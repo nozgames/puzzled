@@ -25,7 +25,9 @@ namespace Puzzled
         /// </summary>
         public Theme Theme => Puzzle.Theme;
 
-        public Puzzle TestPuzzle = null;
+        public GameObject TestPuzzle = null;
+
+        //public Puzzle TestPuzzle = null;
 
         private void OnEnable()
         {
@@ -46,6 +48,7 @@ namespace Puzzled
                 Instance = null;
         }
 
+#if false
         public void LoadPuzzle (Puzzle puzzle)
         {
             //Screen.currentResolution
@@ -55,6 +58,12 @@ namespace Puzzled
 
             for(int y=0; y<puzzle.Height; y++)
                 Instantiate(puzzle.Theme.floor, grid.GetCellCenterWorld(new Vector3Int(0,-puzzle.Height/2 + y, 0)), Quaternion.identity, grid.transform);
+        }
+#endif
+
+        public void LoadPuzzle(GameObject puzzle) 
+        {
+            Instantiate(puzzle, grid.transform);
         }
 
         /// <summary>
