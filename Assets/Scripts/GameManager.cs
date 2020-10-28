@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Puzzled
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : Actor
     {
         [SerializeField] private Grid grid = null;
         [SerializeField] private Canvas ui = null;
@@ -20,6 +20,8 @@ namespace Puzzled
         /// </summary>
         public Puzzle Puzzle { get; private set; }
 
+        public GameObject currentPuzzle { get; private set; } 
+
         /// <summary>
         /// Returns the current active puzzle theme
         /// </summary>
@@ -29,23 +31,23 @@ namespace Puzzled
 
         //public Puzzle TestPuzzle = null;
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
-            if(Instance == null)
+            base.OnEnable();
+
+            if (Instance == null)
                 Instance = this;
 
-            if(TestPuzzle != null)
-            {
+            if (TestPuzzle != null)
                 LoadPuzzle(TestPuzzle);
-            }
-
-            LinkActors();
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
             if (Instance == this)
                 Instance = null;
+
+            base.OnDisable();
         }
 
 #if false
@@ -63,7 +65,12 @@ namespace Puzzled
 
         public void LoadPuzzle(GameObject puzzle) 
         {
-            Instantiate(puzzle, grid.transform);
+            if (currentPuzzle != null)
+                Destroy(currentPuzzle);
+
+            currentPuzzle = Instantiate(puzzle, grid.transform);
+
+            LinkActors();
         }
 
         /// <summary>
@@ -125,6 +132,12 @@ namespace Puzzled
 
             foreach (var actor in actors)
                 actor.Send(evt);
+        }
+
+        [ActorEventHandler]
+        private void OnLevelExit(LevelExit evt)
+        {
+
         }
     }
 }
