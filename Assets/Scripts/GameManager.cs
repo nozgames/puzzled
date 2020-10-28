@@ -1,15 +1,18 @@
 ﻿using NoZ;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Puzzled
 {
-    public class GameManager : Actor
+    public class GameManager : ActorComponent
     {
         [SerializeField] private Grid grid = null;
         [SerializeField] private Canvas ui = null;
         [SerializeField] private int minimumPuzzleSize = 9;
+
+        public InputAction menuAction;
 
         private Dictionary<Vector2Int, List<PuzzledActor>> cells;
 
@@ -124,7 +127,7 @@ namespace Puzzled
         /// <summary>
         /// Send an event to a given cell
         /// </summary>
-        public void SendToCell<TEvent>(TEvent evt, Vector2Int cell) where TEvent : ActorEvent
+        public void SendToCell(ActorEvent evt, Vector2Int cell) 
         {
             var actors = GetCellActors(cell);
             if (null == actors)
@@ -135,9 +138,9 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnLevelExit(LevelExit evt)
+        private void OnLevelExit(LevelExitEvent evt)
         {
-
+            LoadPuzzle(TestPuzzle);
         }
     }
 }

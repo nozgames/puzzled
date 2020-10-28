@@ -506,6 +506,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1737696697}
   - component: {fileID: 1737696698}
+  - component: {fileID: 1737696699}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -544,4 +545,32 @@ MonoBehaviour:
   grid: {fileID: 719198617}
   ui: {fileID: 94907456}
   minimumPuzzleSize: 9
+  menuAction:
+    m_Name: Menu
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: a6036b9b-2bbd-496f-a387-1a9223eefebe
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: eb8c408d-1288-40fc-95ff-f95c324cf8fe
+      m_Path: <Keyboard>/escape
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Menu
+      m_Flags: 0
   TestPuzzle: {fileID: 4752292199920582837, guid: d744b576328e116448f84f6ad19895f0, type: 3}
+--- !u!114 &1737696699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1737696696}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

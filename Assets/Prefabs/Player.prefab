@@ -11,9 +11,6 @@ GameObject:
   - component: {fileID: 7553527789580536935}
   - component: {fileID: 1102731786979793138}
   - component: {fileID: 2266497849410576278}
-  - component: {fileID: 8964165335793629782}
-  - component: {fileID: 5597360376572020439}
-  - component: {fileID: 8730401079748674367}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -60,50 +57,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae3e0b1b7425c7842a8e16611304f6f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputAction: {fileID: -513603453005425030, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  offset: {x: 0, y: -1}
---- !u!114 &8964165335793629782
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7553527789580536928}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae3e0b1b7425c7842a8e16611304f6f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputAction: {fileID: -6062422605368451550, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  offset: {x: 1, y: 0}
---- !u!114 &5597360376572020439
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7553527789580536928}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae3e0b1b7425c7842a8e16611304f6f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputAction: {fileID: -7954358135529409293, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  offset: {x: -1, y: 0}
---- !u!114 &8730401079748674367
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7553527789580536928}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae3e0b1b7425c7842a8e16611304f6f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputAction: {fileID: -5542488664919307679, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  offset: {x: 0, y: 1}
+  leftAction: {fileID: -7954358135529409293, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
+  rightAction: {fileID: -6062422605368451550, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
+  upAction: {fileID: -5542488664919307679, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
+  downAction: {fileID: -513603453005425030, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
 --- !u!1 &7553527790216884996
 GameObject:
   m_ObjectHideFlags: 0

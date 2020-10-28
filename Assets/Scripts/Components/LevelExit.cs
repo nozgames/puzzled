@@ -11,7 +11,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnEnter(EnterCellEvent evt)
         {
-            GameManager.Instance.Send(ActorEvent.Singleton<LevelExitEvent>().Init());
+            GameManager.Instance.actor.Send(ActorEvent.Singleton<LevelExitEvent>().Init());
         }
     }
 }
