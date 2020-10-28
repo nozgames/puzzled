@@ -13,6 +13,5 @@ namespace Puzzled
         {
             GameManager.Instance.Send(ActorEvent.Singleton<LevelExitEvent>().Init());
         }
-
     }
 }
