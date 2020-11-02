@@ -9,14 +9,8 @@ namespace Puzzled
 
         public void SendToCell(ActorEvent evt, Vector2Int cell) => GameManager.Instance.SendToCell(evt, cell);
 
-        protected void BeginBusy () 
-        {
-            // TODO: maintain busy state somewhere?
-        }
+        protected void BeginBusy() => GameManager.IncBusy();
 
-        protected void EndBusy() 
-        {
-            // TODO: maintain busy state somewhere
-        }
+        protected void EndBusy() => GameManager.DecBusy();
     }
 }

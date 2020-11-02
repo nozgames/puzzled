@@ -53,6 +53,18 @@ namespace Puzzled
             base.OnDisable();
         }
 
+        public static Vector3 CellToWorld(Vector2Int cell) =>
+            Instance.grid.CellToWorld(cell.ToVector3Int());
+
+        private int busyCount = 0;
+
+        public static bool IsBusy => Instance.busyCount > 0;
+
+        public static void IncBusy() => Instance.busyCount++;
+
+        public static void DecBusy() => Instance.busyCount--;
+
+
 #if false
         public void LoadPuzzle (Puzzle puzzle)
         {
