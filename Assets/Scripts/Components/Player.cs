@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using NoZ;
 
@@ -10,6 +8,10 @@ namespace Puzzled
     {
         private Vector2Int moveToCell;
         private Animator animator;
+        private Vector2Int queuedMove;
+        private float queuedMoveTime = float.MinValue;
+
+        [SerializeField] private float queuedInputThreshold = 0.25f;
 
         [SerializeField] private Transform visuals = null;
 
@@ -48,15 +50,22 @@ namespace Puzzled
             base.OnDisable();
         }
 
-        private void OnLeftAction(InputAction.CallbackContext ctx) => MoveAsync(actor.Cell + new Vector2Int(-1, 0));
-        private void OnRightAction(InputAction.CallbackContext ctx) => MoveAsync(actor.Cell + new Vector2Int(1, 0));
-        private void OnUpAction(InputAction.CallbackContext ctx) => MoveAsync(actor.Cell + new Vector2Int(0, 1));
-        private void OnDownAction(InputAction.CallbackContext ctx) => MoveAsync(actor.Cell + new Vector2Int(0, -1));
+        private void OnLeftAction(InputAction.CallbackContext ctx) => MoveAsync(new Vector2Int(-1, 0));
+        private void OnRightAction(InputAction.CallbackContext ctx) => MoveAsync(new Vector2Int(1, 0));
+        private void OnUpAction(InputAction.CallbackContext ctx) => MoveAsync(new Vector2Int(0, 1));
+        private void OnDownAction(InputAction.CallbackContext ctx) => MoveAsync(new Vector2Int(0, -1));
 
         private void MoveAsync (Vector2Int cell)
         {
-            if (GameManager.IsBusy)
+            if (GameManager.IsBusy) 
+            {
+                queuedMove = cell;
+                queuedMoveTime = Time.time;
                 return;
+            }
+
+            queuedMoveTime = float.MinValue;
+            cell += actor.Cell;
 
             if (cell.x < actor.Cell.x)
                 visuals.localScale = new Vector3(-1, 1, 1);
@@ -68,11 +77,11 @@ namespace Puzzled
             if (!query.Result)
                 return;
 
+            BeginBusy();
+
             moveToCell = cell;
 
             PlayAnimation("Walk");
-
-            BeginBusy();
 
             Tween.Move(actor.transform.position, GameManager.CellToWorld(cell), false)
                 .Duration(0.4f)
@@ -90,6 +99,9 @@ namespace Puzzled
             PlayAnimation("Idle");
 
             EndBusy();
+
+            if (Time.time - queuedMoveTime <= queuedInputThreshold)
+                MoveAsync(queuedMove);
         }
 
         private void PlayAnimation (string name)
