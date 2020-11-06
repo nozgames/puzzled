@@ -8,12 +8,21 @@ namespace Puzzled
 {
     public class PressurePlate : ActorComponent
     {
+        [SerializeField] private OutputPort activatePort;
+        [SerializeField] private OutputPort deactivatePort;
         [SerializeField] private bool isSticky = false;
 
         [ActorEventHandler]
         private void OnEnter(EnterCellEvent evt)
         {
-            // do stuff
+            activatePort.FireTrigger();
+        }
+
+        [ActorEventHandler]
+        private void OnExit(LeaveCellEvent evt)
+        {
+            if (!isSticky)
+                deactivatePort.FireTrigger();
         }
     }
 }

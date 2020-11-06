@@ -8,5 +8,13 @@ namespace Puzzled
 {
     public class OutputPort : ActorComponent
     {
+        [SerializeField] private string portName;
+        [SerializeField] private InputPort[] triggerPorts;
+
+        public void FireTrigger()
+        {
+            foreach (InputPort triggerPort in triggerPorts)
+                triggerPort.HandleTrigger();
+        }
     }
 }
