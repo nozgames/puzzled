@@ -6,10 +6,11 @@ namespace Puzzled
 {
     class Player : PuzzledActorComponent
     {
+        private Vector2Int moveFromCell;
         private Vector2Int moveToCell;
         private Animator animator;
-        private Vector2Int queuedMove;
-        private float queuedMoveTime = float.MinValue;
+        private Vector2Int queuedAction;
+        private float queuedActionTime = float.MinValue;
 
         [SerializeField] private float queuedInputThreshold = 0.25f;
 
@@ -50,35 +51,54 @@ namespace Puzzled
             base.OnDisable();
         }
 
-        private void OnLeftAction(InputAction.CallbackContext ctx) => MoveAsync(new Vector2Int(-1, 0));
-        private void OnRightAction(InputAction.CallbackContext ctx) => MoveAsync(new Vector2Int(1, 0));
-        private void OnUpAction(InputAction.CallbackContext ctx) => MoveAsync(new Vector2Int(0, 1));
-        private void OnDownAction(InputAction.CallbackContext ctx) => MoveAsync(new Vector2Int(0, -1));
+        private void OnLeftAction(InputAction.CallbackContext ctx) => PerformAction(new Vector2Int(-1, 0));
+        private void OnRightAction(InputAction.CallbackContext ctx) => PerformAction(new Vector2Int(1, 0));
+        private void OnUpAction(InputAction.CallbackContext ctx) => PerformAction(new Vector2Int(0, 1));
+        private void OnDownAction(InputAction.CallbackContext ctx) => PerformAction(new Vector2Int(0, -1));
 
-        private void MoveAsync (Vector2Int cell)
+        private void PerformAction (Vector2Int cell)
         {
             if (GameManager.IsBusy) 
             {
-                queuedMove = cell;
-                queuedMoveTime = Time.time;
+                queuedAction = cell;
+                queuedActionTime = Time.time;
                 return;
             }
 
-            queuedMoveTime = float.MinValue;
+            queuedActionTime = float.MinValue;
             cell += actor.Cell;
 
+            // Change facing direction 
             if (cell.x < actor.Cell.x)
                 visuals.localScale = new Vector3(-1, 1, 1);
             else if (cell.x > actor.Cell.x)
                 visuals.localScale = Vector3.one;
 
+            // Try moving first
+            if (Move(cell))
+                return;
+
+            // Try a push move
+            if (PushMove(cell))
+                return;
+        }
+
+        private void OnActionComplete ()
+        {
+            if (Time.time - queuedActionTime <= queuedInputThreshold)
+                PerformAction(queuedAction);
+        }
+
+        private bool Move (Vector2Int cell)
+        {
             var query = ActorEvent.Singleton<QueryMoveEvent>().Init(cell);
             GameManager.Instance.SendToCell(query, query.Cell);
             if (!query.Result)
-                return;
+                return false;
 
             BeginBusy();
 
+            moveFromCell = actor.Cell;
             moveToCell = cell;
 
             PlayAnimation("Walk");
@@ -88,11 +108,37 @@ namespace Puzzled
                 .EaseOutCubic()
                 .OnStop(OnMoveComplete)
                 .Start(actor.gameObject);
+
+            return true;
+        }
+
+        private bool PushMove (Vector2Int cell)
+        {
+            var query = ActorEvent.Singleton<QueryPushEvent>().Init(cell);
+            GameManager.Instance.SendToCell(query, query.Cell);
+            if (!query.Result)
+                return false;
+
+            BeginBusy();
+
+            moveToCell = cell;
+
+            PlayAnimation("Push");
+
+            GameManager.Instance.SendToCell(ActorEvent.Singleton<PushEvent>().Init(moveToCell + new Vector2Int(1,0)), moveToCell);
+
+            Tween.Move(actor.transform.position, GameManager.CellToWorld(cell), false)
+                .Duration(0.4f)
+                .EaseOutCubic()
+                .OnStop(OnMoveComplete)
+                .Start(actor.gameObject);
+
+            return true;
         }
 
         private void OnMoveComplete()
         {
-            SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), actor.Cell);
+            SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), moveFromCell);
             GameManager.Instance.SetActorCell(actor, moveToCell);
             SendToCell(ActorEvent.Singleton<EnterCellEvent>().Init(), moveToCell);
 
@@ -100,8 +146,7 @@ namespace Puzzled
 
             EndBusy();
 
-            if (Time.time - queuedMoveTime <= queuedInputThreshold)
-                MoveAsync(queuedMove);
+            OnActionComplete();
         }
 
         private void PlayAnimation (string name)
