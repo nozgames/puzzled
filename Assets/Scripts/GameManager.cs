@@ -98,8 +98,7 @@ namespace Puzzled
             var actors = grid.GetComponentsInChildren<PuzzledActor>();
             foreach (var actor in actors)
             {
-                SetActorCell(actor, actor.Cell);
-
+                actor.Cell = grid.WorldToCell(actor.transform.position).ToVector2Int();
                 actor.transform.position = grid.CellToWorld(actor.Cell.ToVector3Int());
             }
         }

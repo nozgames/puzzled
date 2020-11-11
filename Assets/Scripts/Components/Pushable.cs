@@ -6,6 +6,7 @@ namespace Puzzled
     class Pushable : PuzzledActorComponent
     {
         private Vector2Int moveToCell;
+        private Vector2Int moveFromCell;
 
         [ActorEventHandler]
         private void OnQueryMove(QueryMoveEvent evt) => evt.result = false;
@@ -13,12 +14,15 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnQueryPush(QueryPushEvent evt)
         {
-            evt.result = true;
+            var queryMove = new QueryMoveEvent(actor, evt.offset);
+            SendToCell(queryMove, queryMove.targetCell);
+            evt.result = queryMove.result;
         }
 
         [ActorEventHandler]
         private void OnPush(PushEvent evt)
         {
+            moveFromCell = actor.Cell;
             moveToCell = actor.Cell + evt.offset;
             BeginBusy();
             Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
@@ -30,8 +34,8 @@ namespace Puzzled
 
         private void OnMoveComplete()
         {
-            SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), actor.Cell);
-            GameManager.Instance.SetActorCell(actor, moveToCell);
+            SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), moveFromCell);
+            actor.Cell = moveToCell;
             SendToCell(ActorEvent.Singleton<EnterCellEvent>().Init(), moveToCell);
             
             EndBusy();
