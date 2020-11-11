@@ -3,14 +3,15 @@ using NoZ;
 
 namespace Puzzled
 {
-    class PushEvent : ActorEvent
+    public class PushEvent : ActorEvent
     {
-        public Vector2Int Cell { get; private set; }
+        public Actor source { get; private set; }
+        public Vector2Int offset { get; private set; }
 
-        public PushEvent Init(Vector2Int cell)
+        public PushEvent (Actor source, Vector2Int offset)
         {
-            Cell = cell;
-            return this;
+            this.source = source;
+            this.offset = offset;
         }
     }
 }

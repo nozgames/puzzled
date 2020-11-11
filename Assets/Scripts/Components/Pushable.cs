@@ -8,18 +8,18 @@ namespace Puzzled
         private Vector2Int moveToCell;
 
         [ActorEventHandler]
-        private void OnQueryMove(QueryMoveEvent evt) => evt.Result = false;
+        private void OnQueryMove(QueryMoveEvent evt) => evt.result = false;
 
         [ActorEventHandler]
         private void OnQueryPush(QueryPushEvent evt)
         {
-            evt.Result = true;
+            evt.result = true;
         }
 
         [ActorEventHandler]
         private void OnPush(PushEvent evt)
         {
-            moveToCell = evt.Cell;
+            moveToCell = actor.Cell + evt.offset;
             BeginBusy();
             Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
                 .Duration(0.4f)

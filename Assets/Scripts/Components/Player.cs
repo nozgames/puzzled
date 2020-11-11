@@ -66,12 +66,11 @@ namespace Puzzled
             }
 
             queuedActionTime = float.MinValue;
-            cell += actor.Cell;
 
             // Change facing direction 
-            if (cell.x < actor.Cell.x)
+            if (cell.x < 0)
                 visuals.localScale = new Vector3(-1, 1, 1);
-            else if (cell.x > actor.Cell.x)
+            else if (cell.x > 0)
                 visuals.localScale = Vector3.one;
 
             // Try moving first
@@ -80,6 +79,10 @@ namespace Puzzled
 
             // Try a push move
             if (PushMove(cell))
+                return;
+
+            // Try a use move
+            if (UseMove(cell))
                 return;
         }
 
@@ -91,19 +94,19 @@ namespace Puzzled
 
         private bool Move (Vector2Int cell)
         {
-            var query = ActorEvent.Singleton<QueryMoveEvent>().Init(cell);
-            GameManager.Instance.SendToCell(query, query.Cell);
-            if (!query.Result)
+            moveFromCell = actor.Cell;
+            moveToCell = actor.Cell + cell;
+
+            var query = new QueryMoveEvent(actor, cell);
+            GameManager.Instance.SendToCell(query, moveToCell);
+            if (!query.result)
                 return false;
 
             BeginBusy();
 
-            moveFromCell = actor.Cell;
-            moveToCell = cell;
-
             PlayAnimation("Walk");
 
-            Tween.Move(actor.transform.position, GameManager.CellToWorld(cell), false)
+            Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
                 .Duration(0.4f)
                 .EaseOutCubic()
                 .OnStop(OnMoveComplete)
@@ -114,24 +117,44 @@ namespace Puzzled
 
         private bool PushMove (Vector2Int cell)
         {
-            var query = ActorEvent.Singleton<QueryPushEvent>().Init(cell);
-            GameManager.Instance.SendToCell(query, query.Cell);
-            if (!query.Result)
+            moveFromCell = actor.Cell;
+            moveToCell = actor.Cell + cell;
+
+            var query = new QueryPushEvent(actor, cell);
+            GameManager.Instance.SendToCell(query, moveToCell);
+            if (!query.result)
                 return false;
 
             BeginBusy();
 
-            moveToCell = cell;
-
             PlayAnimation("Push");
 
-            GameManager.Instance.SendToCell(ActorEvent.Singleton<PushEvent>().Init(moveToCell + new Vector2Int(1,0)), moveToCell);
+            GameManager.Instance.SendToCell(new PushEvent(actor, cell), moveToCell);
 
-            Tween.Move(actor.transform.position, GameManager.CellToWorld(cell), false)
+            Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
                 .Duration(0.4f)
                 .EaseOutCubic()
                 .OnStop(OnMoveComplete)
                 .Start(actor.gameObject);
+
+            return true;
+        }
+
+        private bool UseMove (Vector2Int cell)
+        {
+            moveFromCell = actor.Cell;
+            moveToCell = actor.Cell + cell;
+
+            var query = new QueryUseEvent(actor, cell);
+            GameManager.Instance.SendToCell(query, moveToCell);
+            if (!query.result)
+                return false;
+
+            BeginBusy();
+
+            PlayAnimation("Push");
+
+            GameManager.Instance.SendToCell(new UseEvent(actor), moveToCell);
 
             return true;
         }

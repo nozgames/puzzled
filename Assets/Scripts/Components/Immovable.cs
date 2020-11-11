@@ -8,7 +8,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnQueryMove (QueryMoveEvent evt)
         {
-            evt.Result = false; 
+            evt.result = false; 
         }
     }
 }

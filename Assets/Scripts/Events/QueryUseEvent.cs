@@ -3,27 +3,10 @@ using NoZ;
 
 namespace Puzzled
 {
-    class QueryUseEvent : ActorEvent
+    class QueryUseEvent : QueryEvent
     {
-        public Actor user { get; private set; }
-
-        private bool _result = false;
-
-        public bool result
+        public QueryUseEvent(Actor user, Vector2Int offset) : base (user, offset)
         {
-            get => _result;
-            set
-            {
-                _result = value;
-                if (_result)
-                    IsHandled = true;
-            }
-        }
-
-        public QueryUseEvent(Actor user)
-        {
-            this.user = user;
-            result = false;
         }
     }
 }
