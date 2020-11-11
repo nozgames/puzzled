@@ -18,8 +18,8 @@ namespace Puzzled
         public Vector2Int Cell {
             get => cell;
             set {
-                cell = value;
                 GameManager.Instance.SetActorCell(this, value);
+                cell = value;
             }
         }
 
