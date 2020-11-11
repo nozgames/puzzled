@@ -5,9 +5,9 @@ namespace Puzzled
 {
     class UseEvent : ActorEvent
     {
-        public Actor user { get; private set; }
+        public PuzzledActor user { get; private set; }
 
-        public UseEvent(Actor user)
+        public UseEvent(PuzzledActor user)
         {
             this.user = user;
         }
