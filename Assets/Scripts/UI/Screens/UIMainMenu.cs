@@ -10,8 +10,7 @@ namespace Puzzled
     {
         public void OnPlayButton()
         {
-            GameManager.Instance.Restart();
-            UIManager.instance.HideMenu();
+            UIManager.instance.ChoosePuzzlePack();
         }
 
         public void OnQuitButton()

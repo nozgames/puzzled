@@ -5,6 +5,8 @@ namespace Puzzled
     [CreateAssetMenu(fileName="New Puzzle", menuName ="Puzzled/Puzzle")]
     public class Puzzle : ScriptableObject
     {
+        public GameObject puzzlePrefab;
+
         [SerializeField]
         private struct Piece
         {

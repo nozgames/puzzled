@@ -165,9 +165,12 @@ namespace Puzzled
             UIManager.instance.ShowPuzzleComplete();
         }
 
-        public void Restart ()
+        public void Restart (Puzzle puzzle=null)
         {
-            LoadPuzzle(TestPuzzle);
+            if(puzzle != null)
+                LoadPuzzle(puzzle.puzzlePrefab);
+            else
+                LoadPuzzle(TestPuzzle);
         }
     }
 }
