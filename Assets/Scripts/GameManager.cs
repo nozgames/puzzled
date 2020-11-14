@@ -12,7 +12,7 @@ namespace Puzzled
         [SerializeField] private Canvas ui = null;
         [SerializeField] private int minimumPuzzleSize = 9;
 
-        public InputAction menuAction;
+        public InputActionReference menuAction;
 
         private Dictionary<Vector2Int, List<PuzzledActor>> cells;
 
@@ -38,6 +38,9 @@ namespace Puzzled
         {
             base.OnEnable();
 
+            menuAction.action.Enable();
+            menuAction.action.performed += OnMenuAction;
+
             if (Instance == null)
                 Instance = this;
 
@@ -50,7 +53,15 @@ namespace Puzzled
             if (Instance == this)
                 Instance = null;
 
+            menuAction.action.Disable();
+            menuAction.action.performed -= OnMenuAction;
+
             base.OnDisable();
+        }
+
+        private void OnMenuAction(InputAction.CallbackContext obj)
+        {
+            UIManager.instance.ShowIngame();
         }
 
         public static Vector3 CellToWorld(Vector2Int cell) =>
@@ -150,6 +161,11 @@ namespace Puzzled
 
         [ActorEventHandler]
         private void OnLevelExit(LevelExitEvent evt)
+        {
+            UIManager.instance.ShowPuzzleComplete();
+        }
+
+        public void Restart ()
         {
             LoadPuzzle(TestPuzzle);
         }

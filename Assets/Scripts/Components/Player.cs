@@ -102,8 +102,6 @@ namespace Puzzled
             if (!query.result)
                 return false;
 
-            Debug.Log($"Move: {moveFromCell} => {moveToCell}");
-
             BeginBusy();
 
             PlayAnimation("Walk");
@@ -126,8 +124,6 @@ namespace Puzzled
             GameManager.Instance.SendToCell(query, moveToCell);
             if (!query.result)
                 return false;
-
-            Debug.Log($"Push: {moveFromCell} => {moveToCell}");
 
             BeginBusy();
 
@@ -153,8 +149,6 @@ namespace Puzzled
             GameManager.Instance.SendToCell(query, moveToCell);
             if (!query.result)
                 return false;
-
-            Debug.Log($"Use: {moveFromCell} => {moveToCell}");
 
             BeginBusy();
 
