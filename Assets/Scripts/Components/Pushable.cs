@@ -8,8 +8,12 @@ namespace Puzzled
         private Vector2Int moveToCell;
         private Vector2Int moveFromCell;
 
-        [ActorEventHandler]
-        private void OnQueryMove(QueryMoveEvent evt) => evt.result = false;
+        [ActorEventHandler(priority=1)]
+        private void OnQueryMove(QueryMoveEvent evt)
+        {
+            evt.result = false;
+            evt.IsHandled = true;
+        }
 
         [ActorEventHandler]
         private void OnQueryPush(QueryPushEvent evt)

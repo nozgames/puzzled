@@ -11,14 +11,11 @@ namespace Puzzled
     {
         [Header("Logic")]
         [SerializeField] private bool isClosed = true;
-        [SerializeField] private bool isLocked = false;
         [SerializeField] private ItemType keyItem = ItemType.None;
 
         [Header("Visuals")]
-        [SerializeField] private SpriteRenderer visuals;
-        [SerializeField] private Sprite openSprite;
-        [SerializeField] private Sprite closedSprite;
-        [SerializeField] private Sprite lockedSprite;
+        [SerializeField] private GameObject openedVisual;
+        [SerializeField] private GameObject closedVisual;
 
         private void Start()
         {
@@ -27,13 +24,15 @@ namespace Puzzled
 
         private void UpdateVisuals()
         {
-            visuals.sprite = isClosed ? (isLocked ? lockedSprite : closedSprite) : openSprite;
+            openedVisual.SetActive(!isClosed);
+            closedVisual.SetActive(isClosed);
         }
 
-        [ActorEventHandler]
+        [ActorEventHandler(priority=1)]
         private void OnQueryMove(QueryMoveEvent evt)
         {
             evt.result = !isClosed;
+            evt.IsHandled = true;
         }
 
         [ActorEventHandler]
@@ -42,13 +41,6 @@ namespace Puzzled
             // door can only be used if it is still closed 
             if (!isClosed)
                 return;
-
-            if (!isLocked)
-            {
-                // we can open it
-                evt.result = true;
-                return;
-            }
 
             if (keyItem != ItemType.None)
             {
@@ -67,28 +59,18 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
-            if (isLocked)
-            {
-                Unlock();
-                return;
-            }
+            Open();            
+        }
 
+        public void Open()
+        {
             isClosed = false;
             UpdateVisuals();
         }
 
-        public void Unlock()
+        public void Close()
         {
-            isLocked = false;
-            UpdateVisuals();
-        }
-
-        public void Lock()
-        {
-            if (!isClosed)
-                return;
-
-            isLocked = true;
+            isClosed = true;
             UpdateVisuals();
         }
     }

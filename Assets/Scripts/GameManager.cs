@@ -144,8 +144,8 @@ namespace Puzzled
             if (null == actors)
                 return;
 
-            foreach (var actor in actors)
-                actor.Send(evt);
+            for(var actorIndex=0; actorIndex<actors.Count && !evt.IsHandled; actorIndex++)               
+                actors[actorIndex].Send(evt);
         }
 
         [ActorEventHandler]

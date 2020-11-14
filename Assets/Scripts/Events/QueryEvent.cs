@@ -11,14 +11,17 @@ namespace Puzzled
 
         public Vector2Int targetCell => source.Cell + offset;
 
+        private bool _noresult = true;
         private bool _result = false;
 
         public bool result {
             get => _result;
             set {
+                if (value && !_noresult)
+                    return;
+
+                _noresult = false;
                 _result = value;
-                if (_result)
-                    IsHandled = true;
             }
         }
 
@@ -26,6 +29,7 @@ namespace Puzzled
         {
             this.source = source;
             this.offset = offset;
+            _noresult = true;
             _result = false;
         }
     }
