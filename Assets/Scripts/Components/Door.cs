@@ -31,8 +31,8 @@ namespace Puzzled
         [ActorEventHandler(priority=1)]
         private void OnQueryMove(QueryMoveEvent evt)
         {
-            evt.result = !isClosed;
-            evt.IsHandled = true;
+            if (isClosed)
+                evt.result = false;
         }
 
         [ActorEventHandler]

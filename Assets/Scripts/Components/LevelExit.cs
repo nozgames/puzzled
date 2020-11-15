@@ -11,5 +11,13 @@ namespace Puzzled
             SendToCell(new LevelExitEvent(), actor.Cell);
             actor.gameObject.SetActive(false);
         }
+
+        [ActorEventHandler]
+        private void OnQueryMove(QueryMoveEvent evt)
+        {
+            // TODO: need better solution for this
+            if (!evt.source.GetComponentInChildren<Player>())
+                evt.result = false;
+        }
     }
 }
