@@ -21,5 +21,10 @@ namespace Puzzled
             Application.Quit();
 #endif
         }
+
+        public void OnEditorButton()
+        {
+            UIManager.instance.EditPuzzle();
+        }
     }
 }

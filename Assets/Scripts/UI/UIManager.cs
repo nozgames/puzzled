@@ -13,6 +13,7 @@ namespace Puzzled
         [SerializeField] private UIScreen puzzleComplete = null;
         [SerializeField] private UIChoosePack choosePuzzlePack = null;
         [SerializeField] private UIChoosePuzzle choosePuzzle = null;
+        [SerializeField] private UIPuzzleEditor puzzleEditor = null;
 
         public static UIManager instance { get; private set; }
 
@@ -103,6 +104,15 @@ namespace Puzzled
                     return pack.puzzles[i + 1];
 
             return null;
+        }
+
+        public void EditPuzzle ()
+        {
+            if (activeScreen != null)
+                activeScreen.gameObject.SetActive(false);
+
+            activeScreen = puzzleEditor;
+            activeScreen.gameObject.SetActive(true);
         }
     }
 }
