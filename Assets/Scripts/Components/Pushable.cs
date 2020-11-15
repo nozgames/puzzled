@@ -30,8 +30,8 @@ namespace Puzzled
             moveToCell = actor.Cell + evt.offset;
             BeginBusy();
             Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
-                .Duration(0.4f)
-                .EaseOutCubic()
+                .Duration(evt.duration)
+                //.EaseOutCubic()
                 .OnStop(OnMoveComplete)
                 .Start(actor.gameObject);
         }

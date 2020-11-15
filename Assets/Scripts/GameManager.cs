@@ -167,7 +167,8 @@ namespace Puzzled
 
         public void Restart (Puzzle puzzle=null)
         {
-            if(puzzle != null)
+            busyCount = 0;
+            if (puzzle != null)
                 LoadPuzzle(puzzle.puzzlePrefab);
             else
                 LoadPuzzle(TestPuzzle);

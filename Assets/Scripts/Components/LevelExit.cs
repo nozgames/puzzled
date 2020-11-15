@@ -1,17 +1,15 @@
 ﻿using NoZ;
-using Puzzled;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Puzzled
 {
-    public class LevelExit : ActorComponent
+    class LevelExit : PuzzledActorComponent
     {
         [ActorEventHandler]
         private void OnEnter(EnterCellEvent evt)
         {
-            GameManager.Instance.actor.Send(ActorEvent.Singleton<LevelExitEvent>().Init());
+            SendToCell(new LevelExitEvent(), actor.Cell);
+            actor.gameObject.SetActive(false);
         }
     }
 }

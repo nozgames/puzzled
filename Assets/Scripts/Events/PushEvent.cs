@@ -7,11 +7,13 @@ namespace Puzzled
     {
         public PuzzledActor source { get; private set; }
         public Vector2Int offset { get; private set; }
+        public float duration { get; private set; }
 
-        public PushEvent (PuzzledActor source, Vector2Int offset)
+        public PushEvent (PuzzledActor source, Vector2Int offset, float duration)
         {
             this.source = source;
             this.offset = offset;
+            this.duration = duration;
         }
     }
 }

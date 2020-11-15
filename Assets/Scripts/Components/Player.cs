@@ -13,6 +13,7 @@ namespace Puzzled
         private float queuedActionTime = float.MinValue;
 
         [SerializeField] private float queuedInputThreshold = 0.25f;
+        [SerializeField] private float moveDuration = 0.4f;
 
         [SerializeField] private Transform visuals = null;
 
@@ -107,8 +108,8 @@ namespace Puzzled
             PlayAnimation("Walk");
 
             Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
-                .Duration(0.4f)
-                .EaseOutCubic()
+                .Duration(moveDuration)
+//                .EaseOutCubic()
                 .OnStop(OnMoveComplete)
                 .Start(actor.gameObject);
 
@@ -129,11 +130,11 @@ namespace Puzzled
 
             PlayAnimation("Push");
 
-            GameManager.Instance.SendToCell(new PushEvent(actor, offset), moveToCell);
+            GameManager.Instance.SendToCell(new PushEvent(actor, offset, moveDuration), moveToCell);
 
             Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
-                .Duration(0.4f)
-                .EaseOutCubic()
+                .Duration(moveDuration)
+//                .EaseOutCubic()
                 .OnStop(OnMoveComplete)
                 .Start(actor.gameObject);
 
@@ -177,6 +178,15 @@ namespace Puzzled
         private void PlayAnimation (string name)
         {
             animator.SetTrigger(name);
+        }
+
+        [ActorEventHandler]
+        private void OnLevelExit (LevelExitEvent evt)
+        {
+            BeginBusy();
+            PlayAnimation("Exit");
+
+            Tween.Wait(2.0f).OnStop(() => GameManager.Instance.actor.Send(evt)).Start(gameObject);
         }
     }
 }
