@@ -11,7 +11,7 @@ namespace Puzzled
         [SerializeField] private UIScreen mainMenu = null;
         [SerializeField] private UIScreen ingameScreen = null;
         [SerializeField] private UIScreen puzzleComplete = null;
-        [SerializeField] private UIScreen choosePuzzlePack = null;
+        [SerializeField] private UIChoosePack choosePuzzlePack = null;
         [SerializeField] private UIChoosePuzzle choosePuzzle = null;
 
         public static UIManager instance { get; private set; }
@@ -86,6 +86,23 @@ namespace Puzzled
                 return;
 
             activeScreen.gameObject.SetActive(false);
+        }
+
+        public Puzzle GetNextPuzzle ()
+        {
+            var pack = choosePuzzle.puzzlePack;
+            if (null == pack)
+                return null;
+
+            var current = GameManager.Instance.puzzle;
+            if (null == current)
+                return null;
+
+            for(int i=0; i<pack.puzzles.Length - 1; i++)
+                if(pack.puzzles[i] == current)
+                    return pack.puzzles[i + 1];
+
+            return null;
         }
     }
 }

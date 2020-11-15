@@ -17,7 +17,7 @@ namespace Puzzled
                 if (null == _puzzle)
                     return;
 
-                name.text = puzzle.name;
+                name.text = (transform.GetSiblingIndex() + 1).ToString();
             }
         }
 

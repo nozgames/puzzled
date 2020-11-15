@@ -9,12 +9,13 @@ namespace Puzzled
 
         private void OnEnable()
         {
-            nextButton.interactable = false;
+            var nextPuzzle = UIManager.instance.GetNextPuzzle();
+            nextButton.interactable = nextPuzzle != null;
         }
 
         public void OnReplayButton()
         {
-            GameManager.Instance.Restart();
+            GameManager.Instance.Restart(GameManager.Instance.puzzle);
             UIManager.instance.HideMenu();
         }
 
@@ -25,7 +26,7 @@ namespace Puzzled
 
         public void OnNextButton()
         {
-            GameManager.Instance.Restart();
+            GameManager.Instance.Restart(UIManager.instance.GetNextPuzzle());
             UIManager.instance.HideMenu();
         }
     }

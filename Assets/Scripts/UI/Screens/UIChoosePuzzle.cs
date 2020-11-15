@@ -12,13 +12,22 @@ namespace Puzzled
         private void OnEnable()
         {
             for (int i = content.childCount - 1; i >= 0; i--)
-                Destroy(content.GetChild(i).gameObject);
+            {
+                var go = content.GetChild(i).gameObject;
+                go.transform.SetParent(null);
+                Destroy(go);
+            }
 
             foreach (var puzzle in puzzlePack.puzzles)
             {
                 var go = Instantiate(puzzleButtonPrefab, content);
                 go.GetComponent<UIPuzzleButton>().puzzle = puzzle;
             }
+        }
+
+        public void OnBackButton()
+        {
+            UIManager.instance.ChoosePuzzlePack();
         }
     }
 }

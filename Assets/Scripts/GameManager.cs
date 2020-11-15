@@ -21,14 +21,9 @@ namespace Puzzled
         /// <summary>
         /// Returns the active puzzle
         /// </summary>
-        public Puzzle Puzzle { get; private set; }
+        public Puzzle puzzle { get; private set; }
 
         public GameObject currentPuzzle { get; private set; } 
-
-        /// <summary>
-        /// Returns the current active puzzle theme
-        /// </summary>
-        public Theme Theme => Puzzle.Theme;
 
         public GameObject TestPuzzle = null;
 
@@ -167,6 +162,7 @@ namespace Puzzled
 
         public void Restart (Puzzle puzzle=null)
         {
+            this.puzzle = puzzle;
             busyCount = 0;
             if (puzzle != null)
                 LoadPuzzle(puzzle.puzzlePrefab);
