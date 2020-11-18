@@ -15,7 +15,7 @@ namespace Puzzled
 
         public void OnReplayButton()
         {
-            GameManager.Instance.Restart(GameManager.Instance.puzzle);
+            GameManager.Instance.LoadPuzzle(GameManager.Instance.puzzle);
             UIManager.instance.HideMenu();
         }
 
@@ -26,7 +26,7 @@ namespace Puzzled
 
         public void OnNextButton()
         {
-            GameManager.Instance.Restart(UIManager.instance.GetNextPuzzle());
+            GameManager.Instance.LoadPuzzle(UIManager.instance.GetNextPuzzle());
             UIManager.instance.HideMenu();
         }
     }

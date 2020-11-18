@@ -11,7 +11,7 @@ namespace Puzzled
 
         public void OnRestartButton()
         {
-            GameManager.Instance.Restart(GameManager.Instance.puzzle);
+            GameManager.Instance.LoadPuzzle(GameManager.Instance.puzzle);
             UIManager.instance.HideMenu();
         }
 

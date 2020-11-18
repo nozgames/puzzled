@@ -28,7 +28,7 @@ namespace Puzzled
 
         private void OnClick()
         {
-            GameManager.Instance.Restart(puzzle);
+            GameManager.Instance.LoadPuzzle(puzzle);
             UIManager.instance.HideMenu();
         }
     }

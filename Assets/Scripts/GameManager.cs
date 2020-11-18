@@ -23,10 +23,6 @@ namespace Puzzled
         /// </summary>
         public Puzzle puzzle { get; private set; }
 
-        public GameObject currentPuzzle { get; private set; } 
-
-        public GameObject TestPuzzle = null;
-
         //public Puzzle TestPuzzle = null;
 
         protected override void OnEnable()
@@ -38,9 +34,6 @@ namespace Puzzled
 
             if (Instance == null)
                 Instance = this;
-
-            if (TestPuzzle != null)
-                LoadPuzzle(TestPuzzle);
         }
 
         protected override void OnDisable()
@@ -84,12 +77,15 @@ namespace Puzzled
         }
 #endif
 
-        public void LoadPuzzle(GameObject puzzle) 
+        public void LoadPuzzle(Puzzle puzzle) 
         {
-            if (currentPuzzle != null)
-                Destroy(currentPuzzle);
+            grid.transform.DetachAndDestroyChildren();
 
-            currentPuzzle = Instantiate(puzzle, grid.transform);
+            busyCount = 0;
+
+            this.puzzle = puzzle;
+
+            Instantiate(puzzle.puzzlePrefab, grid.transform);
 
             LinkActors();
         }
@@ -119,6 +115,9 @@ namespace Puzzled
         /// </summary>
         public void SetActorCell(PuzzledActor actor, Vector2Int cell)
         {
+            if (actor.transform.parent != grid.transform)
+                actor.transform.SetParent(grid.transform);
+
             // Remove the actor from the previous cell
             GetCellActors(actor.Cell)?.Remove(actor);
 
@@ -158,16 +157,6 @@ namespace Puzzled
         private void OnLevelExit(LevelExitEvent evt)
         {
             UIManager.instance.ShowPuzzleComplete();
-        }
-
-        public void Restart (Puzzle puzzle=null)
-        {
-            this.puzzle = puzzle;
-            busyCount = 0;
-            if (puzzle != null)
-                LoadPuzzle(puzzle.puzzlePrefab);
-            else
-                LoadPuzzle(TestPuzzle);
         }
     }
 }
