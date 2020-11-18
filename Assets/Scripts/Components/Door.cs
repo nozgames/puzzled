@@ -62,6 +62,18 @@ namespace Puzzled
             Open();            
         }
 
+        [ActorEventHandler]
+        private void OnActivateWire(ActivateWireEvent evt)
+        {
+            Open();
+        }
+
+        [ActorEventHandler]
+        private void OnDeactivateWire(DeactivateWireEvent evt)
+        {
+            Close();
+        }
+
         public void Open()
         {
             isClosed = false;

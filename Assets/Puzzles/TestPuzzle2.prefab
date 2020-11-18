@@ -49,6 +49,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4828924393034670971}
     m_Modifications:
+    - target: {fileID: -8286699205250075377, guid: cddec60db43609b46993bd0f93236bfa, type: 3}
+      propertyPath: connectedActors.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8286699205250075377, guid: cddec60db43609b46993bd0f93236bfa, type: 3}
+      propertyPath: connectedActors.Array.data[0]
+      value: 
+      objectReference: {fileID: 5916000528094384815}
     - target: {fileID: -7203482411454611197, guid: cddec60db43609b46993bd0f93236bfa, type: 3}
       propertyPath: triggerPorts.Array.size
       value: 1
@@ -124,7 +132,7 @@ PrefabInstance:
     - target: {fileID: 6869573054451439691, guid: cddec60db43609b46993bd0f93236bfa, type: 3}
       propertyPath: triggerPorts.Array.data[0]
       value: 
-      objectReference: {fileID: 3538979754218977617}
+      objectReference: {fileID: 0}
     - target: {fileID: 8922302472943703707, guid: cddec60db43609b46993bd0f93236bfa, type: 3}
       propertyPath: m_Name
       value: FloorSwitch
@@ -384,15 +392,15 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4980225229906135306, guid: 6cec47bc019c6ba4eb1109b6a19ba3f6, type: 3}
   m_PrefabInstance: {fileID: 5091392362705512040}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &3538979754218977617 stripped
+--- !u!114 &5916000528094384815 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8625722831838617401, guid: 6cec47bc019c6ba4eb1109b6a19ba3f6, type: 3}
+  m_CorrespondingSourceObject: {fileID: 1491141461308355783, guid: 6cec47bc019c6ba4eb1109b6a19ba3f6, type: 3}
   m_PrefabInstance: {fileID: 5091392362705512040}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c35eefde978033a45a5e9a9e52c538fc, type: 3}
+  m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &5815915681182070113

@@ -3,11 +3,8 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    public class PressurePlate : ActorComponent
+    class PressurePlate : PuzzledActorComponent
     {
-        [Header("Logic")]
-        [SerializeField] private Port port;
-        
         public bool pressed { get; private set; }
 
         [Header("Visuals")]
@@ -19,7 +16,7 @@ namespace Puzzled
         {
             pressed = true;
             UpdateVisuals();
-            port.FireActivate();
+            actor.TriggerActivateWire();
         }
 
         [ActorEventHandler]
@@ -27,7 +24,7 @@ namespace Puzzled
         {
             pressed = false;
             UpdateVisuals();
-            port.FireDeactivate();
+            actor.TriggerDeactivateWire();
         }
 
         private void UpdateVisuals()

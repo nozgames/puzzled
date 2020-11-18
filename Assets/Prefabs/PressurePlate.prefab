@@ -175,7 +175,6 @@ GameObject:
   - component: {fileID: 2819266254877709548}
   - component: {fileID: -8286699205250075377}
   - component: {fileID: -5876770016442729841}
-  - component: {fileID: 6869573054451439691}
   m_Layer: 0
   m_Name: PressurePlate
   m_TagString: Untagged
@@ -211,6 +210,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  connectedActors: []
 --- !u!114 &-5876770016442729841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -223,25 +223,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6e2c7e312f0d2742a43908b3c20fc36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  port: {fileID: 6869573054451439691}
+  port: {fileID: 0}
   visualPressed: {fileID: 3766020313462247865}
   visualUnpressed: {fileID: 5137144399866844459}
---- !u!114 &6869573054451439691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8922302472943703707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c35eefde978033a45a5e9a9e52c538fc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  triggerPorts: []
-  activateAction:
-    m_PersistentCalls:
-      m_Calls: []
-  deactivateAction:
-    m_PersistentCalls:
-      m_Calls: []
