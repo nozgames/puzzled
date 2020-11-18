@@ -40,6 +40,8 @@ namespace Puzzled
             foreach (var group in blockGroups)
                 foreach (var block in group.blocks)
                     GeneratePreview(block);
+
+            previewParent.DetachAndDestroyChildren();
         }
 
         private void GeneratePreview(Block block)
@@ -63,7 +65,17 @@ namespace Puzzled
 
             block.preview = t;
 
-            Instantiate(piecePrefab, pieces).GetComponent<RawImage>().texture = t;
+            Instantiate(piecePrefab, pieces).GetComponent<RawImage>().texture = t;            
+        }
+
+        private void OnMoveToolButton()
+        {
+
+        }
+
+        private void OnDrawToolButton()
+        {
+
         }
     }
 }
