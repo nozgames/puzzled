@@ -28,19 +28,19 @@ namespace Puzzled
 
         public void SendToCell(ActorEvent evt, Vector2Int cell) => GameManager.Instance.SendToCell(evt, cell);
 
-        public void TriggerActivateWire()
+        public void ActivateWire()
         {
             foreach (PuzzledActor connectedActor in connectedActors)
                 connectedActor.Send(new ActivateWireEvent());
         }
 
-        public void TriggerDeactivateWire()
+        public void DeactivateWire()
         {
             foreach (PuzzledActor connectedActor in connectedActors)
                 connectedActor.Send(new DeactivateWireEvent());
         }
 
-        public void TriggerPulseWire()
+        public void PulseWire()
         {
             foreach (PuzzledActor connectedActor in connectedActors)
             {
