@@ -6,8 +6,7 @@ namespace Puzzled
     public class PressurePlate : ActorComponent
     {
         [Header("Logic")]
-        [SerializeField] private OutputPort activatePort;
-        [SerializeField] private OutputPort deactivatePort;
+        [SerializeField] private Port port;
         
         public bool pressed { get; private set; }
 
@@ -20,7 +19,7 @@ namespace Puzzled
         {
             pressed = true;
             UpdateVisuals();
-            activatePort.FireTrigger();
+            port.FireActivate();
         }
 
         [ActorEventHandler]
@@ -28,7 +27,7 @@ namespace Puzzled
         {
             pressed = false;
             UpdateVisuals();
-            deactivatePort.FireTrigger();
+            port.FireDeactivate();
         }
 
         private void UpdateVisuals()
