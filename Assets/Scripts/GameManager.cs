@@ -52,6 +52,9 @@ namespace Puzzled
             UIManager.instance.ShowIngame();
         }
 
+        public static Vector2Int WorldToCell(Vector3 world) =>
+            Instance.grid.WorldToCell(world).ToVector2Int();
+
         public static Vector3 CellToWorld(Vector2Int cell) =>
             Instance.grid.CellToWorld(cell.ToVector3Int());
 
@@ -157,6 +160,39 @@ namespace Puzzled
         private void OnLevelExit(LevelExitEvent evt)
         {
             UIManager.instance.ShowPuzzleComplete();
+        }
+
+        public void ClearTiles ()
+        {
+            cells = new Dictionary<Vector2Int, List<PuzzledActor>>();
+            grid.transform.DetachAndDestroyChildren();
+        }
+
+        public PuzzledActor InstantiateTile (GameObject prefab, Vector2Int cell)
+        {
+            var actor = Instantiate(prefab, grid.transform).GetComponent<PuzzledActor>();
+            actor.Cell = cell;
+            actor.transform.position = grid.CellToWorld(actor.Cell.ToVector3Int());
+            return actor;
+        }
+
+        public void ClearTile (Vector2Int cell)
+        {
+            var actors = GetCellActors(cell);
+            if (null == actors)
+                return;
+
+            foreach (var actor in actors)
+                Destroy(actor.gameObject);
+        }
+
+        public void RemoveActorFromCell (PuzzledActor actor)
+        {
+            var actors = GetCellActors(actor.Cell);
+            if (null == actors)
+                return;
+
+            actors.Remove(actor);
         }
     }
 }

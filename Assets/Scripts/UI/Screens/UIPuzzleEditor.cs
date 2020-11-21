@@ -6,6 +6,12 @@ namespace Puzzled
 {
     public class UIPuzzleEditor : UIScreen
     {
+        private enum Mode
+        {
+            Draw,
+            Move
+        }
+
         [Serializable]
         private class Block
         {
@@ -24,6 +30,7 @@ namespace Puzzled
             public Block[] blocks;
         }
 
+        [SerializeField] private Theme theme = null;
         [SerializeField] private Camera previewCamera = null;
         [SerializeField] private Transform previewParent = null;
         [SerializeField] private GameObject piecePrefab = null;
@@ -33,25 +40,39 @@ namespace Puzzled
         [SerializeField]
         private BlockGroup[] blockGroups;
 
+        private Mode _mode = Mode.Draw;
+
+        private GameObject selectedTile = null;
+
+        private Mode mode {
+            get => _mode;
+            set => _mode = value;
+        }
+
         private void OnEnable()
         {
             pieces.transform.DetachAndDestroyChildren();
 
-            foreach (var group in blockGroups)
-                foreach (var block in group.blocks)
-                    GeneratePreview(block);
+            foreach(var id in (TileId[])Enum.GetValues(typeof(TileId)))
+                GeneratePreview(id);
 
             previewParent.DetachAndDestroyChildren();
+
+            GameManager.Instance.ClearTiles();
         }
 
-        private void GeneratePreview(Block block)
+        private void GeneratePreview(TileId tileId)
         {
+            var prefab = theme.GetPrefab(tileId);
+            if (null == prefab)
+                return;
+
             if (previewParent.childCount > 0)
                 previewParent.GetChild(0).gameObject.SetActive(false);
 
             previewParent.DetachAndDestroyChildren();
-
-            var blockObject = Instantiate(block.prefab, previewParent);
+            
+            var blockObject = Instantiate(prefab, previewParent);
             blockObject.SetChildLayers(LayerMask.NameToLayer("Preview"));
 
             previewCamera.Render();
@@ -63,19 +84,35 @@ namespace Puzzled
             t.ReadPixels(new Rect(0, 0, t.width, t.height), 0, 0);
             t.Apply();
 
-            block.preview = t;
-
-            Instantiate(piecePrefab, pieces).GetComponent<RawImage>().texture = t;            
+            var tileObject = Instantiate(piecePrefab, pieces);
+            tileObject.GetComponent<Button>().onClick.AddListener(() => {
+                selectedTile = prefab;
+            });
+            tileObject.GetComponent<RawImage>().texture = t;            
         }
 
         private void OnMoveToolButton()
         {
-
+            mode = Mode.Move;
         }
 
         private void OnDrawToolButton()
         {
+            mode = Mode.Draw;
+        }
 
+        public void OnCanvasPointerDown(Vector2Int cell)
+        {
+            if (null == selectedTile)
+                return;
+
+            GameManager.Instance.ClearTile(cell);
+
+            // Automatically add floor
+            if (selectedTile.GetComponent<PuzzledActor>().id != TileId.Floor)
+                GameManager.Instance.InstantiateTile(theme.GetPrefab(TileId.Floor), cell);
+
+            GameManager.Instance.InstantiateTile(selectedTile, cell);
         }
     }
 }

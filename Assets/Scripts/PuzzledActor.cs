@@ -10,10 +10,18 @@ namespace Puzzled
     public class PuzzledActor : Actor
     {
         [SerializeField] private PuzzledActor[] connectedActors;
+        [SerializeField] private TileId _id;
 
         private static Dictionary<Vector2Int, List<PuzzledActor>> cells;
 
         private Vector2Int cell;
+
+        public PuzzledActor[] connections {
+            get => connectedActors;
+            set => connectedActors = value;
+        }
+
+        public TileId id => _id;
 
         /// <summary>
         /// Cell the actor is current in
@@ -27,6 +35,14 @@ namespace Puzzled
         }
 
         public void SendToCell(ActorEvent evt, Vector2Int cell) => GameManager.Instance.SendToCell(evt, cell);
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if(GameManager.Instance != null)
+                GameManager.Instance.RemoveActorFromCell(this);
+        }
 
         public void ActivateWire()
         {

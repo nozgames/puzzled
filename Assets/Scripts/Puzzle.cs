@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Linq;
+using UnityEngine;
 
 namespace Puzzled
 {
@@ -7,13 +9,22 @@ namespace Puzzled
     {
         public GameObject puzzlePrefab;
 
-        [SerializeField]
-        private struct Piece
+        [Serializable]
+        private class Tile
         {
+            public Vector2Int cell;
+            public TileId id;
         }
 
-        [SerializeField] private int width = 10;
-        [SerializeField] private int height = 10;
+        [Serializable]
+        private class Connection
+        {
+            public int from;
+            public int to;
+        }
+
+        [SerializeField] [HideInInspector] private Tile[] tiles;
+        [SerializeField] [HideInInspector] private Connection[] connections;
         [SerializeField] private Theme theme = null;
 
         public Theme Theme {
@@ -23,8 +34,59 @@ namespace Puzzled
             }
         }
 
-        public int Width => width;
+        /// <summary>
+        /// Load the puzzle into the given target
+        /// </summary>
+        /// <param name="target"></param>
+        public bool LoadInto (Transform target)
+        {
+            if (null == tiles)
+                return true;
 
-        public int Height => height;
+            if (null == theme)
+                return true;
+
+            var result = true;
+            foreach (var tile in tiles)
+            {
+                var prefab = theme.GetPrefab(tile.id);
+                if(null == prefab)
+                {
+                    Debug.LogWarning($"missing prefab for tile '{tile.id}");
+                    result = false;
+                    continue;
+                }
+                Instantiate(prefab, target);
+            }
+
+            return result;
+        }
+
+        public void Save (Transform target)
+        {
+            var actors = target.GetComponentsInChildren<PuzzledActor>();
+            var save = new Tile[actors.Length];
+
+            connections = new Connection[actors.Sum(a => a.connections.Length)];
+            var connectionIndex = 0;
+            for(int i=0; i<actors.Length; i++)
+            {
+                var actor = actors[i];
+                save[i] = new Tile {
+                    id = actor.id,
+                    cell = actor.Cell
+                };
+
+                foreach(var connectedActor in actor.connections)
+                {
+                    var to = 0;
+                    for (to = 0; to < actors.Length && actors[to] != connectedActor; to++);
+                    connections[connectionIndex++] = new Connection {
+                        from = i,
+                        to = i
+                    };
+                }
+            }
+        }
     }
 }
