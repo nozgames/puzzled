@@ -1,20 +1,15 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
 
 namespace Puzzled.PuzzleEditor
 {
-    public class UICanvas : MonoBehaviour, IPointerDownHandler
+    public class UICanvas : MonoBehaviour
     {
-        public UnityEvent<Vector2Int> pointerDown; 
-
-        public void OnPointerDown(PointerEventData eventData)
-        {
-            pointerDown.Invoke(
-                GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(eventData.position) + new Vector3(0.5f, 0.5f, 0)));
-        }
     }
 }
 

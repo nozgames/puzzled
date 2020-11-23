@@ -10,7 +10,7 @@ TextureImporter:
     second: UIBlockCursor
   - first:
       213: 1080825480604336155
-    second: UI_2
+    second: Pencil
   - first:
       213: -9136572144232859775
     second: UI_3
@@ -20,6 +20,15 @@ TextureImporter:
   - first:
       213: 8160775752198118580
     second: UI_5
+  - first:
+      213: 7448113381798972013
+    second: Eraser
+  - first:
+      213: 7843416716369364892
+    second: Select
+  - first:
+      213: -6595680761151332689
+    second: SelectionRect
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -149,13 +158,13 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: UI_2
+      name: Pencil
       rect:
         serializedVersion: 2
-        x: 41
-        y: 113
-        width: 14
-        height: 14
+        x: 80
+        y: 224
+        width: 32
+        height: 32
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -173,7 +182,7 @@ TextureImporter:
       name: UI_3
       rect:
         serializedVersion: 2
-        x: 55
+        x: 56
         y: 113
         width: 15
         height: 15
@@ -220,7 +229,7 @@ TextureImporter:
         width: 15
         height: 15
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -228,6 +237,69 @@ TextureImporter:
       bones: []
       spriteID: 4bcd3691f46e04170800000000000000
       internalID: 8160775752198118580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Eraser
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 192
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d6a06f0b8a30d5760800000000000000
+      internalID: 7448113381798972013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Select
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 192
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c978e8482f969dc60800000000000000
+      internalID: 7843416716369364892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SelectionRect
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 184
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 12, y: 12, z: 9, w: 9}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fae52bb0b4f6774a0800000000000000
+      internalID: -6595680761151332689
       vertices: []
       indices: 
       edges: []

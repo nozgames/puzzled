@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
+
+using Puzzled.PuzzleEditor;
 
 namespace Puzzled
 {
@@ -9,7 +13,9 @@ namespace Puzzled
         private enum Mode
         {
             Draw,
-            Move
+            Select,
+            Move,
+            Erase
         }
 
         [Serializable]
@@ -35,6 +41,11 @@ namespace Puzzled
         [SerializeField] private Transform previewParent = null;
         [SerializeField] private GameObject piecePrefab = null;
         [SerializeField] private Transform pieces = null;
+        [SerializeField] private RectTransform selectionRect = null;
+
+        [Header("Input")]
+        [SerializeField] private InputActionReference pointerAction;
+        [SerializeField] private InputActionReference pointerDownAction;
 
         [Header("Blocks")]
         [SerializeField]
@@ -58,7 +69,18 @@ namespace Puzzled
 
             previewParent.DetachAndDestroyChildren();
 
+            pointerAction.action.performed += OnPointerMoved;
+            pointerDownAction.action.performed += OnPointerDown;
+
+            selectionRect.gameObject.SetActive(false);
+
             GameManager.Instance.ClearTiles();
+        }
+
+        private void OnDisable()
+        {
+            pointerAction.action.performed -= OnPointerMoved;
+            pointerDownAction.action.performed -= OnPointerDown;
         }
 
         private void GeneratePreview(TileId tileId)
@@ -91,28 +113,82 @@ namespace Puzzled
             tileObject.GetComponent<RawImage>().texture = t;            
         }
 
-        private void OnMoveToolButton()
+        public void OnSelectToolButton()
         {
-            mode = Mode.Move;
+            mode = Mode.Select;
         }
 
-        private void OnDrawToolButton()
+        public void OnDrawToolButton()
         {
+            selectionRect.gameObject.SetActive(false);
             mode = Mode.Draw;
+        }
+
+        public void OnEraseToolButton()
+        {
+            selectionRect.gameObject.SetActive(false);
+            mode = Mode.Erase;
         }
 
         public void OnCanvasPointerDown(Vector2Int cell)
         {
-            if (null == selectedTile)
-                return;
+            switch (mode)
+            {
+                case Mode.Draw:
+                    if (null == selectedTile)
+                        return;
 
-            GameManager.Instance.ClearTile(cell);
+                    GameManager.Instance.ClearTile(cell);
 
-            // Automatically add floor
-            if (selectedTile.GetComponent<PuzzledActor>().id != TileId.Floor)
-                GameManager.Instance.InstantiateTile(theme.GetPrefab(TileId.Floor), cell);
+                    // Automatically add floor
+                    if (selectedTile.GetComponent<PuzzledActor>().id != TileId.Floor)
+                        GameManager.Instance.InstantiateTile(theme.GetPrefab(TileId.Floor), cell);
 
-            GameManager.Instance.InstantiateTile(selectedTile, cell);
+                    GameManager.Instance.InstantiateTile(selectedTile, cell);
+                    break;
+
+                case Mode.Erase:
+                    GameManager.Instance.ClearTile(cell);
+                    break;
+
+                case Mode.Select:
+                    SetSelectionRect(cell, cell);
+                    break;
+            }
+        }
+
+        private void SetSelectionRect(Vector2Int min, Vector2Int max)
+        {
+            selectionRect.anchoredPosition = 
+                ((Vector2)Camera.main.WorldToScreenPoint(GameManager.CellToWorld(min) - new Vector3(0.5f, 0.5f, 0))) - new Vector2(4,4);
+
+            selectionRect.gameObject.SetActive(true);
+
+            //var cell = GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(obj.ReadValue<Vector2>()) + new Vector3(0.5f, 0.5f, 0));
+        }
+
+        private Vector2Int lastCell;
+
+        private void OnPointerMoved(InputAction.CallbackContext ctx)
+        {
+            var cell = GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(ctx.ReadValue<Vector2>()) + new Vector3(0.5f, 0.5f, 0));
+            if (cell != lastCell)
+                lastCell = cell;
+        }
+
+        public void OnPointerDown(InputAction.CallbackContext ctx)
+        {
+            var results = new List<UnityEngine.EventSystems.RaycastResult>();
+
+            UnityEngine.EventSystems.EventSystem.current.RaycastAll(new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) { position = pointerAction.action.ReadValue<Vector2>() }, results);
+
+            if (ctx.ReadValueAsButton())
+                if (results.Count > 0 && results[0].gameObject.GetComponent<UICanvas>() != null)
+
+                {
+                    OnCanvasPointerDown(lastCell);
+                    //pointerDown.Invoke(lastCell);
+                }
         }
     }
 }

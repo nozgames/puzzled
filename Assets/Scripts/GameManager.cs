@@ -14,7 +14,7 @@ namespace Puzzled
 
         public InputActionReference menuAction;
 
-        private Dictionary<Vector2Int, List<PuzzledActor>> cells;
+        private Dictionary<Vector2Int, List<PuzzledActor>> cells = new Dictionary<Vector2Int, List<PuzzledActor>>();
 
         public static GameManager Instance { get; private set; }
 
@@ -98,7 +98,7 @@ namespace Puzzled
         /// </summary>
         private void LinkActors()
         {
-            cells = new Dictionary<Vector2Int, List<PuzzledActor>>();
+            cells.Clear();
 
             var actors = grid.GetComponentsInChildren<PuzzledActor>();
             foreach (var actor in actors)
@@ -164,7 +164,7 @@ namespace Puzzled
 
         public void ClearTiles ()
         {
-            cells = new Dictionary<Vector2Int, List<PuzzledActor>>();
+            cells.Clear();
             grid.transform.DetachAndDestroyChildren();
         }
 

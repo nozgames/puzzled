@@ -1,106 +1,52 @@
 fileFormatVersion: 2
-guid: b688c2e047e0e7549846c131bf5c99c2
+guid: b899711a0519bf343af82959531d066d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3023947217505616116
-    second: Background
-  - first:
-      213: 3171320065098980384
-    second: FloorCenter1
-  - first:
-      213: -2584099616518623551
-    second: FloorCenter2
-  - first:
-      213: 5868335705826761235
+      213: 13887561693794806
     second: FloorOutlineDk
   - first:
-      213: -6513167402601140833
+      213: 637521998429332090
     second: FloorOutlineLt
   - first:
-      213: 8026847619501135739
-    second: FloorBottomBorder1
+      213: 3812039633915752481
+    second: FloorBackgroundDk
   - first:
-      213: 2410832269295158362
-    second: FloorBottomBorder2
+      213: -3552896683419507274
+    second: FloorBackgroundLt
   - first:
-      213: 1597011204489327851
-    second: FloorBottom1
+      213: 8990510205036062742
+    second: Diamond
   - first:
-      213: -4833507462022710845
-    second: FloorBottom2
+      213: 969205774935878439
+    second: DiamondShadow
   - first:
-      213: -3589512116478249660
-    second: Background
+      213: -7217983986224122332
+    second: FloorBottomOutlineLt
   - first:
-      213: 3810826419941568168
-    second: FloorCenter1
+      213: -1810345348151007211
+    second: FloorBottomOutlineDk
   - first:
-      213: -2918898144034013515
-    second: FloorCenter2
+      213: -8913488133885468681
+    second: FloorBottomDk
   - first:
-      213: -6013715052537905487
-    second: FloorOutlineDk
+      213: -1625813079659609562
+    second: FloorBottomLt
   - first:
-      213: -8991463482257892247
-    second: FloorOutlineLt
+      213: 4531600420867107606
+    second: PressurePlateUp
   - first:
-      213: 5221673034617757842
-    second: FloorBottomBorder1
+      213: -1336566449919631155
+    second: Crate
   - first:
-      213: 7252633056184216181
-    second: FloorBottomBorder2
+      213: 5916661376434028961
+    second: PressurePlateDown
   - first:
-      213: 995992723654724173
-    second: FloorBottom1
+      213: 5063096958188804578
+    second: LiftDown
   - first:
-      213: -3589512116478249660
-    second: island_0
-  - first:
-      213: 3810826419941568168
-    second: island_1
-  - first:
-      213: 3023947217505616116
-    second: island_0
-  - first:
-      213: -2918898144034013515
-    second: island_2
-  - first:
-      213: 5868335705826761235
-    second: island_3
-  - first:
-      213: -6513167402601140833
-    second: island_4
-  - first:
-      213: 8026847619501135739
-    second: island_5
-  - first:
-      213: 2410832269295158362
-    second: island_6
-  - first:
-      213: 1597011204489327851
-    second: island_7
-  - first:
-      213: -4833507462022710845
-    second: island_8
-  - first:
-      213: 8389803991531323874
-    second: island_9
-  - first:
-      213: 8709967549579667271
-    second: island_10
-  - first:
-      213: -7742250631338217152
-    second: island_11
-  - first:
-      213: -5783435703850539440
-    second: island_12
-  - first:
-      213: -8925178375058020056
-    second: island_13
-  - first:
-      213: 2620537229257692224
-    second: island_14
+      213: 7787406897992156365
+    second: LiftUp
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -141,11 +87,11 @@ TextureImporter:
   lightmap: 0
   compressionQuality: 50
   spriteMode: 2
-  spriteExtrude: 0
-  spriteMeshType: 0
+  spriteExtrude: 1
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 0
   alphaUsage: 1
@@ -188,13 +134,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: island_0
+      name: FloorOutlineDk
       rect:
         serializedVersion: 2
-        x: 0
-        y: 112
-        width: 16
-        height: 16
+        x: 34
+        y: 218
+        width: 36
+        height: 36
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -202,302 +148,302 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4457a548fbd7f2ec0800000000000000
-      internalID: -3589512116478249660
+      spriteID: 6f11e8de9a6513000800000000000000
+      internalID: 13887561693794806
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: island_1
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 96
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 8ae6a453076c2e430800000000000000
-      internalID: 3810826419941568168
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_2
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 80
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 5be3e4d5a9dfd77d0800000000000000
-      internalID: -2918898144034013515
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_3
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 108
-        width: 20
-        height: 20
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 31a9b809b34807150800000000000000
-      internalID: 5868335705826761235
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_4
-      rect:
-        serializedVersion: 2
-        x: 36
-        y: 110
-        width: 18
-        height: 18
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: f9d2e4d61c49c95a0800000000000000
-      internalID: -6513167402601140833
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_5
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 103
-        width: 20
-        height: 5
-      alignment: 9
-      pivot: {x: 0.5, y: 3}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: b771e82c167156f60800000000000000
-      internalID: 8026847619501135739
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_6
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 98
-        width: 20
-        height: 5
-      alignment: 9
-      pivot: {x: 0.5, y: 3}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: a5403600d2ff47120800000000000000
-      internalID: 2410832269295158362
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_7
-      rect:
-        serializedVersion: 2
-        x: 37
-        y: 105
-        width: 16
-        height: 5
-      alignment: 9
-      pivot: {x: 0.5, y: 3}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: be4b7e9aa39b92610800000000000000
-      internalID: 1597011204489327851
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_8
-      rect:
-        serializedVersion: 2
-        x: 37
-        y: 100
-        width: 16
-        height: 5
-      alignment: 9
-      pivot: {x: 0.5, y: 3}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 3c9bfe2829eebecb0800000000000000
-      internalID: -4833507462022710845
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_9
-      rect:
-        serializedVersion: 2
-        x: 81
-        y: 32
-        width: 14
-        height: 24
-      alignment: 9
-      pivot: {x: 0.5, y: 0.33333334}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 2e1016a77429e6470800000000000000
-      internalID: 8389803991531323874
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_10
-      rect:
-        serializedVersion: 2
-        x: 97
-        y: 32
-        width: 14
-        height: 24
-      alignment: 9
-      pivot: {x: 0.5, y: 0.33333334}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 74720e5c65500e870800000000000000
-      internalID: 8709967549579667271
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_11
-      rect:
-        serializedVersion: 2
-        x: 54
-        y: 119
-        width: 9
-        height: 9
-      alignment: 9
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 041ba0d22100e8490800000000000000
-      internalID: -7742250631338217152
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_12
-      rect:
-        serializedVersion: 2
-        x: 63
-        y: 121
-        width: 9
-        height: 7
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 0566daa8edb1dbfa0800000000000000
-      internalID: -5783435703850539440
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_13
-      rect:
-        serializedVersion: 2
-        x: 72
-        y: 119
-        width: 11
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 8292ba53e85632480800000000000000
-      internalID: -8925178375058020056
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: island_14
+      name: FloorOutlineLt
       rect:
         serializedVersion: 2
         x: 73
-        y: 115
-        width: 9
-        height: 3
+        y: 221
+        width: 34
+        height: 34
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 044579ec9b40e5420800000000000000
-      internalID: 2620537229257692224
+      spriteID: a72a0ec31eee8d800800000000000000
+      internalID: 637521998429332090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FloorBackgroundDk
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 192
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 120324999d517e430800000000000000
+      internalID: 3812039633915752481
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FloorBackgroundLt
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 160
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6b5ed1d5a4391bec0800000000000000
+      internalID: -3552896683419507274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Diamond
+      rect:
+        serializedVersion: 2
+        x: 154
+        y: 232
+        width: 21
+        height: 16
+      alignment: 9
+      pivot: {x: 0.47619048, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 618e2b0d565b4cc70800000000000000
+      internalID: 8990510205036062742
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DiamondShadow
+      rect:
+        serializedVersion: 2
+        x: 154
+        y: 249
+        width: 21
+        height: 6
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 72b6f49648f437d00800000000000000
+      internalID: 969205774935878439
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FloorBottomOutlineLt
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 209
+        width: 36
+        height: 7
+      alignment: 9
+      pivot: {x: 0.5, y: 3.5714285}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42637aa9ec194db90800000000000000
+      internalID: -7217983986224122332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FloorBottomOutlineDk
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 202
+        width: 36
+        height: 7
+      alignment: 9
+      pivot: {x: 0.5, y: 3.5714285}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 518adaa5f7c50e6e0800000000000000
+      internalID: -1810345348151007211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FloorBottomDk
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 203
+        width: 32
+        height: 7
+      alignment: 9
+      pivot: {x: 0.5, y: 3.5714285}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ffd81694cdec4480800000000000000
+      internalID: -8913488133885468681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FloorBottomLt
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 213
+        width: 32
+        height: 7
+      alignment: 9
+      pivot: {x: 0.5, y: 3.5714285}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62284b33e93ff69e0800000000000000
+      internalID: -1625813079659609562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PressurePlateUp
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 233
+        width: 22
+        height: 22
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 61b6bc5c29a73ee30800000000000000
+      internalID: 4531600420867107606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Crate
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 192
+        width: 28
+        height: 40
+      alignment: 9
+      pivot: {x: 0.5, y: 0.375}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc0e5dd25ef837de0800000000000000
+      internalID: -1336566449919631155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: PressurePlateDown
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 236
+        width: 22
+        height: 19
+      alignment: 9
+      pivot: {x: 0.5, y: 0.47368422}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a1cf9e8c243c1250800000000000000
+      internalID: 5916661376434028961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LiftDown
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 68
+        width: 28
+        height: 24
+      alignment: 9
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2e95438abdbb34640800000000000000
+      internalID: 5063096958188804578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LiftUp
+      rect:
+        serializedVersion: 2
+        x: 194
+        y: 66
+        width: 28
+        height: 34
+      alignment: 9
+      pivot: {x: 0.5, y: 0.4117647}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc4cf34705d621c60800000000000000
+      internalID: 7787406897992156365
       vertices: []
       indices: 
       edges: []
