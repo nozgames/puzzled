@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using NoZ;
+using UnityEngine.Serialization;
 
 namespace Puzzled
 {
     public class PuzzledActor : Actor
     {
+        [SerializeField] private TileType _tileType;
         [SerializeField] private PuzzledActor[] connectedActors;
-        [SerializeField] private TileId _id;
 
         private static Dictionary<Vector2Int, List<PuzzledActor>> cells;
 
@@ -21,7 +22,7 @@ namespace Puzzled
             set => connectedActors = value;
         }
 
-        public TileId id => _id;
+        public TileType tileType => _tileType;
 
         /// <summary>
         /// Cell the actor is current in

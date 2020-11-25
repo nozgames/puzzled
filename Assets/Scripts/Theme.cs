@@ -16,11 +16,11 @@ namespace Puzzled
 
         [SerializeField] private TilePrefab[] prefabs;
 
-        [NonSerialized] private Dictionary<TileId, GameObject> prefabsById = new Dictionary<TileId, GameObject>();
+        [NonSerialized] private Dictionary<TileType, GameObject> prefabsById = new Dictionary<TileType, GameObject>();
 
-        public GameObject GetPrefab(TileId tileId) => prefabsById.TryGetValue(tileId, out var gameObject) ? gameObject : null;
+        public GameObject GetPrefab(TileType tileId) => prefabsById.TryGetValue(tileId, out var gameObject) ? gameObject : null;
 
-        public void SetPrefab(TileId tileId, GameObject prefab) => prefabsById[tileId] = prefab;
+        public void SetPrefab(TileType tileId, GameObject prefab) => prefabsById[tileId] = prefab;
 
 
         public void OnBeforeSerialize()
@@ -40,7 +40,7 @@ namespace Puzzled
                 return;
 
             foreach (var prefab in prefabs)
-                if (Enum.TryParse<TileId>(prefab.id, out var id))
+                if (Enum.TryParse<TileType>(prefab.id, out var id))
                     prefabsById[id] = prefab.prefab;
         }
     }

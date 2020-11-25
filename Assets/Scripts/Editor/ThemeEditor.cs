@@ -9,13 +9,13 @@ namespace Puzzled
     public class ThemeEditor : Editor
     {
         private Theme theme;
-        private TileId[] sorted;
+        private TileType[] sorted;
 
         private void OnEnable()
         {
             theme = (Theme)target;
 
-            sorted = ((TileId[])Enum.GetValues(typeof(TileId))).OrderBy(id => id.ToString()).ToArray();
+            sorted = ((TileType[])Enum.GetValues(typeof(TileType))).OrderBy(id => id.ToString()).ToArray();
         }
 
         public override void OnInspectorGUI()

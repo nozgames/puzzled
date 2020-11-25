@@ -64,7 +64,7 @@ namespace Puzzled
         {
             pieces.transform.DetachAndDestroyChildren();
 
-            foreach(var id in (TileId[])Enum.GetValues(typeof(TileId)))
+            foreach(var id in (TileType[])Enum.GetValues(typeof(TileType)))
                 GeneratePreview(id);
 
             previewParent.DetachAndDestroyChildren();
@@ -83,7 +83,7 @@ namespace Puzzled
             pointerDownAction.action.performed -= OnPointerDown;
         }
 
-        private void GeneratePreview(TileId tileId)
+        private void GeneratePreview(TileType tileId)
         {
             var prefab = theme.GetPrefab(tileId);
             if (null == prefab)
@@ -141,8 +141,8 @@ namespace Puzzled
                     GameManager.Instance.ClearTile(cell);
 
                     // Automatically add floor
-                    if (selectedTile.GetComponent<PuzzledActor>().id != TileId.Floor)
-                        GameManager.Instance.InstantiateTile(theme.GetPrefab(TileId.Floor), cell);
+                    if (selectedTile.GetComponent<PuzzledActor>().tileType != TileType.Floor)
+                        GameManager.Instance.InstantiateTile(theme.GetPrefab(TileType.Floor), cell);
 
                     GameManager.Instance.InstantiateTile(selectedTile, cell);
                     break;

@@ -13,7 +13,7 @@ namespace Puzzled
         private class Tile
         {
             public Vector2Int cell;
-            public TileId id;
+            public TileType type;
         }
 
         [Serializable]
@@ -49,10 +49,10 @@ namespace Puzzled
             var result = true;
             foreach (var tile in tiles)
             {
-                var prefab = theme.GetPrefab(tile.id);
+                var prefab = theme.GetPrefab(tile.type);
                 if(null == prefab)
                 {
-                    Debug.LogWarning($"missing prefab for tile '{tile.id}");
+                    Debug.LogWarning($"missing prefab for tile '{tile.type}");
                     result = false;
                     continue;
                 }
@@ -73,7 +73,7 @@ namespace Puzzled
             {
                 var actor = actors[i];
                 save[i] = new Tile {
-                    id = actor.id,
+                    type = actor.tileType,
                     cell = actor.Cell
                 };
 
