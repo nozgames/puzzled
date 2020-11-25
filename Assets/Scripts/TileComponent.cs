@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class PuzzledActorComponent : ActorComponent
+    class TileComponent : ActorComponent
     {
-        public new PuzzledActor actor => (PuzzledActor)base.actor;
+        public Tile tile => (Tile)base.actor;
 
         public void SendToCell(ActorEvent evt, Vector2Int cell) => GameManager.Instance.SendToCell(evt, cell);
 

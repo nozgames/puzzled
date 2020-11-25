@@ -145,8 +145,8 @@ namespace Puzzled
                         return;
 
                     if (selectedTile.layer == TileLayer.Dynamic)
-                        foreach (var actor in GameManager.Instance.GetCellActors(cell))
-                            if (!actor.tileInfo.allowDynamic)
+                        foreach (var actor in GameManager.Instance.GetCellTiles(cell))
+                            if (!actor.info.allowDynamic)
                                 return;
 
                     GameManager.Instance.ClearTile(cell, selectedTile.layer);
@@ -154,13 +154,13 @@ namespace Puzzled
                     // Destroy all other instances of this tile regardless of variant
                     if (!selectedTile.allowMultiple)
                     {
-                        foreach (var actor in GameManager.GetActors().Where(a => a.tileInfo == selectedTile))
+                        foreach (var actor in GameManager.GetTiles().Where(a => a.info == selectedTile))
                         {
                             Destroy(actor.gameObject);
 
                             // Replace the static actor with a floor so we dont leave a hole
                             if (selectedTile.layer == TileLayer.Static)
-                                GameManager.Instance.InstantiateTile(floorTile, actor.Cell);
+                                GameManager.Instance.InstantiateTile(floorTile, actor.cell);
                         }
                     }
 

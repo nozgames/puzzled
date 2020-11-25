@@ -3,7 +3,7 @@ using NoZ;
 
 namespace Puzzled
 {
-    class Floating : PuzzledActorComponent
+    class Floating : TileComponent
     {
         [SerializeField] private float minHeight = 0;
         [SerializeField] private float maxHeight = 4;

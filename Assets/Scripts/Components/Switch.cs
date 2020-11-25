@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class Switch : PuzzledActorComponent
+    class Switch : TileComponent
     {
         public bool isOn { get; private set; }
 
@@ -30,14 +30,14 @@ namespace Puzzled
         {
             isOn = true;
             UpdateVisuals();
-            actor.ActivateWire();
+            tile.ActivateWire();
         }
 
         private void TurnOff()
         {
             isOn = false;
             UpdateVisuals();
-            actor.DeactivateWire();
+            tile.DeactivateWire();
         }
 
         private void UpdateVisuals()

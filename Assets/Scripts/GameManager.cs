@@ -14,7 +14,7 @@ namespace Puzzled
 
         public InputActionReference menuAction;
 
-        private Dictionary<Vector2Int, List<PuzzledActor>> cells = new Dictionary<Vector2Int, List<PuzzledActor>>();
+        private Dictionary<Vector2Int, List<Tile>> cells = new Dictionary<Vector2Int, List<Tile>>();
 
         public static GameManager Instance { get; private set; }
 
@@ -58,7 +58,7 @@ namespace Puzzled
         public static Vector3 CellToWorld(Vector2Int cell) =>
             Instance.grid.CellToWorld(cell.ToVector3Int());
 
-        public static PuzzledActor[] GetActors() => Instance.grid.GetComponentsInChildren<PuzzledActor>();
+        public static Tile[] GetTiles() => Instance.grid.GetComponentsInChildren<Tile>();
 
         private int busyCount = 0;
 
@@ -92,70 +92,70 @@ namespace Puzzled
 
             Instantiate(puzzle.puzzlePrefab, grid.transform);
 
-            LinkActors();
+            LinkTiles();
         }
 
         /// <summary>
-        /// Link all actors that are children of the grid to a cell and fix their world position
+        /// Link all tiles that are children of the grid to a cell and fix their world position
         /// </summary>
-        private void LinkActors()
+        private void LinkTiles()
         {
             cells.Clear();
 
-            var actors = grid.GetComponentsInChildren<PuzzledActor>();
-            foreach (var actor in actors)
+            var tiles = grid.GetComponentsInChildren<Tile>();
+            foreach (var tile in tiles)
             {
-                actor.Cell = grid.WorldToCell(actor.transform.position).ToVector2Int();
-                actor.transform.position = grid.CellToWorld(actor.Cell.ToVector3Int());
+                tile.cell = grid.WorldToCell(tile.transform.position).ToVector2Int();
+                tile.transform.position = grid.CellToWorld(tile.cell.ToVector3Int());
             }
         }
 
         /// <summary>
-        /// Return the cell for a given actor
+        /// Return the cell for a given tile
         /// </summary>
-        public Vector2Int GetActorCell(PuzzledActor actor) => grid.WorldToCell(actor.transform.position).ToVector2Int();
+        public Vector2Int GetTileCell(Tile tile) => grid.WorldToCell(tile.transform.position).ToVector2Int();
 
         /// <summary>
-        /// Set the actors current cell
+        /// Set the tiles current cell
         /// </summary>
-        public void SetActorCell(PuzzledActor actor, Vector2Int cell)
+        public void SetTileCell(Tile tile, Vector2Int cell)
         {
-            if (actor.transform.parent != grid.transform)
-                actor.transform.SetParent(grid.transform);
+            if (tile.transform.parent != grid.transform)
+                tile.transform.SetParent(grid.transform);
 
-            // Remove the actor from the previous cell
-            GetCellActors(actor.Cell)?.Remove(actor);
+            // Remove the tile from the previous cell
+            GetCellTiles(tile.cell)?.Remove(tile);
 
-            // Add the actor to the give ncell
-            var actors = GetCellActors(cell);
-            if (null == actors)
+            // Add the tile to the give ncell
+            var tiles = GetCellTiles(cell);
+            if (null == tiles)
             {
-                actors = new List<PuzzledActor>(4) { actor };
-                cells[cell] = actors;
+                tiles = new List<Tile>(4) { tile };
+                cells[cell] = tiles;
             }
             else
-                actors.Add(actor);
+                tiles.Add(tile);
 
-            actor.transform.position = grid.CellToWorld(cell.ToVector3Int());
+            tile.transform.position = grid.CellToWorld(cell.ToVector3Int());
         }
 
         /// <summary>
-        /// Returns the list of actors at the given cell
+        /// Returns the list of tiles at the given cell
         /// </summary>
-        public List<PuzzledActor> GetCellActors(Vector2Int cell) =>
-            cells.TryGetValue(cell, out var actors) ? actors : null;
+        public List<Tile> GetCellTiles(Vector2Int cell) =>
+            cells.TryGetValue(cell, out var tiles) ? tiles : null;
 
         /// <summary>
         /// Send an event to a given cell
         /// </summary>
         public void SendToCell(ActorEvent evt, Vector2Int cell) 
         {
-            var actors = GetCellActors(cell);
-            if (null == actors)
+            var tiles = GetCellTiles(cell);
+            if (null == tiles)
                 return;
 
-            for(var actorIndex=0; actorIndex<actors.Count && !evt.IsHandled; actorIndex++)               
-                actors[actorIndex].Send(evt);
+            for(var tileIndex=0; tileIndex<tiles.Count && !evt.IsHandled; tileIndex++)               
+                tiles[tileIndex].Send(evt);
         }
 
         [ActorEventHandler]
@@ -170,43 +170,42 @@ namespace Puzzled
             grid.transform.DetachAndDestroyChildren();
         }
 
-        public PuzzledActor InstantiateTile (TileInfo tileInfo, Vector2Int cell, int variantIndex=0)
+        public Tile InstantiateTile (TileInfo tileInfo, Vector2Int cell, int variantIndex=0)
         {
-            var actor = Instantiate(tileInfo.prefabs[variantIndex], grid.transform).GetComponent<PuzzledActor>();
-            actor.Cell = cell;
-            actor.tileInfo = tileInfo;
-            actor.transform.position = grid.CellToWorld(actor.Cell.ToVector3Int());
-            return actor;
+            var tile = Instantiate(tileInfo.prefabs[variantIndex], grid.transform).GetComponent<Tile>();
+            tile.cell = cell;
+            tile.transform.position = grid.CellToWorld(tile.cell.ToVector3Int());
+            return tile;
         }
 
         public void ClearTile (Vector2Int cell, TileLayer layer)
         {
-            var actors = GetCellActors(cell);
-            if (null == actors)
+            var tiles = GetCellTiles(cell);
+            if (null == tiles)
                 return;
 
-            foreach (var actor in actors)
-                if(actor.tileInfo.layer == layer)
-                    Destroy(actor.gameObject);
+            foreach (var tile in tiles)
+                if(tile.info.layer == layer)
+                    Destroy(tile.gameObject);
         }
 
         public void ClearTile(Vector2Int cell)
         {
-            var actors = GetCellActors(cell);
-            if (null == actors)
+            var tiles = GetCellTiles(cell);
+            if (null == tiles)
                 return;
 
-            foreach (var actor in actors)
-                Destroy(actor.gameObject);
+            foreach (var tile in tiles)
+                Destroy(tile.gameObject);
         }
 
-        public void RemoveActorFromCell (PuzzledActor actor)
+        public void RemoveTileFromCell (Tile tile)
         {
-            var actors = GetCellActors(actor.Cell);
-            if (null == actors)
+            var tiles = GetCellTiles(tile.cell);
+            if (null == tiles)
                 return;
 
-            actors.Remove(actor);
+            tiles.Remove(tile);
         }
     }
 }

@@ -3,13 +3,13 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class LevelExit : PuzzledActorComponent
+    class LevelExit : TileComponent
     {
         [ActorEventHandler]
         private void OnEnter(EnterCellEvent evt)
         {
-            SendToCell(new LevelExitEvent(), actor.Cell);
-            actor.gameObject.SetActive(false);
+            SendToCell(new LevelExitEvent(), tile.cell);
+            tile.gameObject.SetActive(false);
         }
 
         [ActorEventHandler]

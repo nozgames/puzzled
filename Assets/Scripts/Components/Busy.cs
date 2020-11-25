@@ -2,7 +2,7 @@
 
 namespace Puzzled
 {
-    class Busy : PuzzledActorComponent
+    class Busy : TileComponent
     {
         protected override void OnEnable() 
         {

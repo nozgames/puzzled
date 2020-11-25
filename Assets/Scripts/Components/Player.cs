@@ -4,7 +4,7 @@ using NoZ;
 
 namespace Puzzled
 {
-    class Player : PuzzledActorComponent
+    class Player : TileComponent
     {
         private Vector2Int moveFromCell;
         private Vector2Int moveToCell;
@@ -95,10 +95,10 @@ namespace Puzzled
 
         private bool Move (Vector2Int offset)
         {
-            moveFromCell = actor.Cell;
-            moveToCell = actor.Cell + offset;
+            moveFromCell = tile.cell;
+            moveToCell = tile.cell + offset;
 
-            var query = new QueryMoveEvent(actor, offset);
+            var query = new QueryMoveEvent(tile, offset);
             GameManager.Instance.SendToCell(query, moveToCell);
             if (!query.result)
                 return false;
@@ -107,21 +107,21 @@ namespace Puzzled
 
             PlayAnimation("Walk");
 
-            Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
+            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
                 .Duration(moveDuration)
 //                .EaseOutCubic()
                 .OnStop(OnMoveComplete)
-                .Start(actor.gameObject);
+                .Start(tile.gameObject);
 
             return true;
         }
 
         private bool PushMove (Vector2Int offset)
         {
-            moveFromCell = actor.Cell;
-            moveToCell = actor.Cell + offset;            
+            moveFromCell = tile.cell;
+            moveToCell = tile.cell + offset;            
 
-            var query = new QueryPushEvent(actor, offset);
+            var query = new QueryPushEvent(tile, offset);
             GameManager.Instance.SendToCell(query, moveToCell);
             if (!query.result)
                 return false;
@@ -130,30 +130,30 @@ namespace Puzzled
 
             PlayAnimation("Push");
 
-            GameManager.Instance.SendToCell(new PushEvent(actor, offset, moveDuration), moveToCell);
+            GameManager.Instance.SendToCell(new PushEvent(tile, offset, moveDuration), moveToCell);
 
-            Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
+            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
                 .Duration(moveDuration)
 //                .EaseOutCubic()
                 .OnStop(OnMoveComplete)
-                .Start(actor.gameObject);
+                .Start(tile.gameObject);
 
             return true;
         }
 
         private bool UseMove (Vector2Int offset)
         {
-            moveFromCell = actor.Cell;
-            moveToCell = actor.Cell + offset;            
+            moveFromCell = tile.cell;
+            moveToCell = tile.cell + offset;            
 
-            var query = new QueryUseEvent(actor, offset);
+            var query = new QueryUseEvent(tile, offset);
             GameManager.Instance.SendToCell(query, moveToCell);
             if (!query.result)
                 return false;
 
             BeginBusy();
 
-            GameManager.Instance.SendToCell(new UseEvent(actor), moveToCell);
+            GameManager.Instance.SendToCell(new UseEvent(tile), moveToCell);
 
             EndBusy();
 
@@ -165,7 +165,7 @@ namespace Puzzled
         private void OnMoveComplete()
         {
             SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), moveFromCell);
-            actor.Cell = moveToCell;
+            tile.cell = moveToCell;
             SendToCell(ActorEvent.Singleton<EnterCellEvent>().Init(), moveToCell);
 
             PlayAnimation("Idle");

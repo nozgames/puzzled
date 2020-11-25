@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class PressurePlate : PuzzledActorComponent
+    class PressurePlate : TileComponent
     {
         public bool pressed { get; private set; }
 
@@ -16,7 +16,7 @@ namespace Puzzled
         {
             pressed = true;
             UpdateVisuals();
-            actor.ActivateWire();
+            tile.ActivateWire();
         }
 
         [ActorEventHandler]
@@ -24,7 +24,7 @@ namespace Puzzled
         {
             pressed = false;
             UpdateVisuals();
-            actor.DeactivateWire();
+            tile.DeactivateWire();
         }
 
         private void UpdateVisuals()

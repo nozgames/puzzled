@@ -5,11 +5,11 @@ namespace Puzzled
 {
     public abstract class QueryEvent : ActorEvent
     {
-        public PuzzledActor source { get; private set; }
+        public Tile source { get; private set; }
 
         public Vector2Int offset { get; private set; }
 
-        public Vector2Int targetCell => source.Cell + offset;
+        public Vector2Int targetCell => source.cell + offset;
 
         private bool _noresult = true;
         private bool _result = false;
@@ -25,7 +25,7 @@ namespace Puzzled
             }
         }
 
-        protected QueryEvent(PuzzledActor source, Vector2Int offset)
+        protected QueryEvent(Tile source, Vector2Int offset)
         {
             this.source = source;
             this.offset = offset;

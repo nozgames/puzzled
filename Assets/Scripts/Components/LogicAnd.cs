@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class LogicAnd : PuzzledActorComponent
+    class LogicAnd : TileComponent
     {
         // NOTE: this is just a stub, we need to figure out how we want to handle this
         private int numWires = 0;
@@ -29,9 +29,9 @@ namespace Puzzled
         private void SetLiveWireCount(int count)
         {
             if (liveWireCount >= numWires)
-                actor.ActivateWire();
+                tile.ActivateWire();
             else
-                actor.DeactivateWire();
+                tile.DeactivateWire();
         }
     }
 }

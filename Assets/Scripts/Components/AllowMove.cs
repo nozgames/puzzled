@@ -2,7 +2,7 @@
 
 namespace Puzzled
 {
-    class AllowMove : PuzzledActorComponent
+    class AllowMove : TileComponent
     {
         [ActorEventHandler]
         private void OnQueryMove(QueryMoveEvent evt) => evt.result = true;

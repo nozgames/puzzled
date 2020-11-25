@@ -3,7 +3,7 @@ using NoZ;
 
 namespace Puzzled
 {
-    class Pushable : PuzzledActorComponent
+    class Pushable : TileComponent
     {
         private Vector2Int moveToCell;
         private Vector2Int moveFromCell;
@@ -18,7 +18,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnQueryPush(QueryPushEvent evt)
         {
-            var queryMove = new QueryMoveEvent(actor, evt.offset);
+            var queryMove = new QueryMoveEvent(tile, evt.offset);
             SendToCell(queryMove, queryMove.targetCell);
             evt.result = queryMove.result;
         }
@@ -26,20 +26,20 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnPush(PushEvent evt)
         {
-            moveFromCell = actor.Cell;
-            moveToCell = actor.Cell + evt.offset;
+            moveFromCell = tile.cell;
+            moveToCell = tile.cell + evt.offset;
             BeginBusy();
-            Tween.Move(actor.transform.position, GameManager.CellToWorld(moveToCell), false)
+            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
                 .Duration(evt.duration)
                 //.EaseOutCubic()
                 .OnStop(OnMoveComplete)
-                .Start(actor.gameObject);
+                .Start(tile.gameObject);
         }
 
         private void OnMoveComplete()
         {
             SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), moveFromCell);
-            actor.Cell = moveToCell;
+            tile.cell = moveToCell;
             SendToCell(ActorEvent.Singleton<EnterCellEvent>().Init(), moveToCell);
             
             EndBusy();

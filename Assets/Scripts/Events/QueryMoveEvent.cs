@@ -5,6 +5,6 @@ namespace Puzzled
 {
     public class QueryMoveEvent : QueryEvent
     {
-        public QueryMoveEvent(PuzzledActor source, Vector2Int offset) : base(source, offset) { }
+        public QueryMoveEvent(Tile source, Vector2Int offset) : base(source, offset) { }
     }
 }

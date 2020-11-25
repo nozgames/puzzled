@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class SpinSelector : PuzzledActorComponent
+    class SpinSelector : TileComponent
     {
         public int value { get; private set; }
 
@@ -35,9 +35,9 @@ namespace Puzzled
             value = newValue;
 
             if (value == target)
-                actor.ActivateWire();
+                tile.ActivateWire();
             else
-                actor.DeactivateWire();
+                tile.DeactivateWire();
 
             UpdateVisuals();
         }

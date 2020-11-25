@@ -1,12 +1,21 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 namespace Puzzled
 {
     [CreateAssetMenu(fileName = "New Tile Databae", menuName = "Puzzled/Tile Database")]
     class TileDatabase : ScriptableObject 
     {
-        [SerializeField] private TileInfo[] _tiles = null;
+        [SerializeField] private Tile[] _prefabs = null;
 
-        public TileInfo[] tiles => _tiles;
+        private void OnEnable()
+        {
+            tiles = _prefabs.Select(a => a.info)
+                .Distinct()
+                .OrderBy(ti => ti.name)
+                .ToArray();
+        }
+
+        public TileInfo[] tiles { get; private set; }
     }
 }
