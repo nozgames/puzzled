@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 using Puzzled.PuzzleEditor;
+using UnityEditor;
 
 namespace Puzzled
 {
@@ -49,12 +50,12 @@ namespace Puzzled
         [SerializeField] private InputActionReference pointerDownAction;
 
         [Header("Tiles")]
-        [SerializeField] private TileInfo floorTile = null;
+        [SerializeField] private Tile floorTile = null;
         [SerializeField] private BlockGroup[] blockGroups;
 
         private Mode _mode = Mode.Draw;
 
-        private TileInfo selectedTile = null;
+        private Tile selectedTile = null;
         private Vector2Int dragStart;
         private Vector2Int dragEnd;
         private bool dragging;
@@ -68,10 +69,8 @@ namespace Puzzled
         {
             pieces.transform.DetachAndDestroyChildren();
 
-            foreach(var tile in tileDatabase.tiles)
-            {
+            foreach(var tile in tileDatabase.prefabs)
                 GeneratePreview(tile);
-            }
 
             previewParent.DetachAndDestroyChildren();
 
@@ -89,9 +88,8 @@ namespace Puzzled
             pointerDownAction.action.performed -= OnPointerDown;
         }
 
-        private void GeneratePreview(TileInfo tileInfo)
+        private void GeneratePreview(Tile prefab)
         {
-            var prefab = tileInfo.prefabs[0].gameObject;
             if (null == prefab)
                 return;
 
@@ -100,7 +98,7 @@ namespace Puzzled
 
             previewParent.DetachAndDestroyChildren();
             
-            var blockObject = Instantiate(prefab, previewParent);
+            var blockObject = Instantiate(prefab.gameObject, previewParent);
             blockObject.SetChildLayers(LayerMask.NameToLayer("Preview"));
 
             previewCamera.Render();
@@ -114,7 +112,7 @@ namespace Puzzled
 
             var tileObject = Instantiate(piecePrefab, pieces);
             tileObject.GetComponent<Button>().onClick.AddListener(() => {
-                selectedTile = tileInfo;
+                selectedTile = prefab;
             });
             tileObject.GetComponent<RawImage>().texture = t;            
         }
@@ -144,31 +142,31 @@ namespace Puzzled
                     if (null == selectedTile)
                         return;
 
-                    if (selectedTile.layer == TileLayer.Dynamic)
+                    if (selectedTile.info.layer == TileLayer.Dynamic)
                         foreach (var actor in GameManager.Instance.GetCellTiles(cell))
                             if (!actor.info.allowDynamic)
                                 return;
 
-                    GameManager.Instance.ClearTile(cell, selectedTile.layer);
+                    GameManager.Instance.ClearTile(cell, selectedTile.info.layer);
 
                     // Destroy all other instances of this tile regardless of variant
-                    if (!selectedTile.allowMultiple)
+                    if (!selectedTile.info.allowMultiple)
                     {
                         foreach (var actor in GameManager.GetTiles().Where(a => a.info == selectedTile))
                         {
                             Destroy(actor.gameObject);
 
                             // Replace the static actor with a floor so we dont leave a hole
-                            if (selectedTile.layer == TileLayer.Static)
-                                GameManager.Instance.InstantiateTile(floorTile, actor.cell);
+                            if (selectedTile.info.layer == TileLayer.Static)
+                                InstantiateTile(floorTile, actor.cell);
                         }
                     }
 
                     // Automatically add floor
-                    if (selectedTile.layer != TileLayer.Static)
-                        GameManager.Instance.InstantiateTile(floorTile, cell);
+                    if (selectedTile.info.layer != TileLayer.Static)
+                        InstantiateTile(floorTile, cell);
 
-                    GameManager.Instance.InstantiateTile(selectedTile, cell);
+                    InstantiateTile(selectedTile, cell);
                     break;
 
                 case Mode.Erase:
@@ -234,6 +232,38 @@ namespace Puzzled
             }
 
             OnCanvasPointerDown(lastCell);
+        }
+
+        private Tile InstantiateTile (Tile prefab, Vector2Int cell, int variantIndex=0)
+        {
+            var tile = GameManager.Instance.InstantiateTile(prefab, cell, variantIndex);
+            if (null == tile)
+                return null;
+
+            tile.gameObject.AddComponent<TileEditorInfo>().prefab = prefab;
+
+            return tile;
+        }
+
+        public void OnSaveButton()
+        {
+            var puzzle = new Puzzle();
+            puzzle.Save(GameManager.Instance.transform.GetChild(1));
+
+            System.IO.File.WriteAllText(System.IO.Path.Combine(Application.dataPath, "Puzzles/test.puzzle"), JsonUtility.ToJson(puzzle));
+        }
+
+        public void OnLoadButton()
+        {
+            var puzzle = ScriptableObject.CreateInstance<Puzzle>();
+            JsonUtility.FromJsonOverwrite(System.IO.File.ReadAllText(System.IO.Path.Combine(Application.dataPath, "Puzzles/test.puzzle")), puzzle);
+
+            GameManager.Instance.ClearTiles();
+            if(puzzle.tempTiles != null)
+            {
+                foreach (var tile in puzzle.tempTiles)
+                    InstantiateTile(tile.prefab.GetComponent<Tile>(), tile.cell);
+            }
         }
     }
 }

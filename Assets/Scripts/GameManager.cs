@@ -170,9 +170,9 @@ namespace Puzzled
             grid.transform.DetachAndDestroyChildren();
         }
 
-        public Tile InstantiateTile (TileInfo tileInfo, Vector2Int cell, int variantIndex=0)
+        public Tile InstantiateTile (Tile prefab, Vector2Int cell, int variantIndex=0)
         {
-            var tile = Instantiate(tileInfo.prefabs[variantIndex], grid.transform).GetComponent<Tile>();
+            var tile = Instantiate(prefab.gameObject, grid.transform).GetComponent<Tile>();
             tile.cell = cell;
             tile.transform.position = grid.CellToWorld(tile.cell.ToVector3Int());
             return tile;

@@ -4,16 +4,15 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    [CreateAssetMenu(fileName="New Puzzle", menuName ="Puzzled/Puzzle")]
     public class Puzzle : ScriptableObject
     {
         public GameObject puzzlePrefab;
 
         [Serializable]
-        private class SerializedTile
+        public class SerializedTile
         {
             public Vector2Int cell;
-            public string prefab;
+            public GameObject prefab;
         }
 
         [Serializable]
@@ -25,6 +24,8 @@ namespace Puzzled
 
         [SerializeField] [HideInInspector] private SerializedTile[] tiles;
         [SerializeField] [HideInInspector] private Connection[] wires;
+
+        public SerializedTile[] tempTiles => tiles;
 
         /// <summary>
         /// Load the puzzle into the given target
@@ -53,8 +54,7 @@ namespace Puzzled
 
         public void Save (Transform target)
         {
-#if false
-            var tiles = target.GetComponentsInChildren<SerializedTile>();
+            var tiles = target.GetComponentsInChildren<Tile>();
             var save = new SerializedTile[tiles.Length];
 
             wires = new Connection[tiles.Sum(t => t.connections.Length)];
@@ -62,9 +62,10 @@ namespace Puzzled
             for(int i=0; i<tiles.Length; i++)
             {
                 var tile = tiles[i];
+                var editorInfo = tile.GetComponent<TileEditorInfo>();
                 save[i] = new SerializedTile {
-                    prefab = "",
-                    cell = tile.Cell
+                    prefab = tile.GetComponent<TileEditorInfo>().prefab.gameObject,
+                    cell = tile.cell
                 };
 
                 foreach(var connectedTile in tile.connections)
@@ -76,8 +77,9 @@ namespace Puzzled
                         to = i
                     };
                 }
+
+                this.tiles = save;
             }
-#endif
         }
     }
 }

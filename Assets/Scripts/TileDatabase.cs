@@ -16,6 +16,8 @@ namespace Puzzled
                 .ToArray();
         }
 
+        public Tile[] prefabs => _prefabs;
+
         public TileInfo[] tiles { get; private set; }
     }
 }
