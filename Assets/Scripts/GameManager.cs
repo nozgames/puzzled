@@ -58,6 +58,8 @@ namespace Puzzled
         public static Vector3 CellToWorld(Vector2Int cell) =>
             Instance.grid.CellToWorld(cell.ToVector3Int());
 
+        public static PuzzledActor[] GetActors() => Instance.grid.GetComponentsInChildren<PuzzledActor>();
+
         private int busyCount = 0;
 
         public static bool IsBusy => Instance.busyCount > 0;
@@ -168,15 +170,27 @@ namespace Puzzled
             grid.transform.DetachAndDestroyChildren();
         }
 
-        public PuzzledActor InstantiateTile (GameObject prefab, Vector2Int cell)
+        public PuzzledActor InstantiateTile (TileInfo tileInfo, Vector2Int cell, int variantIndex=0)
         {
-            var actor = Instantiate(prefab, grid.transform).GetComponent<PuzzledActor>();
+            var actor = Instantiate(tileInfo.prefabs[variantIndex], grid.transform).GetComponent<PuzzledActor>();
             actor.Cell = cell;
+            actor.tileInfo = tileInfo;
             actor.transform.position = grid.CellToWorld(actor.Cell.ToVector3Int());
             return actor;
         }
 
-        public void ClearTile (Vector2Int cell)
+        public void ClearTile (Vector2Int cell, TileLayer layer)
+        {
+            var actors = GetCellActors(cell);
+            if (null == actors)
+                return;
+
+            foreach (var actor in actors)
+                if(actor.tileInfo.layer == layer)
+                    Destroy(actor.gameObject);
+        }
+
+        public void ClearTile(Vector2Int cell)
         {
             var actors = GetCellActors(cell);
             if (null == actors)

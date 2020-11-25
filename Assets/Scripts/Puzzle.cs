@@ -13,7 +13,7 @@ namespace Puzzled
         private class Tile
         {
             public Vector2Int cell;
-            public TileType type;
+            public string prefab;
         }
 
         [Serializable]
@@ -25,14 +25,6 @@ namespace Puzzled
 
         [SerializeField] [HideInInspector] private Tile[] tiles;
         [SerializeField] [HideInInspector] private Connection[] connections;
-        [SerializeField] private Theme theme = null;
-
-        public Theme Theme {
-            get => theme;
-            set {
-                theme = value;
-            }
-        }
 
         /// <summary>
         /// Load the puzzle into the given target
@@ -43,13 +35,10 @@ namespace Puzzled
             if (null == tiles)
                 return true;
 
-            if (null == theme)
-                return true;
-
             var result = true;
             foreach (var tile in tiles)
             {
-                var prefab = theme.GetPrefab(tile.type);
+/*                var prefab = theme.GetPrefab(tile.prefab);
                 if(null == prefab)
                 {
                     Debug.LogWarning($"missing prefab for tile '{tile.type}");
@@ -57,7 +46,7 @@ namespace Puzzled
                     continue;
                 }
                 Instantiate(prefab, target);
-            }
+*/            }
 
             return result;
         }
@@ -73,7 +62,7 @@ namespace Puzzled
             {
                 var actor = actors[i];
                 save[i] = new Tile {
-                    type = actor.tileType,
+                    prefab = "",
                     cell = actor.Cell
                 };
 

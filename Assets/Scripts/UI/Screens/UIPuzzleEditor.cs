@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -36,7 +37,7 @@ namespace Puzzled
             public Block[] blocks;
         }
 
-        [SerializeField] private Theme theme = null;
+        [SerializeField] private TileDatabase tileDatabase = null;
         [SerializeField] private Camera previewCamera = null;
         [SerializeField] private Transform previewParent = null;
         [SerializeField] private GameObject piecePrefab = null;
@@ -47,13 +48,16 @@ namespace Puzzled
         [SerializeField] private InputActionReference pointerAction;
         [SerializeField] private InputActionReference pointerDownAction;
 
-        [Header("Blocks")]
-        [SerializeField]
-        private BlockGroup[] blockGroups;
+        [Header("Tiles")]
+        [SerializeField] private TileInfo floorTile = null;
+        [SerializeField] private BlockGroup[] blockGroups;
 
         private Mode _mode = Mode.Draw;
 
-        private GameObject selectedTile = null;
+        private TileInfo selectedTile = null;
+        private Vector2Int dragStart;
+        private Vector2Int dragEnd;
+        private bool dragging;
 
         private Mode mode {
             get => _mode;
@@ -64,8 +68,10 @@ namespace Puzzled
         {
             pieces.transform.DetachAndDestroyChildren();
 
-            foreach(var id in (TileType[])Enum.GetValues(typeof(TileType)))
-                GeneratePreview(id);
+            foreach(var tile in tileDatabase.tiles)
+            {
+                GeneratePreview(tile);
+            }
 
             previewParent.DetachAndDestroyChildren();
 
@@ -83,9 +89,9 @@ namespace Puzzled
             pointerDownAction.action.performed -= OnPointerDown;
         }
 
-        private void GeneratePreview(TileType tileId)
+        private void GeneratePreview(TileInfo tileInfo)
         {
-            var prefab = theme.GetPrefab(tileId);
+            var prefab = tileInfo.prefabs[0].gameObject;
             if (null == prefab)
                 return;
 
@@ -108,7 +114,7 @@ namespace Puzzled
 
             var tileObject = Instantiate(piecePrefab, pieces);
             tileObject.GetComponent<Button>().onClick.AddListener(() => {
-                selectedTile = prefab;
+                selectedTile = tileInfo;
             });
             tileObject.GetComponent<RawImage>().texture = t;            
         }
@@ -138,11 +144,29 @@ namespace Puzzled
                     if (null == selectedTile)
                         return;
 
-                    GameManager.Instance.ClearTile(cell);
+                    if (selectedTile.layer == TileLayer.Dynamic)
+                        foreach (var actor in GameManager.Instance.GetCellActors(cell))
+                            if (!actor.tileInfo.allowDynamic)
+                                return;
+
+                    GameManager.Instance.ClearTile(cell, selectedTile.layer);
+
+                    // Destroy all other instances of this tile regardless of variant
+                    if (!selectedTile.allowMultiple)
+                    {
+                        foreach (var actor in GameManager.GetActors().Where(a => a.tileInfo == selectedTile))
+                        {
+                            Destroy(actor.gameObject);
+
+                            // Replace the static actor with a floor so we dont leave a hole
+                            if (selectedTile.layer == TileLayer.Static)
+                                GameManager.Instance.InstantiateTile(floorTile, actor.Cell);
+                        }
+                    }
 
                     // Automatically add floor
-                    if (selectedTile.GetComponent<PuzzledActor>().tileType != TileType.Floor)
-                        GameManager.Instance.InstantiateTile(theme.GetPrefab(TileType.Floor), cell);
+                    if (selectedTile.layer != TileLayer.Static)
+                        GameManager.Instance.InstantiateTile(floorTile, cell);
 
                     GameManager.Instance.InstantiateTile(selectedTile, cell);
                     break;
@@ -152,15 +176,18 @@ namespace Puzzled
                     break;
 
                 case Mode.Select:
-                    SetSelectionRect(cell, cell);
+                    SetSelectionRect(dragStart, dragEnd);
                     break;
             }
         }
 
         private void SetSelectionRect(Vector2Int min, Vector2Int max)
         {
-            selectionRect.anchoredPosition = 
-                ((Vector2)Camera.main.WorldToScreenPoint(GameManager.CellToWorld(min) - new Vector3(0.5f, 0.5f, 0))) - new Vector2(4,4);
+            var anchorCell = Vector2Int.Min(min, max);
+            var size = Vector2Int.Max(min, max) - anchorCell;
+
+            selectionRect.anchorMin = Camera.main.WorldToViewportPoint (GameManager.CellToWorld(anchorCell) - new Vector3(0.5f, 0.5f, 0));
+            selectionRect.anchorMax = Camera.main.WorldToViewportPoint(GameManager.CellToWorld(anchorCell+size) + new Vector3(0.5f, 0.5f, 0));
 
             selectionRect.gameObject.SetActive(true);
 
@@ -174,21 +201,39 @@ namespace Puzzled
             var cell = GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(ctx.ReadValue<Vector2>()) + new Vector3(0.5f, 0.5f, 0));
             if (cell != lastCell)
                 lastCell = cell;
+
+            if(dragging && dragEnd != lastCell)
+            {
+                dragEnd = lastCell;
+                UpdateDrag();
+            }
         }
 
-        public void OnPointerDown(InputAction.CallbackContext ctx)
+        private void UpdateDrag()
+        {
+            OnCanvasPointerDown(dragEnd);
+        }
+
+        private void OnPointerDown(InputAction.CallbackContext ctx)
         {
             var results = new List<UnityEngine.EventSystems.RaycastResult>();
 
             UnityEngine.EventSystems.EventSystem.current.RaycastAll(new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) { position = pointerAction.action.ReadValue<Vector2>() }, results);
+            if (results.Count <= 0 || results[0].gameObject.GetComponent<UICanvas>() == null)
+                return;
 
             if (ctx.ReadValueAsButton())
-                if (results.Count > 0 && results[0].gameObject.GetComponent<UICanvas>() != null)
+            {
+                dragging = true;
+                dragStart = lastCell;
+                dragEnd = lastCell;
+            }
+            else
+            {
+                dragging = false;
+            }
 
-                {
-                    OnCanvasPointerDown(lastCell);
-                    //pointerDown.Invoke(lastCell);
-                }
+            OnCanvasPointerDown(lastCell);
         }
     }
 }
