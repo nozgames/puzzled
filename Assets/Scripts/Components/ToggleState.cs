@@ -27,14 +27,14 @@ namespace Puzzled
         {
             isOn = true;
             UpdateVisuals();
-            tile.ActivateWire();
+            tile.SetOutputsActive(true);
         }
 
         private void TurnOff()
         {
             isOn = false;
             UpdateVisuals();
-            tile.DeactivateWire();
+            tile.SetOutputsActive(false);
         }
 
         private void UpdateVisuals()

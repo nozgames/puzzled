@@ -35,9 +35,9 @@ namespace Puzzled
             value = newValue;
 
             if (value == target)
-                tile.ActivateWire();
+                tile.SetOutputsActive(true);
             else
-                tile.DeactivateWire();
+                tile.SetOutputsActive(false);
 
             UpdateVisuals();
         }

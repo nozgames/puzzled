@@ -18,7 +18,8 @@ namespace Puzzled
             Draw,
             Select,
             Move,
-            Erase
+            Erase,
+            Wire
         }
 
         [Serializable]
@@ -68,6 +69,7 @@ namespace Puzzled
 
         private Mode _mode = Mode.Draw;
         private string selectedPuzzle = null;
+        private Wire dragWire = null;
 
         private Tile selectedTile = null;
         private Vector2Int dragStart;
@@ -104,7 +106,8 @@ namespace Puzzled
 
         private void OnDisable()
         {
-            GameManager.DecBusy();
+            if(GameManager.Instance != null)
+                GameManager.DecBusy();
             pointerAction.action.performed -= OnPointerMoved;
             pointerDownAction.action.performed -= OnPointerDown;
         }
@@ -155,7 +158,7 @@ namespace Puzzled
             mode = Mode.Erase;
         }
 
-        public void OnCanvasPointerDown(Vector2Int cell)
+        public void OnCanvasPointerDown(Vector2Int cell, bool down)
         {
             switch (mode)
             {
@@ -197,6 +200,36 @@ namespace Puzzled
                 case Mode.Select:
                     SetSelectionRect(dragStart, dragEnd);
                     break;
+
+                case Mode.Wire:
+                    if (dragWire == null)
+                    {
+                        var tile = GetTile(cell);
+                        if (tile != null)
+                        {
+                            GameManager.Instance.HideWires();
+                            GameManager.Instance.ShowWires(tile);
+
+                            SetSelectionRect(cell, cell);
+                            dragWire = new Wire { input = tile, output = tile };
+                            GameManager.Instance.ShowWire(dragWire);
+                        }
+                    }
+                    else if(dragWire.line != null)
+                    {
+                        if (down)
+                            dragWire.line.SetPosition(1, GameManager.CellToWorld(cell));
+                        else
+                        {
+                            var tile = GetTile(cell);
+                            if (tile != null && tile != dragWire.input && !tile.HasOutput(dragWire.input))
+                                AddWire(dragWire.input, tile);
+                            GameManager.Instance.HideWires();
+                            GameManager.Instance.ShowWires(tile);
+                            dragWire = null;
+                        }
+                    }
+                    break;
             }
         }
 
@@ -230,7 +263,7 @@ namespace Puzzled
 
         private void UpdateDrag()
         {
-            OnCanvasPointerDown(dragEnd);
+            OnCanvasPointerDown(dragEnd, true);
         }
 
         private void OnPointerDown(InputAction.CallbackContext ctx)
@@ -267,7 +300,7 @@ namespace Puzzled
                 dragging = false;
             }
 
-            OnCanvasPointerDown(lastCell);
+            OnCanvasPointerDown(lastCell, mouseDown);
         }
 
         private Tile InstantiateTile (Tile prefab, Vector2Int cell)
@@ -386,8 +419,16 @@ namespace Puzzled
             GameManager.Instance.ClearTiles();
             if(puzzle.tempTiles != null)
             {
-                foreach (var tile in puzzle.tempTiles)
-                    InstantiateTile(tile.prefab.GetComponent<Tile>(), tile.cell);
+                var tiles = new List<Tile>();
+                foreach (var serializedTile in puzzle.tempTiles)
+                {
+                    var tile = InstantiateTile(serializedTile.prefab.GetComponent<Tile>(), serializedTile.cell);
+                    tiles.Add(tile);
+                }
+
+                if(puzzle.tempWires!=null)
+                    foreach (var serializedWire in puzzle.tempWires)
+                        AddWire(tiles[serializedWire.from], tiles[serializedWire.to]);
             }
 
             HidePopup();
@@ -411,6 +452,38 @@ namespace Puzzled
         private void HidePopup()
         {
             popups.SetActive(false);
+        }
+
+        public void OnWireButton()
+        {
+            mode = Mode.Wire;
+        }
+
+        private Tile GetTile (Vector2Int cell)
+        {
+            return GameManager.Instance.GetCellTiles(cell)?[0];
+        }
+
+        private void AddWire(Tile input, Tile output)
+        {
+            // Already connected?
+            if (input.HasOutput(output))
+                return;
+
+            var wire = new Wire { active = false, input = input, output = output };
+            input.outputs.Add(wire);
+            output.inputs.Add(wire);
+        }
+
+        private void RemoveWire(Tile input, Tile output)
+        {
+            for (int i = output.inputs.Count - 1; i >= 0; i--)
+                if (output.inputs[i].input == input)
+                    output.inputs.RemoveAt(i);
+
+            for (int i = input.outputs.Count - 1; i >= 0; i--)
+                if (input.outputs[i].output == output)
+                    input.outputs.RemoveAt(i);
         }
     }
 }

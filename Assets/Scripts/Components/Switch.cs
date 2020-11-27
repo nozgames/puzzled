@@ -21,23 +21,23 @@ namespace Puzzled
         private void OnUse(UseEvent evt)
         {
             if (isOn)
-                TurnOn();
-            else
                 TurnOff();
+            else
+                TurnOn();
         }
 
         private void TurnOn()
         {
             isOn = true;
             UpdateVisuals();
-            tile.ActivateWire();
+            tile.SetOutputsActive(true);
         }
 
         private void TurnOff()
         {
             isOn = false;
             UpdateVisuals();
-            tile.DeactivateWire();
+            tile.SetOutputsActive(false);
         }
 
         private void UpdateVisuals()

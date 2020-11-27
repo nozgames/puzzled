@@ -16,7 +16,7 @@ namespace Puzzled
         {
             pressed = true;
             UpdateVisuals();
-            tile.ActivateWire();
+            tile.SetOutputsActive(true);
         }
 
         [ActorEventHandler]
@@ -24,7 +24,7 @@ namespace Puzzled
         {
             pressed = false;
             UpdateVisuals();
-            tile.DeactivateWire();
+            tile.SetOutputsActive(false);
         }
 
         private void UpdateVisuals()

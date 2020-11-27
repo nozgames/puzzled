@@ -9,8 +9,10 @@ namespace Puzzled
     public class GameManager : ActorComponent
     {
         [SerializeField] private Grid grid = null;
+        [SerializeField] private Transform wires = null;
         [SerializeField] private Canvas ui = null;
         [SerializeField] private int minimumPuzzleSize = 9;
+        [SerializeField] private GameObject wirePrefab = null;
 
         public InputActionReference menuAction;
 
@@ -209,6 +211,42 @@ namespace Puzzled
                 return;
 
             tiles.Remove(tile);
+        }
+
+        public void HideWire(Wire wire)
+        {
+            if (wire.line == null)
+                return;
+
+            Destroy(wire.line.gameObject);
+            wire.line = null;
+        }
+
+        public void HideWires()
+        {
+            wires.DetachAndDestroyChildren();
+        }
+
+        public void ShowWire(Wire wire)
+        {
+/*            if (wire.line != null)
+                return;
+*/
+            var wireObject = Instantiate(wirePrefab, wires);
+            var line = wireObject.GetComponent<LineRenderer>();
+            line.positionCount = 2;
+            line.SetPosition(0, wire.input.transform.position);
+            line.SetPosition(1, wire.output.transform.position);
+            wire.line = line;
+        }
+
+        public void ShowWires(Tile tile)
+        {
+            foreach (var output in tile.outputs)
+                ShowWire(output);
+
+            foreach (var input in tile.inputs)
+                ShowWire(input);
         }
     }
 }

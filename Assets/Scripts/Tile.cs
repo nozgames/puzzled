@@ -1,19 +1,17 @@
 ﻿using UnityEngine;
 using NoZ;
+using System.Collections.Generic;
 
 namespace Puzzled
 {
     public class Tile : Actor
     {
-        [SerializeField] private Tile[] _connectedTiles;
         [SerializeField] private TileInfo _info = null;
 
         private Vector2Int _cell;
 
-        public Tile[] connections {
-            get => _connectedTiles;
-            set => _connectedTiles = value;
-        }
+        public List<Wire> inputs { get; private set; } = new List<Wire>();
+        public List<Wire> outputs { get; private set; } = new List<Wire>();
 
         public TileInfo info => _info;
 
@@ -38,25 +36,67 @@ namespace Puzzled
                 GameManager.Instance.RemoveTileFromCell(this);
         }
 
-        public void ActivateWire()
-        {
-            foreach (Tile connectedActor in _connectedTiles)
-                connectedActor.Send(new ActivateWireEvent());
-        }
+        /// <summary>
+        /// Returns the number of active inputs
+        /// </summary>
+        public int activeInputCount {
+            get {
+                if (inputs == null)
+                    return 0;
 
-        public void DeactivateWire()
-        {
-            foreach (Tile connectedActor in _connectedTiles)
-                connectedActor.Send(new DeactivateWireEvent());
-        }
+                var count = 0;
+                foreach (var input in inputs)
+                    if (input.active)
+                        count++;
 
-        public void PulseWire()
-        {
-            foreach (Tile connectedActor in _connectedTiles)
-            {
-                connectedActor.Send(new ActivateWireEvent());
-                connectedActor.Send(new DeactivateWireEvent());
+                return count;
             }
+        }
+
+        public int inputCount => inputs.Count;
+        public int outputCount => outputs.Count;
+
+        public bool allInputsActive => activeInputCount == inputCount;
+
+        public bool hasActiveInput => activeInputCount > 0;
+
+        public bool HasOutput (Tile tile)
+        {
+            if (null == outputs)
+                return false;
+            
+            foreach(var output in outputs)
+                if (tile == output.output)
+                    return true;
+
+            return false;
+        }
+
+        public bool HasInput (Tile tile)
+        {
+            if (null == inputs)
+                return false;
+
+            foreach (var input in inputs)
+                if (tile == input.input)
+                    return true;
+
+            return false;
+        }
+
+        public void SetOutputsActive (bool active)
+        {
+            if (null == outputs)
+                return;
+
+            foreach (var output in outputs)
+                output.active = active;
+        }
+
+        public void PulseOutputs()
+        {
+            SetOutputsActive(true);
+            SetOutputsActive(false);
         }
     }
 }

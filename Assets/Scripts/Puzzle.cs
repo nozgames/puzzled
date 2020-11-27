@@ -16,16 +16,17 @@ namespace Puzzled
         }
 
         [Serializable]
-        private class Connection
+        public class SerializedWire
         {
             public int from;
             public int to;
         }
 
         [SerializeField] [HideInInspector] private SerializedTile[] tiles;
-        [SerializeField] [HideInInspector] private Connection[] wires;
+        [SerializeField] [HideInInspector] private SerializedWire[] wires;
 
         public SerializedTile[] tempTiles => tiles;
+        public SerializedWire[] tempWires => wires;
 
         /// <summary>
         /// Load the puzzle into the given target
@@ -57,8 +58,8 @@ namespace Puzzled
             var tiles = target.GetComponentsInChildren<Tile>();
             var save = new SerializedTile[tiles.Length];
 
-            wires = new Connection[tiles.Sum(t => t.connections.Length)];
-            var connectionIndex = 0;
+            wires = new SerializedWire[tiles.Sum(t => t.outputCount)];
+            var wireIndex = 0;
             for(int i=0; i<tiles.Length; i++)
             {
                 var tile = tiles[i];
@@ -68,13 +69,13 @@ namespace Puzzled
                     cell = tile.cell
                 };
 
-                foreach(var connectedTile in tile.connections)
+                foreach(var output in tile.outputs)
                 {
                     var to = 0;
-                    for (to = 0; to < tiles.Length && tiles[to] != connectedTile; to++);
-                    wires[connectionIndex++] = new Connection {
+                    for (to = 0; to < tiles.Length && tiles[to] != output.output; to++);
+                    wires[wireIndex++] = new SerializedWire {
                         from = i,
-                        to = i
+                        to = to
                     };
                 }
 

@@ -5,9 +5,11 @@ namespace Puzzled
 {
     public class ActivateWireEvent : ActorEvent
     {
-        public ActivateWireEvent Init()
+        public Wire wire { get; private set; }
+
+        public ActivateWireEvent (Wire wire)
         {
-            return this;
+            this.wire = wire;
         }
     }
 }
