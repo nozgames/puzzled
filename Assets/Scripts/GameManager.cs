@@ -64,6 +64,8 @@ namespace Puzzled
 
         public static bool IsBusy => Instance.busyCount > 0;
 
+        public static void ClearBusy() => Instance.busyCount = 0;
+
         public static void IncBusy() => Instance.busyCount++;
 
         public static void DecBusy() => Instance.busyCount--;
@@ -139,6 +141,8 @@ namespace Puzzled
             tile.transform.position = grid.CellToWorld(cell.ToVector3Int());
         }
 
+        public bool HasCellTiles(Vector2Int cell) => (GetCellTiles(cell)?.Count ?? 0) > 0;
+
         /// <summary>
         /// Returns the list of tiles at the given cell
         /// </summary>
@@ -170,11 +174,10 @@ namespace Puzzled
             grid.transform.DetachAndDestroyChildren();
         }
 
-        public Tile InstantiateTile (Tile prefab, Vector2Int cell, int variantIndex=0)
+        public Tile InstantiateTile (Tile prefab, Vector2Int cell)
         {
             var tile = Instantiate(prefab.gameObject, grid.transform).GetComponent<Tile>();
             tile.cell = cell;
-            tile.transform.position = grid.CellToWorld(tile.cell.ToVector3Int());
             return tile;
         }
 

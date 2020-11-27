@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
@@ -44,6 +45,18 @@ namespace Puzzled
         [SerializeField] private GameObject piecePrefab = null;
         [SerializeField] private Transform pieces = null;
         [SerializeField] private RectTransform selectionRect = null;
+        [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
+        [SerializeField] private Button playButton = null;
+        [SerializeField] private Button stopButton = null;
+
+        [Header("Popups")]
+        [SerializeField] private GameObject popups = null;
+        [SerializeField] private GameObject fileMenuPopup = null;
+        [SerializeField] private GameObject puzzleNamePopup = null;
+        [SerializeField] private GameObject loadPopup = null;
+        [SerializeField] private TMPro.TMP_InputField puzzleNameInput = null;
+        [SerializeField] private Transform loadPopupFiles = null;
+        [SerializeField] private GameObject loadPopupFilePrefab = null;
 
         [Header("Input")]
         [SerializeField] private InputActionReference pointerAction;
@@ -54,11 +67,14 @@ namespace Puzzled
         [SerializeField] private BlockGroup[] blockGroups;
 
         private Mode _mode = Mode.Draw;
+        private string selectedPuzzle = null;
 
         private Tile selectedTile = null;
         private Vector2Int dragStart;
         private Vector2Int dragEnd;
         private bool dragging;
+        private bool ignoreMouseUp;
+        private bool playing;
 
         private Mode mode {
             get => _mode;
@@ -67,6 +83,10 @@ namespace Puzzled
 
         private void OnEnable()
         {
+            GameManager.IncBusy();
+
+            popups.gameObject.SetActive(false);
+
             pieces.transform.DetachAndDestroyChildren();
 
             foreach(var tile in tileDatabase.prefabs)
@@ -84,6 +104,7 @@ namespace Puzzled
 
         private void OnDisable()
         {
+            GameManager.DecBusy();
             pointerAction.action.performed -= OnPointerMoved;
             pointerDownAction.action.performed -= OnPointerDown;
         }
@@ -142,7 +163,7 @@ namespace Puzzled
                     if (null == selectedTile)
                         return;
 
-                    if (selectedTile.info.layer == TileLayer.Dynamic)
+                    if (selectedTile.info.layer == TileLayer.Dynamic && GameManager.Instance.HasCellTiles(cell))
                         foreach (var actor in GameManager.Instance.GetCellTiles(cell))
                             if (!actor.info.allowDynamic)
                                 return;
@@ -214,13 +235,28 @@ namespace Puzzled
 
         private void OnPointerDown(InputAction.CallbackContext ctx)
         {
-            var results = new List<UnityEngine.EventSystems.RaycastResult>();
+            var mouseDown = ctx.ReadValueAsButton();
 
+            if(!mouseDown && ignoreMouseUp)
+            {
+                ignoreMouseUp = false;
+                return;
+            }
+
+            var results = new List<UnityEngine.EventSystems.RaycastResult>();
             UnityEngine.EventSystems.EventSystem.current.RaycastAll(new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) { position = pointerAction.action.ReadValue<Vector2>() }, results);
+            if (mouseDown && results.Count > 0 && results[0].gameObject == popups)
+            {
+                ignoreMouseUp = true;
+                HidePopup();
+                return;
+            }
+
             if (results.Count <= 0 || results[0].gameObject.GetComponent<UICanvas>() == null)
                 return;
 
-            if (ctx.ReadValueAsButton())
+
+            if (mouseDown)
             {
                 dragging = true;
                 dragStart = lastCell;
@@ -234,9 +270,9 @@ namespace Puzzled
             OnCanvasPointerDown(lastCell);
         }
 
-        private Tile InstantiateTile (Tile prefab, Vector2Int cell, int variantIndex=0)
+        private Tile InstantiateTile (Tile prefab, Vector2Int cell)
         {
-            var tile = GameManager.Instance.InstantiateTile(prefab, cell, variantIndex);
+            var tile = GameManager.Instance.InstantiateTile(prefab, cell);
             if (null == tile)
                 return null;
 
@@ -247,16 +283,105 @@ namespace Puzzled
 
         public void OnSaveButton()
         {
-            var puzzle = new Puzzle();
+            if (puzzleName.text == null || String.Compare(puzzleName.text, "unnamed", true) == 0)
+                ShowPopup(puzzleNamePopup);
+            else
+            {
+                Save();
+                HidePopup();
+            }
+        }
+
+        public void OnSavePuzzleName()
+        {
+            if (string.IsNullOrEmpty(puzzleNameInput.text) || String.Compare(puzzleNameInput.text, "unnamed", true) == 0)
+                return;
+
+            puzzleName.text = puzzleNameInput.text;
+            selectedPuzzle = System.IO.Path.Combine(Application.dataPath, $"Puzzles/{puzzleName.text}.puzzle");
+
+            HidePopup();
+            Save();
+        }
+
+        public void OnCancelPopup()
+        {
+            HidePopup();
+        }
+
+        public void Save()
+        {
+            var puzzle = ScriptableObject.CreateInstance<Puzzle>();
             puzzle.Save(GameManager.Instance.transform.GetChild(1));
 
-            System.IO.File.WriteAllText(System.IO.Path.Combine(Application.dataPath, "Puzzles/test.puzzle"), JsonUtility.ToJson(puzzle));
+            System.IO.File.WriteAllText(selectedPuzzle, JsonUtility.ToJson(puzzle));
+        }
+
+        public void OnNewButton()
+        {
+            selectedPuzzle = null;
+            puzzleName.text = "Unnamed";
+            GameManager.Instance.ClearTiles();
+            HidePopup();
         }
 
         public void OnLoadButton()
         {
+            loadPopupFiles.DetachAndDestroyChildren();
+
+            var files = System.IO.Directory.GetFiles(System.IO.Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
+            foreach(var file in files)
+            {
+                var fileGameObject = Instantiate(loadPopupFilePrefab, loadPopupFiles);
+                fileGameObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = Path.GetFileNameWithoutExtension(file);
+                var button = fileGameObject.GetComponent<Button>();
+                button.onClick.AddListener(() => {
+                    selectedPuzzle = file;
+                    button.Select();
+                });
+            }
+
+            ShowPopup(loadPopup);
+        }
+
+        public void OnLoadButtonConfirm()
+        {
+            Load(selectedPuzzle);
+        }
+
+        public void OnStopButton()
+        {
+            if (!playing)
+                return;
+
+            GameManager.ClearBusy();
+            GameManager.IncBusy();
+
+            playing = false;
+            playButton.gameObject.SetActive(true);
+            stopButton.gameObject.SetActive(false);
+            Load(selectedPuzzle);
+        }
+
+        public void OnPlayButton()
+        {
+            if (playing)
+                return;
+
+            GameManager.ClearBusy();
+
+            playButton.gameObject.SetActive(false);
+            stopButton.gameObject.SetActive(true);
+
+            playing = true;
+            Save();
+        }
+
+        public void Load(string file)
+        {
             var puzzle = ScriptableObject.CreateInstance<Puzzle>();
-            JsonUtility.FromJsonOverwrite(System.IO.File.ReadAllText(System.IO.Path.Combine(Application.dataPath, "Puzzles/test.puzzle")), puzzle);
+            JsonUtility.FromJsonOverwrite(File.ReadAllText(file), puzzle);
+            puzzleName.text = Path.GetFileNameWithoutExtension(file);            
 
             GameManager.Instance.ClearTiles();
             if(puzzle.tempTiles != null)
@@ -264,6 +389,28 @@ namespace Puzzled
                 foreach (var tile in puzzle.tempTiles)
                     InstantiateTile(tile.prefab.GetComponent<Tile>(), tile.cell);
             }
+
+            HidePopup();
+        }
+
+        public void OnFileMenuButton()
+        {
+            ShowPopup(fileMenuPopup);
+        }
+
+        private void ShowPopup (GameObject popup)
+        {
+            if (popup.transform.parent != popups.transform)
+                return;
+
+            popups.transform.DisableChildren();
+            popups.SetActive(true);
+            popup.SetActive(true);
+        }
+
+        private void HidePopup()
+        {
+            popups.SetActive(false);
         }
     }
 }

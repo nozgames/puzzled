@@ -109,7 +109,6 @@ namespace Puzzled
 
             Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
                 .Duration(moveDuration)
-//                .EaseOutCubic()
                 .OnStop(OnMoveComplete)
                 .Start(tile.gameObject);
 

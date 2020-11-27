@@ -175,6 +175,7 @@ GameObject:
   - component: {fileID: 2819266254877709548}
   - component: {fileID: -8286699205250075377}
   - component: {fileID: 5358202952990724035}
+  - component: {fileID: -128667218960194998}
   m_Layer: 0
   m_Name: FloorLight
   m_TagString: Untagged
@@ -211,7 +212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  connectedTiles: []
+  _connectedTiles: []
   _info: {fileID: 11400000, guid: dd97824149f660f47a0b3c19747ec4b3, type: 2}
 --- !u!114 &5358202952990724035
 MonoBehaviour:
@@ -227,6 +228,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visualOn: {fileID: 3766020313462247865}
   visualOff: {fileID: 5137144399866844459}
+--- !u!114 &-128667218960194998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36bca5eb496b2854cb4af1921bce4ae0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &3780014487248777476
 PrefabInstance:
   m_ObjectHideFlags: 0

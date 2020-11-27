@@ -19,5 +19,11 @@ namespace Puzzled
                 UnityEngine.Object.Destroy(go);
             }
         }
+
+        public static void DisableChildren(this Transform transform)
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+                transform.GetChild(i).gameObject.SetActive(false);
+        }
     }
 }

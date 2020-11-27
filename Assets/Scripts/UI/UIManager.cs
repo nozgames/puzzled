@@ -55,6 +55,12 @@ namespace Puzzled
 
         public void ShowPuzzleComplete()
         {
+            if(activeScreen == puzzleEditor)
+            {
+                puzzleEditor.OnStopButton();
+                return;
+            }
+
             if (activeScreen != null)
                 activeScreen.gameObject.SetActive(false);
 
