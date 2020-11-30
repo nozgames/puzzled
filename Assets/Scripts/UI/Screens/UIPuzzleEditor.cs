@@ -76,6 +76,7 @@ namespace Puzzled
         [Header("Input")]
         [SerializeField] private InputActionReference pointerAction;
         [SerializeField] private InputActionReference pointerDownAction;
+        [SerializeField] private InputActionReference rclickAction;
 
         [Header("Tiles")]
         [SerializeField] private Tile floorTile = null;
@@ -122,12 +123,27 @@ namespace Puzzled
 
             pointerAction.action.performed += OnPointerMoved;
             pointerDownAction.action.performed += OnPointerDown;
+            rclickAction.action.performed += OnRightClick;
 
             selectionRect.gameObject.SetActive(false);
 
             drawTool.isOn = true;
 
             GameManager.Instance.ClearTiles();
+        }
+
+        private void OnRightClick(InputAction.CallbackContext ctx)
+        {
+            switch (mode)
+            {
+                case Mode.Wire:
+                {
+                    var wire = HitTestWire(pointerWorld);
+                    if(null != wire)
+                        RemoveWire(wire);
+                    break;
+                }
+            }
         }
 
         private void OnDisable()
@@ -284,10 +300,14 @@ namespace Puzzled
         }
 
         private Vector2Int pointerCell;
+        private Vector2 pointer;
+        private Vector3 pointerWorld;
 
         private void OnPointerMoved(InputAction.CallbackContext ctx)
         {
-            var cell = GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(ctx.ReadValue<Vector2>()) + new Vector3(0.5f, 0.5f, 0));
+            pointer = ctx.ReadValue<Vector2>();
+            pointerWorld = Camera.main.ScreenToWorldPoint(pointer);
+            var cell = GameManager.WorldToCell(pointerWorld + new Vector3(0.5f, 0.5f, 0));
             if (cell != pointerCell)
                 pointerCell = cell;
 
@@ -496,15 +516,14 @@ namespace Puzzled
             return GameManager.Instance.InstantiateWire(input, output);
         }
 
-        private void RemoveWire(Tile input, Tile output)
+        private void RemoveWire(Wire wire)
         {
-            for (int i = output.inputs.Count - 1; i >= 0; i--)
-                if (output.inputs[i].input == input)
-                    output.inputs.RemoveAt(i);
+            Destroy(wire.gameObject);
+        }
 
-            for (int i = input.outputs.Count - 1; i >= 0; i--)
-                if (input.outputs[i].output == output)
-                    input.outputs.RemoveAt(i);
+        private Wire HitTestWire (Vector3 pointer)
+        {
+            return GameManager.HitTestWire(pointer);
         }
     }
 }

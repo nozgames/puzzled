@@ -13,6 +13,7 @@ namespace Puzzled
         [SerializeField] private Canvas ui = null;
         [SerializeField] private int minimumPuzzleSize = 9;
         [SerializeField] private GameObject wirePrefab = null;
+        [SerializeField] private float wireHitThreshold = 0.1f;
 
         public InputActionReference menuAction;
 
@@ -257,6 +258,40 @@ namespace Puzzled
 
             foreach (var input in tile.inputs)
                 input.visible = true;
+        }
+
+        /// <summary>
+        /// Return the wire that collides with the given world position
+        /// </summary>
+        /// <param name="position">World poisition to hit test</param>
+        /// <returns>Wire that collides with the world position or null if none found</returns>
+        public static Wire HitTestWire (Vector3 position)
+        {
+            var cell = WorldToCell(position + new Vector3(0.5f, 0.5f, 0));
+            var threshold = Instance.wireHitThreshold * Instance.wireHitThreshold;
+
+            for (int i=0; i<Instance.wires.childCount; i++)
+            {
+                var wire = Instance.wires.GetChild(i).GetComponent<Wire>();
+                var min = Vector2Int.Min(wire.input.cell, wire.output.cell);
+                var max = Vector2Int.Max(wire.input.cell, wire.output.cell);
+                if (cell.x < min.x || cell.y < min.y || cell.x > max.x || cell.y > max.y)
+                    continue;
+
+                var pt0 = wire.input.transform.position;
+                var pt1 = wire.output.transform.position;
+                var dir = (pt1 - pt0).normalized;
+                var mag = (pt1 - pt0).magnitude;
+                var delta = position - pt0;
+                var dot = Mathf.Clamp(Vector2.Dot(dir, delta) / mag, 0, 1);
+                var dist = (position - (pt0 + dir * dot * mag)).sqrMagnitude;
+                if (dist > threshold)
+                    continue;
+
+                return wire;
+            }
+
+            return null;
         }
     }
 }
