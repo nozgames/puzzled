@@ -32,6 +32,15 @@ namespace Puzzled
         {
             base.OnDestroy();
 
+            foreach (var input in inputs)
+                Destroy(input.gameObject);
+
+            foreach (var output in outputs)
+                Destroy(output.gameObject);
+
+            inputs.Clear();
+            outputs.Clear();
+
             if(GameManager.Instance != null)
                 GameManager.Instance.RemoveTileFromCell(this);
         }
@@ -46,7 +55,7 @@ namespace Puzzled
 
                 var count = 0;
                 foreach (var input in inputs)
-                    if (input.active)
+                    if (input.enabled)
                         count++;
 
                 return count;
@@ -90,7 +99,7 @@ namespace Puzzled
                 return;
 
             foreach (var output in outputs)
-                output.active = active;
+                output.enabled = active;
         }
 
         public void PulseOutputs()

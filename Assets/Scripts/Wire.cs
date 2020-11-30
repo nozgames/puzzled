@@ -2,27 +2,49 @@
 
 namespace Puzzled
 {
-    public class Wire
+    public class Wire : MonoBehaviour
     {
-        private bool _active = false;
-
-        public LineRenderer line = null;
+        [SerializeField] private LineRenderer line = null;
 
         public Tile input { get; set; }
         public Tile output { get; set; }
         
-        public bool active {
-            get => _active;
+        public bool visible {
+            get => line.enabled;
             set {
-                if (_active == value)
-                    return;
-
-                _active = value;
-                if (_active)
-                    output.Send(new ActivateWireEvent(this));
-                else
-                    output.Send(new DeactivateWireEvent(this));
+                line.enabled = value;
+                if (line.enabled)
+                    UpdateLine();
             }
+        }
+
+        private void OnEnable()
+        {
+            output.Send(new ActivateWireEvent(this));
+
+            if(visible)
+                UpdateLine();
+        }
+
+        private void OnDisable()
+        {
+            output.Send(new DeactivateWireEvent(this));
+        }
+
+        private void OnDestroy()
+        {
+            if(input != null)
+                input.outputs.Remove(this);
+
+            if(output != null)
+                output.inputs.Remove(this);
+        }
+
+        public void UpdateLine()
+        {
+            line.positionCount = 2;
+            line.SetPosition(0, input.transform.position);
+            line.SetPosition(1, output.transform.position);
         }
     }
 }

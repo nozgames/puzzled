@@ -22,6 +22,13 @@ namespace Puzzled
             Wire
         }
 
+        private enum DragState
+        {
+            Begin,
+            Update,
+            End
+        }
+
         [Serializable]
         private class Block
         {
@@ -49,6 +56,13 @@ namespace Puzzled
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
+        [SerializeField] private GameObject dragWirePrefab = null;
+
+        [Header("Tools")]
+        [SerializeField] private Toggle selectTool = null;
+        [SerializeField] private Toggle drawTool = null;
+        [SerializeField] private Toggle eraseTool = null;
+        [SerializeField] private Toggle wireTool = null;
 
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
@@ -69,8 +83,9 @@ namespace Puzzled
 
         private Mode _mode = Mode.Draw;
         private string selectedPuzzle = null;
-        private Wire dragWire = null;
+        private LineRenderer dragWire = null;
 
+        private RectInt selection;
         private Tile selectedTile = null;
         private Vector2Int dragStart;
         private Vector2Int dragEnd;
@@ -78,9 +93,18 @@ namespace Puzzled
         private bool ignoreMouseUp;
         private bool playing;
 
+        private bool hasSelection => selectionRect.gameObject.activeSelf;
+
         private Mode mode {
             get => _mode;
-            set => _mode = value;
+            set {
+                if (_mode == value)
+                    return;
+
+                selectionRect.gameObject.SetActive(false);
+
+                _mode = value;
+            }
         }
 
         private void OnEnable()
@@ -100,6 +124,8 @@ namespace Puzzled
             pointerDownAction.action.performed += OnPointerDown;
 
             selectionRect.gameObject.SetActive(false);
+
+            drawTool.isOn = true;
 
             GameManager.Instance.ClearTiles();
         }
@@ -141,24 +167,19 @@ namespace Puzzled
             tileObject.GetComponent<RawImage>().texture = t;            
         }
 
-        public void OnSelectToolButton()
+        public void OnToolChanged()
         {
-            mode = Mode.Select;
+            if (drawTool.isOn)
+                mode = Mode.Draw;
+            else if (selectTool.isOn)
+                mode = Mode.Select;
+            else if (eraseTool.isOn)
+                mode = Mode.Erase;
+            else if (wireTool.isOn)
+                mode = Mode.Wire;
         }
 
-        public void OnDrawToolButton()
-        {
-            selectionRect.gameObject.SetActive(false);
-            mode = Mode.Draw;
-        }
-
-        public void OnEraseToolButton()
-        {
-            selectionRect.gameObject.SetActive(false);
-            mode = Mode.Erase;
-        }
-
-        public void OnCanvasPointerDown(Vector2Int cell, bool down)
+        private void HandleDrag(DragState state, Vector2Int cell)
         {
             switch (mode)
             {
@@ -202,31 +223,47 @@ namespace Puzzled
                     break;
 
                 case Mode.Wire:
-                    if (dragWire == null)
+                    switch (state)
                     {
-                        var tile = GetTile(cell);
-                        if (tile != null)
-                        {
-                            GameManager.Instance.HideWires();
-                            GameManager.Instance.ShowWires(tile);
-
-                            SetSelectionRect(cell, cell);
-                            dragWire = new Wire { input = tile, output = tile };
-                            GameManager.Instance.ShowWire(dragWire);
-                        }
-                    }
-                    else if(dragWire.line != null)
-                    {
-                        if (down)
-                            dragWire.line.SetPosition(1, GameManager.CellToWorld(cell));
-                        else
+                        case DragState.Begin:
                         {
                             var tile = GetTile(cell);
-                            if (tile != null && tile != dragWire.input && !tile.HasOutput(dragWire.input))
-                                AddWire(dragWire.input, tile);
-                            GameManager.Instance.HideWires();
-                            GameManager.Instance.ShowWires(tile);
-                            dragWire = null;
+                            if (tile != null)
+                            {
+                                GameManager.Instance.HideWires();
+                                GameManager.Instance.ShowWires(tile);
+                                SetSelectionRect(cell, cell);
+                            }
+                            break;
+                        }
+
+                        case DragState.Update:
+                        {
+                            if(null == dragWire && dragStart != dragEnd && hasSelection && GetTile(dragStart).info.allowWireOutputs)
+                            {
+                                dragWire = Instantiate(dragWirePrefab).GetComponent<LineRenderer>();
+                                dragWire.positionCount = 2;
+                                dragWire.SetPosition(0, GameManager.CellToWorld(dragStart));
+                                dragWire.SetPosition(1, GameManager.CellToWorld(cell));
+                            }
+                            else if(dragWire != null)
+                            {
+                                dragWire.SetPosition(1, GameManager.CellToWorld(cell));
+                            }
+                            break;
+                        }
+
+                        case DragState.End:
+                        {
+                            if(dragWire != null)
+                            {
+                                var wire = GameManager.Instance.InstantiateWire(GetTile(dragStart), GetTile(dragEnd));
+                                if (wire != null)
+                                    wire.visible = true;
+                                Destroy(dragWire.gameObject);
+                                dragWire = null;
+                            }
+                            break;
                         }
                     }
                     break;
@@ -246,24 +283,19 @@ namespace Puzzled
             //var cell = GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(obj.ReadValue<Vector2>()) + new Vector3(0.5f, 0.5f, 0));
         }
 
-        private Vector2Int lastCell;
+        private Vector2Int pointerCell;
 
         private void OnPointerMoved(InputAction.CallbackContext ctx)
         {
             var cell = GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(ctx.ReadValue<Vector2>()) + new Vector3(0.5f, 0.5f, 0));
-            if (cell != lastCell)
-                lastCell = cell;
+            if (cell != pointerCell)
+                pointerCell = cell;
 
-            if(dragging && dragEnd != lastCell)
+            if(dragging && dragEnd != pointerCell)
             {
-                dragEnd = lastCell;
-                UpdateDrag();
+                dragEnd = pointerCell;
+                HandleDrag(DragState.Update, dragEnd);
             }
-        }
-
-        private void UpdateDrag()
-        {
-            OnCanvasPointerDown(dragEnd, true);
         }
 
         private void OnPointerDown(InputAction.CallbackContext ctx)
@@ -288,19 +320,19 @@ namespace Puzzled
             if (results.Count <= 0 || results[0].gameObject.GetComponent<UICanvas>() == null)
                 return;
 
-
             if (mouseDown)
             {
                 dragging = true;
-                dragStart = lastCell;
-                dragEnd = lastCell;
+                dragStart = pointerCell;
+                dragEnd = pointerCell;
+                HandleDrag(DragState.Begin, pointerCell);
             }
             else
             {
                 dragging = false;
+                dragEnd = pointerCell;
+                HandleDrag(DragState.End, pointerCell);
             }
-
-            OnCanvasPointerDown(lastCell, mouseDown);
         }
 
         private Tile InstantiateTile (Tile prefab, Vector2Int cell)
@@ -454,25 +486,14 @@ namespace Puzzled
             popups.SetActive(false);
         }
 
-        public void OnWireButton()
-        {
-            mode = Mode.Wire;
-        }
-
         private Tile GetTile (Vector2Int cell)
         {
             return GameManager.Instance.GetCellTiles(cell)?[0];
         }
 
-        private void AddWire(Tile input, Tile output)
+        private Wire AddWire(Tile input, Tile output)
         {
-            // Already connected?
-            if (input.HasOutput(output))
-                return;
-
-            var wire = new Wire { active = false, input = input, output = output };
-            input.outputs.Add(wire);
-            output.inputs.Add(wire);
+            return GameManager.Instance.InstantiateWire(input, output);
         }
 
         private void RemoveWire(Tile input, Tile output)

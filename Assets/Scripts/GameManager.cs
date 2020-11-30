@@ -194,6 +194,29 @@ namespace Puzzled
                     Destroy(tile.gameObject);
         }
 
+        public Wire InstantiateWire (Tile input, Tile output)
+        {
+            if (input == null || output == null)
+                return null;
+
+            if (!output.info.allowWireInputs || !input.info.allowWireOutputs)
+                return null;
+
+            if (input == output)
+                return null;
+
+            // Already connected?
+            if (input.HasOutput(output))
+                return null;
+
+            var wire = Instantiate(wirePrefab, wires.transform).GetComponent<Wire>();
+            wire.input = input;
+            wire.output = output;
+            input.outputs.Add(wire);
+            output.inputs.Add(wire);
+            return wire;
+        }
+
         public void ClearTile(Vector2Int cell)
         {
             var tiles = GetCellTiles(cell);
@@ -201,7 +224,15 @@ namespace Puzzled
                 return;
 
             foreach (var tile in tiles)
+            {
+                foreach (var input in tile.inputs)
+                    Destroy(input);
+
+                foreach (var output in tile.outputs)
+                    Destroy(output);
+
                 Destroy(tile.gameObject);
+            }
         }
 
         public void RemoveTileFromCell (Tile tile)
@@ -213,40 +244,19 @@ namespace Puzzled
             tiles.Remove(tile);
         }
 
-        public void HideWire(Wire wire)
-        {
-            if (wire.line == null)
-                return;
-
-            Destroy(wire.line.gameObject);
-            wire.line = null;
-        }
-
         public void HideWires()
         {
-            wires.DetachAndDestroyChildren();
-        }
-
-        public void ShowWire(Wire wire)
-        {
-/*            if (wire.line != null)
-                return;
-*/
-            var wireObject = Instantiate(wirePrefab, wires);
-            var line = wireObject.GetComponent<LineRenderer>();
-            line.positionCount = 2;
-            line.SetPosition(0, wire.input.transform.position);
-            line.SetPosition(1, wire.output.transform.position);
-            wire.line = line;
+            for (int i = 0; i < wires.transform.childCount; i++)
+                wires.transform.GetChild(i).GetComponent<Wire>().visible = false;
         }
 
         public void ShowWires(Tile tile)
         {
             foreach (var output in tile.outputs)
-                ShowWire(output);
+                output.visible = true;
 
             foreach (var input in tile.inputs)
-                ShowWire(input);
+                input.visible = true;
         }
     }
 }
