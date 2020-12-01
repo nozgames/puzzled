@@ -475,7 +475,7 @@ namespace Puzzled
                 var tiles = new List<Tile>();
                 foreach (var serializedTile in puzzle.tempTiles)
                 {
-                    var tile = InstantiateTile(serializedTile.prefab.GetComponent<Tile>(), serializedTile.cell);
+                    var tile = InstantiateTile(tileDatabase.GetTile(serializedTile.prefab), serializedTile.cell);
                     tiles.Add(tile);
                 }
 

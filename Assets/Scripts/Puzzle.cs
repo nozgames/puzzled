@@ -12,7 +12,7 @@ namespace Puzzled
         public class SerializedTile
         {
             public Vector2Int cell;
-            public GameObject prefab;
+            public string prefab;
             public SerializedProperty[] properties;
         }
 
@@ -73,7 +73,7 @@ namespace Puzzled
                 var tile = tiles[i];
                 var editorInfo = tile.GetComponent<TileEditorInfo>();
                 save[i] = new SerializedTile {
-                    prefab = editorInfo.prefab.gameObject,
+                    prefab = tile.guid,
                     cell = tile.cell,
                     properties = editorInfo.editableProperties?
                         .Select(p => new SerializedProperty { name = p.property.Name, value = p.GetValue() })

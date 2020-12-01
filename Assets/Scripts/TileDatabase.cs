@@ -19,5 +19,7 @@ namespace Puzzled
         public Tile[] prefabs => _prefabs;
 
         public TileInfo[] tiles { get; private set; }
+
+        public Tile GetTile (string guid) => prefabs.Where(p => p.guid == guid).FirstOrDefault();
     }
 }
