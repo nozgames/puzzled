@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -481,6 +482,17 @@ namespace Puzzled
                 if(puzzle.tempWires!=null)
                     foreach (var serializedWire in puzzle.tempWires)
                         AddWire(tiles[serializedWire.from], tiles[serializedWire.to]);
+
+                for(int i=0; i<puzzle.tempTiles.Length; i++)
+                {
+                    var serializedTile = puzzle.tempTiles[i];
+                    if (serializedTile.properties == null)
+                        continue;
+
+                    var tileEditorInfo = tiles[i].GetComponent<TileEditorInfo>();
+                    foreach (var serializedProperty in serializedTile.properties)
+                        tileEditorInfo.SetEditableProperty(serializedProperty.name, serializedProperty.value);
+                }
             }
 
             HidePopup();

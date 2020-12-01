@@ -13,6 +13,7 @@ namespace Puzzled
         {
             public Vector2Int cell;
             public GameObject prefab;
+            public SerializedProperty[] properties;
         }
 
         [Serializable]
@@ -20,6 +21,13 @@ namespace Puzzled
         {
             public int from;
             public int to;
+        }
+
+        [Serializable]
+        public class SerializedProperty
+        {
+            public string name;
+            public string value;
         }
 
         [SerializeField] [HideInInspector] private SerializedTile[] tiles;
@@ -65,8 +73,11 @@ namespace Puzzled
                 var tile = tiles[i];
                 var editorInfo = tile.GetComponent<TileEditorInfo>();
                 save[i] = new SerializedTile {
-                    prefab = tile.GetComponent<TileEditorInfo>().prefab.gameObject,
-                    cell = tile.cell
+                    prefab = editorInfo.prefab.gameObject,
+                    cell = tile.cell,
+                    properties = editorInfo.editableProperties?
+                        .Select(p => new SerializedProperty { name = p.property.Name, value = p.GetValue() })
+                        .ToArray()
                 };
 
                 foreach(var output in tile.outputs)

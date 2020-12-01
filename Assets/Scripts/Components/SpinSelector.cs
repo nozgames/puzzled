@@ -5,13 +5,29 @@ namespace Puzzled
 {
     class SpinSelector : TileComponent
     {
-        public int value { get; private set; }
-
         [Header("Visuals")]
         [SerializeField] private GameObject[] visualValues;
 
-        [Header("Config")]
-        [SerializeField] private uint target = 0;
+        private int _target = 0;
+        private int _value = 0;
+
+        [Editable]
+        public int target {
+            get => _target;
+            set {
+                _target = value;
+                OnUpdateValue();
+            }
+        }
+
+        [Editable]
+        public int value {
+            get => _value;
+            set {
+                _value = (visualValues != null && visualValues.Length > 0) ? (value % visualValues.Length) : 0;
+                OnUpdateValue();
+            }
+        }
 
         [ActorEventHandler]
         private void OnQueryUse(QueryUseEvent evt)
@@ -22,30 +38,18 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
-            int numValues = visualValues.Length;
-
-            int newValue = (value + 1) % numValues;
-            SetValue(value);
+            value++;
         }
 
-        private void SetValue(int newValue)
+        private void OnUpdateValue()
         {
-            Debug.Assert(newValue < visualValues.Length);
-
-            value = newValue;
-
-            if (value == target)
+            if (value == _target)
                 tile.SetOutputsActive(true);
             else
                 tile.SetOutputsActive(false);
 
-            UpdateVisuals();
-        }
-
-        private void UpdateVisuals()
-        {
             for (int i = 0; i < visualValues.Length; ++i)
-                visualValues[value].SetActive(value == i);
+                visualValues[i].SetActive(value == i);
         }
     }
 }
