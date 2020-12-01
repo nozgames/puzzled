@@ -225,7 +225,7 @@ namespace Puzzled
                     }
 
                     // Automatically add floor
-                    if (selectedTile.info.layer != TileLayer.Static)
+                    if (selectedTile.info.layer == TileLayer.Dynamic)
                         InstantiateTile(floorTile, cell);
 
                     InstantiateTile(selectedTile, cell);
@@ -520,7 +520,11 @@ namespace Puzzled
 
         private Tile GetTile (Vector2Int cell)
         {
-            return GameManager.Instance.GetCellTiles(cell)?[0];
+            var tiles = GameManager.Instance.GetCellTiles(cell);
+            if (tiles == null || tiles.Count == 0)
+                return null;
+
+            return tiles.OrderByDescending(t => t.info.layer).FirstOrDefault();
         }
 
         private Wire AddWire(Tile input, Tile output)
