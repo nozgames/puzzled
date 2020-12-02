@@ -23,7 +23,6 @@ namespace Puzzled
             public string GetValue() => property.GetValue(component).ToString();
         }
 
-        public Tile prefab;
         public EditableProperty[] editableProperties;
 
         private void Awake()

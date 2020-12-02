@@ -2972,7 +2972,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6968442508bd974e9263ce2bddcc0d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileDatabase: {fileID: 11400000, guid: 90acdabafb2a84a4c99d5e267d9b9c0f, type: 2}
   previewCamera: {fileID: 0}
   previewParent: {fileID: 0}
   piecePrefab: {fileID: 4642312077439141805, guid: d684a815fe1df374c8869163752acd8d, type: 3}
@@ -2982,6 +2981,7 @@ MonoBehaviour:
   playButton: {fileID: 8274674950775170638}
   stopButton: {fileID: 1099847484105953486}
   dragWirePrefab: {fileID: 4802866844265590925, guid: 7065baa40cee3944897e0b7bfaade53b, type: 3}
+  tileSelector: {fileID: 8093783416340948565}
   selectTool: {fileID: 3944645158735336505}
   drawTool: {fileID: 954185900610062332}
   eraseTool: {fileID: 4431867700114768407}
@@ -2997,22 +2997,6 @@ MonoBehaviour:
   pointerDownAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
   rclickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
   floorTile: {fileID: 6868080960101938933, guid: 9bddce0558392d543b7b606b1489fff3, type: 3}
-  blockGroups:
-  - name: General
-    icon: {fileID: 0}
-    blocks:
-    - name: Pressure Plate
-      prefab: {fileID: 8922302472943703707, guid: cddec60db43609b46993bd0f93236bfa, type: 3}
-    - name: Box
-      prefab: {fileID: 8922302472943703707, guid: 3e7cf061f3a872442810eff31334b14c, type: 3}
-    - name: Door
-      prefab: {fileID: 1979402765203244668, guid: 6cec47bc019c6ba4eb1109b6a19ba3f6, type: 3}
-    - name: Exit
-      prefab: {fileID: 7680977818543006660, guid: 30ee7357b397b5c419f4f1451aa3b75a, type: 3}
-    - name: Player
-      prefab: {fileID: 7553527789580536928, guid: 53693a9d652afb1408c1b2364a33311c, type: 3}
-    - name: Floor
-      prefab: {fileID: 5227713672087370718, guid: 9bddce0558392d543b7b606b1489fff3, type: 3}
 --- !u!1 &8607535298291345361
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 ﻿using NoZ;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -23,6 +24,8 @@ namespace Puzzled
         public static GameManager Instance { get; private set; }
 
         public static TileDatabase tileDatabase => Instance._tileDatabase;
+
+        public static event Action<Tile> onTileInstantiated;
 
         /// <summary>
         /// Returns the active puzzle
@@ -188,6 +191,9 @@ namespace Puzzled
 
             var tile = Instantiate(prefab.gameObject, Instance.grid.transform).GetComponent<Tile>();
             tile.cell = cell;
+
+            onTileInstantiated?.Invoke(tile);
+
             return tile;
         }
 

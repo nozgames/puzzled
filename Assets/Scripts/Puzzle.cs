@@ -8,6 +8,8 @@ namespace Puzzled
 {
     public class Puzzle 
     {
+        public string name { get; set; }
+
         [Serializable]
         public class SerializedTile
         {
@@ -33,7 +35,12 @@ namespace Puzzled
         public SerializedTile[] tiles;
         public SerializedWire[] wires;
 
-        public static void Save (Transform target)
+        public static void Save (Transform target, string filename)
+        {
+            File.WriteAllText(filename, JsonUtility.ToJson(Save(target)));
+        }
+
+        public static Puzzle Save (Transform target)
         {
             var puzzle = new Puzzle();
             var tiles = target.GetComponentsInChildren<Tile>();
@@ -65,42 +72,41 @@ namespace Puzzled
 
                 puzzle.tiles = save;
             }
+
+            return puzzle;
         }
 
-        public static void Load(string filename, Action<Tile> tileCallback = null)
+        public void Load ()
         {
-            var puzzle = JsonUtility.FromJson<Puzzle>(File.ReadAllText(filename));
-
             GameManager.Instance.ClearTiles();
 
-            if (puzzle.tiles == null)
+            if (tiles == null)
                 return;
 
-            var tiles = new List<Tile>();
-            foreach (var serializedTile in puzzle.tiles)
+            var tilesObjects = new List<Tile>();
+            foreach (var serializedTile in tiles)
             {
                 var tile = GameManager.InstantiateTile(serializedTile.prefab, serializedTile.cell);
-                tiles.Add(tile);
-
-                tileCallback?.Invoke(tile);
+                tilesObjects.Add(tile);
             }
 
-            if (puzzle.wires != null)
-                foreach (var serializedWire in puzzle.wires)
-                    GameManager.InstantiateWire(tiles[serializedWire.from], tiles[serializedWire.to]);
+            if (wires != null)
+                foreach (var serializedWire in wires)
+                    GameManager.InstantiateWire(tilesObjects[serializedWire.from], tilesObjects[serializedWire.to]);
 
-            for (int i = 0; i < puzzle.tiles.Length; i++)
+            for (int i = 0; i < tiles.Length; i++)
             {
-                var serializedTile = puzzle.tiles[i];
+                var serializedTile = tiles[i];
                 if (serializedTile.properties == null)
                     continue;
 
-                var tileEditorInfo = tiles[i].GetComponent<TileEditorInfo>();
+                var tileEditorInfo = tilesObjects[i].GetComponent<TileEditorInfo>();
                 foreach (var serializedProperty in serializedTile.properties)
                     tileEditorInfo.SetEditableProperty(serializedProperty.name, serializedProperty.value);
             }
-
-            File.WriteAllText(filename, JsonUtility.ToJson(puzzle));
         }
+
+        public static void Load(string filename) =>
+            JsonUtility.FromJson<Puzzle>(File.ReadAllText(filename)).Load();
     }
 }

@@ -37,6 +37,7 @@ namespace Puzzled
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
+        [SerializeField] private GameObject tileSelector = null;
 
         [Header("Tools")]
         [SerializeField] private Toggle selectTool = null;
@@ -62,7 +63,8 @@ namespace Puzzled
         [SerializeField] private Tile floorTile = null;
 
         private Mode _mode = Mode.Draw;
-        private string selectedPuzzle = null;
+        private string currentPuzzleName = null;
+        private string puzzleToLoad = null;
         private LineRenderer dragWire = null;
 
         private RectInt selection;
@@ -74,6 +76,7 @@ namespace Puzzled
         private bool playing;
 
         private bool hasSelection => selectionRect.gameObject.activeSelf;
+        private bool hasPuzzleName => !string.IsNullOrEmpty(currentPuzzleName);
 
         private Mode mode {
             get => _mode;
@@ -90,6 +93,7 @@ namespace Puzzled
         private void OnEnable()
         {
             GameManager.IncBusy();
+            GameManager.onTileInstantiated += OnTileInstantiated;
 
             popups.gameObject.SetActive(false);
 
@@ -109,6 +113,13 @@ namespace Puzzled
             drawTool.isOn = true;
 
             GameManager.Instance.ClearTiles();
+            currentPuzzleName = null;
+            puzzleName.text = "Unnamed";
+        }
+
+        private void OnTileInstantiated(Tile tile)
+        {
+            tile.gameObject.AddComponent<TileEditorInfo>();
         }
 
         private void OnRightClick(InputAction.CallbackContext ctx)
@@ -127,7 +138,9 @@ namespace Puzzled
 
         private void OnDisable()
         {
-            if(GameManager.Instance != null)
+            GameManager.onTileInstantiated -= OnTileInstantiated;
+
+            if (GameManager.Instance != null)
                 GameManager.DecBusy();
             pointerAction.action.performed -= OnPointerMoved;
             pointerDownAction.action.performed -= OnPointerDown;
@@ -172,6 +185,8 @@ namespace Puzzled
                 mode = Mode.Erase;
             else if (wireTool.isOn)
                 mode = Mode.Wire;
+
+            tileSelector.SetActive(mode == Mode.Draw);
         }
 
         private void HandleDrag(DragState state, Vector2Int cell)
@@ -351,7 +366,7 @@ namespace Puzzled
                 return;
 
             puzzleName.text = puzzleNameInput.text;
-            selectedPuzzle = System.IO.Path.Combine(Application.dataPath, $"Puzzles/{puzzleName.text}.puzzle");
+            currentPuzzleName = puzzleName.text;
 
             HidePopup();
             Save();
@@ -362,14 +377,16 @@ namespace Puzzled
             HidePopup();
         }
 
+        private string currentPuzzleFilename => Path.Combine(Application.dataPath, $"Puzzles/{puzzleName.text}.puzzle");
+
         public void Save()
         {
-            Puzzle.Save(GameManager.Instance.transform.GetChild(1));            
+            Puzzle.Save(GameManager.Instance.transform.GetChild(1), currentPuzzleFilename);
         }
 
         public void OnNewButton()
         {
-            selectedPuzzle = null;
+            currentPuzzleName = null;
             puzzleName.text = "Unnamed";
             GameManager.Instance.ClearTiles();
             HidePopup();
@@ -386,7 +403,7 @@ namespace Puzzled
                 fileGameObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = Path.GetFileNameWithoutExtension(file);
                 var button = fileGameObject.GetComponent<Button>();
                 button.onClick.AddListener(() => {
-                    selectedPuzzle = file;
+                    puzzleToLoad = Path.GetFileNameWithoutExtension(file);
                     button.Select();
                 });
             }
@@ -396,7 +413,8 @@ namespace Puzzled
 
         public void OnLoadButtonConfirm()
         {
-            Load(selectedPuzzle);
+            if(null != puzzleToLoad)
+                Load(puzzleToLoad);
         }
 
         public void OnStopButton()
@@ -407,16 +425,34 @@ namespace Puzzled
             GameManager.ClearBusy();
             GameManager.IncBusy();
 
+            tileSelector.SetActive(true);
+            selectTool.gameObject.SetActive(true);
+            drawTool.gameObject.SetActive(true);
+            eraseTool.gameObject.SetActive(true);
+            wireTool.gameObject.SetActive(true);
+
             playing = false;
             playButton.gameObject.SetActive(true);
             stopButton.gameObject.SetActive(false);
-            Load(selectedPuzzle);
+            Load(currentPuzzleName);
         }
 
         public void OnPlayButton()
         {
             if (playing)
                 return;
+
+            if(!hasPuzzleName)
+            {
+                ShowPopup(puzzleNamePopup);
+                return;
+            }
+
+            tileSelector.SetActive(false);
+            selectTool.gameObject.SetActive(false);
+            drawTool.gameObject.SetActive(false);
+            eraseTool.gameObject.SetActive(false);
+            wireTool.gameObject.SetActive(false);
 
             GameManager.ClearBusy();
 
@@ -429,9 +465,9 @@ namespace Puzzled
 
         public void Load(string file)
         {
-            Puzzle.Load(file, (tile) => {
-                tile.gameObject.AddComponent<TileEditorInfo>();
-            });
+            currentPuzzleName = file;
+            puzzleName.text = currentPuzzleName;
+            Puzzle.Load(currentPuzzleFilename);
             HidePopup();
         }
 
