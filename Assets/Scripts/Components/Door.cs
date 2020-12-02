@@ -7,15 +7,25 @@ using UnityEngine.UIElements;
 
 namespace Puzzled
 {
-    public class Door : ActorComponent
+    public class Door : TileComponent
     {
         [Header("Logic")]
+        [Editable]
         [SerializeField] private bool isClosed = true;
         [SerializeField] private ItemType keyItem = ItemType.None;
 
         [Header("Visuals")]
         [SerializeField] private GameObject openedVisual;
         [SerializeField] private GameObject closedVisual;
+
+        [Editable]
+        public bool isOpen {
+            get => !isClosed;
+            set {
+                isClosed = !value;
+                UpdateVisuals();
+            }
+        }
 
         private void Start()
         {
@@ -73,16 +83,7 @@ namespace Puzzled
             Close();
         }
 
-        public void Open()
-        {
-            isClosed = false;
-            UpdateVisuals();
-        }
-
-        public void Close()
-        {
-            isClosed = true;
-            UpdateVisuals();
-        }
+        public void Open() => isOpen = true;
+        public void Close() => isOpen = false;
     }
 }

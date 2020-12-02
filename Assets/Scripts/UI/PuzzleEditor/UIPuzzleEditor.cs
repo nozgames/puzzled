@@ -40,6 +40,7 @@ namespace Puzzled
         [SerializeField] private GameObject tileSelector = null;
         [SerializeField] private int minZoom = 1;
         [SerializeField] private int maxZoom = 10;
+        [SerializeField] private GameObject fileButton = null;
 
         [SerializeField] private Transform options = null;
         [SerializeField] private GameObject inspector = null;
@@ -72,6 +73,7 @@ namespace Puzzled
         [Header("Options")]
         [SerializeField] private UIOptionEditor optionPrefabInt = null;
         [SerializeField] private UIOptionEditor optionPrefabBool = null;
+        [SerializeField] private UIOptionEditor optionPrefabString = null;
 
 
         private Mode _mode = Mode.Draw;
@@ -433,6 +435,11 @@ namespace Puzzled
             }
         }
 
+        public void OnSaveAsButton()
+        {
+            ShowPopup(puzzleNamePopup);
+        }
+
         public void OnSavePuzzleName()
         {
             if (string.IsNullOrEmpty(puzzleNameInput.text) || String.Compare(puzzleNameInput.text, "unnamed", true) == 0)
@@ -511,6 +518,7 @@ namespace Puzzled
             drawTool.gameObject.SetActive(true);
             eraseTool.gameObject.SetActive(true);
             wireTool.gameObject.SetActive(true);
+            fileButton.gameObject.SetActive(true);
 
             playing = false;
             playButton.gameObject.SetActive(true);
@@ -534,6 +542,7 @@ namespace Puzzled
             drawTool.gameObject.SetActive(false);
             eraseTool.gameObject.SetActive(false);
             wireTool.gameObject.SetActive(false);
+            fileButton.gameObject.SetActive(false);
 
             GameManager.ClearBusy();
 
@@ -599,6 +608,8 @@ namespace Puzzled
                 return Instantiate(optionPrefabInt, options).GetComponent<UIOptionEditor>();
             else if (type == typeof(bool))
                 return Instantiate(optionPrefabBool, options).GetComponent<UIOptionEditor>();
+            else if (type == typeof(string))
+                return Instantiate(optionPrefabString, options).GetComponent<UIOptionEditor>();
 
             return null;
         }

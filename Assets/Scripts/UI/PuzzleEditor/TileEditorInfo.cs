@@ -14,10 +14,12 @@ namespace Puzzled
 
             public void SetValue (string value)
             {
-                if(property.PropertyType == typeof(int))
+                if (property.PropertyType == typeof(int))
                     property.SetValue(component, int.TryParse(value, out var parsed) ? parsed : 0);
                 else if (property.PropertyType == typeof(bool))
                     property.SetValue(component, bool.TryParse(value, out var parsed) ? parsed : false);
+                else if (property.PropertyType == typeof(string))
+                    property.SetValue(component, value);
             }
 
             public string GetValue() => property.GetValue(component).ToString();
