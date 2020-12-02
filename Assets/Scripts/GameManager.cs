@@ -14,12 +14,15 @@ namespace Puzzled
         [SerializeField] private int minimumPuzzleSize = 9;
         [SerializeField] private GameObject wirePrefab = null;
         [SerializeField] private float wireHitThreshold = 0.1f;
+        [SerializeField] private TileDatabase _tileDatabase = null;
 
         public InputActionReference menuAction;
 
         private Dictionary<Vector2Int, List<Tile>> cells = new Dictionary<Vector2Int, List<Tile>>();
 
         public static GameManager Instance { get; private set; }
+
+        public static TileDatabase tileDatabase => Instance._tileDatabase;
 
         /// <summary>
         /// Returns the active puzzle
@@ -94,8 +97,6 @@ namespace Puzzled
             busyCount = 0;
 
             this.puzzle = puzzle;
-
-            Instantiate(puzzle.puzzlePrefab, grid.transform);
 
             LinkTiles();
         }
@@ -177,9 +178,15 @@ namespace Puzzled
             grid.transform.DetachAndDestroyChildren();
         }
 
-        public Tile InstantiateTile (Tile prefab, Vector2Int cell)
+        public static Tile InstantiateTile(string guid, Vector2Int cell) =>
+            InstantiateTile(tileDatabase.GetTile(guid), cell);
+
+        public static Tile InstantiateTile (Tile prefab, Vector2Int cell)
         {
-            var tile = Instantiate(prefab.gameObject, grid.transform).GetComponent<Tile>();
+            if (prefab == null)
+                return null;
+
+            var tile = Instantiate(prefab.gameObject, Instance.grid.transform).GetComponent<Tile>();
             tile.cell = cell;
             return tile;
         }
@@ -195,7 +202,7 @@ namespace Puzzled
                     Destroy(tile.gameObject);
         }
 
-        public Wire InstantiateWire (Tile input, Tile output)
+        public static Wire InstantiateWire (Tile input, Tile output)
         {
             if (input == null || output == null)
                 return null;
@@ -210,7 +217,7 @@ namespace Puzzled
             if (input.HasOutput(output))
                 return null;
 
-            var wire = Instantiate(wirePrefab, wires.transform).GetComponent<Wire>();
+            var wire = Instantiate(Instance.wirePrefab, Instance.wires.transform).GetComponent<Wire>();
             wire.input = input;
             wire.output = output;
             input.outputs.Add(wire);

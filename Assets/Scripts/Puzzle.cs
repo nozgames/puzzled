@@ -1,13 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
 namespace Puzzled
 {
-    public class Puzzle : ScriptableObject
+    public class Puzzle 
     {
-        public GameObject puzzlePrefab;
-
         [Serializable]
         public class SerializedTile
         {
@@ -30,43 +30,16 @@ namespace Puzzled
             public string value;
         }
 
-        [SerializeField] [HideInInspector] private SerializedTile[] tiles;
-        [SerializeField] [HideInInspector] private SerializedWire[] wires;
+        public SerializedTile[] tiles;
+        public SerializedWire[] wires;
 
-        public SerializedTile[] tempTiles => tiles;
-        public SerializedWire[] tempWires => wires;
-
-        /// <summary>
-        /// Load the puzzle into the given target
-        /// </summary>
-        /// <param name="target"></param>
-        public bool LoadInto (Transform target)
+        public static void Save (Transform target)
         {
-            if (null == tiles)
-                return true;
-
-            var result = true;
-            foreach (var tile in tiles)
-            {
-/*                var prefab = theme.GetPrefab(tile.prefab);
-                if(null == prefab)
-                {
-                    Debug.LogWarning($"missing prefab for tile '{tile.type}");
-                    result = false;
-                    continue;
-                }
-                Instantiate(prefab, target);
-*/            }
-
-            return result;
-        }
-
-        public void Save (Transform target)
-        {
+            var puzzle = new Puzzle();
             var tiles = target.GetComponentsInChildren<Tile>();
             var save = new SerializedTile[tiles.Length];
 
-            wires = new SerializedWire[tiles.Sum(t => t.outputCount)];
+            puzzle.wires = new SerializedWire[tiles.Sum(t => t.outputCount)];
             var wireIndex = 0;
             for(int i=0; i<tiles.Length; i++)
             {
@@ -84,14 +57,50 @@ namespace Puzzled
                 {
                     var to = 0;
                     for (to = 0; to < tiles.Length && tiles[to] != output.output; to++);
-                    wires[wireIndex++] = new SerializedWire {
+                    puzzle.wires[wireIndex++] = new SerializedWire {
                         from = i,
                         to = to
                     };
                 }
 
-                this.tiles = save;
+                puzzle.tiles = save;
             }
+        }
+
+        public static void Load(string filename, Action<Tile> tileCallback = null)
+        {
+            var puzzle = JsonUtility.FromJson<Puzzle>(File.ReadAllText(filename));
+
+            GameManager.Instance.ClearTiles();
+
+            if (puzzle.tiles == null)
+                return;
+
+            var tiles = new List<Tile>();
+            foreach (var serializedTile in puzzle.tiles)
+            {
+                var tile = GameManager.InstantiateTile(serializedTile.prefab, serializedTile.cell);
+                tiles.Add(tile);
+
+                tileCallback?.Invoke(tile);
+            }
+
+            if (puzzle.wires != null)
+                foreach (var serializedWire in puzzle.wires)
+                    GameManager.InstantiateWire(tiles[serializedWire.from], tiles[serializedWire.to]);
+
+            for (int i = 0; i < puzzle.tiles.Length; i++)
+            {
+                var serializedTile = puzzle.tiles[i];
+                if (serializedTile.properties == null)
+                    continue;
+
+                var tileEditorInfo = tiles[i].GetComponent<TileEditorInfo>();
+                foreach (var serializedProperty in serializedTile.properties)
+                    tileEditorInfo.SetEditableProperty(serializedProperty.name, serializedProperty.value);
+            }
+
+            File.WriteAllText(filename, JsonUtility.ToJson(puzzle));
         }
     }
 }

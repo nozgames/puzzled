@@ -1,14 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 using Puzzled.PuzzleEditor;
-using UnityEditor;
 
 namespace Puzzled
 {
@@ -30,25 +28,6 @@ namespace Puzzled
             End
         }
 
-        [Serializable]
-        private class Block
-        {
-            public string name;
-            public GameObject prefab;
-            
-            [NonSerialized]
-            public Texture2D preview;
-        }
-
-        [Serializable]
-        private class BlockGroup
-        {
-            public string name;
-            public Sprite icon;
-            public Block[] blocks;
-        }
-
-        [SerializeField] private TileDatabase tileDatabase = null;
         [SerializeField] private Camera previewCamera = null;
         [SerializeField] private Transform previewParent = null;
         [SerializeField] private GameObject piecePrefab = null;
@@ -81,7 +60,6 @@ namespace Puzzled
 
         [Header("Tiles")]
         [SerializeField] private Tile floorTile = null;
-        [SerializeField] private BlockGroup[] blockGroups;
 
         private Mode _mode = Mode.Draw;
         private string selectedPuzzle = null;
@@ -117,7 +95,7 @@ namespace Puzzled
 
             pieces.transform.DetachAndDestroyChildren();
 
-            foreach(var tile in tileDatabase.prefabs)
+            foreach(var tile in GameManager.tileDatabase.prefabs)
                 GeneratePreview(tile);
 
             previewParent.DetachAndDestroyChildren();
@@ -220,15 +198,15 @@ namespace Puzzled
 
                             // Replace the static actor with a floor so we dont leave a hole
                             if (selectedTile.info.layer == TileLayer.Static)
-                                InstantiateTile(floorTile, actor.cell);
+                                GameManager.InstantiateTile(floorTile, actor.cell);
                         }
                     }
 
                     // Automatically add floor
                     if (selectedTile.info.layer == TileLayer.Dynamic)
-                        InstantiateTile(floorTile, cell);
+                        GameManager.InstantiateTile(floorTile, cell);
 
-                    InstantiateTile(selectedTile, cell);
+                    GameManager.InstantiateTile(selectedTile, cell);
                     break;
 
                 case Mode.Erase:
@@ -274,7 +252,7 @@ namespace Puzzled
                         {
                             if(dragWire != null)
                             {
-                                var wire = GameManager.Instance.InstantiateWire(GetTile(dragStart), GetTile(dragEnd));
+                                var wire = GameManager.InstantiateWire(GetTile(dragStart), GetTile(dragEnd));
                                 if (wire != null)
                                     wire.visible = true;
                                 Destroy(dragWire.gameObject);
@@ -356,17 +334,6 @@ namespace Puzzled
             }
         }
 
-        private Tile InstantiateTile (Tile prefab, Vector2Int cell)
-        {
-            var tile = GameManager.Instance.InstantiateTile(prefab, cell);
-            if (null == tile)
-                return null;
-
-            tile.gameObject.AddComponent<TileEditorInfo>().prefab = prefab;
-
-            return tile;
-        }
-
         public void OnSaveButton()
         {
             if (puzzleName.text == null || String.Compare(puzzleName.text, "unnamed", true) == 0)
@@ -397,10 +364,7 @@ namespace Puzzled
 
         public void Save()
         {
-            var puzzle = ScriptableObject.CreateInstance<Puzzle>();
-            puzzle.Save(GameManager.Instance.transform.GetChild(1));
-
-            System.IO.File.WriteAllText(selectedPuzzle, JsonUtility.ToJson(puzzle));
+            Puzzle.Save(GameManager.Instance.transform.GetChild(1));            
         }
 
         public void OnNewButton()
@@ -415,7 +379,7 @@ namespace Puzzled
         {
             loadPopupFiles.DetachAndDestroyChildren();
 
-            var files = System.IO.Directory.GetFiles(System.IO.Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
+            var files = Directory.GetFiles(System.IO.Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
             foreach(var file in files)
             {
                 var fileGameObject = Instantiate(loadPopupFilePrefab, loadPopupFiles);
@@ -465,36 +429,9 @@ namespace Puzzled
 
         public void Load(string file)
         {
-            var puzzle = ScriptableObject.CreateInstance<Puzzle>();
-            JsonUtility.FromJsonOverwrite(File.ReadAllText(file), puzzle);
-            puzzleName.text = Path.GetFileNameWithoutExtension(file);            
-
-            GameManager.Instance.ClearTiles();
-            if(puzzle.tempTiles != null)
-            {
-                var tiles = new List<Tile>();
-                foreach (var serializedTile in puzzle.tempTiles)
-                {
-                    var tile = InstantiateTile(tileDatabase.GetTile(serializedTile.prefab), serializedTile.cell);
-                    tiles.Add(tile);
-                }
-
-                if(puzzle.tempWires!=null)
-                    foreach (var serializedWire in puzzle.tempWires)
-                        AddWire(tiles[serializedWire.from], tiles[serializedWire.to]);
-
-                for(int i=0; i<puzzle.tempTiles.Length; i++)
-                {
-                    var serializedTile = puzzle.tempTiles[i];
-                    if (serializedTile.properties == null)
-                        continue;
-
-                    var tileEditorInfo = tiles[i].GetComponent<TileEditorInfo>();
-                    foreach (var serializedProperty in serializedTile.properties)
-                        tileEditorInfo.SetEditableProperty(serializedProperty.name, serializedProperty.value);
-                }
-            }
-
+            Puzzle.Load(file, (tile) => {
+                tile.gameObject.AddComponent<TileEditorInfo>();
+            });
             HidePopup();
         }
 
@@ -525,11 +462,6 @@ namespace Puzzled
                 return null;
 
             return tiles.OrderByDescending(t => t.info.layer).FirstOrDefault();
-        }
-
-        private Wire AddWire(Tile input, Tile output)
-        {
-            return GameManager.Instance.InstantiateWire(input, output);
         }
 
         private void RemoveWire(Wire wire)

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Puzzled
 {
     [CreateAssetMenu(fileName = "New Tile Databae", menuName = "Puzzled/Tile Database")]
-    class TileDatabase : ScriptableObject 
+    public class TileDatabase : ScriptableObject 
     {
         [SerializeField] private Tile[] _prefabs = null;
 
