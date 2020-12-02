@@ -41,6 +41,9 @@ namespace Puzzled
         [SerializeField] private int minZoom = 1;
         [SerializeField] private int maxZoom = 10;
 
+        [SerializeField] private Transform options = null;
+        [SerializeField] private GameObject inspector = null;
+
         [Header("Tools")]
         [SerializeField] private Toggle selectTool = null;
         [SerializeField] private Toggle drawTool = null;
@@ -65,6 +68,11 @@ namespace Puzzled
 
         [Header("Tiles")]
         [SerializeField] private Tile floorTile = null;
+
+        [Header("Options")]
+        [SerializeField] private UIOptionEditor optionPrefabInt = null;
+        [SerializeField] private UIOptionEditor optionPrefabBool = null;
+
 
         private Mode _mode = Mode.Draw;
         private string currentPuzzleName = null;
@@ -91,6 +99,7 @@ namespace Puzzled
                     return;
 
                 selectionRect.gameObject.SetActive(false);
+                SelectTile(null);
 
                 _mode = value;
             }
@@ -102,6 +111,7 @@ namespace Puzzled
             GameManager.onTileInstantiated += OnTileInstantiated;
 
             popups.gameObject.SetActive(false);
+            inspector.SetActive(false);
 
             pieces.transform.DetachAndDestroyChildren();
 
@@ -160,6 +170,9 @@ namespace Puzzled
                 return;
 
             Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + (value.y > 0 ? -1 : 1), minZoom, maxZoom);
+
+            if (hasSelection)
+                SetSelectionRect(dragStart, dragEnd);
         }
 
         private void OnDisable()
@@ -237,7 +250,7 @@ namespace Puzzled
                     // Destroy all other instances of this tile regardless of variant
                     if (!selectedTile.info.allowMultiple)
                     {
-                        foreach (var actor in GameManager.GetTiles().Where(a => a.info == selectedTile))
+                        foreach (var actor in GameManager.GetTiles().Where(a => a.info == selectedTile.info))
                         {
                             Destroy(actor.gameObject);
 
@@ -259,6 +272,9 @@ namespace Puzzled
                     break;
 
                 case Mode.Select:
+                    if (state == DragState.Begin)
+                        SelectTile(dragStart);
+
                     SetSelectionRect(dragStart, dragEnd);
                     break;
 
@@ -320,7 +336,23 @@ namespace Puzzled
 
             selectionRect.gameObject.SetActive(true);
 
+
             //var cell = GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(obj.ReadValue<Vector2>()) + new Vector3(0.5f, 0.5f, 0));
+        }
+
+        private void SelectTile(Vector2Int cell) => SelectTile(GetTile(cell));
+
+        private void SelectTile (Tile tile)
+        {
+            if (tile == null)
+            {
+                inspector.SetActive(false);
+                options.DetachAndDestroyChildren();
+                return;
+            }
+
+            inspector.SetActive(true);
+            PopulateOptions(tile);
         }
 
         private Vector2Int pointerCell;
@@ -339,9 +371,14 @@ namespace Puzzled
             {
                 GameManager.Pan(pointerWorld - panPointerStart);
                 panPointerStart = pointerWorld;
+
+                if (hasSelection)
+                    SetSelectionRect(dragStart, dragEnd);
+
+                return;
             }
 
-            if(dragging && dragEnd != pointerCell)
+            if (dragging && dragEnd != pointerCell)
             {
                 dragEnd = pointerCell;
                 HandleDrag(DragState.Update, dragEnd);
@@ -367,7 +404,7 @@ namespace Puzzled
                 return;
             }
 
-            if (results.Count <= 0 || results[0].gameObject.GetComponent<UICanvas>() == null)
+            if (mouseDown && (results.Count <= 0 || results[0].gameObject.GetComponent<UICanvas>() == null))
                 return;
 
             if (mouseDown)
@@ -420,12 +457,20 @@ namespace Puzzled
             Puzzle.Save(GameManager.Instance.transform.GetChild(1), currentPuzzleFilename);
         }
 
-        public void OnNewButton()
+        private void NewPuzzle ()
         {
+            selectionRect.gameObject.SetActive(false);
             currentPuzzleName = null;
             puzzleName.text = "Unnamed";
+            GameManager.PanCenter();
             GameManager.Instance.ClearTiles();
+            Camera.main.orthographicSize = 6;
             HidePopup();
+        }
+
+        public void OnNewButton()
+        {
+            NewPuzzle();
         }
 
         public void OnLoadButton()
@@ -501,6 +546,8 @@ namespace Puzzled
 
         public void Load(string file)
         {
+            NewPuzzle();
+
             currentPuzzleName = file;
             puzzleName.text = currentPuzzleName;
             Puzzle.Load(currentPuzzleFilename);
@@ -544,6 +591,34 @@ namespace Puzzled
         private Wire HitTestWire (Vector3 pointer)
         {
             return GameManager.HitTestWire(pointer);
+        }
+
+        private UIOptionEditor InstantiateOptionEditor(Type type)
+        {
+            if (type == typeof(int))
+                return Instantiate(optionPrefabInt, options).GetComponent<UIOptionEditor>();
+            else if (type == typeof(bool))
+                return Instantiate(optionPrefabBool, options).GetComponent<UIOptionEditor>();
+
+            return null;
+        }
+
+        private void PopulateOptions(Tile tile)
+        {
+            var editorInfo = tile.GetComponent<TileEditorInfo>();
+            if (null == editorInfo.editableProperties)
+                return;
+
+            options.DetachAndDestroyChildren();
+
+            foreach(var editableProperty in editorInfo.editableProperties)
+            {
+                var optionEditor = InstantiateOptionEditor(editableProperty.property.PropertyType);
+                if (null == optionEditor)
+                    continue;
+
+                optionEditor.target = editableProperty;
+            }
         }
     }
 }

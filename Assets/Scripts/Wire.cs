@@ -42,9 +42,11 @@ namespace Puzzled
 
         public void UpdateLine()
         {
+            transform.position = input.transform.position;
+
             line.positionCount = 2;
-            line.SetPosition(0, input.transform.position);
-            line.SetPosition(1, output.transform.position);
+            line.SetPosition(0, Vector3.zero);
+            line.SetPosition(1, output.transform.position - input.transform.position);
         }
     }
 }

@@ -318,6 +318,12 @@ namespace Puzzled
             Instance._pan.position += Vector3.Scale(pan, new Vector3(1,1,0));
         }
 
+        public static void PanCenter ()
+        {
+            // TODO: find center of puzzle
+            Instance._pan.position = Vector3.zero;
+        }
+
         private void Update()
         {
             if (paused)

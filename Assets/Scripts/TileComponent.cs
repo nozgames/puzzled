@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class TileComponent : ActorComponent
+    public class TileComponent : ActorComponent
     {
         public Tile tile => (Tile)base.actor;
 

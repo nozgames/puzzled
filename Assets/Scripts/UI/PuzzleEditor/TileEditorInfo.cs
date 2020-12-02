@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class TileEditorInfo : MonoBehaviour
+    public class TileEditorInfo : MonoBehaviour
     {
         public class EditableProperty
         {
