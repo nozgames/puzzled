@@ -8,6 +8,9 @@ namespace Puzzled
     {
         [SerializeField] private TileInfo _info = null;
 
+        private static List<Tile> _tick = new List<Tile>();
+        private static TickEvent _tickEvent = new TickEvent();
+
         private Vector2Int _cell;
 
         public List<Wire> inputs { get; private set; } = new List<Wire>();
@@ -39,6 +42,8 @@ namespace Puzzled
         protected override void OnDestroy()
         {
             base.OnDestroy();
+
+            _tick.Remove(this);
 
             foreach (var input in inputs)
                 Destroy(input.gameObject);
@@ -114,6 +119,41 @@ namespace Puzzled
         {
             SetOutputsActive(true);
             SetOutputsActive(false);
+        }
+
+        protected override void OnCallbackRegistered(System.Type eventType)
+        {
+            base.OnCallbackRegistered(eventType);
+
+            if(eventType == typeof(TickEvent))
+                _tick.Add(this);
+        }
+
+        protected override void OnCallbackUnregistered(System.Type eventType)
+        {
+            base.OnCallbackUnregistered(eventType);
+
+            if (eventType == typeof(TickEvent) && !_tick.Contains(this))
+                _tick.Remove(this);
+        }
+
+        public static void Tick ()
+        {            
+            foreach (var tile in _tick)
+                tile.Send(_tickEvent);
+        }
+
+        protected override void OnEnable()
+        {
+            if (HandlesEvent(typeof(TickEvent)) && !_tick.Contains(this))
+                _tick.Add(this);
+            base.OnEnable();
+        }
+
+        protected override void OnDisable()
+        {
+            _tick.Remove(this);
+            base.OnDisable();
         }
     }
 }

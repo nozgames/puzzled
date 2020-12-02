@@ -3,11 +3,10 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 namespace Puzzled
 {
-    public class GameManager : ActorComponent
+    public class GameManager : MonoBehaviour
     {
         [SerializeField] private Transform _pan = null;
         [SerializeField] private Grid grid = null;
@@ -17,10 +16,17 @@ namespace Puzzled
         [SerializeField] private GameObject wirePrefab = null;
         [SerializeField] private float wireHitThreshold = 0.1f;
         [SerializeField] private TileDatabase _tileDatabase = null;
+        [SerializeField] private float tick = 0.25f;
+
+
 
         public InputActionReference menuAction;
 
         private Dictionary<Vector2Int, List<Tile>> cells = new Dictionary<Vector2Int, List<Tile>>();
+
+        private float elapsed = 0.0f;
+
+        private bool _paused = false;
 
         public static GameManager Instance { get; private set; }
 
@@ -33,10 +39,8 @@ namespace Puzzled
         /// </summary>
         public Puzzle puzzle { get; private set; }
 
-        protected override void OnEnable()
+        private void OnEnable()
         {
-            base.OnEnable();
-
             menuAction.action.Enable();
             menuAction.action.performed += OnMenuAction;
 
@@ -44,15 +48,13 @@ namespace Puzzled
                 Instance = this;
         }
 
-        protected override void OnDisable()
+        private void OnDisable()
         {
             if (Instance == this)
                 Instance = null;
 
             menuAction.action.Disable();
             menuAction.action.performed -= OnMenuAction;
-
-            base.OnDisable();
         }
 
         private void OnMenuAction(InputAction.CallbackContext obj)
@@ -78,6 +80,12 @@ namespace Puzzled
 
         public static void DecBusy() => Instance.busyCount--;
 
+        public static bool paused {
+            get => Instance._paused;
+            set {
+                Instance._paused = value;
+            }
+        }
 
 #if false
         public void LoadPuzzle (Puzzle puzzle)
@@ -168,8 +176,7 @@ namespace Puzzled
                 tiles[tileIndex].Send(evt);
         }
 
-        [ActorEventHandler]
-        private void OnLevelExit(LevelExitEvent evt)
+        public static void PuzzleComplete ()
         {
             UIManager.instance.ShowPuzzleComplete();
         }
@@ -309,6 +316,19 @@ namespace Puzzled
         public static void Pan(Vector3 pan)
         {
             Instance._pan.position += Vector3.Scale(pan, new Vector3(1,1,0));
+        }
+
+        private void Update()
+        {
+            if (paused)
+                return;
+
+            elapsed += Time.deltaTime;
+            while (elapsed > tick)
+            {
+                Tile.Tick();
+                elapsed -= tick;
+            }
         }
     }
 }

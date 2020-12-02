@@ -185,7 +185,7 @@ namespace Puzzled
             BeginBusy();
             PlayAnimation("Exit");
 
-            Tween.Wait(2.0f).OnStop(() => GameManager.Instance.actor.Send(evt)).Start(gameObject);
+            Tween.Wait(2.0f).OnStop(() => GameManager.PuzzleComplete()).Start(gameObject);
         }
     }
 }
