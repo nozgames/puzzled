@@ -414,7 +414,7 @@ namespace Puzzled
                 dragEnd = pointerCell;
                 HandleDrag(DragState.Begin, pointerCell);
             }
-            else
+            else if (dragging)
             {
                 dragging = false;
                 dragEnd = pointerCell;
