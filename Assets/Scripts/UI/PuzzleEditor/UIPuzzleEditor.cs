@@ -38,6 +38,8 @@ namespace Puzzled
         [SerializeField] private Button stopButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
         [SerializeField] private GameObject tileSelector = null;
+        [SerializeField] private int minZoom = 1;
+        [SerializeField] private int maxZoom = 10;
 
         [Header("Tools")]
         [SerializeField] private Toggle selectTool = null;
@@ -57,7 +59,9 @@ namespace Puzzled
         [Header("Input")]
         [SerializeField] private InputActionReference pointerAction;
         [SerializeField] private InputActionReference pointerDownAction;
-        [SerializeField] private InputActionReference rclickAction;
+        [SerializeField] private InputActionReference rightClickAction;
+        [SerializeField] private InputActionReference middleClickAction;
+        [SerializeField] private InputActionReference mouseWheelAction;
 
         [Header("Tiles")]
         [SerializeField] private Tile floorTile = null;
@@ -74,6 +78,8 @@ namespace Puzzled
         private bool dragging;
         private bool ignoreMouseUp;
         private bool playing;
+        private bool panning;
+        private Vector3 panPointerStart;
 
         private bool hasSelection => selectionRect.gameObject.activeSelf;
         private bool hasPuzzleName => !string.IsNullOrEmpty(currentPuzzleName);
@@ -106,7 +112,9 @@ namespace Puzzled
 
             pointerAction.action.performed += OnPointerMoved;
             pointerDownAction.action.performed += OnPointerDown;
-            rclickAction.action.performed += OnRightClick;
+            rightClickAction.action.performed += OnRightClick;
+            middleClickAction.action.performed += OnMiddleClick;
+            mouseWheelAction.action.performed += OnMouseWheel;
 
             selectionRect.gameObject.SetActive(false);
 
@@ -136,14 +144,36 @@ namespace Puzzled
             }
         }
 
+        private void OnMiddleClick(InputAction.CallbackContext ctx)
+        {
+            panning = ctx.ReadValueAsButton();
+            if(panning)
+            {
+                panPointerStart = pointerWorld;
+            }
+        }
+
+        private void OnMouseWheel(InputAction.CallbackContext ctx)
+        {
+            var value = ctx.ReadValue<Vector2>();
+            if (value.y == 0)
+                return;
+
+            Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + (value.y > 0 ? -1 : 1), minZoom, maxZoom);
+        }
+
         private void OnDisable()
         {
             GameManager.onTileInstantiated -= OnTileInstantiated;
 
             if (GameManager.Instance != null)
                 GameManager.DecBusy();
+
             pointerAction.action.performed -= OnPointerMoved;
             pointerDownAction.action.performed -= OnPointerDown;
+            rightClickAction.action.performed -= OnRightClick;
+            middleClickAction.action.performed -= OnMiddleClick;
+            mouseWheelAction.action.performed -= OnMouseWheel;
         }
 
         private void GeneratePreview(Tile prefab)
@@ -304,6 +334,12 @@ namespace Puzzled
             var cell = GameManager.WorldToCell(pointerWorld + new Vector3(0.5f, 0.5f, 0));
             if (cell != pointerCell)
                 pointerCell = cell;
+
+            if(panning)
+            {
+                GameManager.Pan(pointerWorld - panPointerStart);
+                panPointerStart = pointerWorld;
+            }
 
             if(dragging && dragEnd != pointerCell)
             {

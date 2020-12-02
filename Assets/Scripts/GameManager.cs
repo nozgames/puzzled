@@ -9,6 +9,7 @@ namespace Puzzled
 {
     public class GameManager : ActorComponent
     {
+        [SerializeField] private Transform _pan = null;
         [SerializeField] private Grid grid = null;
         [SerializeField] private Transform wires = null;
         [SerializeField] private Canvas ui = null;
@@ -31,8 +32,6 @@ namespace Puzzled
         /// Returns the active puzzle
         /// </summary>
         public Puzzle puzzle { get; private set; }
-
-        //public Puzzle TestPuzzle = null;
 
         protected override void OnEnable()
         {
@@ -305,6 +304,11 @@ namespace Puzzled
             }
 
             return null;
+        }
+
+        public static void Pan(Vector3 pan)
+        {
+            Instance._pan.position += Vector3.Scale(pan, new Vector3(1,1,0));
         }
     }
 }
