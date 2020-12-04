@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace Puzzled
 {
-    public class SoundFX : ActorComponent
+    public class SoundFX : TileComponent
     {
         [ActorEventHandler]
         private void OnActivateWire(ActivateWireEvent evt)

@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace Puzzled
 {
-    public class Chest : ActorComponent
+    public class Chest : TileComponent
     {
         private bool _isLocked = false;
 

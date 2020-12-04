@@ -6,7 +6,9 @@ namespace Puzzled
     class WireCycle : TileComponent
     {
         private int wireIndex;
-        private bool isCycling;
+
+        [Editable]
+        public bool isCycling { get; set; } = true;
 
         [ActorEventHandler]
         private void OnActivateWire(ActivateWireEvent evt)
