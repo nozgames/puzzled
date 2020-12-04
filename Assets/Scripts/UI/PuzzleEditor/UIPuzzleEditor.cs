@@ -117,7 +117,7 @@ namespace Puzzled
 
             pieces.transform.DetachAndDestroyChildren();
 
-            foreach(var tile in GameManager.tileDatabase.prefabs)
+            foreach(var tile in TileDatabase.GetTiles())
                 GeneratePreview(tile);
 
             previewParent.DetachAndDestroyChildren();

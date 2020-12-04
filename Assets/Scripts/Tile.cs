@@ -17,15 +17,7 @@ namespace Puzzled
         public List<Wire> outputs { get; private set; } = new List<Wire>();
 
         public TileInfo info => _info;
-
-        [HideInInspector]
-        [SerializeField] private string _guid;
-
-        public string guid {
-            get => _guid;
-            set => _guid = value;
-        }
-            
+           
         /// <summary>
         /// Cell the actor is current in
         /// </summary>

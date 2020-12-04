@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -26,6 +27,8 @@ namespace Puzzled
         }
 
         public EditableProperty[] editableProperties;
+
+        public Guid guid { get; set; }
 
         private void Awake()
         {

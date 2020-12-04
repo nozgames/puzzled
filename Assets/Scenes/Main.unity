@@ -232,6 +232,7 @@ Transform:
   - {fileID: 1445747648}
   - {fileID: 57210927}
   - {fileID: 233178650}
+  - {fileID: 1483105451}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -651,6 +652,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6885fc511b12a348a71e3cdef5fe6f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1483105449
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1483105451}
+  - component: {fileID: 1483105450}
+  m_Layer: 0
+  m_Name: Database
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1483105450
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483105449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 85d196800f7f2f04fb6e66125b58ac45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1483105451
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483105449}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 101222511}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1737696696
 GameObject:
   m_ObjectHideFlags: 0
@@ -1080,6 +1124,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1744803769963533076, guid: 04d0dcbd212b0cd459dbb70d837005d4, type: 3}
+      propertyPath: waitForDatabases.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1744803769963533076, guid: 04d0dcbd212b0cd459dbb70d837005d4, type: 3}
+      propertyPath: waitForDatabases.Array.data[0]
+      value: 
+      objectReference: {fileID: 1483105450}
     - target: {fileID: 1748585680531994665, guid: 04d0dcbd212b0cd459dbb70d837005d4, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

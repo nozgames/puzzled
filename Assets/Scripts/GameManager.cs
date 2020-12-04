@@ -15,9 +15,7 @@ namespace Puzzled
         [SerializeField] private int minimumPuzzleSize = 9;
         [SerializeField] private GameObject wirePrefab = null;
         [SerializeField] private float wireHitThreshold = 0.1f;
-        [SerializeField] private TileDatabase _tileDatabase = null;
         [SerializeField] private float tick = 0.25f;
-
 
 
         public InputActionReference menuAction;
@@ -29,8 +27,6 @@ namespace Puzzled
         private bool _paused = false;
 
         public static GameManager Instance { get; private set; }
-
-        public static TileDatabase tileDatabase => Instance._tileDatabase;
 
         public static event Action<Tile> onTileInstantiated;
 
@@ -187,8 +183,8 @@ namespace Puzzled
             grid.transform.DetachAndDestroyChildren();
         }
 
-        public static Tile InstantiateTile(string guid, Vector2Int cell) =>
-            InstantiateTile(tileDatabase.GetTile(guid), cell);
+        public static Tile InstantiateTile(Guid guid, Vector2Int cell) =>
+            InstantiateTile(TileDatabase.GetTile(guid), cell);
 
         public static Tile InstantiateTile (Tile prefab, Vector2Int cell)
         {

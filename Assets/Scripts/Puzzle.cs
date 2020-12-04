@@ -53,7 +53,7 @@ namespace Puzzled
                 var tile = tiles[i];
                 var editorInfo = tile.GetComponent<TileEditorInfo>();
                 save[i] = new SerializedTile {
-                    prefab = tile.guid,
+                    prefab = editorInfo.guid.ToString(),
                     cell = tile.cell,
                     properties = editorInfo.editableProperties?
                         .Select(p => new SerializedProperty { name = p.property.Name, value = p.GetValue() })
@@ -86,7 +86,13 @@ namespace Puzzled
             var tilesObjects = new List<Tile>();
             foreach (var serializedTile in tiles)
             {
-                var tile = GameManager.InstantiateTile(serializedTile.prefab, serializedTile.cell);
+                //var tile =  GameManager.InstantiateTile(serializedTile.prefab, serializedTile.cell);
+                //var editorInfo = tile.GetComponent<TileEditorInfo>();
+                //editorInfo.guid = TileDatabaseTest.GetGuid(TileDatabase.instance.GetTile(serializedTile.prefab));
+                Guid.TryParse(serializedTile.prefab, out var guid);
+                var tile = GameManager.InstantiateTile(guid, serializedTile.cell);
+                var editorInfo = tile.GetComponent<TileEditorInfo>();
+                editorInfo.guid = guid;
                 tilesObjects.Add(tile);
             }
 
@@ -100,7 +106,7 @@ namespace Puzzled
                 if (serializedTile.properties == null)
                     continue;
 
-                var tileEditorInfo = tilesObjects[i].GetComponent<TileEditorInfo>();
+                var tileEditorInfo = tilesObjects[i].GetComponent<TileEditorInfo>();                
                 foreach (var serializedProperty in serializedTile.properties)
                     tileEditorInfo.SetEditableProperty(serializedProperty.name, serializedProperty.value);
             }
