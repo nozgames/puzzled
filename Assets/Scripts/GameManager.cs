@@ -28,7 +28,7 @@ namespace Puzzled
 
         public static GameManager Instance { get; private set; }
 
-        public static event Action<Tile> onTileInstantiated;
+        public static event Action<Tile, Tile> onTileInstantiated;
 
         /// <summary>
         /// Returns the active puzzle
@@ -194,7 +194,7 @@ namespace Puzzled
             var tile = Instantiate(prefab.gameObject, Instance.grid.transform).GetComponent<Tile>();
             tile.cell = cell;
 
-            onTileInstantiated?.Invoke(tile);
+            onTileInstantiated?.Invoke(tile, prefab);
 
             return tile;
         }

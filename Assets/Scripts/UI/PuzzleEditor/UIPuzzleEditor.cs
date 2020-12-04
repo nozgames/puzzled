@@ -137,9 +137,10 @@ namespace Puzzled
             puzzleName.text = "Unnamed";
         }
 
-        private void OnTileInstantiated(Tile tile)
+        private void OnTileInstantiated(Tile tile, Tile prefab)
         {
-            tile.gameObject.AddComponent<TileEditorInfo>();
+            var editorInfo = tile.gameObject.AddComponent<TileEditorInfo>();
+            editorInfo.guid = TileDatabase.GetGuid(prefab);
         }
 
         private void OnRightClick(InputAction.CallbackContext ctx)
