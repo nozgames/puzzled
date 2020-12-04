@@ -7,21 +7,25 @@ using UnityEngine.UIElements;
 
 namespace Puzzled
 {
-    public class Door : TileComponent
+    public class Chest : ActorComponent
     {
-        [Header("Logic")]
-        private bool _isOpen = false;
+        private bool _isLocked = false;
+
+        // TODO: these should be prefabs?
         [SerializeField] private ItemType keyItem = ItemType.None;
+        [SerializeField] private ItemType prizeItem = ItemType.None;
 
         [Header("Visuals")]
-        [SerializeField] private GameObject openedVisual;
-        [SerializeField] private GameObject closedVisual;
+        [SerializeField] private GameObject lockedVisual;
+        [SerializeField] private GameObject unlockedVisual;
 
         [Editable]
-        public bool isOpen {
-            get => _isOpen;
-            set {
-                _isOpen = value;
+        public bool isLocked
+        {
+            get => _isLocked;
+            set
+            {
+                _isLocked = value;
                 UpdateVisuals();
             }
         }
@@ -33,21 +37,15 @@ namespace Puzzled
 
         private void UpdateVisuals()
         {
-            openedVisual.SetActive(_isOpen);
-            closedVisual.SetActive(!_isOpen);
-        }
-
-        [ActorEventHandler(priority=1)]
-        private void OnQueryMove(QueryMoveEvent evt)
-        {
-            evt.result = _isOpen;
+            lockedVisual.SetActive(isLocked);
+            unlockedVisual.SetActive(!isLocked);
         }
 
         [ActorEventHandler]
         private void OnQueryUse(QueryUseEvent evt)
         {
-            // door can only be used if it is still closed 
-            if (_isOpen)
+            // chest can only be used if it is unlocked
+            if (isLocked)
                 return;
 
             if (keyItem != ItemType.None)
@@ -67,22 +65,25 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
-            Open();            
+            Open();
         }
 
         [ActorEventHandler]
         private void OnActivateWire(ActivateWireEvent evt)
         {
-            Open();
+            isLocked = false;
         }
 
         [ActorEventHandler]
         private void OnDeactivateWire(DeactivateWireEvent evt)
         {
-            Close();
+            isLocked = true;
         }
 
-        public void Open() => isOpen = true;
-        public void Close() => isOpen = false;
+        private void Open()
+        {
+            // TODO: animate chest away and instantiate prize item
+            UpdateVisuals();
+        }
     }
 }

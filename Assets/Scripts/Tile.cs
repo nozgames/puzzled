@@ -115,6 +115,15 @@ namespace Puzzled
                 output.enabled = active;
         }
 
+        public void SetOutputActive(int index, bool active)
+        {
+            if (null == outputs)
+                return;
+
+            Debug.Assert(index < outputs.Count);
+            outputs[index].enabled = active;
+        }
+
         public void PulseOutputs()
         {
             SetOutputsActive(true);
