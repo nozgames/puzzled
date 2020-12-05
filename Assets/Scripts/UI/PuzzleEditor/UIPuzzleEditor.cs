@@ -82,7 +82,7 @@ namespace Puzzled
         private LineRenderer dragWire = null;
 
         private RectInt selection;
-        private Tile selectedTile = null;
+        private Tile drawTile = null;
         private Vector2Int dragStart;
         private Vector2Int dragEnd;
         private bool dragging;
@@ -215,10 +215,13 @@ namespace Puzzled
             t.Apply();
 
             var tileObject = Instantiate(piecePrefab, pieces);
-            tileObject.GetComponent<Button>().onClick.AddListener(() => {
-                selectedTile = prefab;
+            var toggle = tileObject.GetComponent<Toggle>();
+            toggle.group = pieces.GetComponent<ToggleGroup>();
+            toggle.onValueChanged.AddListener(v => {
+                if(v)
+                    drawTile = prefab;
             });
-            tileObject.GetComponent<RawImage>().texture = t;            
+            tileObject.GetComponentInChildren<RawImage>().texture = t;            
         }
 
         public void OnToolChanged()
@@ -240,34 +243,34 @@ namespace Puzzled
             switch (mode)
             {
                 case Mode.Draw:
-                    if (null == selectedTile)
+                    if (null == drawTile)
                         return;
 
-                    if (selectedTile.info.layer == TileLayer.Dynamic && GameManager.Instance.HasCellTiles(cell))
+                    if (drawTile.info.layer == TileLayer.Dynamic && GameManager.Instance.HasCellTiles(cell))
                         foreach (var actor in GameManager.Instance.GetCellTiles(cell))
                             if (!actor.info.allowDynamic)
                                 return;
 
-                    GameManager.Instance.ClearTile(cell, selectedTile.info.layer);
+                    GameManager.Instance.ClearTile(cell, drawTile.info.layer);
 
                     // Destroy all other instances of this tile regardless of variant
-                    if (!selectedTile.info.allowMultiple)
+                    if (!drawTile.info.allowMultiple)
                     {
-                        foreach (var actor in GameManager.GetTiles().Where(a => a.info == selectedTile.info))
+                        foreach (var actor in GameManager.GetTiles().Where(a => a.info == drawTile.info))
                         {
                             Destroy(actor.gameObject);
 
                             // Replace the static actor with a floor so we dont leave a hole
-                            if (selectedTile.info.layer == TileLayer.Static)
+                            if (drawTile.info.layer == TileLayer.Static)
                                 GameManager.InstantiateTile(floorTile, actor.cell);
                         }
                     }
 
                     // Automatically add floor
-                    if (selectedTile.info.layer == TileLayer.Dynamic)
+                    if (drawTile.info.layer == TileLayer.Dynamic)
                         GameManager.InstantiateTile(floorTile, cell);
 
-                    GameManager.InstantiateTile(selectedTile, cell);
+                    GameManager.InstantiateTile(drawTile, cell);
                     break;
 
                 case Mode.Erase:
