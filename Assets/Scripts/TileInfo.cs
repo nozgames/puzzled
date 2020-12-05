@@ -6,7 +6,7 @@ namespace Puzzled
     [CreateAssetMenu(fileName = "New Tile Info", menuName = "Puzzled/Tile Info")]
     public class TileInfo : ScriptableObject
     {
-        [SerializeField] private string displayName = "";
+        [SerializeField] private string _displayName = "";
         [SerializeField] private string description;
         [SerializeField] private Tile[] _prefabs = null;
         [SerializeField] private bool _allowMultiple = true;
@@ -31,6 +31,8 @@ namespace Puzzled
 
         public bool allowWireInputs => _allowWireInputs;
         public bool allowWireOutputs => _allowWireOuputs;
+
+        public string displayName => string.IsNullOrEmpty(_displayName) ? name : _displayName;
 
         public CustomOptionEditor[] optionEditors => _optionEditors;
 
