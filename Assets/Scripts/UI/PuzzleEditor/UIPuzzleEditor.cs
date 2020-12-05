@@ -626,7 +626,11 @@ namespace Puzzled
 
             options.DetachAndDestroyChildren();
 
-            foreach(var editableProperty in editorInfo.editableProperties)
+            if (tile.info.optionEditors != null)
+                foreach (var optionEditorInfo in tile.info.optionEditors)
+                    Instantiate(optionEditorInfo.prefab, options).GetComponent<UIOptionEditor>().target = tile;
+
+            foreach (var editableProperty in editorInfo.editableProperties)
             {
                 var optionEditor = InstantiateOptionEditor(editableProperty.property.PropertyType);
                 if (null == optionEditor)

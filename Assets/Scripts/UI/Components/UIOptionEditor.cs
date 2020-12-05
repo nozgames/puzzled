@@ -6,9 +6,14 @@ namespace Puzzled
     {
         [SerializeField] private TMPro.TextMeshProUGUI labelText = null;
 
-        private TileEditorInfo.EditableProperty _target;
+        protected string label {
+            get => labelText.text;
+            set => labelText.text = value;
+        }
 
-        public TileEditorInfo.EditableProperty target {
+        private object _target;
+
+        public object target {
             get => _target;
             set {
                 _target = value;
@@ -16,13 +21,11 @@ namespace Puzzled
                 if (_target == null)
                     return;
 
-                labelText.text = _target.property.Name;
-
                 OnTargetChanged(target);
             }
         }
 
-        protected virtual void OnTargetChanged(TileEditorInfo.EditableProperty target)
+        protected virtual void OnTargetChanged(object target)
         {
         }
     }

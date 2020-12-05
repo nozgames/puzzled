@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Puzzled
@@ -20,12 +19,14 @@ namespace Puzzled
 
         private void OnToggleValueChanged(bool newValue)
         {
-            target.SetValue(newValue.ToString());
+            var editableProperty = ((TileEditorInfo.EditableProperty)target);
+            editableProperty.SetValue(newValue.ToString());
         }
 
-        protected override void OnTargetChanged(TileEditorInfo.EditableProperty target)
+        protected override void OnTargetChanged(object target)
         {
-            toggle.isOn = bool.TryParse(target.GetValue(), out var value) ? value : false;
+            var editableProperty = ((TileEditorInfo.EditableProperty)target);
+            toggle.isOn = bool.TryParse(editableProperty.GetValue(), out var value) ? value : false;
         }
     }
 }

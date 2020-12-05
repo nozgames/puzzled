@@ -91,7 +91,7 @@ namespace Puzzled
             return puzzle;
         }
 
-        public void Load ()
+        public void Load()
         {
             GameManager.Instance.ClearTiles();
 
@@ -112,14 +112,25 @@ namespace Puzzled
             }
 
             if (wires != null)
+            {
+                // Create the wires
+                var wireObjects = new List<Wire>();
                 foreach (var serializedWire in wires)
                 {
                     var wire = GameManager.InstantiateWire(tilesObjects[serializedWire.from], tilesObjects[serializedWire.to]);
-                    wire.from.tile.SetOutputIndex(wire, serializedWire.fromOrder);
                     wire.from.SetOptions(serializedWire.fromOptions);
-                    wire.to.tile.SetInputIndex(wire, serializedWire.toOrder);
                     wire.to.SetOptions(serializedWire.toOptions);
+                    wireObjects.Add(wire);
                 }
+
+                // Sort the wires
+                for (int wireIndex = 0; wireIndex < wireObjects.Count; wireIndex++)
+                {
+                    var wire = wireObjects[wireIndex];
+                    wire.from.tile.SetOutputIndex(wire, wires[wireIndex].fromOrder, true);
+                    wire.to.tile.SetInputIndex(wire, wires[wireIndex].toOrder, true);
+                }
+            }
 
             for (int i = 0; i < tiles.Length; i++)
             {

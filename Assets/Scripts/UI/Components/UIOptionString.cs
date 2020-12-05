@@ -18,12 +18,15 @@ namespace Puzzled
 
         private void OnInputValueChanged(string text)
         {
-            target.SetValue(text);
+            var editableProperty = ((TileEditorInfo.EditableProperty)target);
+            editableProperty.SetValue(text);
         }
 
-        protected override void OnTargetChanged(TileEditorInfo.EditableProperty target)
+        protected override void OnTargetChanged(object target)
         {
-            input.text = target.GetValue();
+            var editableProperty = ((TileEditorInfo.EditableProperty)target);
+            label = editableProperty.property.Name;
+            input.text = editableProperty.GetValue();
         }
     }
 }

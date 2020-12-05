@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Puzzled
 {
@@ -14,6 +15,15 @@ namespace Puzzled
         [SerializeField] private bool _allowWireOuputs = false;
         [SerializeField] private TileLayer _layer = TileLayer.Static;
 
+        [Serializable]
+        public struct CustomOptionEditor
+        {
+            public GameObject prefab;
+            public int order;
+        }
+
+        [SerializeField] private CustomOptionEditor[] _optionEditors = null;
+
         public Tile[] prefabs => _prefabs;
 
         public bool allowMultiple => _allowMultiple;
@@ -21,6 +31,8 @@ namespace Puzzled
 
         public bool allowWireInputs => _allowWireInputs;
         public bool allowWireOutputs => _allowWireOuputs;
+
+        public CustomOptionEditor[] optionEditors => _optionEditors;
 
         public TileLayer layer => _layer;
     }
