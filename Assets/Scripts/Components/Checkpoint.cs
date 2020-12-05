@@ -6,7 +6,7 @@ namespace Puzzled
     class Checkpoint : TileComponent
     {
         [ActorEventHandler]
-        private void OnActivateWire(ActivateWireEvent evt)
+        private void OnActivateWire(WireActivatedEvent evt)
         {
             // FIXME
             // set respawn point

@@ -22,7 +22,12 @@ namespace Puzzled
         public class SerializedWire
         {
             public int from;
+            public int fromOrder;
+            public int[] fromOptions;
+
             public int to;
+            public int toOrder;
+            public int[] toOptions;
         }
 
         [Serializable]
@@ -48,11 +53,11 @@ namespace Puzzled
 
             puzzle.wires = new SerializedWire[tiles.Sum(t => t.outputCount)];
             var wireIndex = 0;
-            for(int i=0; i<tiles.Length; i++)
+            for(int tileIndex=0; tileIndex<tiles.Length; tileIndex++)
             {
-                var tile = tiles[i];
+                var tile = tiles[tileIndex];
                 var editorInfo = tile.GetComponent<TileEditorInfo>();
-                save[i] = new SerializedTile {
+                save[tileIndex] = new SerializedTile {
                     prefab = editorInfo.guid.ToString(),
                     cell = tile.cell,
                     properties = editorInfo.editableProperties?
@@ -60,13 +65,23 @@ namespace Puzzled
                         .ToArray()
                 };
 
-                foreach(var output in tile.outputs)
+                for(int outputIndex=0; outputIndex<tile.outputs.Count; outputIndex++)
                 {
+                    var output = tile.outputs[outputIndex];
+
+                    // Find the tile index of the 'to' connection
                     var to = 0;
-                    for (to = 0; to < tiles.Length && tiles[to] != output.output; to++);
+                    for (to = 0; to < tiles.Length && tiles[to] != output.to.tile; to++);
+
+                    var toTile = tiles[to];
+                    
                     puzzle.wires[wireIndex++] = new SerializedWire {
-                        from = i,
-                        to = to
+                        from = tileIndex,
+                        fromOrder = outputIndex,
+                        fromOptions = output.from.options,
+                        to = to,
+                        toOrder = output.to.tile.inputs.FindIndex(w => w == output),
+                        toOptions = output.to.options
                     };
                 }
 
@@ -98,7 +113,13 @@ namespace Puzzled
 
             if (wires != null)
                 foreach (var serializedWire in wires)
-                    GameManager.InstantiateWire(tilesObjects[serializedWire.from], tilesObjects[serializedWire.to]);
+                {
+                    var wire = GameManager.InstantiateWire(tilesObjects[serializedWire.from], tilesObjects[serializedWire.to]);
+                    wire.from.tile.SetOutputIndex(wire, serializedWire.fromOrder);
+                    wire.from.SetOptions(serializedWire.fromOptions);
+                    wire.to.tile.SetInputIndex(wire, serializedWire.toOrder);
+                    wire.to.SetOptions(serializedWire.toOptions);
+                }
 
             for (int i = 0; i < tiles.Length; i++)
             {

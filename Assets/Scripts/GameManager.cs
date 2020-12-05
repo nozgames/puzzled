@@ -226,8 +226,8 @@ namespace Puzzled
                 return null;
 
             var wire = Instantiate(Instance.wirePrefab, Instance.wires.transform).GetComponent<Wire>();
-            wire.input = input;
-            wire.output = output;
+            wire.from.tile = input;
+            wire.to.tile = output;
             input.outputs.Add(wire);
             output.inputs.Add(wire);
             return wire;
@@ -288,13 +288,13 @@ namespace Puzzled
             for (int i=0; i<Instance.wires.childCount; i++)
             {
                 var wire = Instance.wires.GetChild(i).GetComponent<Wire>();
-                var min = Vector2Int.Min(wire.input.cell, wire.output.cell);
-                var max = Vector2Int.Max(wire.input.cell, wire.output.cell);
+                var min = Vector2Int.Min(wire.from.cell, wire.to.cell);
+                var max = Vector2Int.Max(wire.from.cell, wire.to.cell);
                 if (cell.x < min.x || cell.y < min.y || cell.x > max.x || cell.y > max.y)
                     continue;
 
-                var pt0 = wire.input.transform.position;
-                var pt1 = wire.output.transform.position;
+                var pt0 = wire.from.position;
+                var pt1 = wire.to.position;
                 var dir = (pt1 - pt0).normalized;
                 var mag = (pt1 - pt0).magnitude;
                 var delta = position - pt0;

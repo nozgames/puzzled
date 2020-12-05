@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace Puzzled
 {
@@ -43,6 +45,7 @@ namespace Puzzled
             foreach(var location in labelOperation.Result)
                 locationsForLabel.Add(location.InternalId);
 
+            var assets = new List<Tuple<Guid, IResourceLocation>>();
             foreach (var resourceLocator in Addressables.ResourceLocators)
             {
                 foreach (var objKey in resourceLocator.Keys)
@@ -61,12 +64,15 @@ namespace Puzzled
                     if (!locationsForLabel.Contains(internalId))
                         continue;
 
-                    var loadOperation = Addressables.LoadAssetAsync<object>(internalId);
-                    yield return loadOperation;
-
-                    _cache[keyGuid] = (TAsset)loadOperation.Result;
+                    assets.Add(new Tuple<Guid, IResourceLocation>(keyGuid, keyLocations[0]));
                 }
             }
+
+            var loadOperation = Addressables.LoadAssetsAsync<TAsset>(assets.Select(t => t.Item2).ToList(), obj => { }, true);
+            yield return loadOperation;
+
+            for(int i=0; i<loadOperation.Result.Count; i++)
+                _cache[assets[i].Item1] = loadOperation.Result[i];
 
             loaded = true;
         }

@@ -12,13 +12,13 @@ namespace Puzzled
         [SerializeField] private GameObject visualOff;
 
         [ActorEventHandler]
-        private void OnActivateWire(ActivateWireEvent evt)
+        private void OnActivateWire(WireActivatedEvent evt)
         {
             TurnOn();
         }
 
         [ActorEventHandler]
-        private void OnDeactivateWire(DeactivateWireEvent evt)
+        private void OnDeactivateWire(WireDeactivatedEvent evt)
         {
             TurnOff();
         }

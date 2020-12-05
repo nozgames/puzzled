@@ -69,13 +69,13 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnActivateWire(ActivateWireEvent evt)
+        private void OnActivateWire(WireActivatedEvent evt)
         {
             isLocked = false;
         }
 
         [ActorEventHandler]
-        private void OnDeactivateWire(DeactivateWireEvent evt)
+        private void OnDeactivateWire(WireDeactivatedEvent evt)
         {
             isLocked = true;
         }

@@ -22,7 +22,7 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnActivateWire(ActivateWireEvent evt)
+        private void OnActivateWire(WireActivatedEvent evt)
         {
             if (tile.inputs[sequenceIndex] == evt.wire)
                 HandleCorrectWire();
@@ -31,7 +31,7 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnDeactivateWire(DeactivateWireEvent evt)
+        private void OnDeactivateWire(WireDeactivatedEvent evt)
         {
             // FIXME: should we allow for back-sequencing?
             if (resetOnDeactivate)

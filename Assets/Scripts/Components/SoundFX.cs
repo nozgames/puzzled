@@ -10,7 +10,7 @@ namespace Puzzled
     public class SoundFX : TileComponent
     {
         [ActorEventHandler]
-        private void OnActivateWire(ActivateWireEvent evt)
+        private void OnActivateWire(WireActivatedEvent evt)
         {
             // FIXME
             // Play sound

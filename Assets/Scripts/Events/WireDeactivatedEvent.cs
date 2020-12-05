@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    public class ActivateWireEvent : ActorEvent
+    public class WireDeactivatedEvent : ActorEvent
     {
         public Wire wire { get; private set; }
 
-        public ActivateWireEvent (Wire wire)
+        public WireDeactivatedEvent(Wire wire)
         {
             this.wire = wire;
         }

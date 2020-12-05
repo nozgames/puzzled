@@ -6,13 +6,13 @@ namespace Puzzled
     class StaticCamera : TileComponent
     {
         [ActorEventHandler]
-        private void OnActivateWire(ActivateWireEvent evt)
+        private void OnActivateWire(WireActivatedEvent evt)
         {
             UpdateCameraState();
         }
 
         [ActorEventHandler]
-        private void OnDeactivateWire(DeactivateWireEvent evt)
+        private void OnDeactivateWire(WireDeactivatedEvent evt)
         {
             UpdateCameraState();
         }

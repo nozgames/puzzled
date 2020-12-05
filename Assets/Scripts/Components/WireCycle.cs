@@ -11,13 +11,13 @@ namespace Puzzled
         public bool isCycling { get; set; } = true;
 
         [ActorEventHandler]
-        private void OnActivateWire(ActivateWireEvent evt)
+        private void OnActivateWire(WireActivatedEvent evt)
         {
             UpdateCyclingState();
         }
 
         [ActorEventHandler]
-        private void OnDeactivateWire(DeactivateWireEvent evt)
+        private void OnDeactivateWire(WireDeactivatedEvent evt)
         {
             UpdateCyclingState();
         }
