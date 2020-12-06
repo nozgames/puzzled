@@ -375,8 +375,12 @@ namespace Puzzled
 
             if(panning)
             {
-                GameManager.Pan(pointerWorld - panPointerStart);
-                panPointerStart = pointerWorld;
+                var delta = pointerWorld - panPointerStart;
+                if (delta.magnitude > 0.01f)
+                {
+                    GameManager.Pan(delta);
+                    panPointerStart = pointerWorld;
+                }
 
                 if (hasSelection)
                     SetSelectionRect(dragStart, dragEnd);
@@ -514,6 +518,8 @@ namespace Puzzled
             if (!playing)
                 return;
 
+            GameManager.Stop();
+
             GameManager.ClearBusy();
             GameManager.IncBusy();
 
@@ -555,6 +561,11 @@ namespace Puzzled
 
             playing = true;
             Save();
+
+            // Clear selection
+            selectionRect.gameObject.SetActive(false);
+
+            GameManager.Play();
         }
 
         public void Load(string file)
