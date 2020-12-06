@@ -235,6 +235,8 @@ namespace Puzzled
             else if (wireTool.isOn)
                 mode = Mode.Wire;
 
+            GameManager.Instance.ShowWires(wireTool.isOn);
+
             tileSelector.SetActive(mode == Mode.Draw);
         }
 
@@ -295,6 +297,11 @@ namespace Puzzled
                                 GameManager.Instance.HideWires();
                                 GameManager.Instance.ShowWires(tile);
                                 SetSelectionRect(cell, cell);
+                                SelectTile(cell);
+                            } 
+                            else
+                            {
+                                GameManager.Instance.ShowWires(true);
                             }
                             break;
                         }
@@ -340,9 +347,6 @@ namespace Puzzled
             selectionRect.anchorMax = Camera.main.WorldToViewportPoint(GameManager.CellToWorld(anchorCell+size) + new Vector3(0.5f, 0.5f, 0));
 
             selectionRect.gameObject.SetActive(true);
-
-
-            //var cell = GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(obj.ReadValue<Vector2>()) + new Vector3(0.5f, 0.5f, 0));
         }
 
         private void SelectTile(Vector2Int cell) => SelectTile(GetTile(cell));

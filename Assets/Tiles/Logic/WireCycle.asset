@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aba4c512c890ca4419432c9e74058586, type: 3}
   m_Name: WireCycle
   m_EditorClassIdentifier: 
-  displayName: Wire Cycle
+  _displayName: 
   description: 
   _prefabs:
   - {fileID: -8286699205250075377, guid: f8133c000480fa5439bbda9260fcea1d, type: 3}
@@ -21,3 +21,6 @@ MonoBehaviour:
   _allowWireInputs: 1
   _allowWireOuputs: 1
   _layer: 12
+  _optionEditors:
+  - prefab: {fileID: 5856979643204678395, guid: 09c1665e918187e488c6c9311e6307dd, type: 3}
+    order: 0

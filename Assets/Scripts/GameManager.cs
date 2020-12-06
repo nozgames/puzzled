@@ -283,10 +283,12 @@ namespace Puzzled
             tiles.Remove(tile);
         }
 
-        public void HideWires()
+        public void HideWires() => ShowWires(false);
+
+        public void ShowWires(bool visible)
         {
             for (int i = 0; i < wires.transform.childCount; i++)
-                wires.transform.GetChild(i).GetComponent<Wire>().visible = false;
+                wires.transform.GetChild(i).GetComponent<Wire>().visible = visible;
         }
 
         public void ShowWires(Tile tile)
