@@ -79,7 +79,7 @@ namespace Puzzled
         private Mode _mode = Mode.Draw;
         private string currentPuzzleName = null;
         private string puzzleToLoad = null;
-        private LineRenderer dragWire = null;
+        private WireMesh dragWire = null;
 
         private RectInt selection;
         private Tile drawTile = null;
@@ -303,14 +303,13 @@ namespace Puzzled
                         {
                             if(null == dragWire && dragStart != dragEnd && hasSelection && GetTile(dragStart).info.allowWireOutputs)
                             {
-                                dragWire = Instantiate(dragWirePrefab).GetComponent<LineRenderer>();
-                                dragWire.positionCount = 2;
-                                dragWire.SetPosition(0, GameManager.CellToWorld(dragStart));
-                                dragWire.SetPosition(1, GameManager.CellToWorld(cell));
+                                dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
+                                dragWire.transform.position = GameManager.CellToWorld(dragStart);
+                                dragWire.target = cell;
                             }
                             else if(dragWire != null)
                             {
-                                dragWire.SetPosition(1, GameManager.CellToWorld(cell));
+                                dragWire.target = cell;
                             }
                             break;
                         }

@@ -252,6 +252,7 @@ namespace Puzzled
             wire.to.tile = output;
             input.outputs.Add(wire);
             output.inputs.Add(wire);
+            wire.transform.position = CellToWorld(wire.from.tile.cell);
             return wire;
         }
 

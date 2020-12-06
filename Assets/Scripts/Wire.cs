@@ -73,7 +73,7 @@ namespace Puzzled
             public int GetOption(int index) => options?[index] ?? 0;
         }
 
-        [SerializeField] private LineRenderer line = null;
+        [SerializeField] private WireMesh _visuals = null;
 
         public Connection from { get; private set; } = new Connection();
         public Connection to { get; private set; } = new Connection();
@@ -97,11 +97,10 @@ namespace Puzzled
         }
         
         public bool visible {
-            get => line.enabled;
+            get => _visuals.gameObject.activeSelf;
             set {
-                line.enabled = value;
-                if (line.enabled)
-                    UpdateLine();
+                _visuals.target = to.cell;
+                _visuals.gameObject.SetActive(value);
             }
         }
 
@@ -113,8 +112,7 @@ namespace Puzzled
             // Also send a wire value changed event for convienence
             to.tile.Send(new WireValueChangedEvent(this));
 
-            if(visible)
-                UpdateLine();
+            _visuals.target = to.tile.cell;
         }
 
         private void OnDisable()
@@ -129,15 +127,6 @@ namespace Puzzled
 
             if(to != null)
                 to.tile.inputs.Remove(this);
-        }
-
-        public void UpdateLine()
-        {
-            transform.position = from.tile.transform.position;
-
-            line.positionCount = 2;
-            line.SetPosition(0, Vector3.zero);
-            line.SetPosition(1, to.tile.transform.position - from.tile.transform.position);
         }
     }
 }
