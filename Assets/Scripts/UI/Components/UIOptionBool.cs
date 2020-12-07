@@ -27,6 +27,7 @@ namespace Puzzled
         {
             var editableProperty = ((TileEditorInfo.EditableProperty)target);
             toggle.isOn = bool.TryParse(editableProperty.GetValue(), out var value) ? value : false;
+            label = editableProperty.property.Name;
         }
     }
 }
