@@ -5,11 +5,16 @@ namespace Puzzled
 {
     public class EnterCellEvent : ActorEvent
     {
-        // TODO: need to know who came in and where from
+        /// <summary>
+        /// Tile that is entering the cell
+        /// </summary>
+        public Tile tile { get; private set; }
 
-        public EnterCellEvent Init()
+        public bool isPlayer => tile.gameObject.GetComponent<Player>() != null;
+
+        public EnterCellEvent(Tile tile)
         {
-            return this;
+            this.tile = tile;
         }
     }
 }

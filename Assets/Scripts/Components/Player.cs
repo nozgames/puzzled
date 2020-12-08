@@ -165,7 +165,7 @@ namespace Puzzled
         {
             SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), moveFromCell);
             tile.cell = moveToCell;
-            SendToCell(ActorEvent.Singleton<EnterCellEvent>().Init(), moveToCell);
+            SendToCell(new EnterCellEvent(tile), moveToCell);
 
             PlayAnimation("Idle");
 
@@ -186,6 +186,29 @@ namespace Puzzled
             PlayAnimation("Exit");
 
             Tween.Wait(2.0f).OnStop(() => GameManager.PuzzleComplete()).Start(gameObject);
+        }
+
+        public Item iventory { get; private set; }
+
+        [ActorEventHandler]
+        private void OnGiveItem (GiveItemEvent evt)
+        {
+            BeginBusy();
+            PlayAnimation("Exit");
+
+            var itemVisuals = evt.item.CloneVisuals(transform);
+            itemVisuals.transform.localPosition = new Vector3(0, 1.1f, 0);
+
+            iventory = evt.item;
+
+            Tween.Wait(1f).OnStop(() => {
+                Destroy(itemVisuals);
+                PlayAnimation("Idle");
+                EndBusy();
+            }).Start(gameObject);
+
+            // Indicate we took the item
+            evt.IsHandled = true;
         }
     }
 }

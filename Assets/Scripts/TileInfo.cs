@@ -8,7 +8,6 @@ namespace Puzzled
     {
         [SerializeField] private string _displayName = "";
         [SerializeField] private string description;
-        [SerializeField] private Tile[] _prefabs = null;
         [SerializeField] private bool _allowMultiple = true;
         [SerializeField] private bool _allowDynamic = true;
         [SerializeField] private bool _allowWireInputs = false;
@@ -23,8 +22,6 @@ namespace Puzzled
         }
 
         [SerializeField] private CustomOptionEditor[] _optionEditors = null;
-
-        public Tile[] prefabs => _prefabs;
 
         public bool allowMultiple => _allowMultiple;
         public bool allowDynamic => _allowDynamic;

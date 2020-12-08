@@ -40,7 +40,7 @@ namespace Puzzled
         {
             SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), moveFromCell);
             tile.cell = moveToCell;
-            SendToCell(ActorEvent.Singleton<EnterCellEvent>().Init(), moveToCell);
+            SendToCell(new EnterCellEvent(tile), moveToCell);
             
             EndBusy();
         }
