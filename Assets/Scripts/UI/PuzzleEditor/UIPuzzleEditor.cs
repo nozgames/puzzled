@@ -236,7 +236,7 @@ namespace Puzzled
                 mode = Mode.Wire;
 
             GameManager.Instance.ShowWires(wireTool.isOn);
-
+            inspector.SetActive(wireTool.isOn);
             tileSelector.SetActive(mode == Mode.Draw);
         }
 
@@ -354,13 +354,11 @@ namespace Puzzled
         private void SelectTile (Tile tile)
         {
             if (tile == null)
-            {
-                inspector.SetActive(false);
+            {                
                 options.DetachAndDestroyChildren();
                 return;
             }
 
-            inspector.SetActive(true);
             PopulateOptions(tile);
         }
 

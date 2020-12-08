@@ -36,7 +36,7 @@ namespace Puzzled
         protected override void OnTargetChanged(object target)
         {
             var editableProperty = ((TileEditorInfo.EditableProperty)target);
-            label = editableProperty.property.Name;
+            label = NicifyName(editableProperty.property.Name);
             input.text = editableProperty.GetValue();
         }
     }
