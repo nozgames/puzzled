@@ -17,6 +17,13 @@ namespace Puzzled
         [SerializeField] private float wireHitThreshold = 0.1f;
         [SerializeField] private float tick = 0.25f;
 
+        [Header("Layers")]
+        [SerializeField] [Layer] private int staticLayer = 0;
+        [SerializeField] [Layer] private int dynamicLayer = 0;
+        [SerializeField] [Layer] private int logicLayer = 0;
+        [SerializeField] [Layer] private int wireLayer = 0;
+        [SerializeField] private LayerMask playLayers = 0;
+        [SerializeField] private LayerMask defaultLayers = 0;
 
         public InputActionReference menuAction;
 
@@ -194,6 +201,21 @@ namespace Puzzled
             var tile = Instantiate(prefab.gameObject, Instance.grid.transform).GetComponent<Tile>();
             tile.cell = cell;
 
+            switch (tile.info.layer)
+            {
+                case TileLayer.Dynamic:
+                    tile.gameObject.SetChildLayers(Instance.dynamicLayer);
+                    break;
+
+                case TileLayer.Static:
+                    tile.gameObject.SetChildLayers(Instance.staticLayer);
+                    break;
+
+                case TileLayer.Logic:
+                    tile.gameObject.SetChildLayers(Instance.logicLayer);
+                    break;
+            }
+
             onTileInstantiated?.Invoke(tile, prefab);
 
             return tile;
@@ -230,6 +252,7 @@ namespace Puzzled
             wire.to.tile = output;
             input.outputs.Add(wire);
             output.inputs.Add(wire);
+            wire.transform.position = CellToWorld(wire.from.tile.cell);
             return wire;
         }
 
@@ -260,10 +283,12 @@ namespace Puzzled
             tiles.Remove(tile);
         }
 
-        public void HideWires()
+        public void HideWires() => ShowWires(false);
+
+        public void ShowWires(bool visible)
         {
             for (int i = 0; i < wires.transform.childCount; i++)
-                wires.transform.GetChild(i).GetComponent<Wire>().visible = false;
+                wires.transform.GetChild(i).GetComponent<Wire>().visible = visible;
         }
 
         public void ShowWires(Tile tile)
@@ -331,6 +356,18 @@ namespace Puzzled
                 Tile.Tick();
                 elapsed -= tick;
             }
+        }
+
+        public static void Play ()
+        {
+            Camera.main.cullingMask = Instance.playLayers;
+            paused = false;
+        }
+
+        public static void Stop ()
+        {
+            Camera.main.cullingMask = Instance.defaultLayers;
+            paused = true;
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Puzzled
             set {
                 GameManager.Instance.SetTileCell(this, value);
                 _cell = value;
+                Send(new CellChangedEvent(this));
             }
         }
 

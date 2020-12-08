@@ -79,7 +79,7 @@ namespace Puzzled
         private Mode _mode = Mode.Draw;
         private string currentPuzzleName = null;
         private string puzzleToLoad = null;
-        private LineRenderer dragWire = null;
+        private WireMesh dragWire = null;
 
         private RectInt selection;
         private Tile drawTile = null;
@@ -235,6 +235,8 @@ namespace Puzzled
             else if (wireTool.isOn)
                 mode = Mode.Wire;
 
+            GameManager.Instance.ShowWires(wireTool.isOn);
+
             tileSelector.SetActive(mode == Mode.Draw);
         }
 
@@ -295,6 +297,11 @@ namespace Puzzled
                                 GameManager.Instance.HideWires();
                                 GameManager.Instance.ShowWires(tile);
                                 SetSelectionRect(cell, cell);
+                                SelectTile(cell);
+                            } 
+                            else
+                            {
+                                GameManager.Instance.ShowWires(true);
                             }
                             break;
                         }
@@ -303,14 +310,13 @@ namespace Puzzled
                         {
                             if(null == dragWire && dragStart != dragEnd && hasSelection && GetTile(dragStart).info.allowWireOutputs)
                             {
-                                dragWire = Instantiate(dragWirePrefab).GetComponent<LineRenderer>();
-                                dragWire.positionCount = 2;
-                                dragWire.SetPosition(0, GameManager.CellToWorld(dragStart));
-                                dragWire.SetPosition(1, GameManager.CellToWorld(cell));
+                                dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
+                                dragWire.transform.position = GameManager.CellToWorld(dragStart);
+                                dragWire.target = cell;
                             }
                             else if(dragWire != null)
                             {
-                                dragWire.SetPosition(1, GameManager.CellToWorld(cell));
+                                dragWire.target = cell;
                             }
                             break;
                         }
@@ -341,9 +347,6 @@ namespace Puzzled
             selectionRect.anchorMax = Camera.main.WorldToViewportPoint(GameManager.CellToWorld(anchorCell+size) + new Vector3(0.5f, 0.5f, 0));
 
             selectionRect.gameObject.SetActive(true);
-
-
-            //var cell = GameManager.WorldToCell(Camera.main.ScreenToWorldPoint(obj.ReadValue<Vector2>()) + new Vector3(0.5f, 0.5f, 0));
         }
 
         private void SelectTile(Vector2Int cell) => SelectTile(GetTile(cell));
@@ -375,8 +378,12 @@ namespace Puzzled
 
             if(panning)
             {
-                GameManager.Pan(pointerWorld - panPointerStart);
-                panPointerStart = pointerWorld;
+                var delta = pointerWorld - panPointerStart;
+                if (delta.magnitude > 0.01f)
+                {
+                    GameManager.Pan(delta);
+                    panPointerStart = pointerWorld;
+                }
 
                 if (hasSelection)
                     SetSelectionRect(dragStart, dragEnd);
@@ -514,6 +521,8 @@ namespace Puzzled
             if (!playing)
                 return;
 
+            GameManager.Stop();
+
             GameManager.ClearBusy();
             GameManager.IncBusy();
 
@@ -555,6 +564,11 @@ namespace Puzzled
 
             playing = true;
             Save();
+
+            // Clear selection
+            selectionRect.gameObject.SetActive(false);
+
+            GameManager.Play();
         }
 
         public void Load(string file)
