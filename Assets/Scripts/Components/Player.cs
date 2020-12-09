@@ -15,7 +15,6 @@ namespace Puzzled
         private Vector2Int moveToCell;
         private Animator animator;
         private float queuedMoveTime = float.MinValue;
-        private float useTime = float.MinValue; // FIXME: this is a hack to fix using items until we have use button
 
         [SerializeField] private float queuedInputThreshold = 0.25f;
         [SerializeField] private float moveDuration = 0.4f;
@@ -26,10 +25,14 @@ namespace Puzzled
         [SerializeField] private InputActionReference rightAction = null;
         [SerializeField] private InputActionReference upAction = null;
         [SerializeField] private InputActionReference downAction = null;
+        [SerializeField] private InputActionReference useAction = null;
+
         private bool isLeftHeld = false;
         private bool isRightHeld = false;
         private bool isUpHeld = false;
         private bool isDownHeld = false;
+        private bool isUseHeld = false;
+
         private Vector2Int desiredMovement; // this is the currently held input
         private Vector2Int queuedMovement;  // this is the last desired movement (if within input threshold it will be treated as desired)
         private Vector2Int lastMovement;  // this is the last continuous movement made (cleared when desired is cleared)
@@ -47,6 +50,7 @@ namespace Puzzled
             rightAction.action.Enable();
             upAction.action.Enable();
             downAction.action.Enable();
+            useAction.action.Enable();
 
             leftAction.action.started += OnLeftActionStarted;
             rightAction.action.started += OnRightActionStarted;
@@ -56,6 +60,9 @@ namespace Puzzled
             rightAction.action.canceled += OnRightActionEnded;
             upAction.action.canceled += OnUpActionEnded;
             downAction.action.canceled += OnDownActionEnded;
+            useAction.action.started += OnUseActionStarted;
+            useAction.action.performed += OnUseAction;
+            useAction.action.canceled += OnUseActionEnded;
         }
 
         protected override void OnDisable()
@@ -68,6 +75,15 @@ namespace Puzzled
             rightAction.action.canceled -= OnRightActionEnded;
             upAction.action.canceled -= OnUpActionEnded;
             downAction.action.canceled -= OnDownActionEnded;
+            useAction.action.started -= OnUseActionStarted;
+            useAction.action.performed -= OnUseAction;
+            useAction.action.canceled -= OnUseActionEnded;
+
+            leftAction.action.Disable();
+            rightAction.action.Disable();
+            upAction.action.Disable();
+            downAction.action.Disable();
+            useAction.action.Disable();
 
             base.OnDisable();
         }
@@ -98,7 +114,7 @@ namespace Puzzled
 
             if (movement != Vector2Int.zero)
             {
-                PerformAction(movement);
+                PerformMove(movement);
                 lastMovement = movement;
 
                 // if there is no desired movement anymore, clear the queued movement too
@@ -172,6 +188,17 @@ namespace Puzzled
             }
         }
 
+        private void OnUseActionStarted(InputAction.CallbackContext ctx) => isUseHeld = true;
+        private void OnUseActionEnded(InputAction.CallbackContext ctx) => isUseHeld = false;
+
+        private void OnUseAction(InputAction.CallbackContext ctx)
+        {
+            if (desiredMovement == Vector2Int.zero)
+                return; // use needs a direction
+
+            PerformUse(desiredMovement);
+        }
+
         private void UpdateDesiredMovement()
         {
             if (isLeftHeld)
@@ -186,7 +213,7 @@ namespace Puzzled
                 lastMovement = Vector2Int.zero;
         }
 
-        private void PerformAction(Vector2Int cell)
+        private void PerformMove(Vector2Int cell)
         {
             queuedMoveTime = float.MinValue;
 
@@ -196,17 +223,26 @@ namespace Puzzled
             else if (cell.x > 0)
                 visuals.localScale = Vector3.one;
 
-            // Try moving first
+            if (isUseHeld)
+            {
+                // Try a push move
+                if (PushMove(cell))
+                    return;
+            }
+
             if (Move(cell))
                 return;
+        }
 
-            // FIXME: this is temp until we have a use button
-            if (Time.time < (useTime + 0.25))
-                return;
+        private void PerformUse(Vector2Int cell)
+        {
+            queuedMoveTime = float.MinValue;
 
-            // Try a push move
-            if (PushMove(cell))
-                return;
+            // Change facing direction 
+            if (cell.x < 0)
+                visuals.localScale = new Vector3(-1, 1, 1);
+            else if (cell.x > 0)
+                visuals.localScale = Vector3.one;
 
             // Try a use move
             if (UseMove(cell))
@@ -245,7 +281,6 @@ namespace Puzzled
             if (!query.result)
                 return false;
 
-            useTime = Time.time; // FIXME: temp
             BeginBusy();
 
             PlayAnimation("Push");
@@ -271,7 +306,6 @@ namespace Puzzled
             if (!query.result)
                 return false;
 
-            useTime = Time.time; // FIXME: temp
             BeginBusy();
 
             GameManager.Instance.SendToCell(new UseEvent(tile), moveToCell);
