@@ -121,7 +121,7 @@ namespace Puzzled
             // handle pending movements
             if (pendingMovement != Vector2Int.zero)
             {
-                Move(pendingMovement);
+                PerformAction(pendingMovement);
                 pendingMovement = Vector2Int.zero;
             }
         }
@@ -186,8 +186,6 @@ namespace Puzzled
 
         private void OnActionComplete ()
         {
-            if (Time.time - queuedActionTime <= queuedInputThreshold)
-                PerformAction(queuedAction);
         }
 
         private bool Move (Vector2Int offset)

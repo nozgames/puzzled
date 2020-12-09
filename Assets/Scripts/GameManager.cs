@@ -351,6 +351,9 @@ namespace Puzzled
             if (paused)
                 return;
 
+            if (tick <= 0.01f)
+                return;
+
             elapsed += Time.deltaTime;
             while (elapsed > tick)
             {
