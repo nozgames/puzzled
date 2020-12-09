@@ -6,6 +6,11 @@ namespace Puzzled
 {
     class Player : TileComponent
     {
+        private readonly Vector2Int leftCell = new Vector2Int(-1, 0);
+        private readonly Vector2Int rightCell = new Vector2Int(1, 0);
+        private readonly Vector2Int upCell = new Vector2Int(0, 1);
+        private readonly Vector2Int downCell = new Vector2Int(0, -1);
+
         private Vector2Int moveFromCell;
         private Vector2Int moveToCell;
         private Animator animator;
@@ -21,6 +26,11 @@ namespace Puzzled
         [SerializeField] private InputActionReference rightAction = null;
         [SerializeField] private InputActionReference upAction = null;
         [SerializeField] private InputActionReference downAction = null;
+        private bool isLeftHeld = false;
+        private bool isRightHeld = false;
+        private bool isUpHeld = false;
+        private bool isDownHeld = false;
+        private Vector2Int pendingMovement;
 
         private void Awake()
         {
@@ -36,36 +46,123 @@ namespace Puzzled
             upAction.action.Enable();
             downAction.action.Enable();
 
-            leftAction.action.performed += OnLeftAction;
-            rightAction.action.performed += OnRightAction;
-            upAction.action.performed += OnUpAction;
-            downAction.action.performed += OnDownAction;
+            leftAction.action.started += OnLeftActionStarted;
+            rightAction.action.started += OnRightActionStarted;
+            upAction.action.started += OnUpActionStarted;
+            downAction.action.started += OnDownActionStarted;
+            leftAction.action.canceled += OnLeftActionEnded;
+            rightAction.action.canceled += OnRightActionEnded;
+            upAction.action.canceled += OnUpActionEnded;
+            downAction.action.canceled += OnDownActionEnded;
         }
 
         protected override void OnDisable()
         {
-            leftAction.action.performed -= OnLeftAction;
-            rightAction.action.performed -= OnRightAction;
-            upAction.action.performed -= OnUpAction;
-            downAction.action.performed -= OnDownAction;
+            leftAction.action.started -= OnLeftActionStarted;
+            rightAction.action.started -= OnRightActionStarted;
+            upAction.action.started -= OnUpActionStarted;
+            downAction.action.started -= OnDownActionStarted;
+            leftAction.action.canceled -= OnLeftActionEnded;
+            rightAction.action.canceled -= OnRightActionEnded;
+            upAction.action.canceled -= OnUpActionEnded;
+            downAction.action.canceled -= OnDownActionEnded;
 
             base.OnDisable();
         }
 
-        private void OnLeftAction(InputAction.CallbackContext ctx) => PerformAction(new Vector2Int(-1, 0));
-        private void OnRightAction(InputAction.CallbackContext ctx) => PerformAction(new Vector2Int(1, 0));
-        private void OnUpAction(InputAction.CallbackContext ctx) => PerformAction(new Vector2Int(0, 1));
-        private void OnDownAction(InputAction.CallbackContext ctx) => PerformAction(new Vector2Int(0, -1));
+        private void OnLeftActionStarted(InputAction.CallbackContext ctx)
+        {
+            isLeftHeld = true;
+            PotentiallyQueueMove(leftCell);
+        }
+
+        private void OnRightActionStarted(InputAction.CallbackContext ctx)
+        {
+            isRightHeld = true;
+            PotentiallyQueueMove(rightCell);
+        }
+
+        private void OnUpActionStarted(InputAction.CallbackContext ctx)
+        {
+            isUpHeld = true;
+            PotentiallyQueueMove(upCell);
+        }
+
+        private void OnDownActionStarted(InputAction.CallbackContext ctx)
+        {
+            isDownHeld = true;
+            PotentiallyQueueMove(downCell);
+        }
+
+        private void OnLeftActionEnded(InputAction.CallbackContext ctx) => isLeftHeld = false;
+        private void OnRightActionEnded(InputAction.CallbackContext ctx) => isRightHeld = false;
+        private void OnUpActionEnded(InputAction.CallbackContext ctx) => isUpHeld = false;
+        private void OnDownActionEnded(InputAction.CallbackContext ctx) => isDownHeld = false;
+
+        [ActorEventHandler]
+        private void OnTick(TickEvent evt)
+        {
+            if (GameManager.IsBusy)
+                return;
+
+            // queue up a different move if an action is active 
+            if (pendingMovement == Vector2Int.zero)
+            {
+                if (isLeftHeld)
+                    PotentiallyQueueMove(leftCell);
+                else if (isRightHeld)
+                    PotentiallyQueueMove(rightCell);
+                else if (isUpHeld)
+                    PotentiallyQueueMove(upCell);
+                else if (isDownHeld)
+                    PotentiallyQueueMove(downCell);
+            }
+
+            // handle pending movements
+            if (pendingMovement != Vector2Int.zero)
+            {
+                Move(pendingMovement);
+                pendingMovement = Vector2Int.zero;
+            }
+        }
+
+        private void PotentiallyClearPendingMovement()
+        {
+            if (pendingMovement == leftCell)
+            {
+                if (!isLeftHeld)
+                    pendingMovement = Vector2Int.zero;
+            }
+            else if (pendingMovement == rightCell)
+            {
+                if (!isRightHeld)
+                    pendingMovement = Vector2Int.zero;
+            }
+            else if (pendingMovement == upCell)
+            {
+                if (!isUpHeld)
+                    pendingMovement = Vector2Int.zero;
+            }
+            else if (pendingMovement == downCell)
+            {
+                if (!isDownHeld)
+                    pendingMovement = Vector2Int.zero;
+            }
+        }
+
+        private void PotentiallyQueueMove(Vector2Int movement)
+        {
+            PotentiallyClearPendingMovement();
+
+            // don't set the move if one is already set
+            if (pendingMovement != Vector2Int.zero)
+                return;
+
+            pendingMovement = movement;
+        }
 
         private void PerformAction (Vector2Int cell)
         {
-            if (GameManager.IsBusy) 
-            {
-                queuedAction = cell;
-                queuedActionTime = Time.time;
-                return;
-            }
-
             queuedActionTime = float.MinValue;
 
             // Change facing direction 
