@@ -370,6 +370,14 @@ namespace Puzzled
             animator.SetTrigger(name);
         }
 
+        // FIXME: this is a temp hack to allow pulling crates onto player tile
+        [ActorEventHandler(priority = 1)]
+        private void OnQueryMove(QueryMoveEvent evt)
+        {
+            evt.result = true;
+            evt.IsHandled = true;
+        }
+
         [ActorEventHandler]
         private void OnLevelExit (LevelExitEvent evt)
         {
