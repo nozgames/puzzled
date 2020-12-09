@@ -21,6 +21,8 @@ namespace Puzzled
                     property.SetValue(component, bool.TryParse(value, out var parsed) ? parsed : false);
                 else if (property.PropertyType == typeof(string))
                     property.SetValue(component, value);
+                else if (property.PropertyType == typeof(Guid))
+                    property.SetValue(component, Guid.TryParse(value, out var parsed) ? parsed : Guid.Empty);
             }
 
             public string GetValue() => property.GetValue(component).ToString();

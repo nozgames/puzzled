@@ -199,6 +199,7 @@ namespace Puzzled
                 return null;
 
             var tile = Instantiate(prefab.gameObject, Instance.grid.transform).GetComponent<Tile>();
+            tile.guid = prefab.guid;
             tile.cell = cell;
 
             switch (tile.info.layer)

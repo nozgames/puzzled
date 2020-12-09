@@ -75,6 +75,12 @@ namespace Puzzled
                 _cache[assets[i].Item1] = loadOperation.Result[i];
 
             loaded = true;
+
+            OnLoaded();
+        }
+
+        protected virtual void OnLoaded()
+        {
         }
     }
 }

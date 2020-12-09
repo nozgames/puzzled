@@ -85,6 +85,7 @@ GameObject:
   - component: {fileID: 2741314630061960320}
   - component: {fileID: 342643717121969350}
   - component: {fileID: 3450000003014354878}
+  - component: {fileID: 8520421038448384026}
   m_Layer: 5
   m_Name: UITileButton
   m_TagString: Untagged
@@ -219,6 +220,21 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+--- !u!114 &8520421038448384026
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4642312077439141805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bec2fe690681c3498025a7c93ac6359, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  preview: {fileID: 8197367742369685844}
+  nameText: {fileID: 8606311165298289421}
+  _toggle: {fileID: 3450000003014354878}
 --- !u!1 &7323273936628971505
 GameObject:
   m_ObjectHideFlags: 0

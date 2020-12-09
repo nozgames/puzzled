@@ -50,6 +50,7 @@ namespace Puzzled
             if (_isOpen)
                 return;
 
+#if false
             if (keyItem != ItemType.None)
             {
                 // check if the using actor has the keyItem
@@ -62,6 +63,7 @@ namespace Puzzled
                     evt.result = true;
                 }
             }
+#endif
         }
 
         [ActorEventHandler]

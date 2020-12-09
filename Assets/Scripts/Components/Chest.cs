@@ -10,9 +10,8 @@ namespace Puzzled
         [Editable]
         public System.Guid keyItem { get; private set; }
 
-        // TODO: these should be prefabs?
-//      [SerializeField] private ItemType keyItem = ItemType.None;
-        [SerializeField] private ItemType prizeItem = ItemType.None;
+        [Editable]
+        public System.Guid prizeItem { get; private set; }
 
         [Header("Visuals")]
         [SerializeField] private GameObject lockedVisual;
@@ -43,24 +42,24 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnQueryUse(QueryUseEvent evt)
         {
-            // chest can only be used if it is unlocked
-            if (isLocked)
-                return;
-
-#if false
-            if (keyItem != ItemType.None)
+            if (keyItem != null)
             {
                 // check if the using actor has the keyItem
                 QueryHasItemEvent hasItemEvent = new QueryHasItemEvent(keyItem);
                 evt.source.Send(hasItemEvent);
 
-                if (hasItemEvent.result)
+                if (hasItemEvent.IsHandled)
                 {
-                    // yes, we can use this lockable
-                    evt.result = true;
+                    isLocked = false;
                 }
             }
-#endif
+
+            // chest can only be used if it is unlocked
+            if (isLocked)
+                return;
+
+            GameManager.InstantiateTile(TileDatabase.GetTile(prizeItem), tile.cell);
+            Destroy(tile.gameObject);
         }
 
         [ActorEventHandler]

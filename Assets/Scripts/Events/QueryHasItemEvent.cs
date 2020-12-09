@@ -1,28 +1,15 @@
-﻿using UnityEngine;
+﻿using System;
 using NoZ;
 
 namespace Puzzled
 {
     class QueryHasItemEvent : ActorEvent
     {
-        public ItemType item { get; private set; }
-
-        private bool _result = false;
-
-        public bool result
+        public Guid itemGuid { get; private set; }
+        
+        public QueryHasItemEvent(Guid itemGuid)
         {
-            get => _result;
-            set
-            {
-                _result = value;
-                if (_result)
-                    IsHandled = true;
-            }
-        }
-
-        public QueryHasItemEvent(ItemType item)
-        {
-            result = false;
+            this.itemGuid = itemGuid;
         }
     }
 }

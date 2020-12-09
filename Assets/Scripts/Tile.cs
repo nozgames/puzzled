@@ -17,6 +17,8 @@ namespace Puzzled
         public List<Wire> outputs { get; private set; } = new List<Wire>();
 
         public TileInfo info => _info;
+
+        public System.Guid guid { get; set; }
            
         /// <summary>
         /// Cell the actor is current in

@@ -285,7 +285,7 @@ namespace Puzzled
             Tween.Wait(2.0f).OnStop(() => GameManager.PuzzleComplete()).Start(gameObject);
         }
 
-        public Item iventory { get; private set; }
+        public Item inventory { get; private set; }
 
         [ActorEventHandler]
         private void OnGiveItem (GiveItemEvent evt)
@@ -296,7 +296,7 @@ namespace Puzzled
             var itemVisuals = evt.item.CloneVisuals(transform);
             itemVisuals.transform.localPosition = new Vector3(0, 1.1f, 0);
 
-            iventory = evt.item;
+            inventory = evt.item;
 
             Tween.Wait(1f).OnStop(() => {
                 Destroy(itemVisuals);
@@ -306,6 +306,15 @@ namespace Puzzled
 
             // Indicate we took the item
             evt.IsHandled = true;
+        }
+
+        [ActorEventHandler]
+        private void OnQueryHasItem (QueryHasItemEvent evt)
+        {
+            if(inventory != null && evt.itemGuid == inventory.tile.guid)
+            {
+                evt.IsHandled = true;
+            }
         }
     }
 }
