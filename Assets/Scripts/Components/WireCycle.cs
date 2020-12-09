@@ -28,6 +28,9 @@ namespace Puzzled
             if (!isCycling)
                 return;
 
+            if (tile.outputCount == 0)
+                return;
+
             int oldWireIndex = wireIndex;
             wireIndex = (wireIndex + 1) % tile.outputCount;
 

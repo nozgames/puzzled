@@ -10,5 +10,11 @@ namespace Puzzled
 
             label = NicifyName(((TileEditorInfo.EditableProperty)target).property.Name);
         }
+
+        public void OnSelectTile ()
+        {
+            UIPuzzleEditor.instance.OpenTileSelector((tile) => {
+            });
+        }
     }
 }
