@@ -118,6 +118,7 @@ namespace Puzzled
 
         private void OnEnable()
         {
+            GameManager.Stop();
             GameManager.IncBusy();
             GameManager.onTileInstantiated += OnTileInstantiated;
 
