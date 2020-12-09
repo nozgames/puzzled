@@ -14,8 +14,8 @@ namespace Puzzled
         private Vector2Int moveFromCell;
         private Vector2Int moveToCell;
         private Animator animator;
-        private Vector2Int queuedAction;
-        private float queuedActionTime = float.MinValue;
+        private float queuedMoveTime = float.MinValue;
+        private float useTime = float.MinValue; // FIXME: this is a hack to fix using items until we have use button
 
         [SerializeField] private float queuedInputThreshold = 0.25f;
         [SerializeField] private float moveDuration = 0.4f;
@@ -30,7 +30,9 @@ namespace Puzzled
         private bool isRightHeld = false;
         private bool isUpHeld = false;
         private bool isDownHeld = false;
-        private Vector2Int pendingMovement;
+        private Vector2Int desiredMovement; // this is the currently held input
+        private Vector2Int queuedMovement;  // this is the last desired movement (if within input threshold it will be treated as desired)
+        private Vector2Int lastMovement;  // this is the last continuous movement made (cleared when desired is cleared)
 
         private void Awake()
         {
@@ -70,100 +72,123 @@ namespace Puzzled
             base.OnDisable();
         }
 
+        [ActorEventHandler]
+        private void OnUpdate(NoZ.ActorUpdateEvent evt)
+        {
+            // update queued movement state
+            if ((desiredMovement != Vector2Int.zero) && (desiredMovement != lastMovement))
+            {
+                queuedMovement = desiredMovement;
+                queuedMoveTime = Time.time;
+            }
+
+            // timeout movement if it has been too long
+            if (Time.time > (queuedMoveTime + queuedInputThreshold))
+                queuedMovement = Vector2Int.zero;
+
+            if (GameManager.IsBusy)
+                return;
+
+            // handle use? TODO
+
+            // handle move
+            Vector2Int movement = desiredMovement;
+            if (movement == Vector2Int.zero)
+                movement = queuedMovement;
+
+            if (movement != Vector2Int.zero)
+            {
+                PerformAction(movement);
+                lastMovement = movement;
+
+                // if there is no desired movement anymore, clear the queued movement too
+                if (desiredMovement == Vector2Int.zero)
+                    queuedMovement = Vector2Int.zero;
+            }
+        }
+
         private void OnLeftActionStarted(InputAction.CallbackContext ctx)
         {
             isLeftHeld = true;
-            PotentiallyQueueMove(leftCell);
+            desiredMovement = leftCell;
         }
 
         private void OnRightActionStarted(InputAction.CallbackContext ctx)
         {
             isRightHeld = true;
-            PotentiallyQueueMove(rightCell);
+            desiredMovement = rightCell;
         }
 
         private void OnUpActionStarted(InputAction.CallbackContext ctx)
         {
             isUpHeld = true;
-            PotentiallyQueueMove(upCell);
+            desiredMovement = upCell;
         }
 
         private void OnDownActionStarted(InputAction.CallbackContext ctx)
         {
             isDownHeld = true;
-            PotentiallyQueueMove(downCell);
+            desiredMovement = downCell;
         }
 
-        private void OnLeftActionEnded(InputAction.CallbackContext ctx) => isLeftHeld = false;
-        private void OnRightActionEnded(InputAction.CallbackContext ctx) => isRightHeld = false;
-        private void OnUpActionEnded(InputAction.CallbackContext ctx) => isUpHeld = false;
-        private void OnDownActionEnded(InputAction.CallbackContext ctx) => isDownHeld = false;
-
-        [ActorEventHandler]
-        private void OnTick(TickEvent evt)
+        private void OnLeftActionEnded(InputAction.CallbackContext ctx)
         {
-            if (GameManager.IsBusy)
-                return;
-
-            // queue up a different move if an action is active 
-            if (pendingMovement == Vector2Int.zero)
+            isLeftHeld = false;
+            if (desiredMovement == leftCell)
             {
-                if (isLeftHeld)
-                    PotentiallyQueueMove(leftCell);
-                else if (isRightHeld)
-                    PotentiallyQueueMove(rightCell);
-                else if (isUpHeld)
-                    PotentiallyQueueMove(upCell);
-                else if (isDownHeld)
-                    PotentiallyQueueMove(downCell);
-            }
-
-            // handle pending movements
-            if (pendingMovement != Vector2Int.zero)
-            {
-                PerformAction(pendingMovement);
-                pendingMovement = Vector2Int.zero;
+                desiredMovement = Vector2Int.zero;
+                UpdateDesiredMovement();
             }
         }
 
-        private void PotentiallyClearPendingMovement()
+        private void OnRightActionEnded(InputAction.CallbackContext ctx)
         {
-            if (pendingMovement == leftCell)
-            {
-                if (!isLeftHeld)
-                    pendingMovement = Vector2Int.zero;
+            isRightHeld = false;
+            if (desiredMovement == rightCell)
+            { 
+                desiredMovement = Vector2Int.zero;
+                UpdateDesiredMovement();
             }
-            else if (pendingMovement == rightCell)
-            {
-                if (!isRightHeld)
-                    pendingMovement = Vector2Int.zero;
-            }
-            else if (pendingMovement == upCell)
-            {
-                if (!isUpHeld)
-                    pendingMovement = Vector2Int.zero;
-            }
-            else if (pendingMovement == downCell)
-            {
-                if (!isDownHeld)
-                    pendingMovement = Vector2Int.zero;
+
+        }
+
+        private void OnUpActionEnded(InputAction.CallbackContext ctx)
+        {
+            isUpHeld = false;
+            if (desiredMovement == upCell)
+            { 
+                desiredMovement = Vector2Int.zero;
+                UpdateDesiredMovement();
             }
         }
 
-        private void PotentiallyQueueMove(Vector2Int movement)
+        private void OnDownActionEnded(InputAction.CallbackContext ctx)
         {
-            PotentiallyClearPendingMovement();
-
-            // don't set the move if one is already set
-            if (pendingMovement != Vector2Int.zero)
-                return;
-
-            pendingMovement = movement;
+            isDownHeld = false;
+            if (desiredMovement == downCell)
+            { 
+                desiredMovement = Vector2Int.zero;
+                UpdateDesiredMovement();
+            }
         }
 
-        private void PerformAction (Vector2Int cell)
+        private void UpdateDesiredMovement()
         {
-            queuedActionTime = float.MinValue;
+            if (isLeftHeld)
+                desiredMovement = leftCell;
+            else if (isRightHeld)
+                desiredMovement = rightCell;
+            else if (isUpHeld)
+                desiredMovement = upCell;
+            else if (isDownHeld)
+                desiredMovement = downCell;
+            else
+                lastMovement = Vector2Int.zero;
+        }
+
+        private void PerformAction(Vector2Int cell)
+        {
+            queuedMoveTime = float.MinValue;
 
             // Change facing direction 
             if (cell.x < 0)
@@ -175,6 +200,10 @@ namespace Puzzled
             if (Move(cell))
                 return;
 
+            // FIXME: this is temp until we have a use button
+            if (Time.time < (useTime + 0.25))
+                return;
+
             // Try a push move
             if (PushMove(cell))
                 return;
@@ -182,10 +211,6 @@ namespace Puzzled
             // Try a use move
             if (UseMove(cell))
                 return;
-        }
-
-        private void OnActionComplete ()
-        {
         }
 
         private bool Move (Vector2Int offset)
@@ -220,6 +245,7 @@ namespace Puzzled
             if (!query.result)
                 return false;
 
+            useTime = Time.time; // FIXME: temp
             BeginBusy();
 
             PlayAnimation("Push");
@@ -245,13 +271,12 @@ namespace Puzzled
             if (!query.result)
                 return false;
 
+            useTime = Time.time; // FIXME: temp
             BeginBusy();
 
             GameManager.Instance.SendToCell(new UseEvent(tile), moveToCell);
 
             EndBusy();
-
-            OnActionComplete();
 
             return true;
         }
@@ -265,8 +290,6 @@ namespace Puzzled
             PlayAnimation("Idle");
 
             EndBusy();
-
-            OnActionComplete();
         }
 
         private void PlayAnimation (string name)
