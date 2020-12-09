@@ -24,7 +24,28 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
+        private void OnQueryPull(QueryPullEvent evt)
+        {
+            var queryMove = new QueryMoveEvent(tile, evt.offset);
+            SendToCell(queryMove, queryMove.targetCell);
+            evt.result = queryMove.result;
+        }
+
+        [ActorEventHandler]
         private void OnPush(PushEvent evt)
+        {
+            moveFromCell = tile.cell;
+            moveToCell = tile.cell + evt.offset;
+            BeginBusy();
+            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
+                .Duration(evt.duration)
+                //.EaseOutCubic()
+                .OnStop(OnMoveComplete)
+                .Start(tile.gameObject);
+        }
+
+        [ActorEventHandler]
+        private void OnPull(PullEvent evt)
         {
             moveFromCell = tile.cell;
             moveToCell = tile.cell + evt.offset;

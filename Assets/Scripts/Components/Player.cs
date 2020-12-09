@@ -228,6 +228,14 @@ namespace Puzzled
                 // Try a push move
                 if (PushMove(cell))
                     return;
+
+                // Try a pull move
+                if (PullMove(cell))
+                {
+                    // flip him back to face the pulled object
+                    visuals.localScale.Scale(new Vector3(-1, 1, 1));
+                    return;
+                }
             }
 
             if (Move(cell))
@@ -245,7 +253,7 @@ namespace Puzzled
                 visuals.localScale = Vector3.one;
 
             // Try a use move
-            if (UseMove(cell))
+            if (Use(cell))
                 return;
         }
 
@@ -274,7 +282,7 @@ namespace Puzzled
         private bool PushMove (Vector2Int offset)
         {
             moveFromCell = tile.cell;
-            moveToCell = tile.cell + offset;            
+            moveToCell = tile.cell + offset;
 
             var query = new QueryPushEvent(tile, offset);
             GameManager.Instance.SendToCell(query, moveToCell);
@@ -296,7 +304,38 @@ namespace Puzzled
             return true;
         }
 
-        private bool UseMove (Vector2Int offset)
+        private bool PullMove(Vector2Int offset)
+        {
+            moveFromCell = tile.cell;
+            moveToCell = tile.cell + offset;
+            Vector2Int pullFromCell = tile.cell - offset;
+
+            var queryMove = new QueryMoveEvent(tile, offset);
+            GameManager.Instance.SendToCell(queryMove, moveToCell);
+            if (!queryMove.result)
+                return false;
+
+            var query = new QueryPullEvent(tile, offset);
+            GameManager.Instance.SendToCell(query, pullFromCell);
+            if (!query.result)
+                return false;
+
+            BeginBusy();
+
+            PlayAnimation("Push"); // FIXME: we need a pull
+
+            GameManager.Instance.SendToCell(new PullEvent(tile, offset, moveDuration), pullFromCell);
+
+            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
+                .Duration(moveDuration)
+                //                .EaseOutCubic()
+                .OnStop(OnMoveComplete)
+                .Start(tile.gameObject);
+
+            return true;
+        }
+
+        private bool Use (Vector2Int offset)
         {
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;            
