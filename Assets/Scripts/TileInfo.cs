@@ -12,7 +12,7 @@ namespace Puzzled
         [SerializeField] private bool _allowDynamic = true;
         [SerializeField] private bool _allowWireInputs = false;
         [SerializeField] private bool _allowWireOuputs = false;
-        [SerializeField] private TileLayer _layer = TileLayer.Static;
+        [SerializeField] private TileLayer _layer = TileLayer.Object;
 
         [Serializable]
         public struct CustomOptionEditor

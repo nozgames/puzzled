@@ -1,5 +1,6 @@
 ﻿using NoZ;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,14 +19,24 @@ namespace Puzzled
         [SerializeField] private float tick = 0.25f;
 
         [Header("Layers")]
-        [SerializeField] [Layer] private int staticLayer = 0;
-        [SerializeField] [Layer] private int dynamicLayer = 0;
+        [SerializeField] [Layer] private int floorLayer = 0;
+        [SerializeField] [Layer] private int floorObjectLayer = 0;
+        [SerializeField] [Layer] private int objectLayer = 0;
         [SerializeField] [Layer] private int logicLayer = 0;
         [SerializeField] [Layer] private int wireLayer = 0;
         [SerializeField] private LayerMask playLayers = 0;
         [SerializeField] private LayerMask defaultLayers = 0;
 
         public InputActionReference menuAction;
+
+#if false
+        public const int WorldSize = 255;
+        private const int WorldCenter = WorldSize / 2;
+        private const int WorldLayerCount = 4;
+        private const int WorldTileCount = WorldSize * WorldSize * WorldLayerCount;
+
+        private Tile[] _cells = new Tile[WorldTileCount];
+#endif
 
         private Dictionary<Vector2Int, List<Tile>> cells = new Dictionary<Vector2Int, List<Tile>>();
 
@@ -155,6 +166,12 @@ namespace Puzzled
             else
                 tiles.Add(tile);
 
+            // Sort the array
+
+            var sortedTiles = tiles.OrderByDescending(t => t.info.layer).ToList();
+            tiles.Clear();
+            tiles.AddRange(sortedTiles);
+
             tile.transform.position = grid.CellToWorld(cell.ToVector3Int());
         }
 
@@ -175,8 +192,16 @@ namespace Puzzled
             if (null == tiles)
                 return;
 
-            for(var tileIndex=0; tileIndex<tiles.Count && !evt.IsHandled; tileIndex++)               
-                tiles[tileIndex].Send(evt);
+            for(var tileIndex=0; tileIndex<tiles.Count; tileIndex++)
+            {
+                var tile = tiles[tileIndex];
+                if (tile.info.layer == TileLayer.Floor && tileIndex != 0)
+                    break;
+
+                tile.Send(evt);
+                if (evt.IsHandled)
+                    break;
+            }
         }
 
         public static void PuzzleComplete ()
@@ -204,12 +229,16 @@ namespace Puzzled
 
             switch (tile.info.layer)
             {
-                case TileLayer.Dynamic:
-                    tile.gameObject.SetChildLayers(Instance.dynamicLayer);
+                case TileLayer.Floor:
+                    tile.gameObject.SetChildLayers(Instance.floorLayer);
                     break;
 
-                case TileLayer.Static:
-                    tile.gameObject.SetChildLayers(Instance.staticLayer);
+                case TileLayer.FloorObject:
+                    tile.gameObject.SetChildLayers(Instance.floorObjectLayer);
+                    break;
+
+                case TileLayer.Object:
+                    tile.gameObject.SetChildLayers(Instance.objectLayer);
                     break;
 
                 case TileLayer.Logic:
