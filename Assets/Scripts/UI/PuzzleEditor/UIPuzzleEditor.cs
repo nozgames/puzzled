@@ -37,7 +37,7 @@ namespace Puzzled
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
-        [SerializeField] private GameObject tileSelector = null;
+        [SerializeField] private GameObject palette = null;
         [SerializeField] private int minZoom = 1;
         [SerializeField] private int maxZoom = 10;
         [SerializeField] private GameObject fileButton = null;
@@ -56,9 +56,11 @@ namespace Puzzled
         [SerializeField] private GameObject fileMenuPopup = null;
         [SerializeField] private GameObject puzzleNamePopup = null;
         [SerializeField] private GameObject loadPopup = null;
+        [SerializeField] private GameObject tileSelectorPopup = null;
         [SerializeField] private TMPro.TMP_InputField puzzleNameInput = null;
         [SerializeField] private Transform loadPopupFiles = null;
         [SerializeField] private GameObject loadPopupFilePrefab = null;
+        [SerializeField] private Transform tileSelectorTiles = null;
 
         [Header("Input")]
         [SerializeField] private InputActionReference pointerAction;
@@ -74,7 +76,7 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionPrefabInt = null;
         [SerializeField] private UIOptionEditor optionPrefabBool = null;
         [SerializeField] private UIOptionEditor optionPrefabString = null;
-
+        [SerializeField] private UIOptionEditor optionPrefabTile = null;
 
         private Mode _mode = Mode.Draw;
         private string currentPuzzleName = null;
@@ -94,6 +96,8 @@ namespace Puzzled
         private bool hasSelection => selectionRect.gameObject.activeSelf;
         private bool hasPuzzleName => !string.IsNullOrEmpty(currentPuzzleName);
 
+        public static UIPuzzleEditor instance { get; private set; }
+
         private Mode mode {
             get => _mode;
             set {
@@ -107,8 +111,14 @@ namespace Puzzled
             }
         }
 
+        private void Awake()
+        {
+            instance = this;
+        }
+
         private void OnEnable()
         {
+            GameManager.Stop();
             GameManager.IncBusy();
             GameManager.onTileInstantiated += OnTileInstantiated;
 
@@ -212,7 +222,7 @@ namespace Puzzled
 
             RenderTexture.active = previewCamera.targetTexture;
             t.ReadPixels(new Rect(0, 0, t.width, t.height), 0, 0);
-            t.Apply();
+            t.Apply();            
 
             var tileObject = Instantiate(piecePrefab, pieces);
             var toggle = tileObject.GetComponent<Toggle>();
@@ -221,11 +231,15 @@ namespace Puzzled
                 if(v)
                     drawTile = prefab;
             });
+            tileObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = prefab.info.displayName;
             tileObject.GetComponentInChildren<RawImage>().texture = t;            
         }
 
         public void OnToolChanged()
         {
+            if (null == GameManager.Instance)
+                return;
+
             if (drawTool.isOn)
                 mode = Mode.Draw;
             else if (selectTool.isOn)
@@ -237,7 +251,7 @@ namespace Puzzled
 
             GameManager.Instance.ShowWires(wireTool.isOn);
             inspector.SetActive(wireTool.isOn);
-            tileSelector.SetActive(mode == Mode.Draw);
+            palette.SetActive(mode == Mode.Draw);
         }
 
         private void HandleDrag(DragState state, Vector2Int cell)
@@ -524,7 +538,7 @@ namespace Puzzled
             GameManager.ClearBusy();
             GameManager.IncBusy();
 
-            tileSelector.SetActive(true);
+            palette.SetActive(true);
             selectTool.gameObject.SetActive(true);
             drawTool.gameObject.SetActive(true);
             eraseTool.gameObject.SetActive(true);
@@ -548,7 +562,7 @@ namespace Puzzled
                 return;
             }
 
-            tileSelector.SetActive(false);
+            palette.SetActive(false);
             selectTool.gameObject.SetActive(false);
             drawTool.gameObject.SetActive(false);
             eraseTool.gameObject.SetActive(false);
@@ -626,6 +640,8 @@ namespace Puzzled
                 return Instantiate(optionPrefabBool, options).GetComponent<UIOptionEditor>();
             else if (type == typeof(string))
                 return Instantiate(optionPrefabString, options).GetComponent<UIOptionEditor>();
+            else if (type == typeof(Guid))
+                return Instantiate(optionPrefabTile, options).GetComponent<UIOptionEditor>();
 
             return null;
         }
@@ -650,6 +666,16 @@ namespace Puzzled
 
                 optionEditor.target = editableProperty;
             }
+        }
+
+        public void OpenTileSelector (Action<Tile> callback)
+        {
+            ShowPopup(tileSelectorPopup);
+
+            tileSelectorTiles.DetachAndDestroyChildren();
+
+            for (int i = 0; i < palette.transform.childCount; i++)
+                Instantiate(palette.transform.GetChild(i).gameObject, tileSelectorTiles);
         }
     }
 }

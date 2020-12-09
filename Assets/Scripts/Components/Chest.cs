@@ -1,9 +1,5 @@
 ﻿using NoZ;
-using Puzzled;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Puzzled
 {
@@ -11,8 +7,11 @@ namespace Puzzled
     {
         private bool _isLocked = false;
 
+        [Editable]
+        public System.Guid keyItem { get; private set; }
+
         // TODO: these should be prefabs?
-        [SerializeField] private ItemType keyItem = ItemType.None;
+//      [SerializeField] private ItemType keyItem = ItemType.None;
         [SerializeField] private ItemType prizeItem = ItemType.None;
 
         [Header("Visuals")]
@@ -48,6 +47,7 @@ namespace Puzzled
             if (isLocked)
                 return;
 
+#if false
             if (keyItem != ItemType.None)
             {
                 // check if the using actor has the keyItem
@@ -60,6 +60,7 @@ namespace Puzzled
                     evt.result = true;
                 }
             }
+#endif
         }
 
         [ActorEventHandler]
