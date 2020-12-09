@@ -74,7 +74,7 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionPrefabInt = null;
         [SerializeField] private UIOptionEditor optionPrefabBool = null;
         [SerializeField] private UIOptionEditor optionPrefabString = null;
-
+        [SerializeField] private UIOptionEditor optionPrefabTile = null;
 
         private Mode _mode = Mode.Draw;
         private string currentPuzzleName = null;
@@ -221,11 +221,15 @@ namespace Puzzled
                 if(v)
                     drawTile = prefab;
             });
+            tileObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = prefab.info.displayName;
             tileObject.GetComponentInChildren<RawImage>().texture = t;            
         }
 
         public void OnToolChanged()
         {
+            if (null == GameManager.Instance)
+                return;
+
             if (drawTool.isOn)
                 mode = Mode.Draw;
             else if (selectTool.isOn)
@@ -626,6 +630,8 @@ namespace Puzzled
                 return Instantiate(optionPrefabBool, options).GetComponent<UIOptionEditor>();
             else if (type == typeof(string))
                 return Instantiate(optionPrefabString, options).GetComponent<UIOptionEditor>();
+            else if (type == typeof(Guid))
+                return Instantiate(optionPrefabTile, options).GetComponent<UIOptionEditor>();
 
             return null;
         }
