@@ -13,8 +13,17 @@ namespace Puzzled
 
         private void UpdateState()
         {
-            // FIXME: compare against wire config
-            tile.SetOutputsActive(tile.allInputsActive);
+            bool bMatches = true;
+            for (int i = 0; i < tile.inputCount; ++i)
+            {
+                if (tile.inputs[i].enabled != (tile.GetInputOption(i, 0) == 1))
+                {
+                    bMatches = false;
+                    break;
+                }
+            }
+
+            tile.SetOutputsActive(bMatches);
         }
     }
 }
