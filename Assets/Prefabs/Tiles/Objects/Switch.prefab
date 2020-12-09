@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3055914920036044396}
   - component: {fileID: 6103369818007901802}
   m_Layer: 0
-  m_Name: VisualPressed
+  m_Name: VisualOn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,7 +29,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2819266254877709548}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &6103369818007901802
 SpriteRenderer:
@@ -71,9 +71,9 @@ SpriteRenderer:
   m_SortingLayerID: 277350915
   m_SortingLayer: 3
   m_SortingOrder: 1
-  m_Sprite: {fileID: 5916661376434028961, guid: b899711a0519bf343af82959531d066d, type: 3}
+  m_Sprite: {fileID: 7223950226953391895, guid: b899711a0519bf343af82959531d066d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 8177669962107953861}
   - component: {fileID: 5540758807565431933}
   m_Layer: 0
-  m_Name: VisualUnpressed
+  m_Name: VisualOff
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -111,7 +111,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2819266254877709548}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &5540758807565431933
 SpriteRenderer:
@@ -153,7 +153,7 @@ SpriteRenderer:
   m_SortingLayerID: 277350915
   m_SortingLayer: 3
   m_SortingOrder: 1
-  m_Sprite: {fileID: 4531600420867107606, guid: b899711a0519bf343af82959531d066d, type: 3}
+  m_Sprite: {fileID: 7223950226953391895, guid: b899711a0519bf343af82959531d066d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -174,10 +174,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2819266254877709548}
   - component: {fileID: -8286699205250075377}
-  - component: {fileID: -5876770016442729841}
-  - component: {fileID: 6166858641441661560}
+  - component: {fileID: 3379083877432565206}
   m_Layer: 0
-  m_Name: PressurePlate
+  m_Name: Switch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -194,7 +193,6 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 8681657309485289670}
   - {fileID: 3055914920036044396}
   - {fileID: 8177669962107953861}
   m_Father: {fileID: 0}
@@ -212,9 +210,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _info: {fileID: 11400000, guid: 606927d019e4b4747a63984f4ee4dff4, type: 2}
-  _guid: 423ed0ff-f9cf-43f3-9572-7192a0850dfd
---- !u!114 &-5876770016442729841
+  _info: {fileID: 11400000, guid: bfc7dcfd3b53ea84e9fc7667946aa1e1, type: 2}
+--- !u!114 &3379083877432565206
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -223,82 +220,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 8922302472943703707}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6e2c7e312f0d2742a43908b3c20fc36, type: 3}
+  m_Script: {fileID: 11500000, guid: e8e01f84b1e3ae34fadeb01bea3233a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visualPressed: {fileID: 3766020313462247865}
-  visualUnpressed: {fileID: 5137144399866844459}
---- !u!114 &6166858641441661560
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8922302472943703707}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36bca5eb496b2854cb4af1921bce4ae0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!1001 &3780014487248777476
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 2819266254877709548}
-    m_Modifications:
-    - target: {fileID: 5227713672087370718, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_Name
-      value: FloorVisuals
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
---- !u!4 &8681657309485289670 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5480386470126576066, guid: d5c24a49fef6e594883fdee99124cedd, type: 3}
-  m_PrefabInstance: {fileID: 3780014487248777476}
-  m_PrefabAsset: {fileID: 0}
+  visualOn: {fileID: 3766020313462247865}
+  visualOff: {fileID: 5137144399866844459}
