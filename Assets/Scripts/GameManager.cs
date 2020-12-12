@@ -12,8 +12,6 @@ namespace Puzzled
         [SerializeField] private Transform _pan = null;
         [SerializeField] private Grid grid = null;
         [SerializeField] private Transform wires = null;
-        [SerializeField] private Canvas ui = null;
-        [SerializeField] private int minimumPuzzleSize = 9;
         [SerializeField] private GameObject wirePrefab = null;
         [SerializeField] private float wireHitThreshold = 0.1f;
         [SerializeField] private float tick = 0.25f;
@@ -23,30 +21,30 @@ namespace Puzzled
         [SerializeField] [Layer] private int floorObjectLayer = 0;
         [SerializeField] [Layer] private int objectLayer = 0;
         [SerializeField] [Layer] private int logicLayer = 0;
-        [SerializeField] [Layer] private int wireLayer = 0;
         [SerializeField] private LayerMask playLayers = 0;
         [SerializeField] private LayerMask defaultLayers = 0;
 
         public InputActionReference menuAction;
 
-#if false
-        public const int WorldSize = 255;
-        private const int WorldCenter = WorldSize / 2;
-        private const int WorldLayerCount = 4;
-        private const int WorldTileCount = WorldSize * WorldSize * WorldLayerCount;
+        /// <summary>
+        /// Current player
+        /// </summary>
+        private Player _player;
 
-        private Tile[] _cells = new Tile[WorldTileCount];
-#endif
+        public static Player player {
+            get => _instance._player;
+            set => _instance._player = value;
+        }
 
-        private Dictionary<Vector2Int, List<Tile>> cells = new Dictionary<Vector2Int, List<Tile>>();
+        public static Cell playerCell => player != null ? player.tile.cell : Cell.invalid;
+
+        public static bool isValid => _instance != null;
 
         private float elapsed = 0.0f;
 
         private bool _paused = false;
 
-        public static GameManager Instance { get; private set; }
-
-        public static event Action<Tile, Tile> onTileInstantiated;
+        private static GameManager _instance = null;
 
         /// <summary>
         /// Returns the active puzzle
@@ -55,17 +53,26 @@ namespace Puzzled
 
         private void OnEnable()
         {
-            menuAction.action.Enable();
-            menuAction.action.performed += OnMenuAction;
+            //menuAction.action.Enable();
+            //menuAction.action.performed += OnMenuAction;
 
-            if (Instance == null)
-                Instance = this;
+            if (_instance == null)
+                _instance = this;
+        }
+
+        private void OnApplicationQuit()
+        {
+            // Destroy the UI first
+            UIManager.instance.gameObject.SetActive(false);
+            Destroy(UIManager.instance.gameObject);
+
+            UnloadPuzzle();
         }
 
         private void OnDisable()
         {
-            if (Instance == this)
-                Instance = null;
+            if (_instance == this)
+                _instance = null;
 
             menuAction.action.Disable();
             menuAction.action.performed -= OnMenuAction;
@@ -76,132 +83,44 @@ namespace Puzzled
             UIManager.instance.ShowIngame();
         }
 
-        public static Vector2Int WorldToCell(Vector3 world) =>
-            Instance.grid.WorldToCell(world).ToVector2Int();
+        private int _busy = 0;
 
-        public static Vector3 CellToWorld(Vector2Int cell) =>
-            Instance.grid.CellToWorld(cell.ToVector3Int());
+        public static bool isBusy => _instance._busy > 0;
 
-        public static Tile[] GetTiles() => Instance.grid.GetComponentsInChildren<Tile>();
-
-        private int busyCount = 0;
-
-        public static bool IsBusy => Instance.busyCount > 0;
-
-        public static void ClearBusy() => Instance.busyCount = 0;
-
-        public static void IncBusy() => Instance.busyCount++;
-
-        public static void DecBusy() => Instance.busyCount--;
+        public static int busy {
+            get => _instance._busy;
+            set {
+                _instance._busy = value;
+                // TODO: event?
+            }
+        }
 
         public static bool paused {
-            get => Instance._paused;
+            get => _instance._paused;
             set {
-                Instance._paused = value;
+                _instance._paused = value;
             }
         }
 
-#if false
-        public void LoadPuzzle (Puzzle puzzle)
+        public static void LoadPuzzle(Puzzle puzzle) 
         {
-            //Screen.currentResolution
-            //canvasScaler.referencePixelsPerUnit
-            //canvasScaler.referenceResolution
-            Camera.main.orthographicSize = /*ui.transform.localScale.x * */(Mathf.Max(minimumPuzzleSize, puzzle.Height) + 1) * 0.5f;
-
-            for(int y=0; y<puzzle.Height; y++)
-                Instantiate(puzzle.Theme.floor, grid.GetCellCenterWorld(new Vector3Int(0,-puzzle.Height/2 + y, 0)), Quaternion.identity, grid.transform);
-        }
-#endif
-
-        public void LoadPuzzle(Puzzle puzzle) 
-        {
-            grid.transform.DetachAndDestroyChildren();
-
-            busyCount = 0;
-
-            this.puzzle = puzzle;
-
-            LinkTiles();
+            throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Link all tiles that are children of the grid to a cell and fix their world position
+        /// Unload the current puzzle
         /// </summary>
-        private void LinkTiles()
+        public static void UnloadPuzzle ()
         {
-            cells.Clear();
-
-            var tiles = grid.GetComponentsInChildren<Tile>();
-            foreach (var tile in tiles)
+            // Destroy the player
+            if (_instance._player != null)
             {
-                tile.cell = grid.WorldToCell(tile.transform.position).ToVector2Int();
-                tile.transform.position = grid.CellToWorld(tile.cell.ToVector3Int());
+                Destroy(_instance._player.gameObject);
+                _instance._player = null;
             }
-        }
 
-        /// <summary>
-        /// Return the cell for a given tile
-        /// </summary>
-        public Vector2Int GetTileCell(Tile tile) => grid.WorldToCell(tile.transform.position).ToVector2Int();
-
-        /// <summary>
-        /// Set the tiles current cell
-        /// </summary>
-        public void SetTileCell(Tile tile, Vector2Int cell)
-        {
-            if (tile.transform.parent != grid.transform)
-                tile.transform.SetParent(grid.transform);
-
-            // Remove the tile from the previous cell
-            GetCellTiles(tile.cell)?.Remove(tile);
-
-            // Add the tile to the give ncell
-            var tiles = GetCellTiles(cell);
-            if (null == tiles)
-            {
-                tiles = new List<Tile>(4) { tile };
-                cells[cell] = tiles;
-            }
-            else
-                tiles.Add(tile);
-
-            // Sort the array
-
-            var sortedTiles = tiles.OrderByDescending(t => t.info.layer).ToList();
-            tiles.Clear();
-            tiles.AddRange(sortedTiles);
-
-            tile.transform.position = grid.CellToWorld(cell.ToVector3Int());
-        }
-
-        public bool HasCellTiles(Vector2Int cell) => (GetCellTiles(cell)?.Count ?? 0) > 0;
-
-        /// <summary>
-        /// Returns the list of tiles at the given cell
-        /// </summary>
-        public List<Tile> GetCellTiles(Vector2Int cell) =>
-            cells.TryGetValue(cell, out var tiles) ? tiles : null;
-
-        /// <summary>
-        /// Send an event to a given cell
-        /// </summary>
-        public void SendToCell(ActorEvent evt, Vector2Int cell) 
-        {
-            var tiles = GetCellTiles(cell);
-            if (null == tiles)
-                return;
-
-            for(var tileIndex=0; tileIndex<tiles.Count; tileIndex++)
-            {
-                var tile = tiles[tileIndex];
-                if (tile.info.layer == TileLayer.Floor && tileIndex != 0)
-                    break;
-
-                tile.Send(evt);
-                if (evt.IsHandled)
-                    break;
-            }
+            // Unlink all tiles and destory them
+            TileGrid.UnlinkAll(true);
         }
 
         public static void PuzzleComplete ()
@@ -209,57 +128,45 @@ namespace Puzzled
             UIManager.instance.ShowPuzzleComplete();
         }
 
-        public void ClearTiles ()
-        {
-            cells.Clear();
-            grid.transform.DetachAndDestroyChildren();
-        }
-
-        public static Tile InstantiateTile(Guid guid, Vector2Int cell) =>
+        public static Tile InstantiateTile(Guid guid, Cell cell) =>
             InstantiateTile(TileDatabase.GetTile(guid), cell);
 
-        public static Tile InstantiateTile (Tile prefab, Vector2Int cell)
+        public static Tile InstantiateTile (Tile prefab, Cell cell)
         {
             if (prefab == null)
                 return null;
 
-            var tile = Instantiate(prefab.gameObject, Instance.grid.transform).GetComponent<Tile>();
+            // Do not allow two tiles to be intstantiated into the same cell
+            if(TileGrid.IsLinked(cell, prefab.info.layer))
+            {
+                Debug.LogError($"Cannot create tile `{prefab.info.displayName} at cell {cell}, layer is occupied by `{TileGrid.CellToTile(cell, prefab.info.layer).info.displayName}");
+                return null;
+            }
+
+            var tile = Instantiate(prefab.gameObject, _instance.grid.transform).GetComponent<Tile>();
             tile.guid = prefab.guid;
             tile.cell = cell;
 
             switch (tile.info.layer)
             {
                 case TileLayer.Floor:
-                    tile.gameObject.SetChildLayers(Instance.floorLayer);
+                    tile.gameObject.SetChildLayers(_instance.floorLayer);
                     break;
 
                 case TileLayer.FloorObject:
-                    tile.gameObject.SetChildLayers(Instance.floorObjectLayer);
+                    tile.gameObject.SetChildLayers(_instance.floorObjectLayer);
                     break;
 
                 case TileLayer.Object:
-                    tile.gameObject.SetChildLayers(Instance.objectLayer);
+                    tile.gameObject.SetChildLayers(_instance.objectLayer);
                     break;
 
                 case TileLayer.Logic:
-                    tile.gameObject.SetChildLayers(Instance.logicLayer);
+                    tile.gameObject.SetChildLayers(_instance.logicLayer);
                     break;
             }
 
-            onTileInstantiated?.Invoke(tile, prefab);
-
             return tile;
-        }
-
-        public void ClearTile (Vector2Int cell, TileLayer layer)
-        {
-            var tiles = GetCellTiles(cell);
-            if (null == tiles)
-                return;
-
-            foreach (var tile in tiles)
-                if(tile.info.layer == layer)
-                    Destroy(tile.gameObject);
         }
 
         public static Wire InstantiateWire (Tile input, Tile output)
@@ -277,51 +184,25 @@ namespace Puzzled
             if (input.HasOutput(output))
                 return null;
 
-            var wire = Instantiate(Instance.wirePrefab, Instance.wires.transform).GetComponent<Wire>();
+            var wire = Instantiate(_instance.wirePrefab, _instance.wires.transform).GetComponent<Wire>();
             wire.from.tile = input;
             wire.to.tile = output;
             input.outputs.Add(wire);
             output.inputs.Add(wire);
-            wire.transform.position = CellToWorld(wire.from.tile.cell);
+            wire.transform.position = TileGrid.CellToWorld(wire.from.tile.cell);
             return wire;
         }
 
-        public void ClearTile(Vector2Int cell)
+        public static void HideWires() => ShowWires(false);
+
+        public static void ShowWires(bool visible)
         {
-            var tiles = GetCellTiles(cell);
-            if (null == tiles)
-                return;
-
-            foreach (var tile in tiles)
-            {
-                foreach (var input in tile.inputs)
-                    Destroy(input);
-
-                foreach (var output in tile.outputs)
-                    Destroy(output);
-
-                Destroy(tile.gameObject);
-            }
-        }
-
-        public void RemoveTileFromCell (Tile tile)
-        {
-            var tiles = GetCellTiles(tile.cell);
-            if (null == tiles)
-                return;
-
-            tiles.Remove(tile);
-        }
-
-        public void HideWires() => ShowWires(false);
-
-        public void ShowWires(bool visible)
-        {
+            var wires = _instance.wires;
             for (int i = 0; i < wires.transform.childCount; i++)
                 wires.transform.GetChild(i).GetComponent<Wire>().visible = visible;
         }
 
-        public void ShowWires(Tile tile)
+        public static void ShowWires(Tile tile)
         {
             foreach (var output in tile.outputs)
                 output.visible = true;
@@ -337,14 +218,14 @@ namespace Puzzled
         /// <returns>Wire that collides with the world position or null if none found</returns>
         public static Wire HitTestWire (Vector3 position)
         {
-            var cell = WorldToCell(position + new Vector3(0.5f, 0.5f, 0));
-            var threshold = Instance.wireHitThreshold * Instance.wireHitThreshold;
+            var cell = TileGrid.WorldToCell(position + new Vector3(0.5f, 0.5f, 0));
+            var threshold = _instance.wireHitThreshold * _instance.wireHitThreshold;
 
-            for (int i=0; i<Instance.wires.childCount; i++)
+            for (int i=0; i<_instance.wires.childCount; i++)
             {
-                var wire = Instance.wires.GetChild(i).GetComponent<Wire>();
-                var min = Vector2Int.Min(wire.from.cell, wire.to.cell);
-                var max = Vector2Int.Max(wire.from.cell, wire.to.cell);
+                var wire = _instance.wires.GetChild(i).GetComponent<Wire>();
+                var min = Cell.Min(wire.from.cell, wire.to.cell);
+                var max = Cell.Max(wire.from.cell, wire.to.cell);
                 if (cell.x < min.x || cell.y < min.y || cell.x > max.x || cell.y > max.y)
                     continue;
 
@@ -366,13 +247,13 @@ namespace Puzzled
 
         public static void Pan(Vector3 pan)
         {
-            Instance._pan.position += Vector3.Scale(pan, new Vector3(1,1,0));
+            _instance._pan.position += Vector3.Scale(pan, new Vector3(1,1,0));
         }
 
         public static void PanCenter ()
         {
             // TODO: find center of puzzle
-            Instance._pan.position = Vector3.zero;
+            _instance._pan.position = Vector3.zero;
         }
 
         private void Update()
@@ -393,13 +274,25 @@ namespace Puzzled
 
         public static void Play ()
         {
-            Camera.main.cullingMask = Instance.playLayers;
+            Camera.main.cullingMask = _instance.playLayers;
             paused = false;
+
+            // Send a start event to all actors
+            var start = new StartEvent();
+            var grid = _instance.grid.transform;
+            for(int i=0; i<grid.childCount; i++)
+            {
+                var tile = grid.GetChild(i).GetComponent<Actor>();
+                if (null == tile)
+                    continue;
+
+                tile.Send(start);
+            }
         }
 
         public static void Stop ()
         {
-            Camera.main.cullingMask = Instance.defaultLayers;
+            Camera.main.cullingMask = _instance.defaultLayers;
             paused = true;
         }
     }

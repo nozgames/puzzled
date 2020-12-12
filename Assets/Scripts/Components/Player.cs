@@ -1,20 +1,23 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using NoZ;
 
 namespace Puzzled
 {
-    class Player : TileComponent
+    public class Player : TileComponent
     {
-        private readonly Vector2Int leftCell = new Vector2Int(-1, 0);
-        private readonly Vector2Int rightCell = new Vector2Int(1, 0);
-        private readonly Vector2Int upCell = new Vector2Int(0, 1);
-        private readonly Vector2Int downCell = new Vector2Int(0, -1);
+        private readonly Cell leftCell = new Cell(-1, 0);
+        private readonly Cell rightCell = new Cell(1, 0);
+        private readonly Cell upCell = new Cell(0, 1);
+        private readonly Cell downCell = new Cell(0, -1);
 
-        private Vector2Int moveFromCell;
-        private Vector2Int moveToCell;
+        private Cell moveFromCell;
+        private Cell moveToCell;
         private Animator animator;
         private float queuedMoveTime = float.MinValue;
+
+        public Tile inventory { get; private set; }
 
         [SerializeField] private float queuedInputThreshold = 0.25f;
         [SerializeField] private float moveDuration = 0.4f;
@@ -33,9 +36,9 @@ namespace Puzzled
         private bool isDownHeld = false;
         private bool isUseHeld = false;
 
-        private Vector2Int desiredMovement; // this is the currently held input
-        private Vector2Int queuedMovement;  // this is the last desired movement (if within input threshold it will be treated as desired)
-        private Vector2Int lastMovement;  // this is the last continuous movement made (cleared when desired is cleared)
+        private Cell desiredMovement; // this is the currently held input
+        private Cell queuedMovement;  // this is the last desired movement (if within input threshold it will be treated as desired)
+        private Cell lastMovement;  // this is the last continuous movement made (cleared when desired is cleared)
 
         private void Awake()
         {
@@ -67,6 +70,8 @@ namespace Puzzled
 
         protected override void OnDisable()
         {
+            base.OnDisable();
+
             leftAction.action.started -= OnLeftActionStarted;
             rightAction.action.started -= OnRightActionStarted;
             upAction.action.started -= OnUpActionStarted;
@@ -84,15 +89,13 @@ namespace Puzzled
             upAction.action.Disable();
             downAction.action.Disable();
             useAction.action.Disable();
-
-            base.OnDisable();
         }
 
         [ActorEventHandler]
         private void OnUpdate(NoZ.ActorUpdateEvent evt)
         {
             // update queued movement state
-            if ((desiredMovement != Vector2Int.zero) && (desiredMovement != lastMovement))
+            if ((desiredMovement != Cell.zero) && (desiredMovement != lastMovement))
             {
                 queuedMovement = desiredMovement;
                 queuedMoveTime = Time.time;
@@ -100,26 +103,26 @@ namespace Puzzled
 
             // timeout movement if it has been too long
             if (Time.time > (queuedMoveTime + queuedInputThreshold))
-                queuedMovement = Vector2Int.zero;
+                queuedMovement = Cell.zero;
 
-            if (GameManager.IsBusy)
+            if (GameManager.isBusy)
                 return;
 
             // handle use? TODO
 
             // handle move
-            Vector2Int movement = desiredMovement;
-            if (movement == Vector2Int.zero)
+            Cell movement = desiredMovement;
+            if (movement == Cell.zero)
                 movement = queuedMovement;
 
-            if (movement != Vector2Int.zero)
+            if (movement != Cell.zero)
             {
                 PerformMove(movement);
                 lastMovement = movement;
 
                 // if there is no desired movement anymore, clear the queued movement too
-                if (desiredMovement == Vector2Int.zero)
-                    queuedMovement = Vector2Int.zero;
+                if (desiredMovement == Cell.zero)
+                    queuedMovement = Cell.zero;
             }
         }
 
@@ -152,7 +155,7 @@ namespace Puzzled
             isLeftHeld = false;
             if (desiredMovement == leftCell)
             {
-                desiredMovement = Vector2Int.zero;
+                desiredMovement = Cell.zero;
                 UpdateDesiredMovement();
             }
         }
@@ -162,7 +165,7 @@ namespace Puzzled
             isRightHeld = false;
             if (desiredMovement == rightCell)
             { 
-                desiredMovement = Vector2Int.zero;
+                desiredMovement = Cell.zero;
                 UpdateDesiredMovement();
             }
 
@@ -173,7 +176,7 @@ namespace Puzzled
             isUpHeld = false;
             if (desiredMovement == upCell)
             { 
-                desiredMovement = Vector2Int.zero;
+                desiredMovement = Cell.zero;
                 UpdateDesiredMovement();
             }
         }
@@ -183,7 +186,7 @@ namespace Puzzled
             isDownHeld = false;
             if (desiredMovement == downCell)
             { 
-                desiredMovement = Vector2Int.zero;
+                desiredMovement = Cell.zero;
                 UpdateDesiredMovement();
             }
         }
@@ -193,7 +196,7 @@ namespace Puzzled
 
         private void OnUseAction(InputAction.CallbackContext ctx)
         {
-            if (desiredMovement == Vector2Int.zero)
+            if (desiredMovement == Cell.zero)
                 return; // use needs a direction
 
             PerformUse(desiredMovement);
@@ -210,10 +213,10 @@ namespace Puzzled
             else if (isDownHeld)
                 desiredMovement = downCell;
             else
-                lastMovement = Vector2Int.zero;
+                lastMovement = Cell.zero;
         }
 
-        private void PerformMove(Vector2Int cell)
+        private void PerformMove(Cell cell)
         {
             queuedMoveTime = float.MinValue;
 
@@ -242,8 +245,11 @@ namespace Puzzled
                 return;
         }
 
-        private void PerformUse(Vector2Int cell)
+        private void PerformUse(Cell cell)
         {
+            if (GameManager.isBusy)
+                return;
+
             queuedMoveTime = float.MinValue;
 
             // Change facing direction 
@@ -257,76 +263,89 @@ namespace Puzzled
                 return;
         }
 
-        private bool Move (Vector2Int offset)
+        private bool Move (Cell offset)
         {
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;
 
+            // Can we move wherre we are going?
             var query = new QueryMoveEvent(tile, offset);
-            GameManager.Instance.SendToCell(query, moveToCell);
+            SendToCell(query, moveToCell, CellEventRouting.FirstVisible);
             if (!query.result)
                 return false;
+
+            // Move to that cell immediately 
+            tile.cell = moveToCell;
 
             BeginBusy();
 
             PlayAnimation("Walk");
 
-            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
+            Tween.Move(TileGrid.CellToWorld(moveFromCell), TileGrid.CellToWorld(moveToCell), false)
                 .Duration(moveDuration)
                 .OnStop(OnMoveComplete)
-                .Start(tile.gameObject);
+                .Start(gameObject);
 
             return true;
         }
 
-        private bool PushMove (Vector2Int offset)
+        private bool PushMove (Cell offset)
         {
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;
 
-            var query = new QueryPushEvent(tile, offset);
-            GameManager.Instance.SendToCell(query, moveToCell);
-            if (!query.result)
+            // First tell the tile in the push direction to push.  If a tile pushed it will set IsHandled to true
+            if (!SendToCell(new PushEvent(tile, offset, moveDuration), moveToCell, CellEventRouting.FirstVisible))
                 return false;
+
+            // Move to the new cell immediately to ensure proper timing.  This will teleport the player
+            // but the call to Tween.Move below will immediately set the player back to the previous position
+            // to play the animation.
+            tile.cell = moveToCell;
 
             BeginBusy();
 
             PlayAnimation("Push");
 
-            GameManager.Instance.SendToCell(new PushEvent(tile, offset, moveDuration), moveToCell);
-
-            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
+            Tween.Move(TileGrid.CellToWorld(moveFromCell), TileGrid.CellToWorld(moveToCell), false)
                 .Duration(moveDuration)
-//                .EaseOutCubic()
                 .OnStop(OnMoveComplete)
                 .Start(tile.gameObject);
 
             return true;
         }
 
-        private bool PullMove(Vector2Int offset)
+        private bool PullMove(Cell offset)
         {
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;
-            Vector2Int pullFromCell = tile.cell - offset;
+            var pullFromCell = tile.cell - offset;
 
-            var queryMove = new QueryMoveEvent(tile, offset);
-            GameManager.Instance.SendToCell(queryMove, moveToCell);
+            // Make sure we can actually move where we are going first
+            var queryMove = new QueryMoveEvent(tile, moveToCell);
+            SendToCell(queryMove, moveToCell, CellEventRouting.FirstVisible);
             if (!queryMove.result)
                 return false;
 
-            var query = new QueryPullEvent(tile, offset);
-            GameManager.Instance.SendToCell(query, pullFromCell);
-            if (!query.result)
+            // Move to the new cell immediately to ensure proper timing.  This will teleport the player
+            // but the call to Tween.Move below will immediately set the player back to the previous position
+            // to play the animation.
+            tile.cell = moveToCell;
+
+            // Pull in the direction
+            if (!SendToCell(new PullEvent(tile, offset, moveDuration), pullFromCell, CellEventRouting.FirstVisible))
+            {
+                // Move back since the pull failed
+                tile.cell = moveFromCell;
                 return false;
+            }                
 
             BeginBusy();
 
             PlayAnimation("Push"); // FIXME: we need a pull
 
-            GameManager.Instance.SendToCell(new PullEvent(tile, offset, moveDuration), pullFromCell);
-
-            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
+            // Animate the movement
+            Tween.Move(TileGrid.CellToWorld(moveFromCell), TileGrid.CellToWorld(moveToCell), false)
                 .Duration(moveDuration)
                 //                .EaseOutCubic()
                 .OnStop(OnMoveComplete)
@@ -335,30 +354,16 @@ namespace Puzzled
             return true;
         }
 
-        private bool Use (Vector2Int offset)
+        private bool Use (Cell offset)
         {
-            moveFromCell = tile.cell;
-            moveToCell = tile.cell + offset;            
-
-            var query = new QueryUseEvent(tile, offset);
-            GameManager.Instance.SendToCell(query, moveToCell);
-            if (!query.result)
-                return false;
-
-            BeginBusy();
-
-            GameManager.Instance.SendToCell(new UseEvent(tile), moveToCell);
-
-            EndBusy();
-
-            return true;
+            return SendToCell(new UseEvent(tile), tile.cell + offset, CellEventRouting.FirstVisible);
         }
 
         private void OnMoveComplete()
         {
-            SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), moveFromCell);
-            tile.cell = moveToCell;
-            SendToCell(new EnterCellEvent(tile), moveToCell);
+            // Send events to cells to let them know move is finished
+            SendToCell(new LeaveCellEvent(actor, moveToCell), moveFromCell);
+            SendToCell(new EnterCellEvent(actor, moveFromCell), moveToCell);
 
             PlayAnimation("Idle");
 
@@ -370,14 +375,6 @@ namespace Puzzled
             animator.SetTrigger(name);
         }
 
-        // FIXME: this is a temp hack to allow pulling crates onto player tile
-        [ActorEventHandler(priority = 1)]
-        private void OnQueryMove(QueryMoveEvent evt)
-        {
-            evt.result = true;
-            evt.IsHandled = true;
-        }
-
         [ActorEventHandler]
         private void OnLevelExit (LevelExitEvent evt)
         {
@@ -385,24 +382,51 @@ namespace Puzzled
             PlayAnimation("Exit");
 
             Tween.Wait(2.0f).OnStop(() => GameManager.PuzzleComplete()).Start(gameObject);
-        }
-
-        public Item inventory { get; private set; }
+        }        
 
         [ActorEventHandler]
         private void OnGiveItem (GiveItemEvent evt)
         {
+            var drop = inventory;
+            if(drop != null)
+            {
+                // Dont bother picking up the same item
+                if (drop.guid == evt.item.tile.guid)
+                    return;
+            }
+
             BeginBusy();
             PlayAnimation("Exit");
 
             var itemVisuals = evt.item.CloneVisuals(transform);
             itemVisuals.transform.localPosition = new Vector3(0, 1.1f, 0);
 
-            inventory = evt.item;
+            var dropCell = evt.item.tile.cell;
+            inventory = TileDatabase.GetTile(evt.item.tile.guid);
 
-            Tween.Wait(1f).OnStop(() => {
+            // Drop the item in our inventory
+            if (drop != null)
+            {
+                BeginBusy();
+                Tween.Wait(0.01f)
+                    .OnStop(() => {
+                        var dropped = GameManager.InstantiateTile(drop, dropCell);
+                       
+                        Tween.Scale(0.0f, 1.0f)
+                            .Duration(0.05f)
+                            .Start(dropped.gameObject);
+                        TweenAnimations.ArcMove(TileGrid.CellToWorld(tile.cell), TileGrid.CellToWorld(dropped.cell), 0.5f)
+                            .Duration(0.15f)
+                            .OnStop(EndBusy)
+                            .Start(dropped.gameObject);
+                    })
+                    .Start(gameObject);
+            }
+
+            Tween.Wait(0.75f).OnStop(() => {
                 Destroy(itemVisuals);
                 PlayAnimation("Idle");
+
                 EndBusy();
             }).Start(gameObject);
 
@@ -413,7 +437,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnQueryHasItem (QueryHasItemEvent evt)
         {
-            if(inventory != null && evt.itemGuid == inventory.tile.guid)
+            if(inventory != null && evt.itemGuid == inventory.guid)
             {
                 evt.IsHandled = true;
             }

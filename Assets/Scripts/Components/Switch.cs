@@ -5,39 +5,39 @@ namespace Puzzled
 {
     class Switch : TileComponent
     {
-        public bool isOn { get; private set; }
+        private bool _on = false;
+
+        [Editable]
+        public bool isOn {
+            get => _on;
+            set {
+                if (_on == value)
+                    return;
+
+                _on = value;
+
+                UpdateVisuals();
+                tile.SetOutputsActive(_on);
+            }
+        }
 
         [Header("Visuals")]
         [SerializeField] private GameObject visualOn;
         [SerializeField] private GameObject visualOff;
 
         [ActorEventHandler]
-        private void OnQueryUse(QueryUseEvent evt)
+        private void OnStart(StartEvent evt)
         {
-            evt.result = true;
+            UpdateVisuals();
         }
 
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
-            if (isOn)
-                TurnOff();
-            else
-                TurnOn();
-        }
+            evt.IsHandled = true;
 
-        private void TurnOn()
-        {
-            isOn = true;
-            UpdateVisuals();
-            tile.SetOutputsActive(true);
-        }
-
-        private void TurnOff()
-        {
-            isOn = false;
-            UpdateVisuals();
-            tile.SetOutputsActive(false);
+            // Toggle the state
+            isOn = !isOn;
         }
 
         private void UpdateVisuals()

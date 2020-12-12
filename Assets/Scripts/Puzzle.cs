@@ -13,7 +13,7 @@ namespace Puzzled
         [Serializable]
         public class SerializedTile
         {
-            public Vector2Int cell;
+            public Cell cell;
             public string prefab;
             public SerializedProperty[] properties;
         }
@@ -40,15 +40,14 @@ namespace Puzzled
         public SerializedTile[] tiles;
         public SerializedWire[] wires;
 
-        public static void Save (Transform target, string filename)
+        public static void Save (Tile[] tiles, string filename)
         {
-            File.WriteAllText(filename, JsonUtility.ToJson(Save(target)));
+            File.WriteAllText(filename, JsonUtility.ToJson(Save(tiles)));
         }
 
-        public static Puzzle Save (Transform target)
+        public static Puzzle Save (Tile[] tiles)
         {
             var puzzle = new Puzzle();
-            var tiles = target.GetComponentsInChildren<Tile>();
             var save = new SerializedTile[tiles.Length];
 
             puzzle.wires = new SerializedWire[tiles.Sum(t => t.outputCount)];
@@ -56,12 +55,11 @@ namespace Puzzled
             for(int tileIndex=0; tileIndex<tiles.Length; tileIndex++)
             {
                 var tile = tiles[tileIndex];
-                var editorInfo = tile.GetComponent<TileEditorInfo>();
                 save[tileIndex] = new SerializedTile {
-                    prefab = editorInfo.guid.ToString(),
+                    prefab = tile.guid.ToString(),
                     cell = tile.cell,
-                    properties = editorInfo.editableProperties?
-                        .Select(p => new SerializedProperty { name = p.property.Name, value = p.GetValue() })
+                    properties = tile.properties?
+                        .Select(p => new SerializedProperty { name = p.property.Name, value = p.GetValue(tile) })
                         .ToArray()
                 };
 
@@ -93,7 +91,7 @@ namespace Puzzled
 
         public void Load()
         {
-            GameManager.Instance.ClearTiles();
+            GameManager.UnloadPuzzle();
 
             if (tiles == null)
                 return;
@@ -101,14 +99,8 @@ namespace Puzzled
             var tilesObjects = new List<Tile>();
             foreach (var serializedTile in tiles)
             {
-                //var tile =  GameManager.InstantiateTile(serializedTile.prefab, serializedTile.cell);
-                //var editorInfo = tile.GetComponent<TileEditorInfo>();
-                //editorInfo.guid = TileDatabaseTest.GetGuid(TileDatabase.instance.GetTile(serializedTile.prefab));
                 Guid.TryParse(serializedTile.prefab, out var guid);
-                var tile = GameManager.InstantiateTile(guid, serializedTile.cell);
-                var editorInfo = tile.GetComponent<TileEditorInfo>();
-                editorInfo.guid = guid;
-                tilesObjects.Add(tile);
+                tilesObjects.Add(GameManager.InstantiateTile(guid, serializedTile.cell));
             }
 
             if (wires != null)
@@ -118,15 +110,21 @@ namespace Puzzled
                 foreach (var serializedWire in wires)
                 {
                     var wire = GameManager.InstantiateWire(tilesObjects[serializedWire.from], tilesObjects[serializedWire.to]);
+                    wireObjects.Add(wire);
+                    if (null == wire)
+                        continue;
+
                     wire.from.SetOptions(serializedWire.fromOptions);
                     wire.to.SetOptions(serializedWire.toOptions);
-                    wireObjects.Add(wire);
                 }
 
                 // Sort the wires
                 for (int wireIndex = 0; wireIndex < wireObjects.Count; wireIndex++)
                 {
                     var wire = wireObjects[wireIndex];
+                    if (wire == null)
+                        continue;
+
                     wire.from.tile.SetOutputIndex(wire, wires[wireIndex].fromOrder, true);
                     wire.to.tile.SetInputIndex(wire, wires[wireIndex].toOrder, true);
                 }
@@ -138,9 +136,11 @@ namespace Puzzled
                 if (serializedTile.properties == null)
                     continue;
 
-                var tileEditorInfo = tilesObjects[i].GetComponent<TileEditorInfo>();                
+                if (tilesObjects[i] == null)
+                    continue;
+
                 foreach (var serializedProperty in serializedTile.properties)
-                    tileEditorInfo.SetEditableProperty(serializedProperty.name, serializedProperty.value);
+                    tilesObjects[i].SetProperty(serializedProperty.name, serializedProperty.value);
             }
         }
 

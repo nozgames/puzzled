@@ -11,7 +11,6 @@ namespace Puzzled
         [SerializeField] private GameObject _buttons = null;
         [SerializeField] private Button _moveUpButtom = null;
         [SerializeField] private Button _moveDownButton = null;
-        [SerializeField] private Button _deleteButton = null;
 
         [Header("Parameters")]
         [SerializeField] private Toggle _param1Toggle = null;

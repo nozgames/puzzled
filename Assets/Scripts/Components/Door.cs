@@ -1,17 +1,15 @@
 ﻿using NoZ;
-using Puzzled;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Puzzled
 {
     public class Door : TileComponent
     {
-        [Header("Logic")]
-        private bool _isOpen = false;
-        [SerializeField] private ItemType keyItem = ItemType.None;
+        private bool _open = false;
+        private bool _locked = false;
+
+        [Editable]
+        public System.Guid keyItem { get; private set; } = System.Guid.Empty;
 
         [Header("Visuals")]
         [SerializeField] private GameObject openedVisual;
@@ -19,62 +17,64 @@ namespace Puzzled
 
         [Editable]
         public bool isOpen {
-            get => _isOpen;
+            get => _open;
             set {
-                _isOpen = value;
+                _open = value;
                 UpdateVisuals();
             }
         }
+
+        private bool requiresKey => keyItem != System.Guid.Empty;
 
         private void Start()
         {
             UpdateVisuals();
         }
 
+        [ActorEventHandler]
+        private void OnStart(StartEvent evt)
+        {
+            _locked = requiresKey;
+        }
+
         private void UpdateVisuals()
         {
-            openedVisual.SetActive(_isOpen);
-            closedVisual.SetActive(!_isOpen);
+            openedVisual.SetActive(_open);
+            closedVisual.SetActive(!_open);
         }
 
         [ActorEventHandler(priority=1)]
         private void OnQueryMove(QueryMoveEvent evt)
         {
-            evt.result = _isOpen;
-        }
-
-        [ActorEventHandler]
-        private void OnQueryUse(QueryUseEvent evt)
-        {
-            // door can only be used if it is still closed 
-            if (_isOpen)
-                return;
-
-#if false
-            if (keyItem != ItemType.None)
-            {
-                // check if the using actor has the keyItem
-                QueryHasItemEvent hasItemEvent = new QueryHasItemEvent(keyItem);
-                evt.source.Send(hasItemEvent);
-
-                if (hasItemEvent.result)
-                {
-                    // yes, we can use this lockable
-                    evt.result = true;
-                }
-            }
-#endif
+            evt.result = _open;
         }
 
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
+            // Always retport we were used, even if the use fails
+            evt.IsHandled = true;
+
+            if (_locked && requiresKey)
+            {
+                // check if the using actor has the keyItem
+                _locked = evt.user.Send(new QueryHasItemEvent(keyItem));
+            }
+
+            // Door cannot be opened if locked
+            if (_locked)
+                return;
+
             Open();            
         }
 
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
         {
+            // Do not let wires open locked doors
+            if (_locked)
+                return;
+
             Open();
         }
 

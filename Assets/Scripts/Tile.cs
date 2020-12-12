@@ -1,6 +1,8 @@
-﻿using UnityEngine;
-using NoZ;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
+using UnityEngine;
+using NoZ;
 
 namespace Puzzled
 {
@@ -11,46 +13,123 @@ namespace Puzzled
         private static List<Tile> _tick = new List<Tile>();
         private static TickEvent _tickEvent = new TickEvent();
 
-        private Vector2Int _cell;
-
         public List<Wire> inputs { get; private set; } = new List<Wire>();
         public List<Wire> outputs { get; private set; } = new List<Wire>();
 
         public TileInfo info => _info;
 
-        public System.Guid guid { get; set; }
-           
         /// <summary>
-        /// Cell the actor is current in
+        /// Return the unique identifier for this tile type
         /// </summary>
-        public Vector2Int cell {
+        public System.Guid guid { get; set; }
+
+        /// <summary>
+        /// Return the tile properties array for this tile
+        /// </summary>
+        public TileProperty[] properties => TileDatabase.GetProperties(this);
+
+        /// <summary>
+        /// Current cell
+        /// </summary>
+        private Cell _cell = Cell.invalid;
+
+        /// <summary>
+        /// Current cell
+        /// </summary>
+        public Cell cell {
             get => _cell;
             set {
-                GameManager.Instance.SetTileCell(this, value);
+                if (_cell == value)
+                    return;
+
+                // Unlink ourselves from the tile we are in
+                if (isLinked)
+                    TileGrid.UnlinkTile(this);
+
                 _cell = value;
+
+                if (_cell == Cell.invalid)
+                    return;
+
+                transform.position = TileGrid.CellToWorld(_cell);
+
+                if (!TileGrid.isLinking)
+                    TileGrid.LinkTile(this);
+
+                // Give our own components a chance to react to the cell change
                 Send(new CellChangedEvent(this));
             }
         }
 
-        public void SendToCell(ActorEvent evt, Vector2Int cell) => GameManager.Instance.SendToCell(evt, cell);
-
-        protected override void OnDestroy()
+        /// <summary>
+        /// Send an event to the actor and return true if it was handled
+        /// </summary>
+        /// <param name="evt">Event to send</param>
+        /// <returns>True if the event has handled</returns>
+        public new bool Send(ActorEvent evt)
         {
-            base.OnDestroy();
+            base.Send(evt);
+            return evt.IsHandled;
+        }
 
+        /// <summary>
+        /// Returns true if the tile is linked into the tile grid
+        /// </summary>
+        public bool isLinked => cell != Cell.invalid;
+
+        /// <summary>
+        /// True if Destroy has been called but not OnDestroy 
+        /// </summary>
+        private bool _pendingDestroy = false;
+           
+        /// <summary>
+        /// Send an event to a specific cell
+        /// </summary>
+        /// <param name="evt">Event to send</param>
+        /// <param name="cell">Cell to send to</param>
+        /// <param name="routing">Routing to use for event</param>
+        public void SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing=CellEventRouting.All) => 
+            TileGrid.SendToCell(evt, cell, routing);
+
+        public void Destroy()
+        {
+            if (_pendingDestroy)
+                return;
+
+            _pendingDestroy = true;
+
+            // Remove us from tick management
             _tick.Remove(this);
 
+            gameObject.SetActive(false);
+            gameObject.transform.SetParent(null);
+
+            // Destroy all input wires
             foreach (var input in inputs)
                 Destroy(input.gameObject);
 
+            // Destroy all output wires
             foreach (var output in outputs)
                 Destroy(output.gameObject);
 
             inputs.Clear();
             outputs.Clear();
 
-            if(GameManager.Instance != null)
-                GameManager.Instance.RemoveTileFromCell(this);
+            // Unlink the tile from the tile grid
+            if (isLinked && !TileGrid.isLinking)
+                TileGrid.UnlinkTile(this);
+
+            cell = Cell.invalid;
+
+            Destroy(gameObject);
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            if (!_pendingDestroy)
+                Debug.LogWarning("Tile destroyed without calling Tile.Destroy");
         }
 
         /// <summary>
@@ -294,5 +373,22 @@ namespace Puzzled
             _tick.Remove(this);
             base.OnDisable();
         }
+
+        public void SetProperty (string name, string value)
+        {
+            var property = properties
+                .Where(ep => string.Compare(ep.property.Name, name, true) == 0)
+                .FirstOrDefault();
+
+            if (null == property)
+                return;
+
+            property.SetValue(this, value);
+        }
+
+        public void SetProperty(string name, int value) => SetProperty(name, value.ToString());
+        public void SetProperty(string name, bool value) => SetProperty(name, value.ToString());
+        public void SetProperty(string name, Guid value) => SetProperty(name, value.ToString());
+
     }
 }

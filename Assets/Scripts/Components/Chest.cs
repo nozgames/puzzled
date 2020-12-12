@@ -40,50 +40,29 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnQueryUse(QueryUseEvent evt)
+        private void OnUse(UseEvent evt)
         {
-            if (keyItem != null)
-            {
-                // check if the using actor has the keyItem
-                QueryHasItemEvent hasItemEvent = new QueryHasItemEvent(keyItem);
-                evt.source.Send(hasItemEvent);
+            // Always retport we were used, even if the use fails
+            evt.IsHandled = true;
 
-                if (hasItemEvent.IsHandled)
-                {
-                    isLocked = false;
-                }
-            }
-
-            // chest can only be used if it is unlocked
+            // Check to see if the user has the item to unlock the chest
+            isLocked = (keyItem == null || !evt.user.Send(new QueryHasItemEvent(keyItem)));
             if (isLocked)
                 return;
 
-            GameManager.InstantiateTile(TileDatabase.GetTile(prizeItem), tile.cell);
-            Destroy(tile.gameObject);
+            var cell = tile.cell;
+
+            // Destroy ourself first or the new item cannot spawn 
+            tile.Destroy();
+
+            // Spawn the prize at the same spot
+            GameManager.InstantiateTile(TileDatabase.GetTile(prizeItem), cell);
         }
 
         [ActorEventHandler]
-        private void OnUse(UseEvent evt)
-        {
-            Open();
-        }
+        private void OnActivateWire(WireActivatedEvent evt) => isLocked = false;
 
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
-        {
-            isLocked = false;
-        }
-
-        [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt)
-        {
-            isLocked = true;
-        }
-
-        private void Open()
-        {
-            // TODO: animate chest away and instantiate prize item
-            UpdateVisuals();
-        }
+        private void OnDeactivateWire(WireDeactivatedEvent evt) => isLocked = false;
     }
 }

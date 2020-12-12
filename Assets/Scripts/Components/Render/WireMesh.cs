@@ -8,9 +8,9 @@ namespace Puzzled
         [SerializeField] private float _tile = 0.0f;      
 
         private MeshFilter _filter;
-        private Vector2Int _target;
+        private Cell _target;
         
-        public Vector2Int target {
+        public Cell target {
             get => _target;
             set {
                 if (_target == value)
@@ -42,7 +42,7 @@ namespace Puzzled
             if (_filter == null || _width <= 0.01f || !gameObject.activeSelf)
                 return;
 
-            var targetPosition = GameManager.CellToWorld(_target) - gameObject.transform.position;
+            var targetPosition = TileGrid.CellToWorld(_target) - gameObject.transform.position;
             targetPosition.z = 0.0f;
             var hwidth = _width * 0.5f;
             var dir = targetPosition.normalized;

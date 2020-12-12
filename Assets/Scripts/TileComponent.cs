@@ -1,5 +1,4 @@
 ﻿using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
@@ -7,10 +6,11 @@ namespace Puzzled
     {
         public Tile tile => (Tile)base.actor;
 
-        public void SendToCell(ActorEvent evt, Vector2Int cell) => GameManager.Instance.SendToCell(evt, cell);
+        public bool SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing = CellEventRouting.All) =>
+            TileGrid.SendToCell(evt, cell, routing);
 
-        protected void BeginBusy() => GameManager.IncBusy();
+        protected void BeginBusy() => GameManager.busy++;
 
-        protected void EndBusy() => GameManager.DecBusy();
+        protected void EndBusy() => GameManager.busy--;
     }
 }

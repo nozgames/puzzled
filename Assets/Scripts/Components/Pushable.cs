@@ -5,65 +5,50 @@ namespace Puzzled
 {
     class Pushable : TileComponent
     {
-        private Vector2Int moveToCell;
-        private Vector2Int moveFromCell;
+        private Cell moveToCell;
+        private Cell moveFromCell;
 
         [ActorEventHandler(priority=1)]
         private void OnQueryMove(QueryMoveEvent evt)
         {
+            // Do not let anyone move into the same space as the pushable
             evt.result = false;
             evt.IsHandled = true;
         }
 
         [ActorEventHandler]
-        private void OnQueryPush(QueryPushEvent evt)
-        {
-            var queryMove = new QueryMoveEvent(tile, evt.offset);
-            SendToCell(queryMove, queryMove.targetCell);
-            evt.result = queryMove.result;
-        }
+        private void OnPush(PushEvent evt) => evt.IsHandled = MoveTo(evt.offset, evt.duration);
 
         [ActorEventHandler]
-        private void OnQueryPull(QueryPullEvent evt)
-        {
-            var queryMove = new QueryMoveEvent(tile, evt.offset);
-            SendToCell(queryMove, queryMove.targetCell);
-            evt.result = queryMove.result;
-        }
+        private void OnPull(PullEvent evt) => evt.IsHandled = MoveTo(evt.offset, evt.duration);
 
-        [ActorEventHandler]
-        private void OnPush(PushEvent evt)
+        private bool MoveTo(Cell offset, float duration)
         {
+            // Check if we can move the same direction as we are being pushed
+            var queryMove = new QueryMoveEvent(tile, offset);
+            SendToCell(queryMove, queryMove.targetCell, CellEventRouting.FirstVisible);
+            if (!queryMove.result)
+                return false;
+
             moveFromCell = tile.cell;
-            moveToCell = tile.cell + evt.offset;
-            BeginBusy();
-            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
-                .Duration(evt.duration)
+            moveToCell = queryMove.targetCell;
+
+            // Immediately change our cell
+            tile.cell = queryMove.targetCell;
+
+            Tween.Move(TileGrid.CellToWorld(moveFromCell), TileGrid.CellToWorld(moveToCell), false)
+                .Duration(duration)
                 //.EaseOutCubic()
                 .OnStop(OnMoveComplete)
                 .Start(tile.gameObject);
-        }
-
-        [ActorEventHandler]
-        private void OnPull(PullEvent evt)
-        {
-            moveFromCell = tile.cell;
-            moveToCell = tile.cell + evt.offset;
-            BeginBusy();
-            Tween.Move(tile.transform.position, GameManager.CellToWorld(moveToCell), false)
-                .Duration(evt.duration)
-                //.EaseOutCubic()
-                .OnStop(OnMoveComplete)
-                .Start(tile.gameObject);
+            
+            return true;
         }
 
         private void OnMoveComplete()
         {
-            SendToCell(ActorEvent.Singleton<LeaveCellEvent>().Init(), moveFromCell);
-            tile.cell = moveToCell;
-            SendToCell(new EnterCellEvent(tile), moveToCell);
-            
-            EndBusy();
+            SendToCell(new LeaveCellEvent(tile, moveToCell), moveFromCell);
+            SendToCell(new EnterCellEvent(tile, moveFromCell), moveToCell);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Puzzled
             /// <summary>
             /// Cell of the connected tile
             /// </summary>
-            public Vector2Int cell => tile.cell;
+            public Cell cell => tile.cell;
 
             /// <summary>
             /// True if the connection has options

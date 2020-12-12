@@ -9,7 +9,6 @@ namespace Puzzled
         [SerializeField] private GameObject _wirePrefab = null;
         [SerializeField] private bool _input = true;
         [SerializeField] private bool _reorderable = false;
-        [SerializeField] private ToggleGroup _toggleGroup = null;
         [SerializeField] private TMPro.TextMeshProUGUI _noinputs  = null;
 
         public bool isInput => _input;

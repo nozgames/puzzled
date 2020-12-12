@@ -5,19 +5,16 @@ namespace Puzzled
 {
     public class Item : TileComponent
     {
+        //[SerializeField] private Sprite _icon = null;
         [SerializeField] private GameObject _visuals = null;
-        [SerializeField] private GameObject _shadow = null;
-
+        
         [ActorEventHandler]
-        private void OnEnterCell(EnterCellEvent evt)
+        private void OnUse(UseEvent evt)
         {
-            if (!_visuals.activeSelf)
-                return;
+            evt.IsHandled = true;
 
-            var giveItem = new GiveItemEvent(this);
-            evt.tile.Send(giveItem);
-            _visuals.SetActive(!giveItem.IsHandled);
-            _shadow.SetActive(!giveItem.IsHandled);
+            if(evt.user.Send(new GiveItemEvent(this)))
+                tile.Destroy();
         }
 
         public GameObject CloneVisuals (Transform parent)

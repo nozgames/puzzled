@@ -1,20 +1,25 @@
 ﻿using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
     public class EnterCellEvent : ActorEvent
     {
         /// <summary>
-        /// Tile that is entering the cell
+        /// Actor that is leaving the cell
         /// </summary>
-        public Tile tile { get; private set; }
+        public Actor actor { get; private set; }
 
-        public bool isPlayer => tile.gameObject.GetComponent<Player>() != null;
+        /// <summary>
+        /// Cell the actor came from
+        /// </summary>
+        public Cell cellFrom { get; private set; }
 
-        public EnterCellEvent(Tile tile)
+        public bool isPlayer => actor.gameObject.GetComponent<Player>() != null;
+
+        public EnterCellEvent(Actor actor, Cell cellFrom)
         {
-            this.tile = tile;
+            this.actor = actor;
+            this.cellFrom = cellFrom;
         }
     }
 }

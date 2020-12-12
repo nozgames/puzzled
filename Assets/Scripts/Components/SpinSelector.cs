@@ -30,14 +30,16 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnQueryUse(QueryUseEvent evt)
+        private void OnStart(StartEvent evt)
         {
-            evt.result = true;
+            OnUpdateValue();
         }
 
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
+            evt.IsHandled = true;
+
             value++;
         }
 

@@ -15,8 +15,8 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnQueryMove(QueryMoveEvent evt)
         {
-            // TODO: need better solution for this
-            if (!evt.source.GetComponentInChildren<Player>())
+            // Is player?
+            if(evt.source == GameManager.player.tile)
                 evt.result = false;
         }
     }

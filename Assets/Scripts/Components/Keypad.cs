@@ -24,14 +24,13 @@ namespace Puzzled
         [SerializeField] private GameObject visualUnlocked;
 
         [ActorEventHandler]
-        private void OnQueryUse(QueryUseEvent evt)
-        {
-            evt.result = isLocked;
-        }
-
-        [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
+            evt.IsHandled = true;
+
+            if (isLocked)
+                return;
+
             // FIXME
             // open keypad UI and get input
             // check against value

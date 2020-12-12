@@ -33,7 +33,7 @@ namespace Puzzled
 
         public CustomOptionEditor[] optionEditors => _optionEditors;
 
-        public TileLayer layer => _layer;
+        public TileLayer layer => _layer;        
     }
 }
 

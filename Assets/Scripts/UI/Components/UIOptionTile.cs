@@ -11,18 +11,17 @@ namespace Puzzled
         {
             base.OnTargetChanged(target);
 
-            var editableProperty = (TileEditorInfo.EditableProperty)target;
-            label = NicifyName(editableProperty.property.Name);
-            if(System.Guid.TryParse(editableProperty.GetValue(), out var guid))
-                preview.texture = TileDatabase.GetPreview(guid);
+            var option = (TilePropertyOption)target;
+            label = option.name;
+            preview.texture = TileDatabase.GetPreview(option.GetValueGuid());
         }
 
         public void OnSelectTile ()
         {
             UIPuzzleEditor.instance.OpenTileSelector(typeof(Item), 
                 (tile) => {
-                    var editableProperty = (TileEditorInfo.EditableProperty)target;
-                    editableProperty.SetValue(tile.guid.ToString());
+                    var option = (TilePropertyOption)target;
+                    option.SetValue(tile.guid);
                     preview.texture = TileDatabase.GetPreview(tile.guid);
                 }
             );

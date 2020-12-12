@@ -7,9 +7,9 @@ namespace Puzzled
     {
         public Tile source { get; private set; }
 
-        public Vector2Int offset { get; private set; }
+        public Cell offset { get; private set; }
 
-        public Vector2Int targetCell => source.cell + offset;
+        public Cell targetCell => source.cell + offset;
 
         private bool _noresult = true;
         private bool _result = false;
@@ -25,7 +25,7 @@ namespace Puzzled
             }
         }
 
-        protected QueryEvent(Tile source, Vector2Int offset)
+        protected QueryEvent(Tile source, Cell offset)
         {
             this.source = source;
             this.offset = offset;

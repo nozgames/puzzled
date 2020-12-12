@@ -5,17 +5,17 @@ namespace Puzzled
 {
     class UIPuzzleComplete : UIScreen
     {
-        [SerializeField] private Button nextButton = null;
+        //[SerializeField] private Button nextButton = null;
 
         private void OnEnable()
         {
-            var nextPuzzle = UIManager.instance.GetNextPuzzle();
-            nextButton.interactable = nextPuzzle != null;
+            //var nextPuzzle = UIManager.instance.GetNextPuzzle();
+            //nextButton.interactable = nextPuzzle != null;
         }
 
         public void OnReplayButton()
         {
-            GameManager.Instance.LoadPuzzle(GameManager.Instance.puzzle);
+            //GameManager._instance.LoadPuzzle(GameManager._instance.puzzle);
             UIManager.instance.HideMenu();
         }
 
@@ -26,7 +26,7 @@ namespace Puzzled
 
         public void OnNextButton()
         {
-            GameManager.Instance.LoadPuzzle(UIManager.instance.GetNextPuzzle());
+            //GameManager._instance.LoadPuzzle(UIManager.instance.GetNextPuzzle());
             UIManager.instance.HideMenu();
         }
     }

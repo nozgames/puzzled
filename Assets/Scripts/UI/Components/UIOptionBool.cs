@@ -19,15 +19,14 @@ namespace Puzzled
 
         private void OnToggleValueChanged(bool newValue)
         {
-            var editableProperty = ((TileEditorInfo.EditableProperty)target);
-            editableProperty.SetValue(newValue.ToString());
+            ((TilePropertyOption)target).SetValue(newValue);
         }
 
         protected override void OnTargetChanged(object target)
         {
-            var editableProperty = ((TileEditorInfo.EditableProperty)target);
-            toggle.isOn = bool.TryParse(editableProperty.GetValue(), out var value) ? value : false;
-            label = NicifyName(editableProperty.property.Name);
+            var option = ((TilePropertyOption)target);
+            toggle.isOn = option.GetValueBool();
+            label = option.name;
         }
     }
 }

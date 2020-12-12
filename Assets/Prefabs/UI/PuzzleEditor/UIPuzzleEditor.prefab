@@ -3520,7 +3520,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8223019355202642593}
   m_HandleRect: {fileID: 6377430029570329504}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -4243,16 +4243,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6968442508bd974e9263ce2bddcc0d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  previewCamera: {fileID: 0}
-  previewParent: {fileID: 0}
   piecePrefab: {fileID: 4642312077439141805, guid: d684a815fe1df374c8869163752acd8d, type: 3}
-  pieces: {fileID: 7223597507401389422}
   selectionRect: {fileID: 3798742728068985604}
   puzzleName: {fileID: 659994157591101876}
   playButton: {fileID: 8274674950775170638}
   stopButton: {fileID: 1099847484105953486}
   dragWirePrefab: {fileID: 4802866844265590925, guid: 7065baa40cee3944897e0b7bfaade53b, type: 3}
-  palette: {fileID: 236294129860444160}
+  paletteTiles: {fileID: 7223597507401389422}
+  palette: {fileID: 8093783416340948565}
   minZoom: 1
   maxZoom: 10
   fileButton: {fileID: 6566974725437371001}
@@ -4277,7 +4275,6 @@ MonoBehaviour:
   rightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
   middleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
   mouseWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  floorTile: {fileID: 6868080960101938933, guid: 9bddce0558392d543b7b606b1489fff3, type: 3}
   optionPrefabInt: {fileID: 4529574181350812176, guid: d5d09ef2d31322241a7be94da23d4ed0, type: 3}
   optionPrefabBool: {fileID: 8374807034875396637, guid: 2f03af7b0735f5b4a9e3902ee279015e, type: 3}
   optionPrefabString: {fileID: 6910281527542142307, guid: 465644fba07ec7a46a0f0b76a938d3d5, type: 3}

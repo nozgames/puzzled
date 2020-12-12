@@ -28,15 +28,13 @@ namespace Puzzled
             End
         }
 
-        [SerializeField] private Camera previewCamera = null;
-        [SerializeField] private Transform previewParent = null;
         [SerializeField] private GameObject piecePrefab = null;
-        [SerializeField] private Transform pieces = null;
         [SerializeField] private RectTransform selectionRect = null;
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
+        [SerializeField] private Transform paletteTiles = null;
         [SerializeField] private GameObject palette = null;
         [SerializeField] private int minZoom = 1;
         [SerializeField] private int maxZoom = 10;
@@ -70,9 +68,6 @@ namespace Puzzled
         [SerializeField] private InputActionReference middleClickAction;
         [SerializeField] private InputActionReference mouseWheelAction;
 
-        [Header("Tiles")]
-        [SerializeField] private Tile floorTile = null;
-
         [Header("Options")]
         [SerializeField] private UIOptionEditor optionPrefabInt = null;
         [SerializeField] private UIOptionEditor optionPrefabBool = null;
@@ -86,8 +81,8 @@ namespace Puzzled
 
         private RectInt selection;
         private Tile drawTile = null;
-        private Vector2Int dragStart;
-        private Vector2Int dragEnd;
+        private Cell dragStart;
+        private Cell dragEnd;
         private bool dragging;
         private bool ignoreMouseUp;
         private bool playing;
@@ -110,6 +105,12 @@ namespace Puzzled
                 SelectTile(null);
 
                 _mode = value;
+
+                if (_mode == Mode.Wire)
+                    SelectTile(null);
+
+                inspector.SetActive(_mode == Mode.Wire);
+                palette.SetActive(mode == Mode.Draw);
             }
         }
 
@@ -121,18 +122,15 @@ namespace Puzzled
         private void OnEnable()
         {
             GameManager.Stop();
-            GameManager.IncBusy();
-            GameManager.onTileInstantiated += OnTileInstantiated;
+            GameManager.busy++;
 
             popups.gameObject.SetActive(false);
             inspector.SetActive(false);
 
-            pieces.transform.DetachAndDestroyChildren();
+            paletteTiles.transform.DetachAndDestroyChildren();
 
             foreach (var tile in TileDatabase.GetTiles())
                 GeneratePreview(tile);
-
-            previewParent.DetachAndDestroyChildren();
 
             pointerAction.action.performed += OnPointerMoved;
             pointerDownAction.action.performed += OnPointerDown;
@@ -144,15 +142,9 @@ namespace Puzzled
 
             drawTool.isOn = true;
 
-            GameManager.Instance.ClearTiles();
+            GameManager.UnloadPuzzle();
             currentPuzzleName = null;
             puzzleName.text = "Unnamed";
-        }
-
-        private void OnTileInstantiated(Tile tile, Tile prefab)
-        {
-            var editorInfo = tile.gameObject.AddComponent<TileEditorInfo>();
-            editorInfo.guid = TileDatabase.GetGuid(prefab);
         }
 
         private void OnRightClick(InputAction.CallbackContext ctx)
@@ -192,10 +184,7 @@ namespace Puzzled
 
         private void OnDisable()
         {
-            GameManager.onTileInstantiated -= OnTileInstantiated;
-
-            if (GameManager.Instance != null)
-                GameManager.DecBusy();
+            GameManager.busy--;
 
             pointerAction.action.performed -= OnPointerMoved;
             pointerDownAction.action.performed -= OnPointerDown;
@@ -211,9 +200,9 @@ namespace Puzzled
 
             var t = TileDatabase.GetPreview(prefab.guid);
 
-            var tileObject = Instantiate(piecePrefab, pieces);
+            var tileObject = Instantiate(piecePrefab, paletteTiles);
             var toggle = tileObject.GetComponent<Toggle>();
-            toggle.group = pieces.GetComponent<ToggleGroup>();
+            toggle.group = paletteTiles.GetComponent<ToggleGroup>();
             toggle.onValueChanged.AddListener(v => {
                 if (v)
                     drawTile = prefab;
@@ -224,7 +213,7 @@ namespace Puzzled
 
         public void OnToolChanged()
         {
-            if (null == GameManager.Instance)
+            if (!GameManager.isValid)
                 return;
 
             if (drawTool.isOn)
@@ -235,33 +224,36 @@ namespace Puzzled
                 mode = Mode.Erase;
             else if (wireTool.isOn)
                 mode = Mode.Wire;
-
-            GameManager.Instance.ShowWires(wireTool.isOn);
-            inspector.SetActive(wireTool.isOn);
-            palette.SetActive(mode == Mode.Draw);
         }
 
-        private void HandleDrag(DragState state, Vector2Int cell)
+        private void HandleDrag(DragState state, Cell cell)
         {
             switch (mode)
             {
                 case Mode.Draw:
-                    if (null == drawTile)
+                    if (null == drawTile || state == DragState.End)
                         return;
 
-                    // Remove any tile on the layer
-                    GameManager.Instance.ClearTile(cell, drawTile.info.layer);
+                    // Dont draw if the same tile is already there.  This will prevent
+                    // accidental removal of connections and properties
+                    var existing = TileGrid.CellToTile(cell, drawTile.info.layer);
+                    if (existing != null && existing.guid == drawTile.guid)
+                        return;
+
+                    // Remove what is already in that slot
+                    // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
+                    TileGrid.UnlinkTile(cell, drawTile.info.layer, true);
 
                     // Destroy all other instances of this tile regardless of variant
                     if (!drawTile.info.allowMultiple)
-                        foreach (var actor in GameManager.GetTiles().Where(a => a.info == drawTile.info))
-                            Destroy(actor.gameObject);
-
+                        TileGrid.UnlinkTile(TileGrid.GetLinkedTile(drawTile.info), true);
+                    
+                    // Create the new tile
                     GameManager.InstantiateTile(drawTile, cell);
                     break;
 
                 case Mode.Erase:
-                    GameManager.Instance.ClearTile(cell);
+                    TileGrid.UnlinkTiles(cell,true);
                     break;
 
                 case Mode.Select:
@@ -279,13 +271,12 @@ namespace Puzzled
                             var tile = GetTile(cell);
                             if (tile != null)
                             {
-                                GameManager.Instance.HideWires();
-                                GameManager.Instance.ShowWires(tile);
-                                SetSelectionRect(cell, cell);
+                                
                                 SelectTile(cell);
-                            } else
+                            } 
+                            else
                             {
-                                GameManager.Instance.ShowWires(true);
+                                SelectTile(null);                                
                             }
                             break;
                         }
@@ -295,7 +286,7 @@ namespace Puzzled
                             if (null == dragWire && dragStart != dragEnd && hasSelection && GetTile(dragStart).info.allowWireOutputs)
                             {
                                 dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
-                                dragWire.transform.position = GameManager.CellToWorld(dragStart);
+                                dragWire.transform.position = TileGrid.CellToWorld(dragStart);
                                 dragWire.target = cell;
                             } else if (dragWire != null)
                             {
@@ -321,31 +312,40 @@ namespace Puzzled
             }
         }
 
-        private void SetSelectionRect(Vector2Int min, Vector2Int max)
+        private void SetSelectionRect(Cell min, Cell max)
         {
-            var anchorCell = Vector2Int.Min(min, max);
-            var size = Vector2Int.Max(min, max) - anchorCell;
+            var anchorCell = Cell.Min(min, max);
+            var size = Cell.Max(min, max) - anchorCell;
 
-            selectionRect.anchorMin = Camera.main.WorldToViewportPoint(GameManager.CellToWorld(anchorCell) - new Vector3(0.5f, 0.5f, 0));
-            selectionRect.anchorMax = Camera.main.WorldToViewportPoint(GameManager.CellToWorld(anchorCell + size) + new Vector3(0.5f, 0.5f, 0));
+            selectionRect.anchorMin = Camera.main.WorldToViewportPoint(TileGrid.CellToWorld(anchorCell) - new Vector3(0.5f, 0.5f, 0));
+            selectionRect.anchorMax = Camera.main.WorldToViewportPoint(TileGrid.CellToWorld(anchorCell + size) + new Vector3(0.5f, 0.5f, 0));
 
             selectionRect.gameObject.SetActive(true);
         }
 
-        private void SelectTile(Vector2Int cell) => SelectTile(GetTile(cell));
+        private void SelectTile(Cell cell) => SelectTile(GetTile(cell));
 
         private void SelectTile(Tile tile)
         {
             if (tile == null)
             {
+                selectionRect.gameObject.SetActive(false);                
                 options.DetachAndDestroyChildren();
-                return;
-            }
 
-            PopulateOptions(tile);
+                GameManager.ShowWires(mode == Mode.Wire);
+            }
+            else
+            {
+                Debug.Assert(mode == Mode.Wire);
+
+                SetSelectionRect(tile.cell, tile.cell);
+                GameManager.HideWires();
+                GameManager.ShowWires(tile);
+                PopulateOptions(tile);
+            }
         }
 
-        private Vector2Int pointerCell;
+        private Cell pointerCell;
         private Vector2 pointer;
         private Vector3 pointerWorld;
 
@@ -353,7 +353,7 @@ namespace Puzzled
         {
             pointer = ctx.ReadValue<Vector2>();
             pointerWorld = Camera.main.ScreenToWorldPoint(pointer);
-            var cell = GameManager.WorldToCell(pointerWorld + new Vector3(0.5f, 0.5f, 0));
+            var cell = TileGrid.WorldToCell(pointerWorld + new Vector3(0.5f, 0.5f, 0));
             if (cell != pointerCell)
                 pointerCell = cell;
 
@@ -452,7 +452,7 @@ namespace Puzzled
 
         public void Save()
         {
-            Puzzle.Save(GameManager.Instance.transform.GetChild(1), currentPuzzleFilename);
+            Puzzle.Save(TileGrid.GetLinkedTiles(), currentPuzzleFilename);
         }
 
         private void NewPuzzle()
@@ -461,7 +461,7 @@ namespace Puzzled
             currentPuzzleName = null;
             puzzleName.text = "Unnamed";
             GameManager.PanCenter();
-            GameManager.Instance.ClearTiles();
+            GameManager.UnloadPuzzle();
             Camera.main.orthographicSize = 6;
             HidePopup();
         }
@@ -502,11 +502,10 @@ namespace Puzzled
                 return;
 
             GameManager.Stop();
+            GameManager.busy = 1;            
 
-            GameManager.ClearBusy();
-            GameManager.IncBusy();
-
-            palette.SetActive(true);
+            inspector.SetActive(mode == Mode.Wire);
+            palette.SetActive(mode == Mode.Draw);
             selectTool.gameObject.SetActive(true);
             drawTool.gameObject.SetActive(true);
             eraseTool.gameObject.SetActive(true);
@@ -530,6 +529,8 @@ namespace Puzzled
                 return;
             }
 
+            SelectTile(null);
+            inspector.SetActive(false);
             palette.SetActive(false);
             selectTool.gameObject.SetActive(false);
             drawTool.gameObject.SetActive(false);
@@ -537,7 +538,7 @@ namespace Puzzled
             wireTool.gameObject.SetActive(false);
             fileButton.gameObject.SetActive(false);
 
-            GameManager.ClearBusy();
+            GameManager.busy = 0;
 
             playButton.gameObject.SetActive(false);
             stopButton.gameObject.SetActive(true);
@@ -559,6 +560,9 @@ namespace Puzzled
             puzzleName.text = currentPuzzleName;
             Puzzle.Load(currentPuzzleFilename);
             HidePopup();
+
+            // Ensure no tile is selected
+            SelectTile(null);
         }
 
         public void OnFileMenuButton()
@@ -581,13 +585,11 @@ namespace Puzzled
             popups.SetActive(false);
         }
 
-        private Tile GetTile(Vector2Int cell)
+        private Tile GetTile(Cell cell)
         {
-            var tiles = GameManager.Instance.GetCellTiles(cell);
-            if (tiles == null || tiles.Count == 0)
-                return null;
-
-            return tiles.OrderByDescending(t => t.info.layer).FirstOrDefault();
+            // TODO: handle hidden layers, etc
+            var tile = TileGrid.CellToTile(cell);
+            return tile;
         }
 
         private void RemoveWire(Wire wire)
@@ -616,23 +618,19 @@ namespace Puzzled
 
         private void PopulateOptions(Tile tile)
         {
-            var editorInfo = tile.GetComponent<TileEditorInfo>();
-            if (null == editorInfo.editableProperties)
-                return;
-
             options.DetachAndDestroyChildren();
 
             if (tile.info.optionEditors != null)
                 foreach (var optionEditorInfo in tile.info.optionEditors)
                     Instantiate(optionEditorInfo.prefab, options).GetComponent<UIOptionEditor>().target = tile;
 
-            foreach (var editableProperty in editorInfo.editableProperties)
+            foreach (var tileProperty in tile.properties)
             {
-                var optionEditor = InstantiateOptionEditor(editableProperty.property.PropertyType);
+                var optionEditor = InstantiateOptionEditor(tileProperty.property.PropertyType);
                 if (null == optionEditor)
                     continue;
 
-                optionEditor.target = editableProperty;
+                optionEditor.target = new TilePropertyOption(tile, tileProperty);
             }
         }
 
