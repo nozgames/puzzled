@@ -240,6 +240,12 @@ namespace Puzzled
                     if (existing != null && existing.guid == drawTile.guid)
                         return;
 
+                    // Static objects cannot be placed on floor objects.
+                    if (drawTile.info.layer == TileLayer.Object && 
+                        drawTile.info.isStatic && 
+                        null != TileGrid.CellToTile(cell, TileLayer.FloorObject))
+                        return;
+
                     // Remove what is already in that slot
                     // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
                     TileGrid.UnlinkTile(cell, drawTile.info.layer, true);

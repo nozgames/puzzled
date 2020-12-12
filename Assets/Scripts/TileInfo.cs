@@ -12,6 +12,9 @@ namespace Puzzled
         [SerializeField] private bool _allowDynamic = true;
         [SerializeField] private bool _allowWireInputs = false;
         [SerializeField] private bool _allowWireOuputs = false;
+        
+        [Tooltip("True if the tile will always be in the same cell")]
+        [SerializeField] private bool _static = true;
         [SerializeField] private TileLayer _layer = TileLayer.Object;
 
         [Serializable]
@@ -28,6 +31,8 @@ namespace Puzzled
 
         public bool allowWireInputs => _allowWireInputs;
         public bool allowWireOutputs => _allowWireOuputs;
+
+        public bool isStatic => _static;
 
         public string displayName => string.IsNullOrEmpty(_displayName) ? name : _displayName;
 

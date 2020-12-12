@@ -12,6 +12,9 @@ namespace Puzzled
         [SerializeField] private GameObject visualUnpressed;
 
         [ActorEventHandler]
+        private void OnStart(StartEvent evt) => UpdateState();
+
+        [ActorEventHandler]
         private void OnEnter(EnterCellEvent evt) => UpdateState();
 
         [ActorEventHandler]
