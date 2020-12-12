@@ -79,7 +79,9 @@ namespace Puzzled
         private string puzzleToLoad = null;
         private WireMesh dragWire = null;
 
-        private RectInt selection;
+        //private RectInt selection;
+
+        private Tile selection = null;
         private Tile drawTile = null;
         private Cell dragStart;
         private Cell dragEnd;
@@ -264,7 +266,9 @@ namespace Puzzled
 
                 case Mode.Select:
                     if (state == DragState.Begin)
+                    {
                         SelectTile(dragStart);
+                    }
 
                     SetSelectionRect(dragStart, dragEnd);
                     break;
@@ -274,11 +278,10 @@ namespace Puzzled
                     {
                         case DragState.Begin:
                         {
-                            var tile = GetTile(cell);
+                            var tile = GetTile(cell, (selection != null && selection.info.layer != TileLayer.Floor && selection.cell == cell) ? ((TileLayer)selection.info.layer - 1) : TileLayer.Logic);
                             if (tile != null)
-                            {
-                                
-                                SelectTile(cell);
+                            {                                
+                                SelectTile(tile);
                             } 
                             else
                             {
@@ -333,6 +336,8 @@ namespace Puzzled
 
         private void SelectTile(Tile tile)
         {
+            selection = tile;
+
             if (tile == null)
             {
                 selectionRect.gameObject.SetActive(false);                
@@ -591,11 +596,18 @@ namespace Puzzled
             popups.SetActive(false);
         }
 
-        private Tile GetTile(Cell cell)
+        private Tile GetTile(Cell cell, TileLayer topLayer = TileLayer.Logic)
         {
-            // TODO: handle hidden layers, etc
-            var tile = TileGrid.CellToTile(cell);
-            return tile;
+            for (int i = (int)topLayer; i >= 0; i--)
+            {
+                var tile = TileGrid.CellToTile(cell, (TileLayer)i);
+                if (null != tile)
+                    return tile;
+            }
+
+            // TODO: handle hidden layers
+
+            return null;
         }
 
         private void RemoveWire(Wire wire)
