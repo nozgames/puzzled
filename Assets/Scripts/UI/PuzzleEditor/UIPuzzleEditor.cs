@@ -16,7 +16,6 @@ namespace Puzzled
         {
             Unknown,
             Draw,
-            Select,
             Move,
             Erase,
             Wire
@@ -46,10 +45,13 @@ namespace Puzzled
         [SerializeField] private GameObject inspector = null;
 
         [Header("Tools")]
-        [SerializeField] private Toggle selectTool = null;
+        [SerializeField] private Toggle moveTool = null;
         [SerializeField] private Toggle drawTool = null;
         [SerializeField] private Toggle eraseTool = null;
         [SerializeField] private Toggle wireTool = null;
+        [SerializeField] private GameObject moveToolOptions = null;
+        [SerializeField] private GameObject eraseToolOptions = null;
+        [SerializeField] private Toggle eraseToolAllLayers = null;
 
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
@@ -118,6 +120,8 @@ namespace Puzzled
 
                 inspector.SetActive(_mode == Mode.Wire);
                 palette.SetActive(mode == Mode.Draw);
+                moveToolOptions.SetActive(mode == Mode.Move);
+                eraseToolOptions.SetActive(mode == Mode.Erase);
             }
         }
 
@@ -226,8 +230,8 @@ namespace Puzzled
 
             if (drawTool.isOn)
                 mode = Mode.Draw;
-            else if (selectTool.isOn)
-                mode = Mode.Select;
+            else if (moveTool.isOn)
+                mode = Mode.Move;
             else if (eraseTool.isOn)
                 mode = Mode.Erase;
             else if (wireTool.isOn)
@@ -252,7 +256,7 @@ namespace Puzzled
                     if (drawTile.info.layer == TileLayer.Dynamic)
                     {
                         var staticTile = TileGrid.CellToTile(cell, TileLayer.Static);
-                        if (!staticTile.info.allowDynamic)
+                        if (staticTile != null && !staticTile.info.allowDynamic)
                             return;
                     }
 
@@ -269,10 +273,16 @@ namespace Puzzled
                     break;
 
                 case Mode.Erase:
-                    TileGrid.UnlinkTiles(cell,true);
+                    if (state == DragState.End)
+                        return;
+
+                    if (eraseToolAllLayers.isOn)
+                        TileGrid.UnlinkTiles(cell, true);
+                    else
+                        TileGrid.UnlinkTile(GetTile(cell), true);
                     break;
 
-                case Mode.Select:
+                case Mode.Move:
                     if (state == DragState.Begin)
                     {
                         SelectTile(dragStart);
@@ -529,7 +539,7 @@ namespace Puzzled
 
             inspector.SetActive(mode == Mode.Wire);
             palette.SetActive(mode == Mode.Draw);
-            selectTool.gameObject.SetActive(true);
+            moveTool.gameObject.SetActive(true);
             drawTool.gameObject.SetActive(true);
             eraseTool.gameObject.SetActive(true);
             wireTool.gameObject.SetActive(true);
@@ -555,7 +565,7 @@ namespace Puzzled
             SelectTile(null);
             inspector.SetActive(false);
             palette.SetActive(false);
-            selectTool.gameObject.SetActive(false);
+            moveTool.gameObject.SetActive(false);
             drawTool.gameObject.SetActive(false);
             eraseTool.gameObject.SetActive(false);
             wireTool.gameObject.SetActive(false);
