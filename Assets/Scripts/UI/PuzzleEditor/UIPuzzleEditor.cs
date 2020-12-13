@@ -1,16 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 using Puzzled.PuzzleEditor;
 
 namespace Puzzled
 {
-    public class UIPuzzleEditor : UIScreen
+    public partial class UIPuzzleEditor : UIScreen
     {
         private enum Mode
         {
@@ -18,7 +16,7 @@ namespace Puzzled
             Draw,
             Move,
             Erase,
-            Wire
+            Logic
         }
 
         private enum DragState
@@ -28,6 +26,7 @@ namespace Puzzled
             End
         }
 
+        [SerializeField] private UICanvas canvas = null;
         [SerializeField] private GameObject piecePrefab = null;
         [SerializeField] private RectTransform selectionRect = null;
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
@@ -66,13 +65,6 @@ namespace Puzzled
         [SerializeField] private GameObject loadPopupFilePrefab = null;
         [SerializeField] private Transform tileSelectorTiles = null;
 
-        [Header("Input")]
-        [SerializeField] private InputActionReference pointerAction;
-        [SerializeField] private InputActionReference pointerDownAction;
-        [SerializeField] private InputActionReference rightClickAction;
-        [SerializeField] private InputActionReference middleClickAction;
-        [SerializeField] private InputActionReference mouseWheelAction;
-
         [Header("Inspector")]
         [SerializeField] private GameObject inspectorContent = null;
         [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
@@ -81,12 +73,13 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionPrefabBool = null;
         [SerializeField] private UIOptionEditor optionPrefabString = null;
         [SerializeField] private UIOptionEditor optionPrefabTile = null;
+        [SerializeField] private UIOptionEditor optionInputsPrefab = null;
+        [SerializeField] private UIOptionEditor optionOutputsPrefab = null;
 
 
         private Mode _mode = Mode.Unknown;
         private string currentPuzzleName = null;
         private string puzzleToLoad = null;
-        private WireMesh dragWire = null;
 
         //private RectInt selection;
 
@@ -98,8 +91,8 @@ namespace Puzzled
         private bool ignoreMouseUp;
         private bool playing;
         private bool panning;
-        private Vector3 panPointerStart;
         private Action<Tile> tileSelectorCallback;
+        private Mode savedMode;
 
         private bool hasSelection => selectionRect.gameObject.activeSelf;
         private bool hasPuzzleName => !string.IsNullOrEmpty(currentPuzzleName);
@@ -113,23 +106,33 @@ namespace Puzzled
                     return;
 
                 selectionRect.gameObject.SetActive(false);
-                SelectTile(null);
-
+                
                 _mode = value;
 
-                UpdateMode(_mode);
+                UpdateMode();
             }
         }
 
-        private void UpdateMode(Mode mode)
+        private void UpdateMode()
         {
-            if (_mode == Mode.Wire)
-                SelectTile(null);
-
-            inspector.SetActive(_mode == Mode.Wire);
+            inspector.SetActive(_mode == Mode.Logic);
             palette.SetActive(mode == Mode.Draw);
             moveToolOptions.SetActive(mode == Mode.Move);
-            eraseToolOptions.SetActive(mode == Mode.Erase);
+            
+            canvas.UnregisterAll();
+
+            DisableMoveTool();
+            DisableDrawTool();
+            DisableEraseTool();
+            DisableLogicTool();
+
+            switch (_mode)
+            {
+                case Mode.Move: EnableMoveTool(); break;
+                case Mode.Draw: EnableDrawTool(); break;
+                case Mode.Erase: EnableEraseTool(); break;
+                case Mode.Logic: EnableLogicTool(); break;
+            }
         }
 
         private void Awake()
@@ -142,6 +145,9 @@ namespace Puzzled
 
         private void OnEnable()
         {
+            canvas.onScroll = OnScroll;
+            canvas.onRButtonDrag = OnPan;
+
             GameManager.Stop();
             GameManager.busy++;
 
@@ -153,12 +159,6 @@ namespace Puzzled
             foreach (var tile in TileDatabase.GetTiles())
                 GeneratePreview(tile);
 
-            pointerAction.action.performed += OnPointerMoved;
-            pointerDownAction.action.performed += OnPointerDown;
-            rightClickAction.action.performed += OnRightClick;
-            middleClickAction.action.performed += OnMiddleClick;
-            mouseWheelAction.action.performed += OnMouseWheel;
-
             selectionRect.gameObject.SetActive(false);
 
             mode = Mode.Draw;
@@ -169,36 +169,12 @@ namespace Puzzled
             puzzleName.text = "Unnamed";
         }
 
-        private void OnRightClick(InputAction.CallbackContext ctx)
+        private void OnScroll(Vector2 position, Vector2 delta)
         {
-            switch (mode)
-            {
-                case Mode.Wire:
-                {
-                    var wire = HitTestWire(pointerWorld);
-                    if (null != wire)
-                        RemoveWire(wire);
-                    break;
-                }
-            }
-        }
-
-        private void OnMiddleClick(InputAction.CallbackContext ctx)
-        {
-            panning = ctx.ReadValueAsButton();
-            if (panning)
-            {
-                panPointerStart = pointerWorld;
-            }
-        }
-
-        private void OnMouseWheel(InputAction.CallbackContext ctx)
-        {
-            var value = ctx.ReadValue<Vector2>();
-            if (value.y == 0)
+            if (delta.y == 0)
                 return;
 
-            Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + (value.y > 0 ? -1 : 1), minZoom, maxZoom);
+            Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + (delta.y > 0 ? -1 : 1), minZoom, maxZoom);
 
             if (hasSelection)
                 SetSelectionRect(dragStart, dragEnd);
@@ -207,12 +183,6 @@ namespace Puzzled
         private void OnDisable()
         {
             GameManager.busy--;
-
-            pointerAction.action.performed -= OnPointerMoved;
-            pointerDownAction.action.performed -= OnPointerDown;
-            rightClickAction.action.performed -= OnRightClick;
-            middleClickAction.action.performed -= OnMiddleClick;
-            mouseWheelAction.action.performed -= OnMouseWheel;
         }
 
         private void GeneratePreview(Tile prefab)
@@ -245,111 +215,7 @@ namespace Puzzled
             else if (eraseTool.isOn)
                 mode = Mode.Erase;
             else if (wireTool.isOn)
-                mode = Mode.Wire;
-        }
-
-        private void HandleDrag(DragState state, Cell cell)
-        {
-            switch (mode)
-            {
-                case Mode.Draw:
-                    if (null == drawTile || state == DragState.End)
-                        return;
-
-                    // Dont draw if the same tile is already there.  This will prevent
-                    // accidental removal of connections and properties
-                    var existing = TileGrid.CellToTile(cell, drawTile.info.layer);
-                    if (existing != null && existing.guid == drawTile.guid)
-                        return;
-
-                    // Static objects cannot be placed on floor objects.
-                    if (drawTile.info.layer == TileLayer.Dynamic)
-                    {
-                        var staticTile = TileGrid.CellToTile(cell, TileLayer.Static);
-                        if (staticTile != null && !staticTile.info.allowDynamic)
-                            return;
-                    }
-
-                    // Remove what is already in that slot
-                    // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
-                    TileGrid.UnlinkTile(cell, drawTile.info.layer, true);
-
-                    // Destroy all other instances of this tile regardless of variant
-                    if (!drawTile.info.allowMultiple)
-                        TileGrid.UnlinkTile(TileGrid.GetLinkedTile(drawTile.info), true);
-                    
-                    // Create the new tile
-                    GameManager.InstantiateTile(drawTile, cell);
-                    break;
-
-                case Mode.Erase:
-                    if (state == DragState.End)
-                        return;
-
-                    if (eraseToolAllLayers.isOn)
-                        TileGrid.UnlinkTiles(cell, true);
-                    else
-                        TileGrid.UnlinkTile(GetTile(cell), true);
-                    break;
-
-                case Mode.Move:
-                    if (state == DragState.Begin)
-                    {
-                        SelectTile(dragStart);
-                    }
-
-                    SetSelectionRect(dragStart, dragEnd);
-                    break;
-
-                case Mode.Wire:
-                    switch (state)
-                    {
-                        case DragState.Begin:
-                        {
-                            var tile = GetTile(cell, (selection != null && selection.info.layer != TileLayer.Floor && selection.cell == cell) ? ((TileLayer)selection.info.layer - 1) : TileLayer.Logic);
-                            if (null == tile && selection != null)
-                                tile = selection;
-
-                            if (tile != null)
-                            {                                
-                                SelectTile(tile);
-                            } 
-                            else
-                            {
-                                SelectTile(null);                                
-                            }
-                            break;
-                        }
-
-                        case DragState.Update:
-                        {
-                            if (null == dragWire && dragStart != dragEnd && hasSelection && GetTile(dragStart).info.allowWireOutputs)
-                            {
-                                dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
-                                dragWire.transform.position = TileGrid.CellToWorld(dragStart);
-                                dragWire.target = cell;
-                            } else if (dragWire != null)
-                            {
-                                dragWire.target = cell;
-                            }
-                            break;
-                        }
-
-                        case DragState.End:
-                        {
-                            if (dragWire != null)
-                            {
-                                var wire = GameManager.InstantiateWire(GetTile(dragStart), GetTile(dragEnd));
-                                if (wire != null)
-                                    wire.visible = true;
-                                Destroy(dragWire.gameObject);
-                                dragWire = null;
-                            }
-                            break;
-                        }
-                    }
-                    break;
-            }
+                mode = Mode.Logic;
         }
 
         private void SetSelectionRect(Cell min, Cell max)
@@ -363,102 +229,9 @@ namespace Puzzled
             selectionRect.gameObject.SetActive(true);
         }
 
-        private void SelectTile(Cell cell) => SelectTile(GetTile(cell));
-
-        private void SelectTile(Tile tile)
+        private void OnPan (Vector2 position, Vector2 delta)
         {
-            selection = tile;
-
-            if (tile == null)
-            {
-                selectionRect.gameObject.SetActive(false);                
-                options.DetachAndDestroyChildren();
-                inspectorContent.SetActive(false);
-
-                GameManager.ShowWires(mode == Mode.Wire);
-            }
-            else
-            {
-                Debug.Assert(mode == Mode.Wire);
-
-                inspectorContent.SetActive(true);
-                inspectorTileName.text = tile.info.displayName;
-                inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
-                SetSelectionRect(tile.cell, tile.cell);
-                GameManager.HideWires();
-                GameManager.ShowWires(tile);
-                PopulateOptions(tile);
-            }
-        }
-
-        private Cell pointerCell;
-        private Vector2 pointer;
-        private Vector3 pointerWorld;
-
-        private void OnPointerMoved(InputAction.CallbackContext ctx)
-        {
-            pointer = ctx.ReadValue<Vector2>();
-            pointerWorld = Camera.main.ScreenToWorldPoint(pointer);
-            var cell = TileGrid.WorldToCell(pointerWorld + new Vector3(0.5f, 0.5f, 0));
-            if (cell != pointerCell)
-                pointerCell = cell;
-
-            if (panning)
-            {
-                var delta = pointerWorld - panPointerStart;
-                if (delta.magnitude > 0.01f)
-                {
-                    GameManager.Pan(delta);
-                    panPointerStart = pointerWorld;
-                }
-
-                if (hasSelection)
-                    SetSelectionRect(dragStart, dragEnd);
-
-                return;
-            }
-
-            if (dragging && dragEnd != pointerCell)
-            {
-                dragEnd = pointerCell;
-                HandleDrag(DragState.Update, dragEnd);
-            }
-        }
-
-        private void OnPointerDown(InputAction.CallbackContext ctx)
-        {
-            var mouseDown = ctx.ReadValueAsButton();
-
-            if (!mouseDown && ignoreMouseUp)
-            {
-                ignoreMouseUp = false;
-                return;
-            }
-
-            var results = new List<UnityEngine.EventSystems.RaycastResult>();
-            UnityEngine.EventSystems.EventSystem.current.RaycastAll(new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current) { position = pointerAction.action.ReadValue<Vector2>() }, results);
-            if (mouseDown && results.Count > 0 && results[0].gameObject == popups)
-            {
-                ignoreMouseUp = true;
-                HidePopup();
-                return;
-            }
-
-            if (mouseDown && (results.Count <= 0 || results[0].gameObject.GetComponent<UICanvas>() == null))
-                return;
-
-            if (mouseDown)
-            {
-                dragging = true;
-                dragStart = pointerCell;
-                dragEnd = pointerCell;
-                HandleDrag(DragState.Begin, pointerCell);
-            } else if (dragging)
-            {
-                dragging = false;
-                dragEnd = pointerCell;
-                HandleDrag(DragState.End, pointerCell);
-            }
+            GameManager.Pan(canvas.CanvasToWorld(position + delta) - canvas.CanvasToWorld(position));
         }
 
         public void OnSaveButton()
@@ -551,7 +324,7 @@ namespace Puzzled
             GameManager.busy = 1;
 
             tools.SetActive(true);
-            inspector.SetActive(mode == Mode.Wire);
+            inspector.SetActive(mode == Mode.Logic);
             palette.SetActive(mode == Mode.Draw);
             moveTool.gameObject.SetActive(true);
             drawTool.gameObject.SetActive(true);
@@ -564,7 +337,7 @@ namespace Puzzled
             stopButton.gameObject.SetActive(false);
             Load(currentPuzzleName);
 
-            UpdateMode(mode);
+            mode = savedMode;
             UpdateLayers();
         }
 
@@ -580,8 +353,8 @@ namespace Puzzled
             }
 
             tools.SetActive(false);
-            UpdateMode(Mode.Unknown);
-            SelectTile(null);
+            savedMode = mode;
+            mode = Mode.Unknown;
             inspector.SetActive(false);
             palette.SetActive(false);
             moveTool.gameObject.SetActive(false);
@@ -612,9 +385,7 @@ namespace Puzzled
             puzzleName.text = currentPuzzleName;
             Puzzle.Load(currentPuzzleFilename);
             HidePopup();
-
-            // Ensure no tile is selected
-            SelectTile(null);
+            UpdateMode();
         }
 
         public void OnFileMenuButton()
@@ -660,11 +431,6 @@ namespace Puzzled
             Destroy(wire.gameObject);
         }
 
-        private Wire HitTestWire(Vector3 pointer)
-        {
-            return GameManager.HitTestWire(pointer);
-        }
-
         private UIOptionEditor InstantiateOptionEditor(Type type)
         {
             if (type == typeof(int))
@@ -683,9 +449,15 @@ namespace Puzzled
         {
             options.DetachAndDestroyChildren();
 
-            if (tile.info.optionEditors != null)
-                foreach (var optionEditorInfo in tile.info.optionEditors)
-                    Instantiate(optionEditorInfo.prefab, options).GetComponent<UIOptionEditor>().target = tile;
+            if (tile.info.allowWireInputs)
+                Instantiate(tile.info.inputsPrefab != null ? tile.info.inputsPrefab : optionInputsPrefab, options).GetComponent<UIOptionEditor>().target = tile;
+
+            if (tile.info.allowWireOutputs)
+                Instantiate(tile.info.outputsPrefab != null ? tile.info.outputsPrefab : optionOutputsPrefab, options).GetComponent<UIOptionEditor>().target = tile;
+
+            if (tile.info.customOptionEditors != null)
+                foreach (var editor in tile.info.customOptionEditors)
+                    Instantiate(editor.prefab, options).GetComponent<UIOptionEditor>().target = tile;
 
             foreach (var tileProperty in tile.properties)
             {

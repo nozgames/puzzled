@@ -80,6 +80,11 @@ namespace Puzzled
 
         private int _value = 0;
 
+        public bool selected {
+            get => _visuals.selected;
+            set => _visuals.selected = value;
+        }
+
         /// <summary>
         /// Current value of the wire
         /// </summary>

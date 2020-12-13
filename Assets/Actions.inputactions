@@ -276,6 +276,96 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Editor",
+            "id": "25f528b1-d97d-4681-b19b-5dc8186c382b",
+            "actions": [
+                {
+                    "name": "SelectTile",
+                    "type": "Button",
+                    "id": "5beba7ad-6dea-4e4b-b959-d797e7e87c12",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "DragConnection",
+                    "type": "Button",
+                    "id": "23539ef8-03c9-4849-a488-ba66b4995676",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "Button With One Modifier",
+                    "id": "566341fb-e7a0-435b-81ad-2e5f207651ca",
+                    "path": "ButtonWithOneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DragConnection",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "9a18819f-6aae-45ca-8e3a-7c591304dc99",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DragConnection",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "button",
+                    "id": "390449f0-c095-4eb0-b823-66a04ae9017a",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DragConnection",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Button With One Modifier",
+                    "id": "f9968d76-3bb8-49a5-ac25-f98e19d31c61",
+                    "path": "ButtonWithOneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectTile",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "60ea5499-9c92-499a-82ac-b00b6d6be10f",
+                    "path": "<Keyboard>/nomodifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectTile",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "button",
+                    "id": "623c9012-cc96-4a54-a02c-adaa8fa0b6c2",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectTile",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                }
+            ]
         }
     ],
     "controlSchemes": []

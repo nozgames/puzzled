@@ -6,10 +6,23 @@ namespace Puzzled
     {
         [SerializeField] private float _width = 0.1f;
         [SerializeField] private bool _tile = false;
+        
+        [SerializeField] private Material _materialNormal = null;
+        [SerializeField] private Material _materialSelected = null;
 
+        private MeshRenderer _renderer;
         private MeshFilter _filter;
         private Cell _target;
+        private bool _selected;
         
+        public bool selected {
+            get => _selected;
+            set {
+                _selected = value;
+                _renderer.sharedMaterial = _selected ? _materialSelected : _materialNormal;
+            }
+        }
+
         public Cell target {
             get => _target;
             set {
@@ -24,6 +37,7 @@ namespace Puzzled
         {
             GetComponent<MeshRenderer>().sortingLayerName = "Wire";
             _filter = GetComponent<MeshFilter>();
+            _renderer = GetComponent<MeshRenderer>();
             UpdateMesh();
         }
 

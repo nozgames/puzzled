@@ -31,7 +31,10 @@ namespace Puzzled
             public int order;
         }
 
-        [SerializeField] private CustomOptionEditor[] _optionEditors = null;
+        [Header("Editor")]
+        [SerializeField] private UIOptionWires _inputsPrefab = null;
+        [SerializeField] private UIOptionWires _outputsPrefab = null;
+        [SerializeField] private CustomOptionEditor[] _customEditorPrefabs = null;
 
         public bool allowMultiple => _allowMultiple;
 
@@ -45,7 +48,9 @@ namespace Puzzled
 
         public string displayName => string.IsNullOrEmpty(_displayName) ? name : _displayName;
 
-        public CustomOptionEditor[] optionEditors => _optionEditors;
+        public CustomOptionEditor[] customOptionEditors => _customEditorPrefabs;
+        public UIOptionWires inputsPrefab => _inputsPrefab;
+        public UIOptionWires outputsPrefab => _outputsPrefab;
 
         public TileLayer layer => _layer;        
     }

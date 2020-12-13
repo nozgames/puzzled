@@ -49,6 +49,9 @@ namespace Puzzled
             if(selected)
                 wiresEditor.OnSelectionChanged(this);
 
+            var wire = (Wire)target;
+            wire.selected = selected;
+
             _buttons.SetActive(selected);
             if(selected)
                 UpdateButtons();
