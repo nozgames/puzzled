@@ -22,8 +22,8 @@ namespace Puzzled
 
         private void UpdateState()
         {
-            // The pressure plate is switched if anything in the object layer is on the same tile
-            var pressed = TileGrid.CellToTile(tile.cell, TileLayer.Object) != null;
+            // The pressure plate is switched if anything in the dynamic layer is on the same tile
+            var pressed = TileGrid.CellToTile(tile.cell, TileLayer.Dynamic) != null;
             if (pressed == _pressed)
                 return;
 

@@ -18,8 +18,8 @@ namespace Puzzled
 
         [Header("Layers")]
         [SerializeField] [Layer] private int floorLayer = 0;
-        [SerializeField] [Layer] private int floorObjectLayer = 0;
-        [SerializeField] [Layer] private int objectLayer = 0;
+        [SerializeField] [Layer] private int staticLayer = 0;
+        [SerializeField] [Layer] private int dynamicLayer = 0;
         [SerializeField] [Layer] private int logicLayer = 0;
         [SerializeField] private LayerMask playLayers = 0;
         [SerializeField] private LayerMask defaultLayers = 0;
@@ -153,12 +153,12 @@ namespace Puzzled
                     tile.gameObject.SetChildLayers(_instance.floorLayer);
                     break;
 
-                case TileLayer.FloorObject:
-                    tile.gameObject.SetChildLayers(_instance.floorObjectLayer);
+                case TileLayer.Static:
+                    tile.gameObject.SetChildLayers(_instance.staticLayer);
                     break;
 
-                case TileLayer.Object:
-                    tile.gameObject.SetChildLayers(_instance.objectLayer);
+                case TileLayer.Dynamic:
+                    tile.gameObject.SetChildLayers(_instance.dynamicLayer);
                     break;
 
                 case TileLayer.Logic:

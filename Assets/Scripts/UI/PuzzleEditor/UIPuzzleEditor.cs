@@ -68,11 +68,16 @@ namespace Puzzled
         [SerializeField] private InputActionReference middleClickAction;
         [SerializeField] private InputActionReference mouseWheelAction;
 
-        [Header("Options")]
+        [Header("Inspector")]
+        [SerializeField] private GameObject inspectorContent = null;
+        [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
+        [SerializeField] private RawImage inspectorTilePreview = null;
         [SerializeField] private UIOptionEditor optionPrefabInt = null;
         [SerializeField] private UIOptionEditor optionPrefabBool = null;
         [SerializeField] private UIOptionEditor optionPrefabString = null;
         [SerializeField] private UIOptionEditor optionPrefabTile = null;
+
+
 
         private Mode _mode = Mode.Draw;
         private string currentPuzzleName = null;
@@ -243,10 +248,12 @@ namespace Puzzled
                         return;
 
                     // Static objects cannot be placed on floor objects.
-                    if (drawTile.info.layer == TileLayer.Object && 
-                        drawTile.info.isStatic && 
-                        null != TileGrid.CellToTile(cell, TileLayer.FloorObject))
-                        return;
+                    if (drawTile.info.layer == TileLayer.Dynamic)
+                    {
+                        var staticTile = TileGrid.CellToTile(cell, TileLayer.Static);
+                        if (!staticTile.info.allowDynamic)
+                            return;
+                    }
 
                     // Remove what is already in that slot
                     // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
@@ -342,6 +349,7 @@ namespace Puzzled
             {
                 selectionRect.gameObject.SetActive(false);                
                 options.DetachAndDestroyChildren();
+                inspectorContent.SetActive(false);
 
                 GameManager.ShowWires(mode == Mode.Wire);
             }
@@ -349,6 +357,9 @@ namespace Puzzled
             {
                 Debug.Assert(mode == Mode.Wire);
 
+                inspectorContent.SetActive(true);
+                inspectorTileName.text = tile.info.displayName;
+                inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);
                 GameManager.HideWires();
                 GameManager.ShowWires(tile);

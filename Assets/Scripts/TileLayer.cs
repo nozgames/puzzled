@@ -5,8 +5,8 @@ namespace Puzzled
     public enum TileLayer
     {
         Floor,
-        FloorObject,
-        Object,
+        Static,
+        Dynamic,
         Logic
     }
 }
