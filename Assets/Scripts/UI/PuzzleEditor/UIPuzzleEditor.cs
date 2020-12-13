@@ -14,6 +14,7 @@ namespace Puzzled
     {
         private enum Mode
         {
+            Unknown,
             Draw,
             Select,
             Move,
@@ -78,8 +79,7 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionPrefabTile = null;
 
 
-
-        private Mode _mode = Mode.Draw;
+        private Mode _mode = Mode.Unknown;
         private string currentPuzzleName = null;
         private string puzzleToLoad = null;
         private WireMesh dragWire = null;
@@ -147,6 +147,7 @@ namespace Puzzled
 
             selectionRect.gameObject.SetActive(false);
 
+            mode = Mode.Draw;
             drawTool.isOn = true;
 
             GameManager.UnloadPuzzle();
