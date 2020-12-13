@@ -5,7 +5,7 @@ namespace Puzzled
     public class WireMesh : MonoBehaviour
     {
         [SerializeField] private float _width = 0.1f;
-        [SerializeField] private float _tile = 0.0f;      
+        [SerializeField] private bool _tile = false;
 
         private MeshFilter _filter;
         private Cell _target;
@@ -51,9 +51,9 @@ namespace Puzzled
             var right = normal * _width;
 
             var length = targetPosition.magnitude - hwidth - _width;
-            var sections = Mathf.Max((int)Mathf.Ceil(length / (_width * Mathf.Max(_tile, 1.0f))), 1);
+            var sections = _tile ? Mathf.Min(Mathf.Max((int)Mathf.Ceil(length / _width), 1), 32) : 1;
             var sectionLength = (length / sections);
-            var sectionSize = sectionLength / _tile;
+            var sectionSize = sectionLength;
             var sectionOffset = (sectionLength - sectionSize) * 0.5f;
             var vertCount = 4 + sections * 4;
 

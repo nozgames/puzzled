@@ -58,6 +58,9 @@ namespace Puzzled
 
             if (_instance == null)
                 _instance = this;
+
+            // Set default camera mask layers
+            Camera.main.cullingMask = _instance.defaultLayers;
         }
 
         private void OnApplicationQuit()
@@ -146,27 +149,28 @@ namespace Puzzled
             var tile = Instantiate(prefab.gameObject, _instance.grid.transform).GetComponent<Tile>();
             tile.guid = prefab.guid;
             tile.cell = cell;
+            tile.gameObject.SetChildLayers(TileLayerToObjectLayer(tile.info.layer));
+            return tile;
+        }
 
-            switch (tile.info.layer)
+        private static int TileLayerToObjectLayer (TileLayer layer)
+        {
+            switch (layer)
             {
                 case TileLayer.Floor:
-                    tile.gameObject.SetChildLayers(_instance.floorLayer);
-                    break;
+                    return _instance.floorLayer;
 
                 case TileLayer.Static:
-                    tile.gameObject.SetChildLayers(_instance.staticLayer);
-                    break;
+                    return _instance.staticLayer;
 
                 case TileLayer.Dynamic:
-                    tile.gameObject.SetChildLayers(_instance.dynamicLayer);
-                    break;
+                    return _instance.dynamicLayer;
 
                 case TileLayer.Logic:
-                    tile.gameObject.SetChildLayers(_instance.logicLayer);
-                    break;
+                    return _instance.logicLayer;
             }
 
-            return tile;
+            return 0;
         }
 
         public static Wire InstantiateWire (Tile input, Tile output)
@@ -294,6 +298,14 @@ namespace Puzzled
         {
             Camera.main.cullingMask = _instance.defaultLayers;
             paused = true;
+        }
+
+        public static void ShowLayer (TileLayer layer, bool show)
+        {
+            if (show)
+                Camera.main.cullingMask |= (1<<TileLayerToObjectLayer(layer));
+            else
+                Camera.main.cullingMask &= ~(1<<TileLayerToObjectLayer(layer));
         }
     }
 }

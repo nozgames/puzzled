@@ -142,6 +142,8 @@ namespace Puzzled
                 foreach (var serializedProperty in serializedTile.properties)
                     tilesObjects[i].SetProperty(serializedProperty.name, serializedProperty.value);
             }
+
+            Debug.Log($"Puzzled Loaded: [{tiles.Length} tiles, {wires.Length} wires]");
         }
 
         public static void Load(string filename) =>

@@ -44,7 +44,8 @@ namespace Puzzled
         [SerializeField] private Transform options = null;
         [SerializeField] private GameObject inspector = null;
 
-        [Header("Tools")]
+        [Header("Toolbar")]
+        [SerializeField] private GameObject tools = null;
         [SerializeField] private Toggle moveTool = null;
         [SerializeField] private Toggle drawTool = null;
         [SerializeField] private Toggle eraseTool = null;
@@ -52,6 +53,7 @@ namespace Puzzled
         [SerializeField] private GameObject moveToolOptions = null;
         [SerializeField] private GameObject eraseToolOptions = null;
         [SerializeField] private Toggle eraseToolAllLayers = null;
+        [SerializeField] private Toggle[] layerToggles = null;
 
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
@@ -115,19 +117,27 @@ namespace Puzzled
 
                 _mode = value;
 
-                if (_mode == Mode.Wire)
-                    SelectTile(null);
-
-                inspector.SetActive(_mode == Mode.Wire);
-                palette.SetActive(mode == Mode.Draw);
-                moveToolOptions.SetActive(mode == Mode.Move);
-                eraseToolOptions.SetActive(mode == Mode.Erase);
+                UpdateMode(_mode);
             }
+        }
+
+        private void UpdateMode(Mode mode)
+        {
+            if (_mode == Mode.Wire)
+                SelectTile(null);
+
+            inspector.SetActive(_mode == Mode.Wire);
+            palette.SetActive(mode == Mode.Draw);
+            moveToolOptions.SetActive(mode == Mode.Move);
+            eraseToolOptions.SetActive(mode == Mode.Erase);
         }
 
         private void Awake()
         {
             instance = this;
+
+            foreach(var toggle in layerToggles)
+                toggle.onValueChanged.AddListener((value) => UpdateLayers());
         }
 
         private void OnEnable()
@@ -297,6 +307,9 @@ namespace Puzzled
                         case DragState.Begin:
                         {
                             var tile = GetTile(cell, (selection != null && selection.info.layer != TileLayer.Floor && selection.cell == cell) ? ((TileLayer)selection.info.layer - 1) : TileLayer.Logic);
+                            if (null == tile && selection != null)
+                                tile = selection;
+
                             if (tile != null)
                             {                                
                                 SelectTile(tile);
@@ -535,8 +548,9 @@ namespace Puzzled
                 return;
 
             GameManager.Stop();
-            GameManager.busy = 1;            
+            GameManager.busy = 1;
 
+            tools.SetActive(true);
             inspector.SetActive(mode == Mode.Wire);
             palette.SetActive(mode == Mode.Draw);
             moveTool.gameObject.SetActive(true);
@@ -549,6 +563,9 @@ namespace Puzzled
             playButton.gameObject.SetActive(true);
             stopButton.gameObject.SetActive(false);
             Load(currentPuzzleName);
+
+            UpdateMode(mode);
+            UpdateLayers();
         }
 
         public void OnPlayButton()
@@ -562,6 +579,8 @@ namespace Puzzled
                 return;
             }
 
+            tools.SetActive(false);
+            UpdateMode(Mode.Unknown);
             SelectTile(null);
             inspector.SetActive(false);
             palette.SetActive(false);
@@ -623,11 +642,15 @@ namespace Puzzled
             for (int i = (int)topLayer; i >= 0; i--)
             {
                 var tile = TileGrid.CellToTile(cell, (TileLayer)i);
-                if (null != tile)
-                    return tile;
-            }
+                if (null == tile)
+                    continue;
 
-            // TODO: handle hidden layers
+                // Do not return tiles on hidden layers
+                if (!layerToggles[i].isOn)
+                    continue;
+
+                return tile;
+            }
 
             return null;
         }
@@ -698,6 +721,12 @@ namespace Puzzled
                 tileSelectorCallback?.Invoke(tile);
 
             HidePopup();
+        }        
+
+        private void UpdateLayers()
+        {
+            for(int i=0;i<layerToggles.Length; i++)
+                GameManager.ShowLayer((TileLayer)i, layerToggles[i].isOn);
         }
     }
 }
