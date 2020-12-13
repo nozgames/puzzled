@@ -22,6 +22,7 @@ namespace Puzzled
         private void DisableLogicTool()
         {
             SelectTile(null);
+            GameManager.ShowWires(false);
         }
 
         private void OnLogicLButtonDown(Vector2 position)
@@ -102,6 +103,17 @@ namespace Puzzled
 
         private void SelectTile(Tile tile)
         {
+            if(selection != null)
+            {
+                // Deselect all input wires
+                foreach (var input in selection.inputs)
+                    input.selected = false;
+
+                // Deselect all output wires
+                foreach (var output in selection.outputs)
+                    output.selected = false;
+            }
+
             selection = tile;
 
             if (tile == null)
@@ -110,11 +122,10 @@ namespace Puzzled
                 options.DetachAndDestroyChildren();
                 inspectorContent.SetActive(false);
 
-                GameManager.ShowWires(mode == Mode.Logic);
-            } else
+                GameManager.ShowWires(true);
+            } 
+            else
             {
-                Debug.Assert(mode == Mode.Logic);
-
                 inspectorContent.SetActive(true);
                 inspectorTileName.text = tile.info.displayName;
                 inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
