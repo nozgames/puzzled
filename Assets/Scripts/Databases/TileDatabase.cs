@@ -129,7 +129,9 @@ namespace Puzzled
                 var tile = kv.Value.GetComponent<Tile>();
                 tile.guid = kv.Key;
                 return tile;
-            }).ToArray();
+            })
+                .OrderBy(t => t.name)
+                .ToArray();
 
             // Build the tile properties array for each tile 
             foreach(var tile in _tiles)

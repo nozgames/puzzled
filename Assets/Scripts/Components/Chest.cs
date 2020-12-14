@@ -5,10 +5,7 @@ namespace Puzzled
 {
     public class Chest : TileComponent
     {
-        private bool _isLocked = false;
-
-        [Editable]
-        public System.Guid keyItem { get; private set; }
+        [SerializeField] private Tile keyItem = null;
 
         [Editable]
         public System.Guid prizeItem { get; private set; }
@@ -17,26 +14,19 @@ namespace Puzzled
         [SerializeField] private GameObject lockedVisual;
         [SerializeField] private GameObject unlockedVisual;
 
-        [Editable]
-        public bool isLocked
-        {
-            get => _isLocked;
-            set
-            {
-                _isLocked = value;
-                UpdateVisuals();
-            }
-        }
+        private bool locked = false;
 
+        
         private void Start()
         {
+            locked = keyItem != null;
             UpdateVisuals();
         }
 
         private void UpdateVisuals()
         {
-            lockedVisual.SetActive(isLocked);
-            unlockedVisual.SetActive(!isLocked);
+            lockedVisual.SetActive(locked);
+            unlockedVisual.SetActive(!locked);
         }
 
         [ActorEventHandler]
@@ -45,10 +35,13 @@ namespace Puzzled
             // Always retport we were used, even if the use fails
             evt.IsHandled = true;
 
-            // Check to see if the user has the item to unlock the chest
-            isLocked = (keyItem == null || !evt.user.Send(new QueryHasItemEvent(keyItem)));
-            if (isLocked)
-                return;
+            if(locked)
+            {
+                // Check to see if the user has the item to unlock the chest
+                locked = !evt.user.Send(new QueryHasItemEvent(keyItem.guid));
+                if (locked)
+                    return;
+            }
 
             var cell = tile.cell;
 
@@ -58,11 +51,5 @@ namespace Puzzled
             // Spawn the prize at the same spot
             GameManager.InstantiateTile(TileDatabase.GetTile(prizeItem), cell);
         }
-
-        [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt) => isLocked = false;
-
-        [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt) => isLocked = false;
     }
 }

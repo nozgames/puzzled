@@ -20,7 +20,7 @@ namespace Puzzled
                 if(_tile != null)
                 {
                     preview.texture = TileDatabase.GetPreview(tile);
-                    nameText.text = tile.info.displayName;
+                    nameText.text = tile.name;
                 }
             }
         }
