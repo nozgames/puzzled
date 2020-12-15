@@ -1,7 +1,12 @@
-﻿namespace Puzzled
+﻿using UnityEngine;
+using NoZ;
+
+namespace Puzzled
 {
     public class Sign : TileComponent
     {
+        [SerializeField] private UIPopup _popupPrefab = null;
+
         private string _text = "";
 
         [Editable]
@@ -16,6 +21,14 @@
         private void UpdateVisuals()
         {
 
+        }
+
+        [ActorEventHandler]
+        private void OnUse(UseEvent evt)
+        {
+            evt.IsHandled = true;
+            var popup = UIManager.ShowPopup(_popupPrefab);
+            popup.GetComponentInChildren<UIPopupText>().text = text;
         }
     }
 }

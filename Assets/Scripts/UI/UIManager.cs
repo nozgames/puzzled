@@ -6,6 +6,8 @@ namespace Puzzled
     {
         [Header("General")]
         [SerializeField] private UIScreen startScreen = null;
+        [SerializeField] private Transform popups = null;
+        [SerializeField] private Transform popupCentered = null;
 
         [Header("Screens")]
         [SerializeField] private UIScreen mainMenu = null;
@@ -81,6 +83,18 @@ namespace Puzzled
 
             activeScreen = puzzleEditor;
             activeScreen.gameObject.SetActive(true);
+        }
+
+        public static UIPopup ShowPopup(UIPopup popupPrefab)
+        {
+            instance.popups.gameObject.SetActive(true);
+            return Instantiate(popupPrefab, instance.popupCentered).GetComponent<UIPopup>();
+        }
+
+        public static void ClosePopup()
+        {
+            instance.popups.gameObject.SetActive(false);
+            instance.popupCentered.DetachAndDestroyChildren();
         }
     }
 }

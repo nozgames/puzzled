@@ -92,7 +92,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 10
+  m_fontSize: 18
   m_fontSizeBase: 16
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -204,7 +204,7 @@ MonoBehaviour:
   m_MinHeight: -1
   m_PreferredWidth: -1
   m_PreferredHeight: 30
-  m_FlexibleWidth: -1
+  m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
 --- !u!1 &6957197534842189665
@@ -333,6 +333,18 @@ PrefabInstance:
     - target: {fileID: 760521901888864290, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1276685715004631549, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_ContentType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1276685715004631549, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_KeyboardType
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1276685715004631549, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_CharacterValidation
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7855768023931110797, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
       propertyPath: m_Name

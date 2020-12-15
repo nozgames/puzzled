@@ -31,6 +31,8 @@ namespace Puzzled
         /// </summary>
         private Player _player;
 
+        public static bool isUsingGamepad => _instance._gamepad;
+
         public static Player player {
             get => _instance._player;
             set => _instance._player = value;
@@ -44,6 +46,8 @@ namespace Puzzled
 
         private bool _paused = false;
 
+        private bool _gamepad = false;
+
         private static GameManager _instance = null;
 
         /// <summary>
@@ -55,6 +59,10 @@ namespace Puzzled
         {
             //menuAction.action.Enable();
             //menuAction.action.performed += OnMenuAction;
+
+            _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
+            Debug.Log(_gamepad);
+            InputSystem.onDeviceChange += OnDeviceChanged;
 
             if (_instance == null)
                 _instance = this;
@@ -76,6 +84,8 @@ namespace Puzzled
         {
             if (_instance == this)
                 _instance = null;
+
+            InputSystem.onDeviceChange -= OnDeviceChanged;
 
             menuAction.action.Disable();
             menuAction.action.performed -= OnMenuAction;
@@ -306,6 +316,12 @@ namespace Puzzled
                 Camera.main.cullingMask |= (1<<TileLayerToObjectLayer(layer));
             else
                 Camera.main.cullingMask &= ~(1<<TileLayerToObjectLayer(layer));
+        }
+
+        private void OnDeviceChanged(InputDevice inputDevice, InputDeviceChange deviceChange)
+        {
+            _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
+            Debug.Log(_gamepad);
         }
     }
 }
