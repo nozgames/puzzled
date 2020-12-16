@@ -61,7 +61,6 @@ namespace Puzzled
             //menuAction.action.performed += OnMenuAction;
 
             _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
-            Debug.Log(_gamepad);
             InputSystem.onDeviceChange += OnDeviceChanged;
 
             if (_instance == null)
@@ -321,7 +320,6 @@ namespace Puzzled
         private void OnDeviceChanged(InputDevice inputDevice, InputDeviceChange deviceChange)
         {
             _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
-            Debug.Log(_gamepad);
         }
     }
 }
