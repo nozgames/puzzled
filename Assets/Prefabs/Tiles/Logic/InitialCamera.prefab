@@ -71,7 +71,7 @@ SpriteRenderer:
   m_SortingLayerID: 277350915
   m_SortingLayer: 3
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: bca546618109330489b1eeea6c91fdc1, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2c5fbb1464b7e0343a4ec055e754cbb5, type: 3}
   m_Color: {r: 0.927, g: 0.927, b: 0.927, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -92,9 +92,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2819266254877709548}
   - component: {fileID: -8286699205250075377}
-  - component: {fileID: -4205627530249771063}
+  - component: {fileID: 345266137108139073}
   m_Layer: 0
-  m_Name: TriggerBox
+  m_Name: InitialCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -127,8 +127,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _info: {fileID: 11400000, guid: 51338f2c8ba077549bc3a38e00a191d7, type: 2}
---- !u!114 &-4205627530249771063
+  _info: {fileID: 11400000, guid: c6f3a860d483fd74f84679b414cdf477, type: 2}
+--- !u!114 &345266137108139073
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -137,6 +137,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8922302472943703707}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2177681682dc514494bd03b21d640e5, type: 3}
+  m_Script: {fileID: 11500000, guid: 724e75efe83559947a0ed3deb2c89982, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isInitialLocation: 1
