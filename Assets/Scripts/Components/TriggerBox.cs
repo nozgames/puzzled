@@ -10,15 +10,21 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnEnter(EnterCellEvent evt)
         {
-            entered = true;
-            tile.SetOutputsActive(true);
+            if (evt.isPlayer)
+            {
+                entered = true;
+                tile.SetOutputsActive(true);
+            }
         }
 
         [ActorEventHandler]
         private void OnExit(LeaveCellEvent evt)
         {
-            entered = false;
-            tile.SetOutputsActive(false);
+            if (evt.isPlayer)
+            {
+                entered = false;
+                tile.SetOutputsActive(false);
+            }
         }
     }
 }

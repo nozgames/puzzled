@@ -15,5 +15,8 @@ namespace Puzzled
         {
             tile.SetOutputsActive(tile.hasActiveInput);
         }
+
+        [ActorEventHandler]
+        private void OnStart(StartEvent evt) => UpdateState();
     }
 }

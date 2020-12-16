@@ -25,5 +25,8 @@ namespace Puzzled
 
             tile.SetOutputsActive(bMatches);
         }
+
+        [ActorEventHandler]
+        private void OnStart(StartEvent evt) => UpdateState();
     }
 }
