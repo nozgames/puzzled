@@ -15,6 +15,8 @@ namespace Puzzled
         /// </summary>
         public Cell cellTo { get; private set; }
 
+        public bool isPlayer => actor.gameObject.GetComponent<Player>() != null;
+
         public LeaveCellEvent (Actor actor, Cell cellTo)
         {
             this.actor = actor;
