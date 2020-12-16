@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    public class DecalDatabase : AddressableDatabase<Sprite>
+    public class DecalDatabase : AddressableDatabase<Texture2D>
     {
         private static DecalDatabase _instance = null;
 
@@ -23,7 +23,7 @@ namespace Puzzled
 
         protected override void OnLoaded()
         {
-            _decals = _instance._cache.Select(kv => new Decal(kv.Key, kv.Value)).ToArray();
+            _decals = _instance._cache.Select(kv => new Decal(kv.Key, Sprite.Create(kv.Value, new Rect(0, 0, kv.Value.width, kv.Value.height), new Vector2(.5f, .5f)))).ToArray();
             _decalsByGuid = new Dictionary<Guid, Decal>();
 
             foreach (var decal in _decals)
