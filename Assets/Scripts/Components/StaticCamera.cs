@@ -8,22 +8,12 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
         {
-            UpdateCameraState();
+            ActivateCamera();
         }
 
-        [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt)
+        private void ActivateCamera()
         {
-            UpdateCameraState();
-        }
-
-        private void UpdateCameraState()
-        {
-            // FIXME
-//            if (tile.hasActiveInput)
-                // activate camera
-//            else
-                // deactivate camera
+            CameraManager.TransitionToTile(tile.cell);
         }
     }
 }
