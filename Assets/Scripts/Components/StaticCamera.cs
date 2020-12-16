@@ -15,7 +15,15 @@ namespace Puzzled
             private set => _zoomLevel = Mathf.Clamp(value, MinZoomLevel, MaxZoomLevel); 
         }
 
+        [Editable]
+        public int transitionTime
+        {
+            get => _transitionTime;
+            private set => _transitionTime = Mathf.Max(value, 0);
+        }
+
         private int _zoomLevel = 12;
+        private int _transitionTime = 1;
 
         [SerializeField] private bool isInitialLocation = false;
 
@@ -27,7 +35,7 @@ namespace Puzzled
 
         private void ActivateCamera()
         {
-            CameraManager.TransitionToCell(tile.cell, zoomLevel);
+            CameraManager.TransitionToCell(tile.cell, zoomLevel, transitionTime);
         }
 
         [ActorEventHandler]

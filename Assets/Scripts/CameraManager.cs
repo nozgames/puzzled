@@ -10,7 +10,6 @@ namespace Puzzled
     public class CameraManager : MonoBehaviour
     {
         [SerializeField] private Camera _camera = null;
-        [SerializeField] private float _transitionSpeed = 1;
 
         private Cell _cell = Cell.invalid;
         private int _zoomLevel;
@@ -41,7 +40,7 @@ namespace Puzzled
             _instance._zoomLevel = zoomLevel;
         }
 
-        public static void TransitionToCell(Cell cell, int zoomLevel)
+        public static void TransitionToCell(Cell cell, int zoomLevel, int transitionTime)
         {
             if ((cell == _instance._cell) && (zoomLevel == _instance._zoomLevel))
                 return; // nothing to do
@@ -56,7 +55,9 @@ namespace Puzzled
             if (cell != _instance._cell)
                 tweenGroup.Child(Tween.Move(TileGrid.CellToWorld(_instance._cell), TileGrid.CellToWorld(cell), false));
 
-            tweenGroup.Duration(_instance._transitionSpeed)
+            float duration = transitionTime * GameManager.tick;
+
+            tweenGroup.Duration(duration)
                 .OnStop(_instance.OnCameraTransitionComplete)
                 .Start(_instance._camera.gameObject);
 

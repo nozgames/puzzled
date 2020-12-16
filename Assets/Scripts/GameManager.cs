@@ -14,8 +14,8 @@ namespace Puzzled
         [SerializeField] private Transform wires = null;
         [SerializeField] private GameObject wirePrefab = null;
         [SerializeField] private float wireHitThreshold = 0.1f;
-        [SerializeField] private float tick = 0.25f;
-
+        [SerializeField] private float _tick = 0.25f;
+            
         [Header("Layers")]
         [SerializeField] [Layer] private int floorLayer = 0;
         [SerializeField] [Layer] private int staticLayer = 0;
@@ -41,6 +41,8 @@ namespace Puzzled
         public static Cell playerCell => player != null ? player.tile.cell : Cell.invalid;
 
         public static bool isValid => _instance != null;
+
+        public static float tick => _instance._tick;
 
         private float elapsed = 0.0f;
 
