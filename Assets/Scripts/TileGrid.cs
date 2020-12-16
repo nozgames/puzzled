@@ -273,7 +273,7 @@ namespace Puzzled
 
                 case CellEventRouting.FirstVisible:
                 {
-                    for (int layer = _instance._layerCount - 1; layer >= 0; layer--)
+                    for (int layer = (int)(TileLayer.Logic - 1); layer >= 0; layer--)
                     {
                         var tile = tiles[index + layer];
                         if (null == tile)
