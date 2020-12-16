@@ -7,11 +7,14 @@ namespace Puzzled
     class SequenceDetector : TileComponent
     {
         [Editable]
-        public bool resetOnDeactivate { get; set; } 
+        public bool resetOnDeactivate { get; set; }
 
         // FIXME: we need some sort of sequence data structure here to check against
         private int sequenceIndex = 0;
         private List<int> wireOrder;
+
+        [Editable]
+        public int pageCount { get; set; }
 
         void Start()
         {

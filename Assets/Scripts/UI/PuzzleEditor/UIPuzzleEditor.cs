@@ -199,7 +199,7 @@ namespace Puzzled
                 if (v)
                     drawTile = prefab;
             });
-            tileObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = prefab.info.displayName;
+            tileObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = prefab.name;
             tileObject.GetComponentInChildren<RawImage>().texture = t;
         }
 

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 namespace Puzzled
 {
@@ -14,7 +13,9 @@ namespace Puzzled
         public bool isInput => _input;
         public bool isReorderable => _reorderable;
 
-        private void OnEnable()
+        public int stateBit { get; protected set; } = 0;
+
+        protected virtual void OnEnable()
         {
         }
 

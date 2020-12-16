@@ -32,12 +32,13 @@ namespace Puzzled
 
             if (_param1Toggle != null)
             {
-                _param1Toggle.isOn = (wiresEditor.isInput ? wire.to.GetOption(0) : wire.from.GetOption(0)) == 1;
+                var mask = (1 << wiresEditor.stateBit);
+                _param1Toggle.isOn = ((wiresEditor.isInput ? wire.to.GetOption(0) : wire.from.GetOption(0))&mask) == mask;
                 _param1Toggle.onValueChanged.AddListener((value) => {
                     if (wiresEditor.isInput)
-                        wire.to.SetOption(0, value ? 1 : 0);
+                        wire.to.SetOption(0, (wire.to.GetOption(0) & (~mask)) | (value ? mask : 0));
                     else
-                        wire.from.SetOption(0, value ? 1 : 0);
+                        wire.from.SetOption(0, (wire.from.GetOption(0) & (~mask)) | (value ? mask : 0));
                 });
             }
 
