@@ -301,10 +301,14 @@ namespace Puzzled
 
                 tile.Send(start);
             }
+
+            CameraManager.Play();
         }
 
         public static void Stop ()
         {
+            CameraManager.Stop();
+
             Camera.main.cullingMask = _instance.defaultLayers;
             paused = true;
         }
