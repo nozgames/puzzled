@@ -23,7 +23,7 @@ namespace Puzzled
         }
 
         private int _zoomLevel = 12;
-        private int _transitionTime = 1;
+        private int _transitionTime = 4;
 
         [SerializeField] private bool isInitialLocation = false;
 
