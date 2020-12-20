@@ -164,10 +164,10 @@ namespace Puzzled
 
             _instance._linking = true;
 
-            if (destroy && tiles[index] != null)
-                tiles[index].Destroy();
-
+            var tile = tiles[index];
             tiles[index] = null;
+            if (destroy && tile != null)
+                tile.Destroy();
 
             _instance._linking = false;
         }

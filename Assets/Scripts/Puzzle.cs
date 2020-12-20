@@ -60,6 +60,7 @@ namespace Puzzled
                     cell = tile.cell,
                     properties = tile.properties?
                         .Select(p => new SerializedProperty { name = p.property.Name, value = p.GetValue(tile) })
+                        .Where(p => !string.IsNullOrEmpty(p.value))
                         .ToArray()
                 };
 

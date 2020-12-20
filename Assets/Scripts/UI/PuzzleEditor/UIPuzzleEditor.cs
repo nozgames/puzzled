@@ -16,7 +16,8 @@ namespace Puzzled
             Draw,
             Move,
             Erase,
-            Logic
+            Logic,
+            Decal
         }
 
         [SerializeField] private UICanvas canvas = null;
@@ -26,12 +27,9 @@ namespace Puzzled
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
-        [SerializeField] private Transform paletteTiles = null;
-        [SerializeField] private GameObject palette = null;
         [SerializeField] private int minZoom = 1;
         [SerializeField] private int maxZoom = 10;
         [SerializeField] private GameObject fileButton = null;
-        [SerializeField] private GameObject tileButtonPrefab = null;
 
         [SerializeField] private Transform options = null;
         [SerializeField] private GameObject inspector = null;
@@ -42,6 +40,7 @@ namespace Puzzled
         [SerializeField] private Toggle drawTool = null;
         [SerializeField] private Toggle eraseTool = null;
         [SerializeField] private Toggle wireTool = null;
+        [SerializeField] private Toggle decalTool = null;
         [SerializeField] private GameObject moveToolOptions = null;
         [SerializeField] private GameObject eraseToolOptions = null;
         [SerializeField] private Toggle eraseToolAllLayers = null;
@@ -70,6 +69,11 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionOutputsPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
 
+        [Header("Palette")]
+        [SerializeField] private GameObject palette = null;
+        [SerializeField] private UIList _paletteList = null;
+        [SerializeField] private GameObject tileButtonPrefab = null;
+        [SerializeField] private GameObject paletteDecalItemPrefab = null;
 
         private Mode _mode = Mode.Unknown;
         private string currentPuzzleName = null;
@@ -109,9 +113,8 @@ namespace Puzzled
 
         private void UpdateMode()
         {
-            inspector.SetActive(_mode == Mode.Logic);
-            palette.SetActive(mode == Mode.Draw);
-            moveToolOptions.SetActive(mode == Mode.Move);
+            inspector.SetActive(false);
+            palette.SetActive(false);            
             
             canvas.UnregisterAll();
 
@@ -119,6 +122,7 @@ namespace Puzzled
             DisableDrawTool();
             DisableEraseTool();
             DisableLogicTool();
+            DisableDecalTool();
 
             switch (_mode)
             {
@@ -126,6 +130,7 @@ namespace Puzzled
                 case Mode.Draw: EnableDrawTool(); break;
                 case Mode.Erase: EnableEraseTool(); break;
                 case Mode.Logic: EnableLogicTool(); break;
+                case Mode.Decal: EnableDecalTool(); break;
             }
         }
 
@@ -148,12 +153,9 @@ namespace Puzzled
             GameManager.busy++;
 
             popups.SetActive(false);
-            inspector.SetActive(false);
+            inspector.SetActive(false);            
 
-            paletteTiles.transform.DetachAndDestroyChildren();
-
-            foreach (var tile in TileDatabase.GetTiles())
-                GeneratePreview(tile);
+            InitializePalette();
 
             selectionRect.gameObject.SetActive(false);
 
@@ -163,6 +165,32 @@ namespace Puzzled
             GameManager.UnloadPuzzle();
             currentPuzzleName = null;
             puzzleName.text = "Unnamed";
+        }
+
+        private void InitializePalette()
+        {
+            _paletteList.transform.DetachAndDestroyChildren();
+
+            foreach (var tile in TileDatabase.GetTiles())
+                GeneratePreview(tile);
+
+            var noneDecal = Instantiate(paletteDecalItemPrefab, _paletteList.transform).GetComponent<UIDecalItem>();
+            noneDecal.decal = new Decal(Guid.Empty, null);
+
+            foreach (var decal in DecalDatabase.GetDecals())
+            {
+                var decalItem = Instantiate(paletteDecalItemPrefab, _paletteList.transform).GetComponent<UIDecalItem>();
+                decalItem.decal = decal;
+            }
+        }
+
+        private void FilterPalette(Type itemType)
+        {
+            for (int i = 0; i < _paletteList.transform.childCount; i++)
+            {
+                var child = _paletteList.transform.GetChild(i);
+                child.gameObject.SetActive(child.GetComponent(itemType) != null);
+            }
         }
 
         private void OnScroll(Vector2 position, Vector2 delta)
@@ -180,7 +208,8 @@ namespace Puzzled
         {
             KeyboardManager.Pop();
 
-            Save();
+            if (!playing)
+                Save();
 
             GameManager.busy--;
         }
@@ -192,9 +221,9 @@ namespace Puzzled
 
             var t = TileDatabase.GetPreview(prefab.guid);
 
-            var tileObject = Instantiate(piecePrefab, paletteTiles);
+            var tileObject = Instantiate(piecePrefab, _paletteList.transform);
             var toggle = tileObject.GetComponent<Toggle>();
-            toggle.group = paletteTiles.GetComponent<ToggleGroup>();
+            toggle.group = _paletteList.transform.GetComponent<ToggleGroup>();
             toggle.onValueChanged.AddListener(v => {
                 if (v)
                     drawTile = prefab;
@@ -216,6 +245,8 @@ namespace Puzzled
                 mode = Mode.Erase;
             else if (wireTool.isOn)
                 mode = Mode.Logic;
+            else if (decalTool.isOn)
+                mode = Mode.Decal;
         }
 
         private void SetSelectionRect(Cell min, Cell max)
@@ -497,7 +528,7 @@ namespace Puzzled
 
             foreach(var tile in TileDatabase.GetTiles().Where(t => t.GetComponent(componentType) != null))
             {
-                var tileButton = Instantiate(tileButtonPrefab, tileSelectorTiles).GetComponent<UITileButton>();
+                var tileButton = Instantiate(tileButtonPrefab, tileSelectorTiles).GetComponent<UITileItem>();
                 tileButton.tile = tile;
                 tileButton.GetComponent<Toggle>().onValueChanged.AddListener((value) => {
                     CloseTileSelector(tile);                    

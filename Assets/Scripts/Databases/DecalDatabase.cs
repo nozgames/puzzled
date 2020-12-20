@@ -17,13 +17,15 @@ namespace Puzzled
             _instance = this;
         }
 
+        public static Decal[] GetDecals() => _instance._decalsByGuid.Values.ToArray();
+
         public static Decal GetDecal(Guid guid) => _instance._decalsByGuid.TryGetValue(guid, out var decal) ? decal : null;
 
         protected override string label => "decal";
 
         protected override void OnLoaded()
         {
-            _decals = _instance._cache.Select(kv => new Decal(kv.Key, Sprite.Create(kv.Value, new Rect(0, 0, kv.Value.width, kv.Value.height), new Vector2(.5f, .5f)))).ToArray();
+            _decals = _instance._cache.Select(kv => new Decal(kv.Key, Sprite.Create(kv.Value, new Rect(0, 0, kv.Value.width, kv.Value.height), new Vector2(.5f, .5f), 64))).ToArray();
             _decalsByGuid = new Dictionary<Guid, Decal>();
 
             foreach (var decal in _decals)

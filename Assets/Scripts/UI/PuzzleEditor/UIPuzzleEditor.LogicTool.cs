@@ -16,6 +16,8 @@ namespace Puzzled
             canvas.onLButtonDrag = OnLogicLButtonDrag;
             canvas.onLButtonDragEnd = OnLogicLButtonDragEnd;
 
+            inspector.SetActive(true);
+
             logicCycleSelection = false;
         }
 

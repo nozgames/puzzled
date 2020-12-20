@@ -8,6 +8,9 @@ namespace Puzzled
         {
             canvas.onLButtonDown = OnDrawToolLButtonDown;
             canvas.onLButtonDrag = OnDrawToolDrag;
+            
+            FilterPalette(typeof(UITileItem));
+            palette.SetActive(true);
         }
 
         private void DisableDrawTool()

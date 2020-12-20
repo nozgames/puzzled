@@ -72,6 +72,10 @@ namespace Puzzled
         {
             base.OnDisable();
 
+            var cell = tile.cell;
+            if (cell != Cell.invalid)
+                SendToCell(new LeaveCellEvent(tile, cell), cell);
+
             leftAction.action.started -= OnLeftActionStarted;
             rightAction.action.started -= OnRightActionStarted;
             upAction.action.started -= OnUpActionStarted;
@@ -89,6 +93,12 @@ namespace Puzzled
             upAction.action.Disable();
             downAction.action.Disable();
             useAction.action.Disable();
+        }
+
+        [ActorEventHandler]
+        private void OnStart(StartEvent evt)
+        {
+            SendToCell(new EnterCellEvent(tile, tile.cell), tile.cell);
         }
 
         [ActorEventHandler]

@@ -8,6 +8,21 @@ namespace Puzzled
         private Cell moveToCell;
         private Cell moveFromCell;
 
+        [ActorEventHandler]
+        private void OnStart(StartEvent evt)
+        {
+            SendToCell(new EnterCellEvent(tile, tile.cell), tile.cell);
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            var cell = tile.cell;
+            if(cell != Cell.invalid)
+                SendToCell(new LeaveCellEvent(tile, cell), cell);
+        }
+
         [ActorEventHandler(priority=1)]
         private void OnQueryMove(QueryMoveEvent evt)
         {

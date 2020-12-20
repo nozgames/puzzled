@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Puzzled
 {
-    public class UITileButton : MonoBehaviour
+    public class UITileItem : MonoBehaviour
     {
         [SerializeField] private RawImage preview = null;
         [SerializeField] private TMPro.TextMeshProUGUI nameText = null;
