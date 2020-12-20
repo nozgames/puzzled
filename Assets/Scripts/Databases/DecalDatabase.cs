@@ -25,7 +25,14 @@ namespace Puzzled
 
         protected override void OnLoaded()
         {
-            _decals = _instance._cache.Select(kv => new Decal(kv.Key, Sprite.Create(kv.Value, new Rect(0, 0, kv.Value.width, kv.Value.height), new Vector2(.5f, .5f), 64))).ToArray();
+            _decals = _instance._cache
+                .Select(kv => {
+                    var decal = new Decal(kv.Key, Sprite.Create(kv.Value, new Rect(0, 0, kv.Value.width, kv.Value.height), new Vector2(.5f, .5f), 64));
+                    decal.sprite.name = kv.Value.name.StartsWith("Decal") ? kv.Value.name.Substring(5) : kv.Value.name;
+                    return decal;
+                })
+                .OrderBy(d => d.sprite.name)
+                .ToArray();
             _decalsByGuid = new Dictionary<Guid, Decal>();
 
             foreach (var decal in _decals)

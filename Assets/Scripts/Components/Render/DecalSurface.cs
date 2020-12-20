@@ -15,7 +15,9 @@ namespace Puzzled
                 _decal = value;
 
                 _renderer.enabled = _decal != null && _decal.sprite != null;
-                _renderer.sprite = _decal.sprite;
+
+                if(_decal != null)
+                    _renderer.sprite = _decal.sprite;
             }
         }
     }
