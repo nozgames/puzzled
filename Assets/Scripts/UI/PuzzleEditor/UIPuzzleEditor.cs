@@ -183,6 +183,8 @@ namespace Puzzled
 
         private void OnDisable()
         {
+            Save();
+
             GameManager.busy--;
         }
 
@@ -268,10 +270,13 @@ namespace Puzzled
             HidePopup();
         }
 
-        private string currentPuzzleFilename => Path.Combine(Application.dataPath, $"Puzzles/{puzzleName.text}.puzzle");
+        private string currentPuzzleFilename => string.IsNullOrEmpty(puzzleName.text) ? null : Path.Combine(Application.dataPath, $"Puzzles/{puzzleName.text}.puzzle");
 
         public void Save()
         {
+            if (null == currentPuzzleFilename)
+                return;
+
             Puzzle.Save(TileGrid.GetLinkedTiles(), currentPuzzleFilename);
         }
 

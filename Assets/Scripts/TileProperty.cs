@@ -35,7 +35,7 @@ namespace Puzzled
             if (property.PropertyType == typeof(string[]))
                 return value != null ? string.Join(",", (string[])value) : "";
 
-            return property.ToString();
+            return value.ToString();
         }
 
         public int GetValueInt(Tile tile) => int.TryParse(GetValue(tile), out var result) ? result : 0;
