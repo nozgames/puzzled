@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using UnityEngine;
 
 namespace Puzzled
@@ -11,6 +12,8 @@ namespace Puzzled
             get => labelText.text;
             set => labelText.text = value;
         }
+
+        public event Action<object> onTargetChanged;
 
         private object _target;
 
@@ -28,6 +31,7 @@ namespace Puzzled
 
         protected virtual void OnTargetChanged(object target)
         {
+            onTargetChanged?.Invoke(target);
         }
     }
 }

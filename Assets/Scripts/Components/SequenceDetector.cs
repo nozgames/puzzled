@@ -13,9 +13,9 @@ namespace Puzzled
         private int sequenceIndex = 0;
         private List<int> wireOrder;
 
-        [Editable]
-        public int pageCount { get; set; }
-
+        [Editable(hidden = true)]
+        public string[] steps { get; set; }
+        
         void Start()
         {
             // FIXME, we need to find some way to choose the wire order

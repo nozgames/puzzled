@@ -64,8 +64,8 @@ namespace Puzzled
                 return;
 
             dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
-            dragWire.transform.position = TileGrid.CellToWorld(cell);
-            dragWire.target = cell;
+            dragWire.transform.position = TileGrid.CellToWorld(selection.cell);
+            dragWire.target = selection.cell;
         }
 
         private void OnLogicLButtonDrag(Vector2 position, Vector2 delta)
@@ -94,6 +94,8 @@ namespace Puzzled
                 if (wire != null)
                     wire.visible = true;
             }
+
+            UpdateInspector(selection);
 
             Destroy(dragWire.gameObject);
             dragWire = null;
@@ -132,7 +134,7 @@ namespace Puzzled
                 SetSelectionRect(tile.cell, tile.cell);
                 GameManager.HideWires();
                 GameManager.ShowWires(tile);
-                PopulateOptions(tile);
+                UpdateInspector(tile);
             }
         }
     }

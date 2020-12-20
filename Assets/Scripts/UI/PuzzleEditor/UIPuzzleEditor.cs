@@ -75,6 +75,7 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionPrefabTile = null;
         [SerializeField] private UIOptionEditor optionInputsPrefab = null;
         [SerializeField] private UIOptionEditor optionOutputsPrefab = null;
+        [SerializeField] private GameObject optionPropertiesPrefab = null;
 
 
         private Mode _mode = Mode.Unknown;
@@ -431,37 +432,45 @@ namespace Puzzled
             Destroy(wire.gameObject);
         }
 
-        private UIOptionEditor InstantiateOptionEditor(Type type)
+        private UIOptionEditor InstantiateOptionEditor(Type type, Transform parent)
         {
             if (type == typeof(int))
-                return Instantiate(optionPrefabInt, options).GetComponent<UIOptionEditor>();
+                return Instantiate(optionPrefabInt, parent).GetComponent<UIOptionEditor>();
             else if (type == typeof(bool))
-                return Instantiate(optionPrefabBool, options).GetComponent<UIOptionEditor>();
+                return Instantiate(optionPrefabBool, parent).GetComponent<UIOptionEditor>();
             else if (type == typeof(string))
-                return Instantiate(optionPrefabString, options).GetComponent<UIOptionEditor>();
+                return Instantiate(optionPrefabString, parent).GetComponent<UIOptionEditor>();
             else if (type == typeof(Guid))
-                return Instantiate(optionPrefabTile, options).GetComponent<UIOptionEditor>();
+                return Instantiate(optionPrefabTile, parent).GetComponent<UIOptionEditor>();
 
             return null;
         }
 
-        private void PopulateOptions(Tile tile)
+        private void UpdateInspector(Tile tile)
         {
             options.DetachAndDestroyChildren();
 
             if (tile.info.allowWireInputs)
-                Instantiate(tile.info.inputsPrefab != null ? tile.info.inputsPrefab : optionInputsPrefab, options).GetComponent<UIOptionEditor>().target = tile;
+                Instantiate(tile.info.inputsPrefab != null ? tile.info.inputsPrefab : optionInputsPrefab.gameObject, options).GetComponentInChildren<UIOptionEditor>().target = tile;
 
             if (tile.info.allowWireOutputs)
-                Instantiate(tile.info.outputsPrefab != null ? tile.info.outputsPrefab : optionOutputsPrefab, options).GetComponent<UIOptionEditor>().target = tile;
+                Instantiate(tile.info.outputsPrefab != null ? tile.info.outputsPrefab : optionOutputsPrefab.gameObject, options).GetComponentInChildren<UIOptionEditor>().target = tile;
 
             if (tile.info.customOptionEditors != null)
                 foreach (var editor in tile.info.customOptionEditors)
                     Instantiate(editor.prefab, options).GetComponent<UIOptionEditor>().target = tile;
 
+            Transform properties = null;
             foreach (var tileProperty in tile.properties)
             {
-                var optionEditor = InstantiateOptionEditor(tileProperty.property.PropertyType);
+                // Skip hidden properties
+                if (tileProperty.editable.hidden)
+                    continue;
+
+                if(properties == null)
+                    properties = Instantiate(optionPropertiesPrefab, options).transform.Find("Content");
+
+                var optionEditor = InstantiateOptionEditor(tileProperty.property.PropertyType, properties);
                 if (null == optionEditor)
                     continue;
 

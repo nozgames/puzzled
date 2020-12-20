@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 namespace Puzzled
 {
@@ -8,24 +9,46 @@ namespace Puzzled
         [SerializeField] private GameObject _wirePrefab = null;
         [SerializeField] private bool _input = true;
         [SerializeField] private bool _reorderable = false;
-        [SerializeField] private TMPro.TextMeshProUGUI _noinputs  = null;
+        [SerializeField] private GameObject _content = null;
+        [SerializeField] private GameObject _empty = null;
+        [SerializeField] private Button _moveUpButton = null;
+        [SerializeField] private Button _moveDownButton = null;
+        [SerializeField] private Button _deleteButton = null;
+        [SerializeField] private UIList _list = null;
+
+        [SerializeField] private UISequence _sequence = null;
 
         public bool isInput => _input;
         public bool isReorderable => _reorderable;
 
-        public int stateBit { get; protected set; } = 0;
+        public UISequence sequence => _sequence;
 
-        protected virtual void OnEnable()
+        private void Awake()
         {
+            _list.onSelectionChanged += OnSelectionChanged;
+            
+            if(_sequence != null)
+            {
+                _sequence.onSelectionChanged += OnSequenceSelectionChanged;
+            }
+        }
+
+        private void OnSequenceSelectionChanged(int selection)
+        {
+            if (_sequence != null)
+                label = $"{(isInput ? "Inputs" : "Outputs")} ({_sequence.GetStepName(selection)})";
+
+            UpdateWires();
+        }
+
+        private void OnSelectionChanged(int obj)
+        {
+            UpdateButtons();
         }
 
         protected override void OnTargetChanged(object target)
         {
             var tile = (Tile)target;
-
-            label = _input ? "Inputs" : "Outputs";
-
-            _noinputs.text = $"No {label}";
 
             _wires.DetachAndDestroyChildren();
 
@@ -35,22 +58,24 @@ namespace Puzzled
                 Instantiate(_wirePrefab, _wires).GetComponent<UIOptionWire>().target = wire;
             }
 
+            _empty.SetActive(wires.Count <= 0);
+            _content.SetActive(wires.Count > 0);
+
+            if (_sequence != null)
+                _sequence.tile = tile;
+
             UpdateWires();
+            UpdateButtons();
 
-            OnSelectionChanged(null);
-        }
-
-        internal void OnSelectionChanged(UIOptionWire wireOption)
-        {
+            base.OnTargetChanged(target);
         }
 
         public void UpdateWires()
         {
-            _noinputs.transform.parent.gameObject.SetActive(_wires.childCount <= 0);
-            _wires.gameObject.SetActive(_wires.childCount > 0);
-
             for (int i = 0; i < _wires.childCount; i++)
-                _wires.GetChild(i).GetComponent<UIOptionWire>().UpdateIndex();
+            {
+                _wires.GetChild(i).GetComponent<UIOptionWire>().UpdateState();
+            }
         }
 
         public void Select(int index)
@@ -59,6 +84,77 @@ namespace Puzzled
                 return;
 
             _wires.GetChild(Mathf.Clamp(index, 0, _wires.childCount - 1)).GetComponent<UIOptionWire>().Select();
+        }
+
+        public void OnMoveUpButton()
+        {
+            var index = _list.selected;
+            var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
+            var wire = (Wire)wireEditor.target;
+            if (index == 0)
+                return;
+
+            if (isInput)
+                wire.to.tile.SetInputIndex(wire, index - 1);
+            else
+                wire.from.tile.SetOutputIndex(wire, index - 1);
+
+            wireEditor.transform.SetSiblingIndex(index - 1);
+            _list.Select(index - 1);
+
+            UpdateWires();
+            UpdateButtons();
+        }
+
+        public void OnMoveDownButton()
+        {
+            var index = _list.selected;
+            var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
+            var wire = (Wire)wireEditor.target;
+            if (isInput)
+            {
+                if (index >= wire.to.tile.inputCount - 1)
+                    return;
+
+                wire.to.tile.SetInputIndex(wire, index + 1);
+            } else
+            {
+                if (index >= wire.from.tile.outputCount - 1)
+                    return;
+
+                wire.from.tile.SetOutputIndex(wire, index + 1);
+            }
+
+            wireEditor.transform.SetSiblingIndex(index + 1);
+            _list.Select(index + 1);
+
+            UpdateWires();
+            UpdateButtons();
+        }
+
+        public void OnDeleteButton()
+        {
+            // Destroy the wire
+            var index = _list.selected;
+            var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
+            var wire = (Wire)wireEditor.target;
+            Destroy(wire.gameObject);
+
+            // Destroy the wire editor
+            wireEditor.gameObject.transform.SetParent(null);
+            Destroy(wireEditor.gameObject);
+
+            // Select the item that now occupies the same space
+            _list.Select(Mathf.Clamp(index, -1, _wires.childCount-1));
+
+            UpdateButtons();
+        }
+
+        private void UpdateButtons()
+        {
+            _deleteButton.interactable = _list.selected != -1 && _wires.childCount > 0;
+            _moveUpButton.interactable = _list.selected > 0;
+            _moveDownButton.interactable = _list.selected >= 0 && _list.selected < _list.itemCount - 1;
         }
     }
 }

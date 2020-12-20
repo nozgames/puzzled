@@ -32,8 +32,8 @@ namespace Puzzled
         }
 
         [Header("Editor")]
-        [SerializeField] private UIOptionWires _inputsPrefab = null;
-        [SerializeField] private UIOptionWires _outputsPrefab = null;
+        [SerializeField] private GameObject _inputsPrefab = null;
+        [SerializeField] private GameObject _outputsPrefab = null;
         [SerializeField] private CustomOptionEditor[] _customEditorPrefabs = null;
 
         public bool allowMultiple => _allowMultiple;
@@ -49,8 +49,8 @@ namespace Puzzled
         public string displayName => string.IsNullOrEmpty(_displayName) ? name : _displayName;
 
         public CustomOptionEditor[] customOptionEditors => _customEditorPrefabs;
-        public UIOptionWires inputsPrefab => _inputsPrefab;
-        public UIOptionWires outputsPrefab => _outputsPrefab;
+        public GameObject inputsPrefab => _inputsPrefab;
+        public GameObject outputsPrefab => _outputsPrefab;
 
         public TileLayer layer => _layer;        
     }

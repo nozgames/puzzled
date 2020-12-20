@@ -389,9 +389,11 @@ namespace Puzzled
         public void SetProperty(string name, int value) => SetProperty(name, value.ToString());
         public void SetProperty(string name, bool value) => SetProperty(name, value.ToString());
         public void SetProperty(string name, Guid value) => SetProperty(name, value.ToString());
+        public void SetProperty(string name, string[] value) => GetProperty(name).SetValue(this, value);
 
         public TileProperty GetProperty(string name) => properties.Where(p => p.property.Name == name).FirstOrDefault();
 
         public int GetPropertyInt(string name) => GetProperty(name).GetValueInt(this);
+        public string[] GetPropertyStringArray(string name) => GetProperty(name).GetValueStringArray(this);
     }
 }
