@@ -8,7 +8,7 @@ using Puzzled.PuzzleEditor;
 
 namespace Puzzled
 {
-    public partial class UIPuzzleEditor : UIScreen
+    public partial class UIPuzzleEditor : UIScreen, KeyboardManager.IKeyboardHandler
     {
         private enum Mode
         {
@@ -17,13 +17,6 @@ namespace Puzzled
             Move,
             Erase,
             Logic
-        }
-
-        private enum DragState
-        {
-            Begin,
-            Update,
-            End
         }
 
         [SerializeField] private UICanvas canvas = null;
@@ -140,19 +133,21 @@ namespace Puzzled
         {
             instance = this;
 
-            foreach(var toggle in layerToggles)
+            foreach (var toggle in layerToggles)
                 toggle.onValueChanged.AddListener((value) => UpdateLayers());
         }
 
         private void OnEnable()
         {
+            KeyboardManager.Push(this);
+
             canvas.onScroll = OnScroll;
             canvas.onRButtonDrag = OnPan;
 
             GameManager.Stop();
             GameManager.busy++;
 
-            popups.gameObject.SetActive(false);
+            popups.SetActive(false);
             inspector.SetActive(false);
 
             paletteTiles.transform.DetachAndDestroyChildren();
@@ -183,6 +178,8 @@ namespace Puzzled
 
         private void OnDisable()
         {
+            KeyboardManager.Pop();
+
             Save();
 
             GameManager.busy--;
@@ -520,6 +517,16 @@ namespace Puzzled
         {
             for(int i=0;i<layerToggles.Length; i++)
                 GameManager.ShowLayer((TileLayer)i, layerToggles[i].isOn);
+        }
+
+        public void OnKey(KeyCode keyCode)
+        {
+            switch (keyCode)
+            {
+                case KeyCode.Escape:
+                    ShowPopup(fileMenuPopup);
+                    break;
+            }
         }
     }
 }

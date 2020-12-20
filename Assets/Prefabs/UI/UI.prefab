@@ -5954,6 +5954,7 @@ GameObject:
   - component: {fileID: 9058101739729388210}
   - component: {fileID: 437634718445075507}
   - component: {fileID: 6553277097514261009}
+  - component: {fileID: 2047847554670846813}
   m_Layer: 5
   m_Name: Popups
   m_TagString: Untagged
@@ -6022,6 +6023,33 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &2047847554670846813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7144646921383404990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ccf2a238c5db8a4a91a51fd988b01ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onCancel:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3801852044663621676}
+        m_TargetAssemblyTypeName: Puzzled.UIPuzzleEditor, Assembly-CSharp
+        m_MethodName: OnCancelPopup
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &7234860970503948248
 GameObject:
   m_ObjectHideFlags: 0

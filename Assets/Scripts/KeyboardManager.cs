@@ -1,0 +1,91 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace Puzzled
+{
+    class KeyboardManager : MonoBehaviour
+    {
+        public interface IKeyboardHandler
+        {
+            void OnKey(KeyCode keyCode);
+        }
+
+        [Header("Actions")]
+        [SerializeField] private InputAction keyEscape = null;
+        [SerializeField] private InputAction keyShift = null;
+        [SerializeField] private InputAction keyAlt = null;
+        [SerializeField] private InputAction keyCtrl = null;
+
+        private static KeyboardManager _instance = null;
+
+        private bool shift = false;
+        private bool ctrl = false;
+        private bool alt = false;
+        private Stack<IKeyboardHandler> _handlers = new Stack<IKeyboardHandler>();
+
+        public static bool isShiftPressed {
+            get => _instance.shift;
+            private set => _instance.shift = value;
+        }
+
+        public static bool isCtrlPressed {
+            get => _instance.ctrl;
+            private set => _instance.ctrl = value;
+        }
+
+        public static bool isAltPressed {
+            get => _instance.alt;
+            private set => _instance.alt = value;
+        }
+
+        private void Awake()
+        {
+            keyEscape.performed += (ctx) => SendKey(KeyCode.Escape);
+            keyShift.started += (ctx) => isShiftPressed = true;
+            keyShift.canceled += (ctx) => isShiftPressed = false;
+            keyAlt.started += (ctx) => isAltPressed = true;
+            keyAlt.canceled += (ctx) => isAltPressed = false;
+            keyCtrl.started += (ctx) => isCtrlPressed = true;
+            keyCtrl.canceled += (ctx) => isCtrlPressed = false;
+        }
+
+        private void OnEnable()
+        {
+            _instance = this;
+
+            keyEscape.Enable();
+            keyShift.Enable();
+            keyAlt.Enable();
+            keyCtrl.Enable();
+        }
+
+        private void OnDisable()
+        {
+            keyEscape.Disable();
+            keyShift.Disable();
+            keyAlt.Disable();
+            keyCtrl.Disable();
+
+            _instance = null;
+        }
+
+        public static void Push (IKeyboardHandler handler)
+        {
+            _instance._handlers.Push(handler);
+        }
+
+        public static void Pop ()
+        {
+            _instance._handlers.Pop();
+        }
+
+        private void SendKey(KeyCode keyCode)
+        {
+            if (_instance._handlers.Count == 0)
+                return;
+
+            _instance._handlers.Peek()?.OnKey(keyCode);            
+        }
+    }
+}

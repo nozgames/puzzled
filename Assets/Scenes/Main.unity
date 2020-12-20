@@ -273,6 +273,7 @@ Transform:
   - {fileID: 233178650}
   - {fileID: 1483105451}
   - {fileID: 21689902}
+  - {fileID: 864840653}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -634,6 +635,113 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _size: 255
   _grid: {fileID: 719198617}
+--- !u!1 &864840652
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 864840653}
+  - component: {fileID: 864840654}
+  m_Layer: 0
+  m_Name: Keyboard
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &864840653
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864840652}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 101222511}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &864840654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 864840652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89480e9f6ec572546ad25e05356c2a4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  keyEscape:
+    m_Name: Key Escape
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 3e2326e1-1091-46d0-b178-f0f982b0bab2
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: b0806c32-c6ee-4ff6-ad9b-05d558929246
+      m_Path: <Keyboard>/escape
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Key Escape
+      m_Flags: 0
+  keyShift:
+    m_Name: Key Shift
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 935421c8-91f8-4956-878a-e8e3215b3100
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 15177057-4a7e-4f8b-b943-9ea3121093e8
+      m_Path: <Keyboard>/shift
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Key Shift
+      m_Flags: 0
+  keyAlt:
+    m_Name: Key Alt
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 37896753-a86d-4468-a4b9-da740994d724
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 46eac083-df45-4804-9b5e-def06025890a
+      m_Path: <Keyboard>/alt
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Key Alt
+      m_Flags: 0
+  keyCtrl:
+    m_Name: Key Ctrl
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: cc159578-e2a6-46f8-85f2-d8d0e5b282a3
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: bdccef4c-1e73-4b78-af49-5952f4be837b
+      m_Path: <Keyboard>/ctrl
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Key Ctrl
+      m_Flags: 0
 --- !u!1 &1232339877
 GameObject:
   m_ObjectHideFlags: 0
