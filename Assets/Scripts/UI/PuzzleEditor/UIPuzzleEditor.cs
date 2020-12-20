@@ -303,15 +303,19 @@ namespace Puzzled
         {
             loadPopupFiles.DetachAndDestroyChildren();
 
-            var files = Directory.GetFiles(System.IO.Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
+            var files = Directory.GetFiles(Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
             foreach (var file in files)
             {
                 var fileGameObject = Instantiate(loadPopupFilePrefab, loadPopupFiles);
                 fileGameObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = Path.GetFileNameWithoutExtension(file);
-                var button = fileGameObject.GetComponent<Button>();
-                button.onClick.AddListener(() => {
-                    puzzleToLoad = Path.GetFileNameWithoutExtension(file);
-                    button.Select();
+                var item = fileGameObject.GetComponent<UIListItem>();
+                item.onSelectionChanged.AddListener((selected) => {
+                    if (!selected)
+                        return;
+                    puzzleToLoad = Path.GetFileNameWithoutExtension(file);                    
+                });
+                item.onDoubleClick.AddListener(() => {
+                    OnLoadButtonConfirm();
                 });
             }
 

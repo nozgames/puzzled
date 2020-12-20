@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace Puzzled
 {
-    class UIListItem : MonoBehaviour, IPointerDownHandler
+    class UIListItem : MonoBehaviour, IPointerDownHandler, IPointerClickHandler
     {
         [Tooltip("Object to enable when the item is selected")]
         [SerializeField] private GameObject _selectedVisuals = null;
@@ -13,6 +13,8 @@ namespace Puzzled
         private bool _selected = false;
 
         public UnityEvent<bool> onSelectionChanged = new UnityEvent<bool>();
+
+        public UnityEvent onDoubleClick = new UnityEvent();
 
         private void OnEnable()
         {
@@ -61,6 +63,12 @@ namespace Puzzled
         private void UpdateVisuals()
         {
             _selectedVisuals.SetActive(_selected);
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (eventData.clickCount == 2 && eventData.button == PointerEventData.InputButton.Left)
+                onDoubleClick?.Invoke();
         }
     }
 }
