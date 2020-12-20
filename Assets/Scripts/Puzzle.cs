@@ -143,6 +143,16 @@ namespace Puzzled
                     tilesObjects[i].SetProperty(serializedProperty.name, serializedProperty.value);
             }
 
+            // Send a start event to all tiles
+            var start = new StartEvent();
+            for (int i = 0; i < tiles.Length; i++)
+            {
+                if (tilesObjects[i] == null)
+                    continue;
+
+                tilesObjects[i].Send(start);
+            }
+
             Debug.Log($"Puzzled Loaded: [{tiles.Length} tiles, {wires.Length} wires]");
         }
 

@@ -519,12 +519,22 @@ namespace Puzzled
                 GameManager.ShowLayer((TileLayer)i, layerToggles[i].isOn);
         }
 
-        public void OnKey(KeyCode keyCode)
+        void KeyboardManager.IKeyboardHandler.OnKey(KeyCode keyCode)
         {
             switch (keyCode)
             {
                 case KeyCode.Escape:
                     ShowPopup(fileMenuPopup);
+                    break;
+            }
+        }
+
+        void KeyboardManager.IKeyboardHandler.OnModifiersChanged(bool shift, bool ctrl, bool alt)
+        {
+            switch (mode)
+            {
+                case Mode.Erase:
+                    OnModifiersChangedErase(shift, ctrl, alt);
                     break;
             }
         }

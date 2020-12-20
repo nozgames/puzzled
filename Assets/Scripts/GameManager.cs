@@ -292,18 +292,6 @@ namespace Puzzled
             Camera.main.cullingMask = _instance.playLayers;
             paused = false;
 
-            // Send a start event to all actors
-            var start = new StartEvent();
-            var grid = _instance.grid.transform;
-            for(int i=0; i<grid.childCount; i++)
-            {
-                var tile = grid.GetChild(i).GetComponent<Actor>();
-                if (null == tile)
-                    continue;
-
-                tile.Send(start);
-            }
-
             CameraManager.Play();
         }
 

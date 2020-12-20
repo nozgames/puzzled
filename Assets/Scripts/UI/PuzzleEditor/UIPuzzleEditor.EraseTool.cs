@@ -22,6 +22,10 @@ namespace Puzzled
             eraseToolOptions.SetActive(false);
         }
 
+        private void OnModifiersChangedErase(bool shift, bool ctrl, bool alt)
+        {
+        }
+
         private void OnEraseToolLButtonDown(Vector2 position) => Erase(canvas.CanvasToCell(position));
 
         private void OnEraseToolLButtonUp(Vector2 position)

@@ -48,7 +48,12 @@ namespace Puzzled
                 TileGrid.UnlinkTile(TileGrid.GetLinkedTile(drawTile.info), true);
 
             // Create the new tile
-            GameManager.InstantiateTile(drawTile, cell);
+            var tile = GameManager.InstantiateTile(drawTile, cell);
+            if (null == tile)
+                return;
+
+            // Ensure the tile is started when created
+            tile.Send(new StartEvent());
         }
     }
 }

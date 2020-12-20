@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 namespace Puzzled
@@ -9,6 +11,7 @@ namespace Puzzled
         public interface IKeyboardHandler
         {
             void OnKey(KeyCode keyCode);
+            void OnModifiersChanged(bool shift, bool ctrl, bool alt);
         }
 
         [Header("Actions")]
@@ -26,7 +29,10 @@ namespace Puzzled
 
         public static bool isShiftPressed {
             get => _instance.shift;
-            private set => _instance.shift = value;
+            private set {
+                _instance.shift = value;
+                _instance.UpdateModifiers();
+            }
         }
 
         public static bool isCtrlPressed {
@@ -80,12 +86,20 @@ namespace Puzzled
             _instance._handlers.Pop();
         }
 
-        private void SendKey(KeyCode keyCode)
+        private IKeyboardHandler GetHandler()
         {
             if (_instance._handlers.Count == 0)
-                return;
+                return null;
 
-            _instance._handlers.Peek()?.OnKey(keyCode);            
+            // All input when a keyboard control is active is ignored
+            if (EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null)
+                return null;
+
+            return _instance._handlers.Peek();
         }
+
+        private void SendKey(KeyCode keyCode) => GetHandler()?.OnKey(keyCode);
+
+        private void UpdateModifiers() => GetHandler()?.OnModifiersChanged(_instance.shift, _instance.ctrl, _instance.alt);
     }
 }

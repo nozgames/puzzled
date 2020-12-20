@@ -37,5 +37,9 @@ namespace Puzzled
                     break;
             }
         }
+
+        void KeyboardManager.IKeyboardHandler.OnModifiersChanged(bool shift, bool ctrl, bool alt)
+        {
+        }
     }
 }
