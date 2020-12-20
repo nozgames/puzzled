@@ -4,17 +4,21 @@ namespace Puzzled
 {
     public partial class UIPuzzleEditor
     {
+        private int _lastSelectedDecal = -1;
+
         private void EnableDecalTool()
         {
             canvas.onLButtonDown = OnDecalToolLButtonDown;
             canvas.onLButtonDrag = OnDecalToolDrag;
 
-            FilterPalette(typeof(UIDecalItem));
+            var first = FilterPalette(typeof(UIDecalItem));
             palette.SetActive(true);
+            _paletteList.Select(_lastSelectedDecal == -1 ? first : _lastSelectedDecal);
         }
 
         private void DisableDecalTool()
         {
+            _lastSelectedDecal = _paletteList.selected;
         }
 
         private void OnDecalToolLButtonDown(Vector2 position) => DrawDecal(position);

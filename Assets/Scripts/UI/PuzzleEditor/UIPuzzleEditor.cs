@@ -184,13 +184,18 @@ namespace Puzzled
             }
         }
 
-        private void FilterPalette(Type itemType)
+        private int FilterPalette(Type itemType)
         {
+            var first = -1;
             for (int i = 0; i < _paletteList.transform.childCount; i++)
             {
                 var child = _paletteList.transform.GetChild(i);
                 child.gameObject.SetActive(child.GetComponent(itemType) != null);
+                if (child.gameObject.activeSelf && first == -1)
+                    first = i;
             }
+
+            return first;
         }
 
         private void OnScroll(Vector2 position, Vector2 delta)
