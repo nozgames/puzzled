@@ -147,6 +147,9 @@ namespace Puzzled
             // Select the item that now occupies the same space
             _list.Select(Mathf.Clamp(index, -1, _wires.childCount-1));
 
+            _empty.SetActive(_wires.childCount <= 0);
+            _content.SetActive(_wires.childCount > 0);
+
             UpdateButtons();
         }
 

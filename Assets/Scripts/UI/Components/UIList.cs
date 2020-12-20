@@ -5,16 +5,11 @@ namespace Puzzled
 {
     class UIList : MonoBehaviour
     {
-        public int selected { get; private set; }
+        public int selected { get; private set; } = -1;
 
         public int itemCount => transform.childCount;
 
         public event Action<int> onSelectionChanged;
-
-        private void OnEnable()
-        {
-            selected = -1;
-        }
 
         private void OnTransformChildrenChanged()
         {

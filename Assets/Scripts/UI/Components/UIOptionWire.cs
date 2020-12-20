@@ -13,15 +13,17 @@ namespace Puzzled
         [SerializeField] private Toggle _param1Toggle = null;
 
         private UIOptionWires wiresEditor = null;
-        private Wire wire = null;
+        private Wire _wire = null;
+
+        public Wire wire => _wire;
 
         private int wireOption {
-            get => wiresEditor.isInput ? wire.to.GetOption(0) : wire.from.GetOption(0);
+            get => wiresEditor.isInput ? _wire.to.GetOption(0) : _wire.from.GetOption(0);
             set {
                 if (wiresEditor.isInput)
-                    wire.to.SetOption(0, value);
+                    _wire.to.SetOption(0, value);
                 else
-                    wire.from.SetOption(0, value);
+                    _wire.from.SetOption(0, value);
             }
         }
 
@@ -54,17 +56,15 @@ namespace Puzzled
 
             _item.onSelectionChanged.RemoveListener(OnSelectionChanged);
             Wire.onSelectedWireChanged -= OnWireSelectionChanged;
-
-            OnTargetChanged(null);
         }
 
         protected override void OnTargetChanged(object target)
         {
-            wire = (Wire)target;
-            if (null == wire)
+            _wire = (Wire)target;
+            if (null == _wire)
                 return;
 
-            var tile = wiresEditor.isInput ? wire.from.tile : wire.to.tile;
+            var tile = wiresEditor.isInput ? _wire.from.tile : _wire.to.tile;
 
             _tileName.text = tile.info.displayName;
 
@@ -113,7 +113,7 @@ namespace Puzzled
 
         private void OnWireSelectionChanged(Wire selectedWire)
         {
-            _item.selected = (selectedWire == wire);
+            _item.selected = (selectedWire == _wire);
         }
 
         public void OnSelectionChanged (bool selected)
