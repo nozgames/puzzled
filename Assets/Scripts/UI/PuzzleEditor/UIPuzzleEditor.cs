@@ -270,7 +270,10 @@ namespace Puzzled
             HidePopup();
         }
 
-        private string currentPuzzleFilename => string.IsNullOrEmpty(puzzleName.text) ? null : Path.Combine(Application.dataPath, $"Puzzles/{puzzleName.text}.puzzle");
+        private string currentPuzzleFilename => 
+            (string.IsNullOrEmpty(puzzleName.text) || string.Compare(puzzleName.text, "unnamed", true) == 0) ? 
+                null : 
+                Path.Combine(Application.dataPath, $"Puzzles/{puzzleName.text}.puzzle");
 
         public void Save()
         {
