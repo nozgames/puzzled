@@ -11,7 +11,7 @@ namespace Puzzled
 
         private TileComponent GetComponent(Tile tile) => (TileComponent)tile.GetComponentInChildren(property.DeclaringType);
 
-        public void SetValue(Tile tile, object value)
+        private void SetValueInternal(Tile tile, object value)
         {
             property.SetValue(GetComponent(tile), value);
         }
@@ -33,11 +33,11 @@ namespace Puzzled
                 property.SetValue(component, DecalDatabase.GetDecal(Guid.TryParse(value, out var guid) ? guid : Guid.Empty));
         }
 
-        public void SetValue(Tile tile, int value) => SetValue(tile, value);
-        public void SetValue(Tile tile, bool value) => SetValue(tile, value);
-        public void SetValue(Tile tile, Guid value) => SetValue(tile, value);
-        public void SetValue(Tile tile, string[] value) => SetValue(tile, value);
-        public void SetValue(Tile tile, Decal value) => SetValue(tile, value);
+        public void SetValue(Tile tile, int value) => SetValueInternal(tile, value);
+        public void SetValue(Tile tile, bool value) => SetValueInternal(tile, value);
+        public void SetValue(Tile tile, Guid value) => SetValueInternal(tile, value);
+        public void SetValue(Tile tile, string[] value) => SetValueInternal(tile, value);
+        public void SetValue(Tile tile, Decal value) => SetValueInternal(tile, value);
 
         public string GetValue(Tile tile)
         {
