@@ -42,21 +42,7 @@ namespace Puzzled
                     return;
             }
 
-            // Remove what is already in that slot
-            // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
-            TileGrid.UnlinkTile(cell, drawTile.info.layer, true);
-
-            // Destroy all other instances of this tile regardless of variant
-            if (!drawTile.info.allowMultiple)
-                TileGrid.UnlinkTile(TileGrid.GetLinkedTile(drawTile.info), true);
-
-            // Create the new tile
-            var tile = GameManager.InstantiateTile(drawTile, cell);
-            if (null == tile)
-                return;
-
-            // Ensure the tile is started when created
-            tile.Send(new StartEvent());
+            ExecuteCommand(new Editor.Commands.TileAddCommand(drawTile, cell));
         }
     }
 }

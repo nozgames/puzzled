@@ -34,6 +34,11 @@ namespace Puzzled
         private Cell _cell = Cell.invalid;
 
         /// <summary>
+        /// Inspector state stored on the tile for the next time the tile is selected
+        /// </summary>
+        public Editor.IInspectorState[] inspectorState { get; set; }
+
+        /// <summary>
         /// Current cell
         /// </summary>
         public Cell cell {

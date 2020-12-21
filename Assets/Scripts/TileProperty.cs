@@ -11,11 +11,6 @@ namespace Puzzled
 
         private TileComponent GetComponent(Tile tile) => (TileComponent)tile.GetComponentInChildren(property.DeclaringType);
 
-        private void SetValueInternal(Tile tile, object value)
-        {
-            property.SetValue(GetComponent(tile), value);
-        }
-
         public void SetValue(Tile tile, string value)
         {
             var component = GetComponent(tile);
@@ -33,15 +28,11 @@ namespace Puzzled
                 property.SetValue(component, DecalDatabase.GetDecal(Guid.TryParse(value, out var guid) ? guid : Guid.Empty));
         }
 
-        public void SetValue(Tile tile, int value) => SetValueInternal(tile, value);
-        public void SetValue(Tile tile, bool value) => SetValueInternal(tile, value);
-        public void SetValue(Tile tile, Guid value) => SetValueInternal(tile, value);
-        public void SetValue(Tile tile, string[] value) => SetValueInternal(tile, value);
-        public void SetValue(Tile tile, Decal value) => SetValueInternal(tile, value);
+        public void SetValue(Tile tile, object value) => property.SetValue(GetComponent(tile), value);
 
         public string GetValue(Tile tile)
         {
-            var value = property.GetValue(tile.GetComponentInChildren(property.DeclaringType));
+            var value = GetValueObject(tile);
             if (property.PropertyType == typeof(string[]))
                 return value != null ? string.Join(",", (string[])value) : "";
             else if (property.PropertyType == typeof(Decal))
@@ -56,6 +47,8 @@ namespace Puzzled
             return value.ToString();
         }
 
+        private object GetValueObject(Tile tile) => property.GetValue(tile.GetComponentInChildren(property.DeclaringType));
+
         public int GetValueInt(Tile tile) => int.TryParse(GetValue(tile), out var result) ? result : 0;
         public bool GetValueBool(Tile tile) => bool.TryParse(GetValue(tile), out var result) ? result : false;
         public Guid GetValueGuid(Tile tile) => Guid.TryParse(GetValue(tile), out var result) ? result : Guid.Empty;
@@ -67,6 +60,6 @@ namespace Puzzled
 
             return value.Split(',');
         }
-        public Decal GetValueDecal(Tile tile) => (Decal)property.GetValue(tile);
+        public Decal GetValueDecal(Tile tile) => (Decal)GetValueObject(tile);
     }
 }

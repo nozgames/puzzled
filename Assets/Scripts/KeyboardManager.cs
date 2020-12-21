@@ -14,8 +14,12 @@ namespace Puzzled
             void OnModifiersChanged(bool shift, bool ctrl, bool alt);
         }
 
-        [Header("Actions")]
+        [Header("Keys")]
         [SerializeField] private InputAction keyEscape = null;
+        [SerializeField] private InputAction keyY = null;
+        [SerializeField] private InputAction keyZ = null;
+
+        [Header("Modifiers")]
         [SerializeField] private InputAction keyShift = null;
         [SerializeField] private InputAction keyAlt = null;
         [SerializeField] private InputAction keyCtrl = null;
@@ -48,6 +52,8 @@ namespace Puzzled
         private void Awake()
         {
             keyEscape.performed += (ctx) => SendKey(KeyCode.Escape);
+            keyZ.performed += (ctx) => SendKey(KeyCode.Z);
+            keyY.performed += (ctx) => SendKey(KeyCode.Y);
             keyShift.started += (ctx) => isShiftPressed = true;
             keyShift.canceled += (ctx) => isShiftPressed = false;
             keyAlt.started += (ctx) => isAltPressed = true;
@@ -61,6 +67,8 @@ namespace Puzzled
             _instance = this;
 
             keyEscape.Enable();
+            keyY.Enable();
+            keyZ.Enable();
             keyShift.Enable();
             keyAlt.Enable();
             keyCtrl.Enable();
@@ -69,6 +77,8 @@ namespace Puzzled
         private void OnDisable()
         {
             keyEscape.Disable();
+            keyY.Disable();
+            keyZ.Disable();
             keyShift.Disable();
             keyAlt.Disable();
             keyCtrl.Disable();

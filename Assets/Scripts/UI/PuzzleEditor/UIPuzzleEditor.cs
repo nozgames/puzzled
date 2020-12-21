@@ -10,7 +10,7 @@ namespace Puzzled
 {
     public partial class UIPuzzleEditor : UIScreen, KeyboardManager.IKeyboardHandler
     {
-        private enum Mode
+        public enum Mode
         {
             Unknown,
             Draw,
@@ -80,9 +80,6 @@ namespace Puzzled
         private string currentPuzzleName = null;
         private string puzzleToLoad = null;
 
-        //private RectInt selection;
-
-        private Tile _selection = null;
         private Tile drawTile = null;
         private Cell dragStart;
         private Cell dragEnd;
@@ -98,12 +95,8 @@ namespace Puzzled
 
         public static UIPuzzleEditor instance { get; private set; }
 
-        public static Tile selection {
-            get => instance._selection;
-            set => instance.SelectTile(value);
-        }
 
-        private Mode mode {
+        public Mode mode {
             get => _mode;
             set {
                 if (_mode == value)
@@ -112,6 +105,20 @@ namespace Puzzled
                 selectionRect.gameObject.SetActive(false);
                 
                 _mode = value;
+
+                switch (_mode)
+                {
+                    case Mode.Draw: 
+                        drawTool.isOn = true; break;
+                    case Mode.Move:
+                        moveTool.isOn = true; break;
+                    case Mode.Erase:
+                        eraseTool.isOn = true; break;
+                    case Mode.Logic:
+                        wireTool.isOn = true; break;
+                    case Mode.Decal:
+                        decalTool.isOn = true; break;
+                }
 
                 UpdateMode();
             }
@@ -408,6 +415,7 @@ namespace Puzzled
                 return;
             }
 
+            ClearUndo();
             tools.SetActive(false);
             savedMode = mode;
             mode = Mode.Unknown;
@@ -501,41 +509,6 @@ namespace Puzzled
             return null;
         }
 
-        public static void RefreshInspector() => instance.RefreshInspectorInternal();
-
-        private void RefreshInspectorInternal()
-        {
-            var tile = _selection;
-            options.DetachAndDestroyChildren();
-
-            if (tile.info.allowWireInputs)
-                Instantiate(tile.info.inputsPrefab != null ? tile.info.inputsPrefab : optionInputsPrefab.gameObject, options).GetComponentInChildren<UIOptionEditor>().target = tile;
-
-            if (tile.info.allowWireOutputs)
-                Instantiate(tile.info.outputsPrefab != null ? tile.info.outputsPrefab : optionOutputsPrefab.gameObject, options).GetComponentInChildren<UIOptionEditor>().target = tile;
-
-            if (tile.info.customOptionEditors != null)
-                foreach (var editor in tile.info.customOptionEditors)
-                    Instantiate(editor.prefab, options).GetComponent<UIOptionEditor>().target = tile;
-
-            Transform properties = null;
-            foreach (var tileProperty in tile.properties)
-            {
-                // Skip hidden properties
-                if (tileProperty.editable.hidden)
-                    continue;
-
-                if(properties == null)
-                    properties = Instantiate(optionPropertiesPrefab, options).transform.Find("Content");
-
-                var optionEditor = InstantiateOptionEditor(tileProperty.property.PropertyType, properties);
-                if (null == optionEditor)
-                    continue;
-
-                optionEditor.target = new TilePropertyOption(tile, tileProperty);
-            }
-        }
-
         public void OpenTileSelector(Type componentType, Action<Tile> callback)
         {
             tileSelectorCallback = callback;
@@ -574,6 +547,18 @@ namespace Puzzled
             {
                 case KeyCode.Escape:
                     ShowPopup(fileMenuPopup);
+                    break;
+
+                case KeyCode.Z:
+                    if (KeyboardManager.isCtrlPressed && !KeyboardManager.isShiftPressed)
+                        Undo();
+                    else if (KeyboardManager.isCtrlPressed && KeyboardManager.isShiftPressed)
+                        Redo();
+                    break;
+
+                case KeyCode.Y:
+                    if (KeyboardManager.isCtrlPressed)
+                        Redo();
                     break;
             }
         }

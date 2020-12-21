@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Puzzled.Editor;
 
 namespace Puzzled
 {
@@ -23,7 +24,10 @@ namespace Puzzled
         private Tile _tile;
         private List<string> _steps;
 
-        public int selection => _list.selected;
+        public int selection {
+            get => _list.selected;
+            set => _list.Select(value);
+        }
 
         public Tile tile {
             get => _tile;

@@ -16,6 +16,11 @@ namespace Puzzled
 
         public UnityEvent onDoubleClick = new UnityEvent();
 
+        private void Awake()
+        {
+            list = GetComponentInParent<UIList>();
+        }
+
         private void OnEnable()
         {
             UpdateVisuals();
@@ -39,6 +44,13 @@ namespace Puzzled
         public bool selected {
             get => list != null && list.selected == transform.GetSiblingIndex();
             set {
+                if(list == null)
+                {
+                    list = GetComponentInParent<UIList>();
+                    if (list == null)
+                        return;
+                }
+
                 if (value == selected && value == _selected)
                     return;
 

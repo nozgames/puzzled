@@ -79,29 +79,12 @@ namespace Puzzled
         public Connection from { get; private set; } = new Connection();
         public Connection to { get; private set; } = new Connection();
 
-        public static Action<Wire> onSelectedWireChanged;
-        public static Wire _selectedWire;
 
         private int _value = 0;
 
         public bool selected {
             get => _visuals.selected;
-            set {
-                if (_visuals.selected == value)
-                    return;
-
-                if (_selectedWire != null)
-                {
-                    var old = _selectedWire;
-                    _selectedWire = null;
-                    old.selected = false;
-                }
-
-                _selectedWire = this;
-                _visuals.selected = value;
-
-                onSelectedWireChanged?.Invoke(this);
-            }
+            set => _visuals.selected = value;
         }
 
         /// <summary>

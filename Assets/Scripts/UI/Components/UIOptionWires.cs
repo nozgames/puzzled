@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using UnityEngine.UI;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
-    public class UIOptionWires : UIOptionEditor
+    public class UIOptionWires : UIOptionEditor, IInspectorStateProvider
     {
         [SerializeField] private Transform _wires = null;
         [SerializeField] private GameObject _wirePrefab = null;
@@ -22,6 +24,8 @@ namespace Puzzled
         public bool isReorderable => _reorderable;
 
         public UISequence sequence => _sequence;
+
+        private List<Wire> wires => _input ? ((Tile)target).inputs : ((Tile)target).outputs;
 
         private void Awake()
         {
@@ -52,14 +56,11 @@ namespace Puzzled
 
             _wires.DetachAndDestroyChildren();
 
-            var wires = _input ? tile.inputs : tile.outputs;
             foreach (var wire in wires)
-            {
                 Instantiate(_wirePrefab, _wires).GetComponent<UIOptionWire>().target = wire;
-            }
 
-            _empty.SetActive(wires.Count <= 0);
-            _content.SetActive(wires.Count > 0);
+            _empty.SetActive(_wires.childCount <= 0);
+            _content.SetActive(_wires.childCount > 0);
 
             if (_sequence != null)
                 _sequence.tile = tile;
@@ -94,7 +95,7 @@ namespace Puzzled
             if (index == 0)
                 return;
 
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.ReorderWireCommand(isInput ? wire.to.tile.inputs : wire.from.tile.outputs, index, index - 1));
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(isInput ? wire.to.tile.inputs : wire.from.tile.outputs, index, index - 1));
 
 #if false
             if (isInput)
@@ -116,7 +117,7 @@ namespace Puzzled
             var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
             var wire = (Wire)wireEditor.target;
 
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.ReorderWireCommand(isInput ? wire.to.tile.inputs : wire.from.tile.outputs, index, index + 1));
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(isInput ? wire.to.tile.inputs : wire.from.tile.outputs, index, index + 1));
 
 #if false
             if (isInput)
@@ -145,7 +146,7 @@ namespace Puzzled
         {
             var wireEditor = _wires.GetChild(_list.selected).GetComponent<UIOptionWire>();
             var wire = (Wire)wireEditor.target;
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.DestroyWireCommand(wire));
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireDestroyCommand(wire));
         }
 
         private void UpdateButtons()
@@ -154,5 +155,41 @@ namespace Puzzled
             _moveUpButton.interactable = _list.selected > 0;
             _moveDownButton.interactable = _list.selected >= 0 && _list.selected < _list.itemCount - 1;
         }
+
+        /// <summary>
+        /// Saves the state of the wires editor for the next tile the tile is selected
+        /// </summary>
+        private class WiresState : IInspectorState
+        {
+            public bool isInput;
+            public Wire selectedWire;
+            public int sequenceStep;
+
+            public void Apply(Transform inspector)
+            {
+                var editor = inspector.GetComponentsInChildren<UIOptionWires>().FirstOrDefault(c => c.isInput == isInput);
+                if (null == editor)
+                    return;
+
+                if (editor._sequence != null && sequenceStep > 0)
+                    editor._sequence.selection = sequenceStep;
+
+                if (selectedWire != null)
+                {
+                    UIPuzzleEditor.selectedWire = selectedWire;
+                    editor._wires.GetComponentsInChildren<UIOptionWire>().FirstOrDefault(o => o.wire == selectedWire);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Return the inspector state 
+        /// </summary>
+        IInspectorState IInspectorStateProvider.GetState() =>
+            new WiresState {
+                isInput = isInput,
+                selectedWire = wires.FirstOrDefault(w => w.selected),
+                sequenceStep = _sequence != null ? _sequence.selection : -1
+            };
     }
 }

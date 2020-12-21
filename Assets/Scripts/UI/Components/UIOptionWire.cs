@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
     class UIOptionWire : UIOptionEditor
     {
@@ -37,13 +37,13 @@ namespace Puzzled
         private void OnEnable()
         {
             _item.onSelectionChanged.AddListener(OnSelectionChanged);
-            Wire.onSelectedWireChanged += OnWireSelectionChanged;
+            UIPuzzleEditor.onSelectedWireChanged += OnWireSelectionChanged;
 
             if (_param1Toggle != null && wiresEditor.sequence != null)
             {
                 wiresEditor.sequence.onStepRemoved += OnSequenceStepRemoved;
                 wiresEditor.sequence.onStepMoved += OnSequenceStepMoved;
-            }
+            }            
         }
 
         private void OnDisable()
@@ -55,7 +55,7 @@ namespace Puzzled
             }
 
             _item.onSelectionChanged.RemoveListener(OnSelectionChanged);
-            Wire.onSelectedWireChanged -= OnWireSelectionChanged;
+            UIPuzzleEditor.onSelectedWireChanged -= OnWireSelectionChanged;
         }
 
         protected override void OnTargetChanged(object target)
@@ -71,6 +71,8 @@ namespace Puzzled
             UpdateState();
 
             UpdateIndex();
+
+            OnWireSelectionChanged(UIPuzzleEditor.selectedWire);
         }
 
         private void OnSequenceStepMoved(int from, int to)
@@ -118,7 +120,11 @@ namespace Puzzled
 
         public void OnSelectionChanged (bool selected)
         {
-            ((Wire)target).selected = selected;
+            if (null == target)
+                return;
+
+            if (selected)
+                UIPuzzleEditor.selectedWire = (Wire)target;
         }
 
         public void UpdateIndex()

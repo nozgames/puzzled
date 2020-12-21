@@ -42,11 +42,27 @@ namespace Puzzled
 
             _lastEraseCell = cell;
 
-            // TODO: respect visible layers?
             if (eraseToolAllLayers.isOn)
-                TileGrid.UnlinkTiles(cell, true);
+            {
+                var group = false;
+                for(int layer = (int)TileLayer.Logic; layer >= (int)TileLayer.Floor; layer --)
+                {
+                    var tile = GetTile(cell, (TileLayer)layer);
+                    if (null == tile)
+                        continue;
+
+                    ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile), group);
+                    group = true;
+                }
+            } 
             else
-                TileGrid.UnlinkTile(GetTile(cell), true);
+            {
+                var tile = GetTile(cell);
+                if (null == tile)
+                    return;
+
+                ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile));
+            }
         }
     }
 }

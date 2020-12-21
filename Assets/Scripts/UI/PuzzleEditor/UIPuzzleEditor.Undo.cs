@@ -2,10 +2,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+using Puzzled.Editor.Commands;
+
 namespace Puzzled
 {
     public partial class UIPuzzleEditor
     {
+        private const int MaxUndo = 256;
+
         [Header("Undo")]
         [SerializeField] private Transform _deletedObjects = null;
         [SerializeField] private Button _undoButton = null;
@@ -13,55 +17,119 @@ namespace Puzzled
 
         public static Transform deletedObjects => instance._deletedObjects;
 
-        private List<ICommand> undo = new List<ICommand>();
-        private List<ICommand> redo = new List<ICommand>();
+        private List<Command> _undo = new List<Command>();
+        private List<Command> _redo = new List<Command>();
+        private Dictionary<int, Transform> _trash = new Dictionary<int, Transform>();
 
-        public static void ExecuteCommand (ICommand command)
+        /// <summary>
+        /// Execute a new command
+        /// </summary>
+        /// <param name="command">Command to execute</param>
+        public static void ExecuteCommand (Command command, bool combine=false)
         {
-            foreach (var redoCommand in instance.redo)
-                redoCommand.Destroy();
+            if (combine && instance._undo.Count > 0)
+            {
+                // Is there already a group command in the undo queue?
+                var group = instance._undo[instance._undo.Count - 1] as GroupCommand;
+                if (null == group)
+                {
+                    group = new GroupCommand();
+                    group.Add(instance._undo[instance._undo.Count - 1]);
+                    instance._undo[instance._undo.Count - 1] = group;
+                }
 
-            instance.redo.Clear();
-            instance.undo.Add(command);
-            command.Redo();
-            instance.UpdateUndoButtons();
+                group.Add(command);
+            } 
+            else
+            {
+                // Clear the redo buffer 
+                foreach (var redoCommand in instance._redo)
+                    redoCommand.Destroy();
+
+                instance._redo.Clear();
+
+                // Shrink the undo stack to ensure its within maximums
+                while (instance._undo.Count >= MaxUndo)
+                    instance._undo.RemoveAt(0);
+
+                instance._undo.Add(command);
+                instance.UpdateUndoButtons();
+            }
+
+            command.Execute();
         }
 
+        /// <summary>
+        /// Undo the last command
+        /// </summary>
         public void Undo()
         {
-            if (undo.Count == 0)
+            if (_undo.Count == 0)
                 return;
 
-            var command = undo[undo.Count - 1];
-            undo.RemoveAt(undo.Count - 1);
-            redo.Add(command);
+            var command = _undo[_undo.Count - 1];
+            _undo.RemoveAt(_undo.Count - 1);
+            _redo.Add(command);
             command.Undo();
             UpdateUndoButtons();
         }
 
+        /// <summary>
+        /// Redo the last command that was undone
+        /// </summary>
         public void Redo()
         {
-            if (redo.Count == 0)
+            if (_redo.Count == 0)
                 return;
 
-            var command = redo[redo.Count - 1];
-            redo.RemoveAt(redo.Count - 1);
-            undo.Add(command);
+            var command = _redo[_redo.Count - 1];
+            _redo.RemoveAt(_redo.Count - 1);
+            _undo.Add(command);
             command.Redo();
             UpdateUndoButtons();
         }
 
+        /// <summary>
+        /// Update the interatable state of the undo and redo buttons 
+        /// </summary>
         private void UpdateUndoButtons()
         {
-            _undoButton.interactable = undo.Count > 0;
-            _redoButton.interactable = redo.Count > 0;
+            _undoButton.interactable = _undo.Count > 0;
+            _redoButton.interactable = _redo.Count > 0;
         }
 
+        /// <summary>
+        /// Clear the undo buffer and destroy all commands in the buffer
+        /// </summary>
         private void ClearUndo()
         {
-            undo.Clear();
-            redo.Clear();
+            // Destroy all undo commands
+            foreach (var undoCommand in instance._undo)
+                undoCommand.Destroy();
+
+            // Destroy all redo commands
+            foreach (var redoCommand in instance._redo)
+                redoCommand.Destroy();
+
+            _undo.Clear();
+            _redo.Clear();
             UpdateUndoButtons();
         }
+
+        public static void MoveToTrash (GameObject gameObject)
+        {
+            instance._trash[gameObject.GetInstanceID()] = gameObject.transform.parent;
+            gameObject.transform.SetParent(deletedObjects);
+        }
+
+        public static void RestoreFromTrash(GameObject gameObject)
+        {
+            var parent = instance._trash[gameObject.GetInstanceID()];
+            if (parent == null)
+                return;
+
+            instance._trash.Remove(gameObject.GetInstanceID());
+            gameObject.transform.SetParent(parent);
+        }        
     }
 }

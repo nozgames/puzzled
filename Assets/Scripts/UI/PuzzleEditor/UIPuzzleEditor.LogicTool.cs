@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 namespace Puzzled
@@ -7,6 +8,20 @@ namespace Puzzled
     {
         private WireMesh dragWire = null;
         private bool logicCycleSelection = false;
+        private Tile _selectedTile = null;
+        private Wire _selectedWire = null;
+
+        public static Tile selectedTile {
+            get => instance._selectedTile;
+            set => instance.SelectTile(value);
+        }
+
+        public static Wire selectedWire {
+            get => instance._selectedWire;
+            set => instance.SelectWire(value);
+        }
+
+        public static Action<Wire> onSelectedWireChanged;
 
         private void EnableLogicTool()
         {
@@ -31,7 +46,7 @@ namespace Puzzled
         {
             // Ensure the cell being dragged is the selected cell
             var cell = canvas.CanvasToCell(position);
-            if (_selection == null || _selection.cell != cell)
+            if (_selectedTile == null || _selectedTile.cell != cell)
             {
                 SelectTile(GetTile(cell, TileLayer.Logic));
                 logicCycleSelection = false;
@@ -42,15 +57,15 @@ namespace Puzzled
 
         private void OnLogicLButtonUp(Vector2 position)
         {
-            if (null != dragWire || _selection==null || !logicCycleSelection)
+            if (null != dragWire || _selectedTile==null || !logicCycleSelection)
                 return;
 
             var cell = canvas.CanvasToCell(position);
-            if (_selection.cell != cell)
+            if (_selectedTile.cell != cell)
                 return;
 
-            var tile = GetTile(cell, (_selection != null && _selection.info.layer != TileLayer.Floor && _selection.cell == cell) ? ((TileLayer)_selection.info.layer - 1) : TileLayer.Logic);
-            if (null == tile && _selection != null)
+            var tile = GetTile(cell, (_selectedTile != null && _selectedTile.info.layer != TileLayer.Floor && _selectedTile.cell == cell) ? ((TileLayer)_selectedTile.info.layer - 1) : TileLayer.Logic);
+            if (null == tile && _selectedTile != null)
                 tile = GetTile(cell, TileLayer.Logic);
 
             if (tile != null)
@@ -62,12 +77,12 @@ namespace Puzzled
         private void OnLogicLButtonDragBegin(Vector2 position)
         {
             var cell = canvas.CanvasToCell(position);
-            if (_selection == null || !_selection.info.allowWireOutputs)
+            if (_selectedTile == null || !_selectedTile.info.allowWireOutputs)
                 return;
 
             dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
-            dragWire.transform.position = TileGrid.CellToWorld(_selection.cell);
-            dragWire.target = _selection.cell;
+            dragWire.transform.position = TileGrid.CellToWorld(_selectedTile.cell);
+            dragWire.target = _selectedTile.cell;
         }
 
         private void OnLogicLButtonDrag(Vector2 position, Vector2 delta)
@@ -85,17 +100,15 @@ namespace Puzzled
 
             var cell = canvas.CanvasToCell(position);
             var target = GetTile(cell);
+            if (target == selectedTile)
+                target = null;
 
             // Find the first tile that accepts input
             while (target != null && !target.info.allowWireInputs && target.info.layer > TileLayer.Floor)
                 target = GetTile(cell, (TileLayer)(target.info.layer - 1));
 
             if (target != null && target.info.allowWireInputs)
-            {
-                var wire = GameManager.InstantiateWire(_selection, target);
-                if (wire != null)
-                    wire.visible = true;
-            }
+                ExecuteCommand(new Editor.Commands.WireAddCommand(_selectedTile, target));
 
             RefreshInspectorInternal();
 
@@ -107,18 +120,11 @@ namespace Puzzled
 
         private void SelectTile(Tile tile)
         {
-            if(_selection != null)
-            {
-                // Deselect all input wires
-                foreach (var input in _selection.inputs)
-                    input.selected = false;
+            // Save the inspector state
+            if(_selectedTile != null)
+                _selectedTile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>().Select(p => p.GetState()).ToArray();
 
-                // Deselect all output wires
-                foreach (var output in _selection.outputs)
-                    output.selected = false;
-            }
-
-            _selection = tile;
+            _selectedTile = tile;
 
             if (tile == null)
             {
@@ -138,6 +144,72 @@ namespace Puzzled
                 GameManager.ShowWires(tile);
                 RefreshInspectorInternal();
             }
+
+            // Clear wire selection if the selected wire does not connect to the newly selected tile
+            if (selectedWire != null && selectedWire.from.tile != tile && selectedWire.to.tile != tile)
+                SelectWire(null);
+        }
+
+        /// <summary>
+        /// Select the given wire
+        /// </summary>
+        /// <param name="wire">Wire to select</param>
+        private void SelectWire(Wire wire)
+        {
+            // Make sure one of the two tiles from the wire is selected, if not select the input
+            if (wire != null && _selectedTile != wire.from.tile && _selectedTile != wire.to.tile)
+                SelectTile(wire.from.tile);
+
+            if (_selectedWire != null)
+                _selectedWire.selected = false;
+
+            _selectedWire = wire;
+
+            if (_selectedWire != null)
+                _selectedWire.selected = true;
+
+            onSelectedWireChanged?.Invoke(_selectedWire);
+        }
+
+
+        public static void RefreshInspector() => instance.RefreshInspectorInternal();
+
+        private void RefreshInspectorInternal()
+        {
+            var tile = _selectedTile;
+            options.DetachAndDestroyChildren();
+
+            if (tile.info.allowWireInputs)
+                Instantiate(tile.info.inputsPrefab != null ? tile.info.inputsPrefab : optionInputsPrefab.gameObject, options).GetComponentInChildren<UIOptionEditor>().target = tile;
+
+            if (tile.info.allowWireOutputs)
+                Instantiate(tile.info.outputsPrefab != null ? tile.info.outputsPrefab : optionOutputsPrefab.gameObject, options).GetComponentInChildren<UIOptionEditor>().target = tile;
+
+            if (tile.info.customOptionEditors != null)
+                foreach (var editor in tile.info.customOptionEditors)
+                    Instantiate(editor.prefab, options).GetComponent<UIOptionEditor>().target = tile;
+
+            Transform properties = null;
+            foreach (var tileProperty in tile.properties)
+            {
+                // Skip hidden properties
+                if (tileProperty.editable.hidden)
+                    continue;
+
+                if (properties == null)
+                    properties = Instantiate(optionPropertiesPrefab, options).transform.Find("Content");
+
+                var optionEditor = InstantiateOptionEditor(tileProperty.property.PropertyType, properties);
+                if (null == optionEditor)
+                    continue;
+
+                optionEditor.target = new TilePropertyOption(tile, tileProperty);
+            }
+
+            // Apply the saved inspector state
+            if (_selectedTile.inspectorState != null)
+                foreach (var state in _selectedTile.inspectorState)
+                    state.Apply(inspector.transform);
         }
     }
 }

@@ -19,10 +19,13 @@ namespace Puzzled
 
         public void Select(int index)
         {
-            if (index < 0 || index >= transform.childCount)
+            if(index < 0)
+            {
+                ClearSelection();
                 return;
+            }
 
-            SetSelection(index);
+            SetSelection(Mathf.Min(index, transform.childCount - 1));
         }
 
         private void SetSelection(int index)

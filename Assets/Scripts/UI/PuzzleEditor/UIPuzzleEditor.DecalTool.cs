@@ -27,20 +27,21 @@ namespace Puzzled
 
         private void DrawDecal(Vector2 position)
         {
-            if (null == drawTile)
-                return;
-
             var cell = canvas.CanvasToCell(position);
 
             var tile = GetTile(cell);
             if (null == tile)
                 return;
 
-            var surface = tile.GetComponentInChildren<DecalSurface>();
-            if (null == surface)
+            var property = tile.GetProperty("decal");
+            if (null == property)
                 return;
 
-            surface.decal = _paletteList.GetItem(_paletteList.selected).GetComponent<UIDecalItem>().decal;
+            var decal = _paletteList.GetItem(_paletteList.selected).GetComponent<UIDecalItem>().decal;
+            if (property.GetValueDecal(tile) == decal)
+                return;
+
+            ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(tile, "decal", decal));
         }
     }
 }
