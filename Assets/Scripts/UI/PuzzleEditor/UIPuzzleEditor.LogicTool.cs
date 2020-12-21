@@ -31,7 +31,7 @@ namespace Puzzled
         {
             // Ensure the cell being dragged is the selected cell
             var cell = canvas.CanvasToCell(position);
-            if (selection == null || selection.cell != cell)
+            if (_selection == null || _selection.cell != cell)
             {
                 SelectTile(GetTile(cell, TileLayer.Logic));
                 logicCycleSelection = false;
@@ -42,15 +42,15 @@ namespace Puzzled
 
         private void OnLogicLButtonUp(Vector2 position)
         {
-            if (null != dragWire || selection==null || !logicCycleSelection)
+            if (null != dragWire || _selection==null || !logicCycleSelection)
                 return;
 
             var cell = canvas.CanvasToCell(position);
-            if (selection.cell != cell)
+            if (_selection.cell != cell)
                 return;
 
-            var tile = GetTile(cell, (selection != null && selection.info.layer != TileLayer.Floor && selection.cell == cell) ? ((TileLayer)selection.info.layer - 1) : TileLayer.Logic);
-            if (null == tile && selection != null)
+            var tile = GetTile(cell, (_selection != null && _selection.info.layer != TileLayer.Floor && _selection.cell == cell) ? ((TileLayer)_selection.info.layer - 1) : TileLayer.Logic);
+            if (null == tile && _selection != null)
                 tile = GetTile(cell, TileLayer.Logic);
 
             if (tile != null)
@@ -62,12 +62,12 @@ namespace Puzzled
         private void OnLogicLButtonDragBegin(Vector2 position)
         {
             var cell = canvas.CanvasToCell(position);
-            if (selection == null || !selection.info.allowWireOutputs)
+            if (_selection == null || !_selection.info.allowWireOutputs)
                 return;
 
             dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
-            dragWire.transform.position = TileGrid.CellToWorld(selection.cell);
-            dragWire.target = selection.cell;
+            dragWire.transform.position = TileGrid.CellToWorld(_selection.cell);
+            dragWire.target = _selection.cell;
         }
 
         private void OnLogicLButtonDrag(Vector2 position, Vector2 delta)
@@ -92,12 +92,12 @@ namespace Puzzled
 
             if (target != null && target.info.allowWireInputs)
             {
-                var wire = GameManager.InstantiateWire(selection, target);
+                var wire = GameManager.InstantiateWire(_selection, target);
                 if (wire != null)
                     wire.visible = true;
             }
 
-            UpdateInspector(selection);
+            RefreshInspectorInternal();
 
             Destroy(dragWire.gameObject);
             dragWire = null;
@@ -107,18 +107,18 @@ namespace Puzzled
 
         private void SelectTile(Tile tile)
         {
-            if(selection != null)
+            if(_selection != null)
             {
                 // Deselect all input wires
-                foreach (var input in selection.inputs)
+                foreach (var input in _selection.inputs)
                     input.selected = false;
 
                 // Deselect all output wires
-                foreach (var output in selection.outputs)
+                foreach (var output in _selection.outputs)
                     output.selected = false;
             }
 
-            selection = tile;
+            _selection = tile;
 
             if (tile == null)
             {
@@ -136,7 +136,7 @@ namespace Puzzled
                 SetSelectionRect(tile.cell, tile.cell);
                 GameManager.HideWires();
                 GameManager.ShowWires(tile);
-                UpdateInspector(tile);
+                RefreshInspectorInternal();
             }
         }
     }

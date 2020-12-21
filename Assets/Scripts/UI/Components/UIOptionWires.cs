@@ -94,10 +94,14 @@ namespace Puzzled
             if (index == 0)
                 return;
 
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.ReorderWireCommand(isInput ? wire.to.tile.inputs : wire.from.tile.outputs, index, index - 1));
+
+#if false
             if (isInput)
                 wire.to.tile.SetInputIndex(wire, index - 1);
             else
                 wire.from.tile.SetOutputIndex(wire, index - 1);
+#endif
 
             wireEditor.transform.SetSiblingIndex(index - 1);
             _list.Select(index - 1);
@@ -111,6 +115,10 @@ namespace Puzzled
             var index = _list.selected;
             var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
             var wire = (Wire)wireEditor.target;
+
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.ReorderWireCommand(isInput ? wire.to.tile.inputs : wire.from.tile.outputs, index, index + 1));
+
+#if false
             if (isInput)
             {
                 if (index >= wire.to.tile.inputCount - 1)
@@ -124,6 +132,7 @@ namespace Puzzled
 
                 wire.from.tile.SetOutputIndex(wire, index + 1);
             }
+#endif
 
             wireEditor.transform.SetSiblingIndex(index + 1);
             _list.Select(index + 1);
@@ -134,23 +143,9 @@ namespace Puzzled
 
         public void OnDeleteButton()
         {
-            // Destroy the wire
-            var index = _list.selected;
-            var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
+            var wireEditor = _wires.GetChild(_list.selected).GetComponent<UIOptionWire>();
             var wire = (Wire)wireEditor.target;
-            Destroy(wire.gameObject);
-
-            // Destroy the wire editor
-            wireEditor.gameObject.transform.SetParent(null);
-            Destroy(wireEditor.gameObject);
-
-            // Select the item that now occupies the same space
-            _list.Select(Mathf.Clamp(index, -1, _wires.childCount-1));
-
-            _empty.SetActive(_wires.childCount <= 0);
-            _content.SetActive(_wires.childCount > 0);
-
-            UpdateButtons();
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.DestroyWireCommand(wire));
         }
 
         private void UpdateButtons()

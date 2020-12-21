@@ -20,6 +20,7 @@ namespace Puzzled
             Decal
         }
 
+        [Header("General")]
         [SerializeField] private UICanvas canvas = null;
         [SerializeField] private GameObject piecePrefab = null;
         [SerializeField] private RectTransform selectionRect = null;
@@ -81,7 +82,7 @@ namespace Puzzled
 
         //private RectInt selection;
 
-        private Tile selection = null;
+        private Tile _selection = null;
         private Tile drawTile = null;
         private Cell dragStart;
         private Cell dragEnd;
@@ -96,6 +97,11 @@ namespace Puzzled
         private bool hasPuzzleName => !string.IsNullOrEmpty(currentPuzzleName);
 
         public static UIPuzzleEditor instance { get; private set; }
+
+        public static Tile selection {
+            get => instance._selection;
+            set => instance.SelectTile(value);
+        }
 
         private Mode mode {
             get => _mode;
@@ -162,6 +168,8 @@ namespace Puzzled
             mode = Mode.Draw;
             drawTool.isOn = true;
 
+            ClearUndo();
+
             GameManager.UnloadPuzzle();
             currentPuzzleName = null;
             puzzleName.text = "Unnamed";
@@ -212,6 +220,7 @@ namespace Puzzled
         private void OnDisable()
         {
             KeyboardManager.Pop();
+            ClearUndo();
 
             if (!playing)
                 Save();
@@ -324,6 +333,7 @@ namespace Puzzled
             GameManager.PanCenter();
             GameManager.UnloadPuzzle();
             Camera.main.orthographicSize = 6;
+            ClearUndo();
             HidePopup();
         }
 
@@ -491,8 +501,11 @@ namespace Puzzled
             return null;
         }
 
-        private void UpdateInspector(Tile tile)
+        public static void RefreshInspector() => instance.RefreshInspectorInternal();
+
+        private void RefreshInspectorInternal()
         {
+            var tile = _selection;
             options.DetachAndDestroyChildren();
 
             if (tile.info.allowWireInputs)
