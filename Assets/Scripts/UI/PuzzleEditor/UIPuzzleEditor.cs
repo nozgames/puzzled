@@ -220,8 +220,8 @@ namespace Puzzled
 
             Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + (delta.y > 0 ? -1 : 1), minZoom, maxZoom);
 
-            if (hasSelection)
-                SetSelectionRect(dragStart, dragEnd);
+            if (selectedTile != null)
+                SetSelectionRect(selectedTile.cell, selectedTile.cell);
         }
 
         private void OnDisable()
@@ -284,6 +284,9 @@ namespace Puzzled
         private void OnPan (Vector2 position, Vector2 delta)
         {
             GameManager.Pan(canvas.CanvasToWorld(position + delta) - canvas.CanvasToWorld(position));
+
+            if (selectedTile != null)
+                SetSelectionRect(selectedTile.cell, selectedTile.cell);
         }
 
         public void OnSaveButton()
