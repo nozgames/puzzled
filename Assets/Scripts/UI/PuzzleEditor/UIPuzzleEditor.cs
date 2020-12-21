@@ -229,6 +229,8 @@ namespace Puzzled
 
             if (selectedTile != null)
                 SetSelectionRect(selectedTile.cell, selectedTile.cell);
+
+            UpdateCursor(true);
         }
 
         private void OnDisable()
@@ -294,6 +296,8 @@ namespace Puzzled
 
             if (selectedTile != null)
                 SetSelectionRect(selectedTile.cell, selectedTile.cell);
+
+            UpdateCursor();
         }
 
         public void OnSaveButton()

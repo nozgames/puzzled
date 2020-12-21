@@ -43,8 +43,11 @@ namespace Puzzled
             UpdateCursor();
         }
 
-        private void UpdateCursor()
+        private void UpdateCursor(bool updatePosition = false)
         {
+            if(updatePosition && canvas.isMouseOver)
+                _cursorCell = canvas.CanvasToCell(_pointerAction.action.ReadValue<Vector2>());                
+
             UIManager.cursor = _getCursor?.Invoke(_cursorCell) ?? CursorType.Arrow;
         }
     }
