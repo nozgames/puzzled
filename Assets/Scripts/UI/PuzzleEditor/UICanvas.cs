@@ -33,6 +33,8 @@ namespace Puzzled.PuzzleEditor
         public PositionDelegate onLButtonDragEnd;
         public ScrollDelegate onScroll;
         public DragDelegate onRButtonDrag;
+        public Action onEnter;
+        public Action onExit;
 
         public void UnregisterAll ()
         {
@@ -57,11 +59,13 @@ namespace Puzzled.PuzzleEditor
         void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
         {
             isMouseOver = true;
+            onEnter?.Invoke();
         }
 
         void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
         {
             isMouseOver = false;
+            onExit?.Invoke();
         }
 
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData)

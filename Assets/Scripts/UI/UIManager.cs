@@ -1,9 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Puzzled
 {
     public class UIManager : MonoBehaviour
     {
+        [Serializable]
+        private struct CursorInfo
+        {
+            public Texture2D cursor;
+            public Vector2 hotspot;
+        }
+
         [Header("General")]
         [SerializeField] private UIScreen startScreen = null;
         [SerializeField] private Transform popups = null;
@@ -14,6 +22,23 @@ namespace Puzzled
         [SerializeField] private UIScreen ingameScreen = null;
         [SerializeField] private UIScreen puzzleComplete = null;
         [SerializeField] private UIPuzzleEditor puzzleEditor = null;
+
+        [Header("Cursors")]
+        [SerializeField] private CursorInfo[] _cursors = null;
+
+        private CursorType _cursor = CursorType.Arrow;
+
+        public static CursorType cursor {
+            get => instance._cursor;
+            set {
+                if (value == instance._cursor)
+                    return;
+
+                instance._cursor = value;
+                var info = instance._cursors[(int)value];
+                Cursor.SetCursor(info.cursor, info.hotspot, CursorMode.Auto);
+            }
+        }
 
         public static UIManager instance { get; private set; }
 
@@ -28,6 +53,9 @@ namespace Puzzled
 
             startScreen.gameObject.SetActive(true);
             activeScreen = startScreen;
+
+            _cursor = CursorType.ArrowWithMinus;
+            cursor = CursorType.Arrow;
         }
 
         private void OnDestroy()

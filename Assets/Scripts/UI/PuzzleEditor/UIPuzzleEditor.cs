@@ -127,8 +127,10 @@ namespace Puzzled
         private void UpdateMode()
         {
             inspector.SetActive(false);
-            palette.SetActive(false);            
-            
+            palette.SetActive(false);
+
+            _getCursor = null;
+
             canvas.UnregisterAll();
 
             DisableMoveTool();
@@ -145,6 +147,8 @@ namespace Puzzled
                 case Mode.Logic: EnableLogicTool(); break;
                 case Mode.Decal: EnableDecalTool(); break;
             }
+
+            UpdateCursor();
         }
 
         private void Awake()
@@ -180,6 +184,8 @@ namespace Puzzled
             GameManager.UnloadPuzzle();
             currentPuzzleName = null;
             puzzleName.text = "Unnamed";
+
+            InitializeCursor();
         }
 
         private void InitializePalette()
@@ -189,8 +195,9 @@ namespace Puzzled
             foreach (var tile in TileDatabase.GetTiles())
                 GeneratePreview(tile);
 
+            _decalNone = new Decal(Guid.Empty, null);
             var noneDecal = Instantiate(paletteDecalItemPrefab, _paletteList.transform).GetComponent<UIDecalItem>();
-            noneDecal.decal = new Decal(Guid.Empty, null);
+            noneDecal.decal = _decalNone;
 
             foreach (var decal in DecalDatabase.GetDecals())
             {
@@ -574,6 +581,8 @@ namespace Puzzled
                     OnModifiersChangedErase(shift, ctrl, alt);
                     break;
             }
+
+            UpdateCursor();
         }
     }
 }

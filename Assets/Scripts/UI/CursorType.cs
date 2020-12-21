@@ -1,0 +1,10 @@
+﻿namespace Puzzled
+{
+    public enum CursorType
+    {
+        Arrow,
+        ArrowWithPlus,
+        ArrowWithMinus,
+        ArrowWithNot
+    }
+}

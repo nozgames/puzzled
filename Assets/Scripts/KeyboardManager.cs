@@ -41,12 +41,18 @@ namespace Puzzled
 
         public static bool isCtrlPressed {
             get => _instance.ctrl;
-            private set => _instance.ctrl = value;
+            private set {
+                _instance.ctrl = value;
+                _instance.UpdateModifiers();
+            }
         }
 
         public static bool isAltPressed {
             get => _instance.alt;
-            private set => _instance.alt = value;
+            private set {
+                _instance.alt = value;
+                _instance.UpdateModifiers();
+            }
         }
 
         private void Awake()
