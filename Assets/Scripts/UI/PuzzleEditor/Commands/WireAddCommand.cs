@@ -33,6 +33,8 @@ namespace Puzzled.Editor.Commands
             fromIndex = wire.from.tile.GetOutputIndex(wire);
             toIndex = wire.to.tile.GetInputIndex(wire);
             UIPuzzleEditor.selectedWire = wire;
+
+            wire.from.tile.Send(new StartEvent());
         }
 
         protected override void OnRedo()
@@ -40,6 +42,8 @@ namespace Puzzled.Editor.Commands
             wire.from.tile.outputs.Insert(fromIndex, wire);
             wire.to.tile.inputs.Insert(toIndex, wire);
             wire.transform.SetParent(parent);
+
+            wire.from.tile.Send(new StartEvent());
         }
 
         protected override void OnDestroy()
