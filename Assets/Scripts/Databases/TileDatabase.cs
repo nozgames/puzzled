@@ -140,7 +140,7 @@ namespace Puzzled
                     tile.GetComponentsInChildren<TileComponent>()
                         .SelectMany(tc =>
                             tc.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance),
-                            (tc, p) => new TileProperty { property = p, editable = p.GetCustomAttribute<EditableAttribute>() })
+                            (tc, p) => new TileProperty (p, p.GetCustomAttribute<EditableAttribute>()))
                         .Where(ep => ep.editable != null)
                         .ToArray();
             }

@@ -25,7 +25,7 @@ namespace Puzzled
         protected override void OnTargetChanged(object target)
         {
             var option = ((TilePropertyOption)target);
-            toggle.isOn = option.GetValueBool();
+            toggle.isOn = option.GetValue<bool>();
             label = option.name;
         }
     }

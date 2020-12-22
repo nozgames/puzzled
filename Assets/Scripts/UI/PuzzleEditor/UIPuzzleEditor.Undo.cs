@@ -11,11 +11,8 @@ namespace Puzzled
         private const int MaxUndo = 256;
 
         [Header("Undo")]
-        [SerializeField] private Transform _deletedObjects = null;
         [SerializeField] private Button _undoButton = null;
         [SerializeField] private Button _redoButton = null;
-
-        public static Transform deletedObjects => instance._deletedObjects;
 
         private List<Command> _undo = new List<Command>();
         private List<Command> _redo = new List<Command>();
@@ -119,7 +116,7 @@ namespace Puzzled
         public static void MoveToTrash (GameObject gameObject)
         {
             instance._trash[gameObject.GetInstanceID()] = gameObject.transform.parent;
-            gameObject.transform.SetParent(deletedObjects);
+            gameObject.transform.SetParent(instance._puzzle.trash);
         }
 
         public static void RestoreFromTrash(GameObject gameObject)

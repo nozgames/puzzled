@@ -65,7 +65,7 @@ namespace Puzzled
                 KeyboardManager.isCtrlPressed ?
                     _decalNone :
                     _paletteList.GetItem(_paletteList.selected).GetComponent<UIDecalItem>().decal;
-            if (property.GetValueDecal(tile) == decal)
+            if (property.GetValue<Decal>(tile) == decal)
                 return;
 
             ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(tile, "decal", decal));

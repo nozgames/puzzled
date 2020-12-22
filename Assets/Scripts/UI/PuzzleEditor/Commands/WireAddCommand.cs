@@ -9,7 +9,6 @@ namespace Puzzled.Editor.Commands
         private int fromIndex;
         private int toIndex;
         private Wire wire;
-        private Transform parent;
 
         public WireAddCommand(Tile from, Tile to)
         {
@@ -21,15 +20,14 @@ namespace Puzzled.Editor.Commands
         {
             wire.from.tile.outputs.RemoveAt(fromIndex);
             wire.to.tile.inputs.RemoveAt(toIndex);
-            wire.transform.SetParent(UIPuzzleEditor.deletedObjects);
+            UIPuzzleEditor.MoveToTrash(wire.gameObject);
         }
 
         protected override void OnExecute()
         {
             Debug.Assert(wire == null);
-            wire = GameManager.InstantiateWire(from, to);
+            wire = puzzle.InstantiateWire(from, to);
             wire.visible = true;
-            parent = wire.transform.parent;
             fromIndex = wire.from.tile.GetOutputIndex(wire);
             toIndex = wire.to.tile.GetInputIndex(wire);
             UIPuzzleEditor.selectedWire = wire;
@@ -41,7 +39,7 @@ namespace Puzzled.Editor.Commands
         {
             wire.from.tile.outputs.Insert(fromIndex, wire);
             wire.to.tile.inputs.Insert(toIndex, wire);
-            wire.transform.SetParent(parent);
+            UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
 
             wire.from.tile.Send(new StartEvent());
         }

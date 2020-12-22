@@ -9,6 +9,11 @@ namespace Puzzled.Editor.Commands
 
         public bool isExecuted { get; private set; }
 
+        /// <summary>
+        /// Puzzle being edited
+        /// </summary>
+        public Puzzle puzzle => UIPuzzleEditor.instance.puzzle;
+
         public Command ()
         {
             selectedTile = UIPuzzleEditor.selectedTile;

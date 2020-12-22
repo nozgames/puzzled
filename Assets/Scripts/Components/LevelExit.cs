@@ -16,7 +16,7 @@ namespace Puzzled
         private void OnQueryMove(QueryMoveEvent evt)
         {
             // Is player?
-            if(evt.source == GameManager.player.tile)
+            if(evt.source == puzzle.player.tile)
                 evt.result = false;
         }
     }

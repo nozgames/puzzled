@@ -36,7 +36,7 @@ namespace Puzzled
                 if (null == _tile)
                     return;
 
-                _steps = _tile.GetPropertyStringArray("steps").ToList();
+                _steps = _tile.GetPropertyValue<string[]>("steps").ToList();
                 if (_steps.Count == 0)
                 {
                     OnAddButton();
@@ -82,7 +82,7 @@ namespace Puzzled
             var step = _steps[selection];
             _steps.RemoveAt(selection);
             _steps.Insert(selection - 1, step);
-            _tile.SetProperty("steps", _steps.ToArray());
+            _tile.SetPropertyValue("steps", _steps.ToArray());
 
             onStepMoved?.Invoke(selection, selection - 1);
 
@@ -98,7 +98,7 @@ namespace Puzzled
             var step = _steps[selection];
             _steps.RemoveAt(selection);
             _steps.Insert(selection + 1, step);
-            _tile.SetProperty("steps", _steps.ToArray());
+            _tile.SetPropertyValue("steps", _steps.ToArray());
 
             onStepMoved?.Invoke(selection, selection + 1);
 
@@ -112,7 +112,7 @@ namespace Puzzled
                 return;
             
             _steps.Add("New Step");
-            _tile.SetProperty("steps", _steps.ToArray());
+            _tile.SetPropertyValue("steps", _steps.ToArray());
 
             var step = Instantiate(_stepPrefab, _list.transform).GetComponent<UISequenceStep>();
             step.text = "New Step";
@@ -124,13 +124,13 @@ namespace Puzzled
         private void OnStepNameChanged(UISequenceStep step)
         {
             _steps[step.transform.GetSiblingIndex()] = step.text;
-            _tile.SetProperty("steps", _steps.ToArray());
+            _tile.SetPropertyValue("steps", _steps.ToArray());
         }
 
         public void OnRemoveButton()
         {
             _steps.RemoveAt(_list.selected);
-            _tile.SetProperty("steps", _steps.ToArray());
+            _tile.SetPropertyValue("steps", _steps.ToArray());
 
             var selected = _list.selected;
             onStepRemoved?.Invoke(selected);

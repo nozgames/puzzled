@@ -30,14 +30,14 @@ namespace Puzzled
 
             // Dont draw if the same tile is already there.  This will prevent
             // accidental removal of connections and properties
-            var existing = TileGrid.CellToTile(cell, drawTile.info.layer);
+            var existing = _puzzle.grid.CellToTile(cell, drawTile.info.layer);
             if (existing != null && existing.guid == drawTile.guid)
                 return;
 
             // Static objects cannot be placed on floor objects.
             if (drawTile.info.layer == TileLayer.Dynamic)
             {
-                var staticTile = TileGrid.CellToTile(cell, TileLayer.Static);
+                var staticTile = _puzzle.grid.CellToTile(cell, TileLayer.Static);
                 if (staticTile != null && !staticTile.info.allowDynamic)
                     return;
             }

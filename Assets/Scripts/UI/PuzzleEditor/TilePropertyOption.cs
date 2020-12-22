@@ -12,17 +12,13 @@ namespace Puzzled
         {
             this.tile = tile;
             this.tileProperty = tileProperty;
-            name = tileProperty.property.Name.NicifyName();
+            name = tileProperty.info.Name.NicifyName();
         }
 
-        public void SetValue(string value) => tileProperty.SetValue(tile, value);
-        public void SetValue(bool value) => tileProperty.SetValue(tile, value);
-        public void SetValue(int value) => tileProperty.SetValue(tile, value);
-        public void SetValue(Guid value) => tileProperty.SetValue(tile, value);
+        public void SetValue(object value) => tileProperty.SetValue(tile, value);
 
-        public string GetValue() => tileProperty.GetValue(tile);
-        public bool GetValueBool() => tileProperty.GetValueBool(tile);
-        public int GetValueInt() => tileProperty.GetValueInt(tile);
-        public Guid GetValueGuid() => tileProperty.GetValueGuid(tile);
+        public object GetValue() => tileProperty.GetValue(tile);
+
+        public T GetValue<T>() => tileProperty.GetValue<T>(tile);
     }
 }

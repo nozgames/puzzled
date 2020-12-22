@@ -34,12 +34,17 @@ namespace Puzzled
             inspector.SetActive(true);
 
             logicCycleSelection = false;
+
+            // Show all wires when logic tool is enabled
+            _puzzle.ShowWires(true);
         }
 
         private void DisableLogicTool()
         {
             SelectTile(null);
-            GameManager.ShowWires(false);
+
+            // Hide all wires when logic tool is hidden
+            _puzzle.ShowWires(false);
         }
 
         private void OnLogicLButtonDown(Vector2 position)
@@ -81,7 +86,7 @@ namespace Puzzled
                 return;
 
             dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
-            dragWire.transform.position = TileGrid.CellToWorld(_selectedTile.cell);
+            dragWire.transform.position = puzzle.grid.CellToWorld(_selectedTile.cell);
             dragWire.target = _selectedTile.cell;
         }
 
@@ -120,8 +125,11 @@ namespace Puzzled
 
         private void SelectTile(Tile tile)
         {
+            if (tile == null && _selectedTile == null)
+                return;
+
             // Save the inspector state
-            if(_selectedTile != null)
+            if (_selectedTile != null)
                 _selectedTile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>().Select(p => p.GetState()).ToArray();
 
             _selectedTile = tile;
@@ -132,7 +140,8 @@ namespace Puzzled
                 options.DetachAndDestroyChildren();
                 inspectorContent.SetActive(false);
 
-                GameManager.ShowWires(true);
+                // Show all wires when no tile is selected
+                _puzzle.ShowWires();
             } 
             else
             {
@@ -140,8 +149,10 @@ namespace Puzzled
                 inspectorTileName.text = tile.info.displayName;
                 inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);
-                GameManager.HideWires();
-                GameManager.ShowWires(tile);
+
+                // Hide all wires in case they were all visible previously and show the selected tiles wires
+                _puzzle.HideWires();
+                _puzzle.ShowWires(tile);
                 RefreshInspectorInternal();
             }
 
@@ -199,7 +210,7 @@ namespace Puzzled
                 if (properties == null)
                     properties = Instantiate(optionPropertiesPrefab, options).transform.Find("Content");
 
-                var optionEditor = InstantiateOptionEditor(tileProperty.property.PropertyType, properties);
+                var optionEditor = InstantiateOptionEditor(tileProperty.info.PropertyType, properties);
                 if (null == optionEditor)
                     continue;
 

@@ -1,4 +1,4 @@
-﻿namespace Puzzled.Assets.Scripts.Components
+﻿namespace Puzzled
 {
     using UnityEngine;
     using System.Collections.Generic;

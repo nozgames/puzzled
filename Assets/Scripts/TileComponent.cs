@@ -4,10 +4,23 @@ namespace Puzzled
 {
     public class TileComponent : ActorComponent
     {
+        /// <summary>
+        /// Tile the component is attached to
+        /// </summary>
         public Tile tile => (Tile)base.actor;
 
+        /// <summary>
+        /// Puzzle the parent tile is attached to
+        /// </summary>
+        public Puzzle puzzle => tile.puzzle;
+
+        /// <summary>
+        /// True if the component is being edited
+        /// </summary>
+        public bool isEditing => puzzle.isEditing;
+
         public bool SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing = CellEventRouting.All) =>
-            TileGrid.SendToCell(evt, cell, routing);
+            puzzle.grid.SendToCell(evt, cell, routing);
 
         protected void BeginBusy() => GameManager.busy++;
 

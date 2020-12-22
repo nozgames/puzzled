@@ -7,7 +7,6 @@ namespace Puzzled.Editor.Commands
         private Tile prefab;
         private Tile tile;
         private Cell cell;
-        private Transform parent;
         private GroupCommand children;
 
         public TileAddCommand(Tile prefab, Cell cell)
@@ -20,7 +19,7 @@ namespace Puzzled.Editor.Commands
         {
             // Remove what is already in that slot
             // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
-            var existing = TileGrid.CellToTile(cell, prefab.info.layer);            
+            var existing = puzzle.grid.CellToTile(cell, prefab.info.layer);            
             if(null != existing)
             {
                 if (null == children)
@@ -32,7 +31,7 @@ namespace Puzzled.Editor.Commands
             // Destroy all other instances of this tile regardless of variant
             if (!prefab.info.allowMultiple)
             {
-                existing = TileGrid.GetLinkedTile(prefab.info);
+                existing = puzzle.grid.GetLinkedTile(prefab.info);
                 if (null != existing)
                 {
                     if (null == children)
@@ -45,20 +44,18 @@ namespace Puzzled.Editor.Commands
             children?.Execute();
 
             // Create the new tile
-            tile = GameManager.InstantiateTile(prefab, cell);
+            tile = puzzle.InstantiateTile(prefab, cell);
             if (null == tile)
                 return;
-
-            parent = tile.transform.parent;
 
             // Ensure the tile is started when created
             tile.Send(new StartEvent());
         }
 
         protected override void OnUndo()
-        {            
+        {
             // Move to the trash
-            tile.transform.SetParent(UIPuzzleEditor.deletedObjects);
+            UIPuzzleEditor.MoveToTrash(tile.gameObject);
 
             // Unlink the tile
             tile.cell = Cell.invalid;
@@ -71,7 +68,7 @@ namespace Puzzled.Editor.Commands
             children?.Redo();
 
             // Restore from trash
-            tile.transform.SetParent(parent);
+            UIPuzzleEditor.RestoreFromTrash(tile.gameObject);
 
             // Move the tile to the cell
             tile.cell = cell;

@@ -5,7 +5,7 @@
         private Tile tile;
         private string propertyName;
         private object propertyValue;
-        private string undoValue;
+        private object undoValue;
 
         public TileSetPropertyCommand (Tile tile, string name, object value)
         {

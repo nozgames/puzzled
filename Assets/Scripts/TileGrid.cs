@@ -10,17 +10,15 @@ namespace Puzzled
         [SerializeField] private int _size = 255;
         [SerializeField] private Grid _grid = null;
 
-        private static TileGrid _instance = null;
-
         /// <summary>
         /// Returns the size of the tile grid
         /// </summary>
-        public static int size => _instance._size;
+        public int size => _size;
 
         /// <summary>
         /// Returns true if the tile grid is within the LinkTile call
         /// </summary>
-        internal static bool isLinking => _instance._linking;
+        internal bool isLinking => _linking;
 
         private Tile[] _tiles;
         private int _layerCount;
@@ -28,19 +26,12 @@ namespace Puzzled
         private int _center;
         private bool _linking;
 
-        private void OnEnable()
+        private void Awake ()
         {
-            _instance = this;
-
             _layerCount = Enum.GetNames(typeof(TileLayer)).Length;
             _tiles = new Tile[_size * _size * _layerCount];
             _stride = _layerCount * _size;
             _center = (_size / 2) * _stride + (_size / 2) * _layerCount;
-        }
-
-        private void OnDisable()
-        {
-            _instance = null;
         }
 
         /// <summary>
@@ -48,36 +39,36 @@ namespace Puzzled
         /// an entirely new list and is just a snapshop of the linked tiles at the time of the call.
         /// </summary>
         /// <returns></returns>
-        public static Tile[] GetLinkedTiles() => _instance._tiles.Where(t => t != null).ToArray();
+        public Tile[] GetLinkedTiles() => _tiles.Where(t => t != null).ToArray();
 
         /// <summary>
         /// Return the first tile that matches the given tile info
         /// </summary>
         /// <param name="tileInfo">Tile info to search for</param>
         /// <returns>Tile that matches the given tile info or null if none found</returns>
-        public static Tile GetLinkedTile(TileInfo tileInfo) => _instance._tiles.Where(t => t != null && t.info == tileInfo).FirstOrDefault();
+        public Tile GetLinkedTile(TileInfo tileInfo) => _tiles.Where(t => t != null && t.info == tileInfo).FirstOrDefault();
 
         /// <summary>
         /// Convert a world coordinate to a cell coordinate
         /// </summary>
         /// <param name="position">World coordinate</param>
         /// <returns>Cell coorindate</returns>
-        public static Cell WorldToCell(Vector3 position) => _instance._grid.WorldToCell(position).ToCell();
+        public Cell WorldToCell(Vector3 position) => _grid.WorldToCell(position).ToCell();
 
         /// <summary>
         /// Convert a cell coordinate to a world coordinate
         /// </summary>
         /// <param name="cell">Cell Coordiate</param>
         /// <returns>World Coordinate</returns>
-        public static Vector3 CellToWorld(Cell cell) => _instance._grid.CellToWorld(cell.ToVector3Int());
+        public Vector3 CellToWorld(Cell cell) => _grid.CellToWorld(cell.ToVector3Int());
 
         /// <summary>
         /// Convert the given cell to a tile index
         /// </summary>
         /// <param name="cell">Cell coordinate</param>
         /// <returns>Index into tile array</returns>
-        private static int CellToIndex(Cell cell) => 
-            _instance._center + cell.x * _instance._layerCount + cell.y * _instance._stride;
+        private int CellToIndex(Cell cell) => 
+            _center + cell.x * _layerCount + cell.y * _stride;
 
         /// <summary>
         /// Convert the given cell and layer to a tile index
@@ -85,7 +76,7 @@ namespace Puzzled
         /// <param name="cell">Cell coordinate</param>
         /// <param name="layer">Tile layer</param>
         /// <returns>Index into the tile array</returns>
-        private static int CellToIndex(Cell cell, TileLayer layer) => CellToIndex(cell) + (int)layer;
+        private int CellToIndex(Cell cell, TileLayer layer) => CellToIndex(cell) + (int)layer;
 
         /// <summary>
         /// Convert the given cell and layer to a tile
@@ -93,18 +84,18 @@ namespace Puzzled
         /// <param name="cell">Cell coordinate</param>
         /// <param name="layer">Tile layer</param>
         /// <returns>Tile at the given cell and layer or null if none</returns>
-        public static Tile CellToTile(Cell cell, TileLayer layer) => _instance._tiles[CellToIndex(cell, layer)];
+        public Tile CellToTile(Cell cell, TileLayer layer) => _tiles[CellToIndex(cell, layer)];
 
         /// <summary>
         /// Returns the top most tile in the given cell
         /// </summary>
         /// <param name="cell">Cell coordinate</param>
         /// <returns>Topmost tile in the cell</returns>
-        public static Tile CellToTile(Cell cell)
+        public Tile CellToTile(Cell cell)
         {
-            var tiles = _instance._tiles;
+            var tiles = _tiles;
             var index = CellToIndex(cell);
-            for (int layerIndex = _instance._layerCount - 1; layerIndex >= 0; layerIndex--)
+            for (int layerIndex = _layerCount - 1; layerIndex >= 0; layerIndex--)
                 if (tiles[index + layerIndex] != null)
                     return tiles[index + layerIndex];
 
@@ -115,11 +106,11 @@ namespace Puzzled
         /// Link the given tile into the tile grid using its current cell and layer
         /// </summary>
         /// <param name="tile"></param>
-        public static void LinkTile (Tile tile)
+        public void LinkTile (Tile tile)
         {
             Debug.Assert(tile != null);
 
-            var tiles = _instance._tiles;
+            var tiles = _tiles;
             var index = CellToIndex(tile.cell, tile.info.layer);
             if (index <= 0 || index >= tiles.Length)
                 return;
@@ -137,18 +128,18 @@ namespace Puzzled
                 return;
             }
 
-            _instance._linking = true;
+            _linking = true;
 
             tiles[index] = tile;
 
             // Ensure the tile is parented to the grid
-            if (tile.transform.parent != _instance._grid.transform)
-                tile.transform.SetParent(_instance._grid.transform);
+            if (tile.transform.parent != _grid.transform)
+                tile.transform.SetParent(_grid.transform);
 
             // Move the tile to the correct world position
             tile.transform.position = CellToWorld(tile.cell);
 
-            _instance._linking = false;
+            _linking = false;
         }
 
         /// <summary>
@@ -156,20 +147,20 @@ namespace Puzzled
         /// </summary>
         /// <param name="index">Tile index</param>
         /// <param name="destroy">True if the tile should be destroyed after being unlinked</param>
-        private static void UnlinkTile(int index, bool destroy)
+        private void UnlinkTile(int index, bool destroy)
         {
-            var tiles = _instance._tiles;
+            var tiles = _tiles;
             if (index < 0 || index > tiles.Length)
                 return;
 
-            _instance._linking = true;
+            _linking = true;
 
             var tile = tiles[index];
             tiles[index] = null;
             if (destroy && tile != null)
                 tile.Destroy();
 
-            _instance._linking = false;
+            _linking = false;
         }
 
         /// <summary>
@@ -178,7 +169,7 @@ namespace Puzzled
         /// <param name="cell">Cell coordinate</param>
         /// <param name="layer">Tile layer</param>
         /// <param name="destroy">True if the tile should be destroyed after being unlinked</param>
-        public static void UnlinkTile(Cell cell, TileLayer layer, bool destroy = false) =>
+        public void UnlinkTile(Cell cell, TileLayer layer, bool destroy = false) =>
             UnlinkTile(CellToIndex(cell, layer), destroy);
 
         /// <summary>
@@ -186,7 +177,7 @@ namespace Puzzled
         /// </summary>
         /// <param name="tile">Tile to unlink</param>
         /// <param name="destroy">True if the tile should be destroyed after it is unlinked</param>
-        public static void UnlinkTile(Tile tile, bool destroy = false)
+        public void UnlinkTile(Tile tile, bool destroy = false)
         {
             if (null == tile)
                 return;
@@ -203,10 +194,10 @@ namespace Puzzled
         /// </summary>
         /// <param name="cell">Cell coordinate</param>
         /// <param name="destroy">True if the tile should be destroyed when unlinking</param>
-        public static void UnlinkTiles (Cell cell, bool destroy = false)
+        public void UnlinkTiles (Cell cell, bool destroy = false)
         {
             var index = CellToIndex(cell);
-            for (int i = _instance._layerCount - 1; i >= 0; i--)
+            for (int i = _layerCount - 1; i >= 0; i--)
                 UnlinkTile(index + i, destroy);
         }
 
@@ -214,9 +205,9 @@ namespace Puzzled
         /// Unlink all tiles in the grid
         /// <param name="destroy">True if the tile should be destroyed when unlinking</param>
         /// </summary>
-        public static void UnlinkAll (bool destroy = false)
+        public void UnlinkAll (bool destroy = false)
         {
-            var tiles = _instance._tiles;
+            var tiles = _tiles;
             for (int i = 0; i < tiles.Length; i++)
                 UnlinkTile(i, destroy);
         }
@@ -227,17 +218,17 @@ namespace Puzzled
         /// <param name="cell">Cell coordinate</param>
         /// <param name="layer">Tile layer</param>
         /// <returns>True if the layer for the given cell is linked to a tile.</returns>
-        public static bool IsLinked(Cell cell, TileLayer layer) => CellToTile(cell, layer) != null;
+        public bool IsLinked(Cell cell, TileLayer layer) => CellToTile(cell, layer) != null;
 
         /// <summary>
         /// Send an event to a given cell
         /// </summary>
-        public static bool SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing = CellEventRouting.All)
+        public bool SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing = CellEventRouting.All)
         {
-            var tiles = _instance._tiles;
+            var tiles = _tiles;
             var index = CellToIndex(cell);
 
-            if (index < 0 || index > _instance._tiles.Length)
+            if (index < 0 || index > _tiles.Length)
                 return false;
 
             switch (routing)
@@ -245,7 +236,7 @@ namespace Puzzled
                 case CellEventRouting.All:
                 {
                     var handled = false;
-                    for (int layer = _instance._layerCount - 1; layer >= 0; layer--)
+                    for (int layer = _layerCount - 1; layer >= 0; layer--)
                     {
                         var tile = tiles[index + layer];
                         if (null == tile)
@@ -260,7 +251,7 @@ namespace Puzzled
 
                 case CellEventRouting.FirstHandled:
                 {
-                    for (int layer = _instance._layerCount- 1; layer >= 0 && !evt.IsHandled; layer--)
+                    for (int layer = _layerCount- 1; layer >= 0 && !evt.IsHandled; layer--)
                     {
                         var tile = tiles[index + layer];
                         if (null == tile)

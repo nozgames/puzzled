@@ -51,7 +51,7 @@ namespace Puzzled
             // Immediately change our cell
             tile.cell = queryMove.targetCell;
 
-            Tween.Move(TileGrid.CellToWorld(moveFromCell), TileGrid.CellToWorld(moveToCell), false)
+            Tween.Move(puzzle.grid.CellToWorld(moveFromCell), puzzle.grid.CellToWorld(moveToCell), false)
                 .Duration(duration)
                 //.EaseOutCubic()
                 .OnStop(OnMoveComplete)

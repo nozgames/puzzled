@@ -56,7 +56,7 @@ namespace Puzzled
             if (_filter == null || _width <= 0.01f || !gameObject.activeSelf)
                 return;
 
-            var targetPosition = TileGrid.CellToWorld(_target) - gameObject.transform.position;
+            var targetPosition = Puzzle.current.grid.CellToWorld(_target) - gameObject.transform.position;
             targetPosition.z = 0.0f;
             var hwidth = _width * 0.5f;
             var dir = targetPosition.normalized;

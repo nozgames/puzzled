@@ -25,7 +25,7 @@ namespace Puzzled
         {
             var option = ((TilePropertyOption)target);
             label = option.name;
-            input.text = option.GetValue();
+            input.text = option.GetValue<string>();
         }
     }
 }

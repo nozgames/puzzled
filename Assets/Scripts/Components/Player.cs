@@ -291,7 +291,7 @@ namespace Puzzled
 
             PlayAnimation("Walk");
 
-            Tween.Move(TileGrid.CellToWorld(moveFromCell), TileGrid.CellToWorld(moveToCell), false)
+            Tween.Move(puzzle.grid.CellToWorld(moveFromCell), puzzle.grid.CellToWorld(moveToCell), false)
                 .Duration(moveDuration)
                 .OnStop(OnMoveComplete)
                 .Start(gameObject);
@@ -317,7 +317,7 @@ namespace Puzzled
 
             PlayAnimation("Push");
 
-            Tween.Move(TileGrid.CellToWorld(moveFromCell), TileGrid.CellToWorld(moveToCell), false)
+            Tween.Move(puzzle.grid.CellToWorld(moveFromCell), puzzle.grid.CellToWorld(moveToCell), false)
                 .Duration(moveDuration)
                 .OnStop(OnMoveComplete)
                 .Start(tile.gameObject);
@@ -355,7 +355,7 @@ namespace Puzzled
             PlayAnimation("Push"); // FIXME: we need a pull
 
             // Animate the movement
-            Tween.Move(TileGrid.CellToWorld(moveFromCell), TileGrid.CellToWorld(moveToCell), false)
+            Tween.Move(puzzle.grid.CellToWorld(moveFromCell), puzzle.grid.CellToWorld(moveToCell), false)
                 .Duration(moveDuration)
                 //                .EaseOutCubic()
                 .OnStop(OnMoveComplete)
@@ -420,12 +420,12 @@ namespace Puzzled
                 BeginBusy();
                 Tween.Wait(0.01f)
                     .OnStop(() => {
-                        var dropped = GameManager.InstantiateTile(drop, dropCell);
+                        var dropped = puzzle.InstantiateTile(drop, dropCell);
                        
                         Tween.Scale(0.0f, 1.0f)
                             .Duration(0.05f)
                             .Start(dropped.gameObject);
-                        TweenAnimations.ArcMove(TileGrid.CellToWorld(tile.cell), TileGrid.CellToWorld(dropped.cell), 0.5f)
+                        TweenAnimations.ArcMove(puzzle.grid.CellToWorld(tile.cell), puzzle.grid.CellToWorld(dropped.cell), 0.5f)
                             .Duration(0.15f)
                             .OnStop(EndBusy)
                             .Start(dropped.gameObject);

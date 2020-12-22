@@ -4,62 +4,108 @@ using System.Reflection;
 
 namespace Puzzled
 {
+    /// <summary>
+    /// Supported tile property types
+    /// 
+    /// NOTE: this array is serialized, do not remove or insert any values or serialization will break
+    /// </summary>
+    public enum TilePropertyType
+    {
+        Unknown,
+        Int,
+        Bool,
+        String,
+        Guid,
+        StringArray,
+        Decal,
+        DecalArray,
+        Tile
+    }
+
     public class TileProperty
     {
-        public PropertyInfo property;
-        public EditableAttribute editable;
+        /// <summary>
+        /// Property info for the property 
+        /// </summary>
+        public PropertyInfo info { get; private set; }
 
-        private TileComponent GetComponent(Tile tile) => (TileComponent)tile.GetComponentInChildren(property.DeclaringType);
+        /// <summary>
+        /// Editable attribute that was attached to the property
+        /// </summary>
+        public EditableAttribute editable { get; private set; }
 
-        public void SetValue(Tile tile, string value)
+        /// <summary>
+        /// Name of the property
+        /// </summary>
+        public string name => info.Name;
+
+        /// <summary>
+        /// Type of the property
+        /// </summary>
+        public TilePropertyType type { get; private set; }
+
+        /// <summary>
+        /// Construct a new tile property
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="editable"></param>
+        public TileProperty(PropertyInfo info, EditableAttribute editable)
         {
-            var component = GetComponent(tile);
-            if (property.PropertyType == typeof(int))
-                property.SetValue(component, int.TryParse(value, out var parsed) ? parsed : 0);
-            else if (property.PropertyType == typeof(bool))
-                property.SetValue(component, bool.TryParse(value, out var parsed) ? parsed : false);
-            else if (property.PropertyType == typeof(string))
-                property.SetValue(component, value);
-            else if (property.PropertyType == typeof(Guid))
-                property.SetValue(component, Guid.TryParse(value, out var parsed) ? parsed : Guid.Empty);
-            else if (property.PropertyType == typeof(string[]))
-                property.SetValue(component, value.Split(','));
-            else if (property.PropertyType == typeof(Decal))
-                property.SetValue(component, DecalDatabase.GetDecal(Guid.TryParse(value, out var guid) ? guid : Guid.Empty));
+            this.info = info;
+            this.editable = editable;
+            type = TilePropertyType.Unknown;
+
+            // Dont bother setting the type if the property isnt ediable
+            if (editable == null)
+                return;
+
+            if (info.PropertyType == typeof(int))
+                type = TilePropertyType.Int;
+            else if (info.PropertyType == typeof(bool))
+                type = TilePropertyType.Bool;
+            else if (info.PropertyType == typeof(string))
+                type = TilePropertyType.String;
+            else if (info.PropertyType == typeof(string[]))
+                type = TilePropertyType.StringArray;
+            else if (info.PropertyType == typeof(Guid))
+                type = TilePropertyType.Guid;
+            else if (info.PropertyType == typeof(Decal))
+                type = TilePropertyType.Decal;
+            else if (info.PropertyType == typeof(Decal[]))
+                type = TilePropertyType.DecalArray;
+            else if (info.PropertyType == typeof(Tile))
+                type = TilePropertyType.Tile;
+            else
+                throw new NotImplementedException();
         }
 
-        public void SetValue(Tile tile, object value) => property.SetValue(GetComponent(tile), value);
+        /// <summary>
+        /// Return the component the property is a member of
+        /// </summary>
+        /// <param name="tile">Component parent tile</param>
+        /// <returns>Component</returns>
+        private TileComponent GetComponent(Tile tile) => (TileComponent)tile.GetComponentInChildren(info.DeclaringType);
 
-        public string GetValue(Tile tile)
-        {
-            var value = GetValueObject(tile);
-            if (property.PropertyType == typeof(string[]))
-                return value != null ? string.Join(",", (string[])value) : "";
-            else if (property.PropertyType == typeof(Decal))
-            {
-                var decal = (Decal)value;
-                if (null == decal || decal.guid == Guid.Empty)
-                    return "";
+        /// <summary>
+        /// Set the tile property value
+        /// </summary>
+        /// <param name="tile">Tile to set the property on</param>
+        /// <param name="value">Property value</param>
+        public void SetValue (Tile tile, object value) => info.SetValue(GetComponent(tile), value);
 
-                return decal.guid.ToString();
-            }
+        /// <summary>
+        /// Get a tile property value
+        /// </summary>
+        /// <param name="tile">Tile to get property from</param>
+        /// <returns>Value of property</returns>
+        public object GetValue (Tile tile) => info.GetValue(GetComponent(tile));
 
-            return value.ToString();
-        }
-
-        private object GetValueObject(Tile tile) => property.GetValue(tile.GetComponentInChildren(property.DeclaringType));
-
-        public int GetValueInt(Tile tile) => int.TryParse(GetValue(tile), out var result) ? result : 0;
-        public bool GetValueBool(Tile tile) => bool.TryParse(GetValue(tile), out var result) ? result : false;
-        public Guid GetValueGuid(Tile tile) => Guid.TryParse(GetValue(tile), out var result) ? result : Guid.Empty;
-        public string[] GetValueStringArray(Tile tile)
-        {
-            var value = GetValue(tile);
-            if (string.IsNullOrEmpty(value))
-                return new string[] { };
-
-            return value.Split(',');
-        }
-        public Decal GetValueDecal(Tile tile) => (Decal)GetValueObject(tile);
+        /// <summary>
+        /// Get property value and cast it to the given type
+        /// </summary>
+        /// <typeparam name="T">Type to cast to</typeparam>
+        /// <param name="tile">Tile to get property from</param>
+        /// <returns>Value of property</returns>
+        public T GetValue<T>(Tile tile) => (T)GetValue(tile);
     }
 }

@@ -45,6 +45,9 @@ namespace Puzzled
 
         private void OnUpdateValue()
         {
+            if (tile == null)
+                return;
+
             if (value == _target)
                 tile.SetOutputsActive(true);
             else

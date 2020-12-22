@@ -79,8 +79,18 @@ namespace Puzzled
         public Connection from { get; private set; } = new Connection();
         public Connection to { get; private set; } = new Connection();
 
-
         private int _value = 0;
+
+        /// <summary>
+        /// Puzzle the wire belongs to
+        /// </summary>
+        public Puzzle puzzle { get; set; }
+
+        /// <summary>
+        /// True if the wire is being edited
+        /// </summary>
+        public bool isEditing => puzzle.isEditing;
+
 
         public bool selected {
             get => _visuals.selected;

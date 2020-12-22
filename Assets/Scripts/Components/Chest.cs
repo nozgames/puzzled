@@ -49,7 +49,7 @@ namespace Puzzled
             tile.Destroy();
 
             // Spawn the prize at the same spot
-            GameManager.InstantiateTile(TileDatabase.GetTile(prizeItem), cell);
+            puzzle.InstantiateTile(TileDatabase.GetTile(prizeItem), cell);
         }
     }
 }

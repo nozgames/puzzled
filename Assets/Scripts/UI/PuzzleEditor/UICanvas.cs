@@ -48,7 +48,7 @@ namespace Puzzled.PuzzleEditor
 
         public Vector3 CanvasToWorld (Vector2 position) => Camera.main.ScreenToWorldPoint(position);
 
-        public Cell CanvasToCell(Vector2 position) => TileGrid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0.5f, 0));
+        public Cell CanvasToCell(Vector2 position) => UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0.5f, 0));
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {

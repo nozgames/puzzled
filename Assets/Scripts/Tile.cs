@@ -19,6 +19,11 @@ namespace Puzzled
         public TileInfo info => _info;
 
         /// <summary>
+        /// True if the tile is being edited
+        /// </summary>
+        public bool isEditing => puzzle.isEditing;
+
+        /// <summary>
         /// Return the unique identifier for this tile type
         /// </summary>
         public System.Guid guid { get; set; }
@@ -39,6 +44,11 @@ namespace Puzzled
         public Editor.IInspectorState[] inspectorState { get; set; }
 
         /// <summary>
+        /// Get/Set the puzzle this tile belongs to
+        /// </summary>
+        public Puzzle puzzle { get; set; }
+
+        /// <summary>
         /// Current cell
         /// </summary>
         public Cell cell {
@@ -47,19 +57,21 @@ namespace Puzzled
                 if (_cell == value)
                     return;
 
+                Debug.Assert(puzzle != null);
+
                 // Unlink ourselves from the tile we are in
                 if (isLinked)
-                    TileGrid.UnlinkTile(this);
+                    puzzle.grid.UnlinkTile(this);
 
                 _cell = value;
 
                 if (_cell == Cell.invalid)
                     return;
 
-                transform.position = TileGrid.CellToWorld(_cell);
+                transform.position = puzzle.grid.CellToWorld(_cell);
 
-                if (!TileGrid.isLinking)
-                    TileGrid.LinkTile(this);
+                if (!puzzle.grid.isLinking)
+                    puzzle.grid.LinkTile(this);
 
                 // Give our own components a chance to react to the cell change
                 Send(new CellChangedEvent(this));
@@ -94,7 +106,7 @@ namespace Puzzled
         /// <param name="cell">Cell to send to</param>
         /// <param name="routing">Routing to use for event</param>
         public void SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing=CellEventRouting.All) => 
-            TileGrid.SendToCell(evt, cell, routing);
+            puzzle.grid.SendToCell(evt, cell, routing);
 
         public void Destroy()
         {
@@ -121,12 +133,15 @@ namespace Puzzled
             outputs.Clear();
 
             // Unlink the tile from the tile grid
-            if (isLinked && !TileGrid.isLinking)
-                TileGrid.UnlinkTile(this);
+            if (isLinked && !puzzle.grid.isLinking)
+                puzzle.grid.UnlinkTile(this);
 
             cell = Cell.invalid;
 
-            Destroy(gameObject);
+            if (GameManager.isQuitting)
+                DestroyImmediate(gameObject);
+            else
+                Destroy(gameObject);
         }
 
         protected override void OnDestroy()
@@ -379,26 +394,77 @@ namespace Puzzled
             base.OnDisable();
         }
 
-        public void SetProperty (string name, string value)
+        /// <summary>
+        /// Deprecated (Use SetProperty)
+        /// </summary>
+        public void SetPropertyDeprecated (string name, string value)
         {
-            var property = properties
-                .Where(ep => string.Compare(ep.property.Name, name, true) == 0)
-                .FirstOrDefault();
-
+            var property = GetProperty(name);
             if (null == property)
                 return;
 
-            property.SetValue(this, value);
+            switch (property.type)
+            {
+                case TilePropertyType.Int:
+                    property.SetValue(this, int.TryParse(value, out var parsedInt) ? parsedInt : 0);
+                    break;
+
+                case TilePropertyType.Bool:
+                    property.SetValue(this, bool.TryParse(value, out var parsedBool) ? parsedBool : false);
+                    break;
+
+                case TilePropertyType.Guid:
+                    property.SetValue(this, Guid.TryParse(value, out var parsedGuid) ? parsedGuid : Guid.Empty);
+                    break;
+
+                case TilePropertyType.String:
+                    property.SetValue(this, value);
+                    break;
+
+                case TilePropertyType.StringArray:
+                    property.SetValue(this, value.Split(','));
+                    break;
+
+                case TilePropertyType.Decal:
+                    property.SetValue(this, DecalDatabase.GetDecal(Guid.TryParse(value, out var decalGuid) ? decalGuid : Guid.Empty));
+                    break;
+
+                case TilePropertyType.Tile:
+                    property.SetValue(this, TileDatabase.GetTile(Guid.TryParse(value, out var tileGuid) ? tileGuid : Guid.Empty));
+                    break;
+
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
-        public void SetProperty(string name, int value) => SetProperty(name, value.ToString());
-        public void SetProperty(string name, bool value) => SetProperty(name, value.ToString());
-        public void SetProperty(string name, Guid value) => SetProperty(name, value.ToString());
-        public void SetProperty(string name, string[] value) => GetProperty(name).SetValue(this, value);
+        /// <summary>
+        /// Get the tile property with the given name
+        /// </summary>
+        /// <param name="name">Name of the property</param>
+        /// <returns>Tile property if it exists or null</returns>
+        public TileProperty GetProperty(string name) => properties.Where(p => p.info.Name == name).FirstOrDefault();
 
-        public TileProperty GetProperty(string name) => properties.Where(p => p.property.Name == name).FirstOrDefault();
+        /// <summary>
+        /// Set the tile property with the given name to the given value
+        /// </summary>
+        /// <param name="name">Name of the property</param>
+        /// <param name="value">Property value</param>
+        public void SetPropertyValue (string name, object value) => GetProperty(name)?.SetValue(this, value);
 
-        public int GetPropertyInt(string name) => GetProperty(name).GetValueInt(this);
-        public string[] GetPropertyStringArray(string name) => GetProperty(name).GetValueStringArray(this);
+        /// <summary>
+        /// Return the property value for the given property
+        /// </summary>
+        /// <param name="name">Name of property</param>
+        /// <returns>Property value</returns>
+        public object GetPropertyValue(string name) => GetProperty(name).GetValue(this);
+
+        /// <summary>
+        /// Return the property value for the given property and cast it to the given type
+        /// </summary>
+        /// <typeparam name="T">Type to cast to</typeparam>
+        /// <param name="name">Name of property</param>
+        /// <returns>Property value</returns>
+        public T GetPropertyValue<T>(string name) => (T)GetPropertyValue(name);
     }
 }

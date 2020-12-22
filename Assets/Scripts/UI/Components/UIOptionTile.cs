@@ -13,7 +13,7 @@ namespace Puzzled
 
             var option = (TilePropertyOption)target;
             label = option.name;
-            preview.texture = TileDatabase.GetPreview(option.GetValueGuid());
+            preview.texture = TileDatabase.GetPreview(option.GetValue<System.Guid>());
         }
 
         public void OnSelectTile ()

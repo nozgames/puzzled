@@ -1,7 +1,5 @@
-﻿using NoZ;
-using System;
+﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,38 +7,28 @@ namespace Puzzled
 {
     public class GameManager : MonoBehaviour
     {
-        [SerializeField] private Transform _pan = null;
-        [SerializeField] private Grid grid = null;
-        [SerializeField] private Transform wires = null;
-        [SerializeField] private GameObject wirePrefab = null;
-        [SerializeField] private float wireHitThreshold = 0.1f;
+        [Header("General")]
         [SerializeField] private float _tick = 0.25f;
-            
-        [Header("Layers")]
-        [SerializeField] [Layer] private int floorLayer = 0;
-        [SerializeField] [Layer] private int staticLayer = 0;
-        [SerializeField] [Layer] private int dynamicLayer = 0;
-        [SerializeField] [Layer] private int logicLayer = 0;
-        [SerializeField] private LayerMask playLayers = 0;
-        [SerializeField] private LayerMask defaultLayers = 0;
-
-        public InputActionReference menuAction;
+        [SerializeField] private Puzzle _puzzlePrefab = null;
+        [SerializeField] private Transform _puzzles = null;
+        [SerializeField] private CameraManager _cameraManager = null;
 
         /// <summary>
-        /// Current player
+        /// Event fired when the current puzzle changes
         /// </summary>
-        private Player _player;
+        public static event Action<Puzzle> onPuzzleChanged;
 
+        /// <summary>
+        /// True if there is an active gamepad
+        /// </summary>
         public static bool isUsingGamepad => _instance._gamepad;
 
-        public static Player player {
-            get => _instance._player;
-            set => _instance._player = value;
-        }
-
-        public static Cell playerCell => player != null ? player.tile.cell : Cell.invalid;
-
         public static bool isValid => _instance != null;
+
+        /// <summary>
+        /// True if the application is in the processing of quitting
+        /// </summary>
+        public static bool isQuitting => _instance._quitting;
 
         public static float tick => _instance._tick;
 
@@ -50,51 +38,66 @@ namespace Puzzled
 
         private bool _gamepad = false;
 
+        private bool _quitting = false;
+
         private static GameManager _instance = null;
 
         /// <summary>
-        /// Returns the active puzzle
+        /// Current puzzle
         /// </summary>
-        public Puzzle puzzle { get; private set; }
+        private Puzzle _puzzle;
+
+        /// <summary>
+        /// Get/Set the current active puzzle
+        /// </summary>
+        public static Puzzle puzzle {
+            get => _instance._puzzle;
+            set {
+                if (_instance._puzzle == value)
+                    return;
+
+                if (_instance._puzzle != null)
+                    _instance._puzzle.gameObject.SetActive(false);
+
+                _instance._puzzle = value;
+
+                if (_instance._puzzle != null)
+                    _instance._puzzle.gameObject.SetActive(true);
+
+                onPuzzleChanged?.Invoke(_instance._puzzle);
+            }
+        }
 
         private void OnEnable()
         {
-            //menuAction.action.Enable();
-            //menuAction.action.performed += OnMenuAction;
-
             _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
             InputSystem.onDeviceChange += OnDeviceChanged;
 
             if (_instance == null)
                 _instance = this;
 
-            // Set default camera mask layers
-            Camera.main.cullingMask = _instance.defaultLayers;
+            // Initialize the camera manager
+            _cameraManager.Initialize();
         }
 
         private void OnApplicationQuit()
         {
+            _quitting = true;
+
             // Destroy the UI first
             UIManager.instance.gameObject.SetActive(false);
             Destroy(UIManager.instance.gameObject);
 
-            UnloadPuzzle();
-        }
+            puzzle = null;
 
-        private void OnDisable()
-        {
+            // Destroy all remaining puzzles
+            for (int i = _puzzles.childCount - 1; i >= 0; i--)
+                _puzzles.GetChild(i).GetComponent<Puzzle>().Destroy();
+
             if (_instance == this)
                 _instance = null;
 
             InputSystem.onDeviceChange -= OnDeviceChanged;
-
-            menuAction.action.Disable();
-            menuAction.action.performed -= OnMenuAction;
-        }
-
-        private void OnMenuAction(InputAction.CallbackContext obj)
-        {
-            UIManager.instance.ShowIngame();
         }
 
         private int _busy = 0;
@@ -116,9 +119,36 @@ namespace Puzzled
             }
         }
 
-        public static void LoadPuzzle(Puzzle puzzle) 
+        /// <summary>
+        /// Load a puzzle at the given path and set it to the current puzzle
+        /// </summary>
+        /// <param name="path">Puzzle path</param>
+        /// <returns>Loaded puzzle</returns>
+        public static Puzzle LoadPuzzle(string path)
         {
-            throw new NotImplementedException();
+            // Disable the puzzle first to ensure two puzzles are never enabled at the same time
+            var oldPuzzle = Puzzle.current;
+            Puzzle.current = null;
+
+            // Load and set the new puzzle
+            Puzzle.current = Puzzle.Load(path);
+
+            // If the new puzzle failed to load then set the old puzzle back to active
+            if (Puzzle.current == null)
+                Puzzle.current = oldPuzzle;
+
+            return Puzzle.current;
+        }
+
+        /// <summary>
+        /// Create a new puzzle and deactivate it
+        /// </summary>
+        /// <returns>New puzzle</returns>
+        public static Puzzle InstantiatePuzzle ()
+        {
+            var puzzle = Instantiate(_instance._puzzlePrefab.gameObject, _instance._puzzles).GetComponent<Puzzle>();
+            puzzle.gameObject.SetActive(false);
+            return puzzle;
         }
 
         /// <summary>
@@ -126,149 +156,15 @@ namespace Puzzled
         /// </summary>
         public static void UnloadPuzzle ()
         {
-            // Destroy the player
-            if (_instance._player != null)
-            {
-                Destroy(_instance._player.gameObject);
-                _instance._player = null;
-            }
+            if (Puzzle.current == null)
+                return;
 
-            // Unlink all tiles and destory them
-            TileGrid.UnlinkAll(true);
+            Puzzle.current.Destroy();
         }
 
         public static void PuzzleComplete ()
         {
             UIManager.instance.ShowPuzzleComplete();
-        }
-
-        public static Tile InstantiateTile(Guid guid, Cell cell) =>
-            InstantiateTile(TileDatabase.GetTile(guid), cell);
-
-        public static Tile InstantiateTile (Tile prefab, Cell cell)
-        {
-            if (prefab == null)
-                return null;
-
-            // Do not allow two tiles to be intstantiated into the same cell
-            if(TileGrid.IsLinked(cell, prefab.info.layer))
-            {
-                Debug.LogError($"Cannot create tile `{prefab.info.displayName} at cell {cell}, layer is occupied by `{TileGrid.CellToTile(cell, prefab.info.layer).info.displayName}");
-                return null;
-            }
-
-            var tile = Instantiate(prefab.gameObject, _instance.grid.transform).GetComponent<Tile>();
-            tile.guid = prefab.guid;
-            tile.cell = cell;
-            tile.gameObject.SetChildLayers(TileLayerToObjectLayer(tile.info.layer));
-            return tile;
-        }
-
-        private static int TileLayerToObjectLayer (TileLayer layer)
-        {
-            switch (layer)
-            {
-                case TileLayer.Floor:
-                    return _instance.floorLayer;
-
-                case TileLayer.Static:
-                    return _instance.staticLayer;
-
-                case TileLayer.Dynamic:
-                    return _instance.dynamicLayer;
-
-                case TileLayer.Logic:
-                    return _instance.logicLayer;
-            }
-
-            return 0;
-        }
-
-        public static Wire InstantiateWire (Tile input, Tile output)
-        {
-            if (input == null || output == null)
-                return null;
-
-            if (!output.info.allowWireInputs || !input.info.allowWireOutputs)
-                return null;
-
-            if (input == output)
-                return null;
-
-            // Already connected?
-            if (input.HasOutput(output))
-                return null;
-
-            var wire = Instantiate(_instance.wirePrefab, _instance.wires.transform).GetComponent<Wire>();
-            wire.from.tile = input;
-            wire.to.tile = output;
-            input.outputs.Add(wire);
-            output.inputs.Add(wire);
-            wire.transform.position = TileGrid.CellToWorld(wire.from.tile.cell);
-            return wire;
-        }
-
-        public static void HideWires() => ShowWires(false);
-
-        public static void ShowWires(bool visible)
-        {
-            var wires = _instance.wires;
-            for (int i = 0; i < wires.transform.childCount; i++)
-                wires.transform.GetChild(i).GetComponent<Wire>().visible = visible;
-        }
-
-        public static void ShowWires(Tile tile)
-        {
-            foreach (var output in tile.outputs)
-                output.visible = true;
-
-            foreach (var input in tile.inputs)
-                input.visible = true;
-        }
-
-        /// <summary>
-        /// Return the wire that collides with the given world position
-        /// </summary>
-        /// <param name="position">World poisition to hit test</param>
-        /// <returns>Wire that collides with the world position or null if none found</returns>
-        public static Wire HitTestWire (Vector3 position)
-        {
-            var cell = TileGrid.WorldToCell(position + new Vector3(0.5f, 0.5f, 0));
-            var threshold = _instance.wireHitThreshold * _instance.wireHitThreshold;
-
-            for (int i=0; i<_instance.wires.childCount; i++)
-            {
-                var wire = _instance.wires.GetChild(i).GetComponent<Wire>();
-                var min = Cell.Min(wire.from.cell, wire.to.cell);
-                var max = Cell.Max(wire.from.cell, wire.to.cell);
-                if (cell.x < min.x || cell.y < min.y || cell.x > max.x || cell.y > max.y)
-                    continue;
-
-                var pt0 = wire.from.position;
-                var pt1 = wire.to.position;
-                var dir = (pt1 - pt0).normalized;
-                var mag = (pt1 - pt0).magnitude;
-                var delta = position - pt0;
-                var dot = Mathf.Clamp(Vector2.Dot(dir, delta) / mag, 0, 1);
-                var dist = (position - (pt0 + dir * dot * mag)).sqrMagnitude;
-                if (dist > threshold)
-                    continue;
-
-                return wire;
-            }
-
-            return null;
-        }
-
-        public static void Pan(Vector3 pan)
-        {
-            _instance._pan.position += Vector3.Scale(pan, new Vector3(1,1,0));
-        }
-
-        public static void PanCenter ()
-        {
-            // TODO: find center of puzzle
-            _instance._pan.position = Vector3.zero;
         }
 
         private void Update()
@@ -288,8 +184,7 @@ namespace Puzzled
         }
 
         public static void Play ()
-        {
-            Camera.main.cullingMask = _instance.playLayers;
+        {            
             paused = false;
 
             CameraManager.Play();
@@ -298,17 +193,8 @@ namespace Puzzled
         public static void Stop ()
         {
             CameraManager.Stop();
-
-            Camera.main.cullingMask = _instance.defaultLayers;
+            
             paused = true;
-        }
-
-        public static void ShowLayer (TileLayer layer, bool show)
-        {
-            if (show)
-                Camera.main.cullingMask |= (1<<TileLayerToObjectLayer(layer));
-            else
-                Camera.main.cullingMask &= ~(1<<TileLayerToObjectLayer(layer));
         }
 
         private void OnDeviceChanged(InputDevice inputDevice, InputDeviceChange deviceChange)

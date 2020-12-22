@@ -26,7 +26,7 @@ namespace Puzzled
         private void UpdateState()
         {
             // The pressure plate is switched if anything in the dynamic layer is on the same tile
-            var pressed = TileGrid.CellToTile(tile.cell, TileLayer.Dynamic) != null;
+            var pressed = puzzle.grid.CellToTile(tile.cell, TileLayer.Dynamic) != null;
             
             _pressed = pressed;
             visualPressed.SetActive(pressed);
