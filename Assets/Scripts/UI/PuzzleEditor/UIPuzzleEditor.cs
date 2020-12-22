@@ -58,18 +58,6 @@ namespace Puzzled
         [SerializeField] private GameObject loadPopupFilePrefab = null;
         [SerializeField] private Transform tileSelectorTiles = null;
 
-        [Header("Inspector")]
-        [SerializeField] private GameObject inspectorContent = null;
-        [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
-        [SerializeField] private RawImage inspectorTilePreview = null;
-        [SerializeField] private UIOptionEditor optionPrefabInt = null;
-        [SerializeField] private UIOptionEditor optionPrefabBool = null;
-        [SerializeField] private UIOptionEditor optionPrefabString = null;
-        [SerializeField] private UIOptionEditor optionPrefabTile = null;
-        [SerializeField] private UIOptionEditor optionInputsPrefab = null;
-        [SerializeField] private UIOptionEditor optionOutputsPrefab = null;
-        [SerializeField] private GameObject optionPropertiesPrefab = null;
-
         [Header("Palette")]
         [SerializeField] private GameObject palette = null;
         [SerializeField] private UIList _paletteList = null;
@@ -80,16 +68,12 @@ namespace Puzzled
 
         private Puzzle _puzzle = null;
         private Tile drawTile = null;
-        private Cell dragStart;
-        private Cell dragEnd;
-        private bool dragging;
-        private bool ignoreMouseUp;
         private bool playing;
-        private bool panning;
         private Action<Tile> tileSelectorCallback;
         private Mode savedMode;
-
-        private bool hasSelection => selectionRect.gameObject.activeSelf;
+        private Cell _selectionMin;
+        private Cell _selectionMax;
+        private Cell _selectionSize;
 
         public static UIPuzzleEditor instance { get; private set; }
 
@@ -155,7 +139,10 @@ namespace Puzzled
             instance = this;
 
             foreach (var toggle in layerToggles)
-                toggle.onValueChanged.AddListener((value) => UpdateLayers());
+                toggle.onValueChanged.AddListener((value) => {
+                    UpdateLayers();
+                    FitSelectionRect();
+                });
         }
 
         private void OnEnable()
@@ -225,8 +212,8 @@ namespace Puzzled
 
             Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + (delta.y > 0 ? -1 : 1), minZoom, maxZoom);
 
-            if (selectedTile != null)
-                SetSelectionRect(selectedTile.cell, selectedTile.cell);
+            if (selectionRect.gameObject.activeSelf)
+                SetSelectionRect(_selectionMin, _selectionMax);
 
             UpdateCursor(true);
         }
@@ -285,11 +272,12 @@ namespace Puzzled
 
         private void SetSelectionRect(Cell min, Cell max)
         {
-            var anchorCell = Cell.Min(min, max);
-            var size = Cell.Max(min, max) - anchorCell;
+            _selectionMin = Cell.Min(min, max);
+            _selectionMax = Cell.Max(min, max);
+            _selectionSize = _selectionMax - _selectionMin; 
 
-            selectionRect.anchorMin = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(anchorCell) - new Vector3(0.5f, 0.5f, 0));
-            selectionRect.anchorMax = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(anchorCell + size) + new Vector3(0.5f, 0.5f, 0));
+            selectionRect.anchorMin = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMin) - new Vector3(0.5f, 0.5f, 0));
+            selectionRect.anchorMax = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMax) + new Vector3(0.5f, 0.5f, 0));
 
             selectionRect.gameObject.SetActive(true);
         }
@@ -301,8 +289,8 @@ namespace Puzzled
 
             CameraManager.Pan(-(canvas.CanvasToWorld(position + delta) - canvas.CanvasToWorld(position)));
 
-            if (selectedTile != null)
-                SetSelectionRect(selectedTile.cell, selectedTile.cell);
+            if(selectionRect.gameObject.activeSelf)
+                SetSelectionRect(_selectionMin, _selectionMax);
 
             UpdateCursor();
         }
@@ -540,20 +528,6 @@ namespace Puzzled
         private void RemoveWire(Wire wire)
         {
             Destroy(wire.gameObject);
-        }
-
-        private UIOptionEditor InstantiateOptionEditor(Type type, Transform parent)
-        {
-            if (type == typeof(int))
-                return Instantiate(optionPrefabInt, parent).GetComponent<UIOptionEditor>();
-            else if (type == typeof(bool))
-                return Instantiate(optionPrefabBool, parent).GetComponent<UIOptionEditor>();
-            else if (type == typeof(string))
-                return Instantiate(optionPrefabString, parent).GetComponent<UIOptionEditor>();
-            else if (type == typeof(Guid))
-                return Instantiate(optionPrefabTile, parent).GetComponent<UIOptionEditor>();
-
-            return null;
         }
 
         public void OpenTileSelector(Type componentType, Action<Tile> callback)

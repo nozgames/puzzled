@@ -9,7 +9,7 @@ namespace Puzzled
 
         private string _text = "";
 
-        [Editable]
+        [Editable(multiline = true)]
         public string text {
             get => _text;
             set {

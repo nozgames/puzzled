@@ -1,25 +1,49 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Puzzled
 {
+    [Flags]
+    public enum WireVisualState
+    {
+        Normal = 0,
+        Bold = 1,
+        Dark = 2,
+        Selected = 4
+    }
+
     public class WireMesh : MonoBehaviour
     {
-        [SerializeField] private float _width = 0.1f;
         [SerializeField] private bool _tile = false;
-        
+
+        [SerializeField] private float _widthNormal = 0.1f;
+        [SerializeField] private float _widthBold = 0.2f;
+
         [SerializeField] private Material _materialNormal = null;
+        [SerializeField] private Material _materialNormalDark = null;
         [SerializeField] private Material _materialSelected = null;
+        [SerializeField] private Material _materialSelectedDark = null;
 
         private MeshRenderer _renderer;
         private MeshFilter _filter;
         private Cell _target;
-        private bool _selected;
-        
-        public bool selected {
-            get => _selected;
+        private WireVisualState _state = WireVisualState.Normal;
+        private float _width;
+
+        public WireVisualState state {
+            get => _state;
             set {
-                _selected = value;
-                _renderer.sharedMaterial = _selected ? _materialSelected : _materialNormal;
+                if (_state == value)
+                    return;
+
+                var oldWidth = _width;
+                _state = value;
+
+                _width = (_state & WireVisualState.Bold) == WireVisualState.Bold ? _widthBold : _widthNormal;
+                if (_width != oldWidth)
+                    UpdateMesh();
+
+                UpdateMaterial();
             }
         }
 
@@ -38,11 +62,29 @@ namespace Puzzled
             GetComponent<MeshRenderer>().sortingLayerName = "Wire";
             _filter = GetComponent<MeshFilter>();
             _renderer = GetComponent<MeshRenderer>();
+            _width = _widthNormal;
             UpdateMesh();
+        }
+
+        private void UpdateMaterial()
+        {
+            if (_renderer == null)
+                return;
+
+            var materialState = _state & (WireVisualState.Selected | WireVisualState.Dark);
+            if (materialState == (WireVisualState.Selected | WireVisualState.Dark))
+                _renderer.sharedMaterial = _materialSelectedDark;
+            else if (materialState == WireVisualState.Dark)
+                _renderer.sharedMaterial = _materialNormalDark;
+            else if (materialState == WireVisualState.Selected)
+                _renderer.sharedMaterial = _materialSelected;
+            else
+                _renderer.sharedMaterial = _materialNormal;
         }
 
         private void OnEnable()
         {
+            UpdateMaterial();
             UpdateMesh();
         }
 
@@ -51,7 +93,7 @@ namespace Puzzled
             UpdateMesh();
         }
 
-        private void UpdateMesh()
+        public void UpdateMesh()
         {
             if (_filter == null || _width <= 0.01f || !gameObject.activeSelf)
                 return;

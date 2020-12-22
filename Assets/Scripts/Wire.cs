@@ -91,10 +91,51 @@ namespace Puzzled
         /// </summary>
         public bool isEditing => puzzle.isEditing;
 
+        /// <summary>
+        /// Control the wire visual state
+        /// </summary>
+        public WireVisualState visualState {
+            get => _visuals.state;
+            set => _visuals.state = value;
+        }
 
+        /// <summary>
+        /// Set the selected visual state of the wire
+        /// </summary>
         public bool selected {
-            get => _visuals.selected;
-            set => _visuals.selected = value;
+            get => (visualState & WireVisualState.Selected) == WireVisualState.Selected;
+            set {
+                if (value)
+                    visualState |= WireVisualState.Selected;
+                else
+                    visualState &= ~WireVisualState.Selected;
+            }
+        }
+
+        /// <summary>
+        /// Set the dark visual state of the wire
+        /// </summary>
+        public bool dark {
+            get => (visualState & WireVisualState.Dark) == WireVisualState.Dark;
+            set {
+                if (value)
+                    visualState |= WireVisualState.Dark;
+                else
+                    visualState &= ~WireVisualState.Dark;
+            }
+        }
+
+        /// <summary>
+        /// Set the bold visual state of the wire
+        /// </summary>
+        public bool bold {
+            get => (visualState & WireVisualState.Bold) == WireVisualState.Bold;
+            set {
+                if (value)
+                    visualState |= WireVisualState.Bold;
+                else
+                    visualState &= ~WireVisualState.Bold;
+            }
         }
 
         /// <summary>
@@ -130,11 +171,14 @@ namespace Puzzled
             to.tile.Send(new WireValueChangedEvent(this));
 
             _visuals.target = to.tile.cell;
+
+            bold = true;
         }
 
         private void OnDisable()
         {
             to.tile.Send(new WireDeactivatedEvent(this));
+            bold = false;
         }
 
         private void OnDestroy()
@@ -144,6 +188,12 @@ namespace Puzzled
 
             if(to != null)
                 to.tile.inputs.Remove(this);
+        }
+
+        public void UpdatePositions()
+        {
+            transform.position = from.tile.transform.position;
+            _visuals.UpdateMesh();
         }
     }
 }

@@ -65,5 +65,15 @@ namespace Puzzled
             SendToCell(new LeaveCellEvent(tile, moveToCell), moveFromCell);
             SendToCell(new EnterCellEvent(tile, moveFromCell), moveToCell);
         }
+
+        [ActorEventHandler]
+        private void OnCellChanged(CellChangedEvent evt)
+        {
+            if(isEditing)
+            {
+                SendToCell(new LeaveCellEvent(tile, tile.cell), evt.old);
+                SendToCell(new EnterCellEvent(tile, evt.old), tile.cell);
+            }
+        }
     }
 }

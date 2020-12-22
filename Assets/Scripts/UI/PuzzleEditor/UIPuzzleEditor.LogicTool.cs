@@ -1,11 +1,25 @@
 ﻿using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Puzzled
 {
     public partial class UIPuzzleEditor
     {
+        [Header("Inspector")]
+        [SerializeField] private GameObject inspectorContent = null;
+        [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
+        [SerializeField] private RawImage inspectorTilePreview = null;
+        [SerializeField] private UIOptionEditor optionPrefabInt = null;
+        [SerializeField] private UIOptionEditor optionPrefabBool = null;
+        [SerializeField] private UIOptionEditor optionPrefabString = null;
+        [SerializeField] private UIOptionEditor optionPrefabStringMultiline = null;
+        [SerializeField] private UIOptionEditor optionPrefabTile = null;
+        [SerializeField] private UIOptionEditor optionInputsPrefab = null;
+        [SerializeField] private UIOptionEditor optionOutputsPrefab = null;
+        [SerializeField] private GameObject optionPropertiesPrefab = null;
+
         private WireMesh dragWire = null;
         private bool logicCycleSelection = false;
         private Tile _selectedTile = null;
@@ -86,6 +100,7 @@ namespace Puzzled
                 return;
 
             dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
+            dragWire.state = WireVisualState.Selected;
             dragWire.transform.position = puzzle.grid.CellToWorld(_selectedTile.cell);
             dragWire.target = _selectedTile.cell;
         }
@@ -130,7 +145,15 @@ namespace Puzzled
 
             // Save the inspector state
             if (_selectedTile != null)
+            {
                 _selectedTile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>().Select(p => p.GetState()).ToArray();
+
+                foreach (var input in _selectedTile.inputs)
+                    input.dark = false;
+
+                foreach (var output in _selectedTile.outputs)
+                    output.dark = false;
+            }
 
             _selectedTile = tile;
 
@@ -210,7 +233,7 @@ namespace Puzzled
                 if (properties == null)
                     properties = Instantiate(optionPropertiesPrefab, options).transform.Find("Content");
 
-                var optionEditor = InstantiateOptionEditor(tileProperty.info.PropertyType, properties);
+                var optionEditor = InstantiateOptionEditor(tileProperty, properties);
                 if (null == optionEditor)
                     continue;
 
@@ -221,6 +244,30 @@ namespace Puzzled
             if (_selectedTile.inspectorState != null)
                 foreach (var state in _selectedTile.inspectorState)
                     state.Apply(inspector.transform);
+        }
+
+        private UIOptionEditor InstantiateOptionEditor(TileProperty property, Transform parent)
+        {
+            switch (property.type)
+            {
+                case TilePropertyType.String:
+                    if(property.editable.multiline)
+                        return Instantiate(optionPrefabStringMultiline, parent).GetComponent<UIOptionEditor>();
+
+                    return Instantiate(optionPrefabString, parent).GetComponent<UIOptionEditor>();
+
+                case TilePropertyType.Int:
+                    return Instantiate(optionPrefabInt, parent).GetComponent<UIOptionEditor>();
+
+                case TilePropertyType.Bool:
+                    return Instantiate(optionPrefabBool, parent).GetComponent<UIOptionEditor>();
+
+                // TODO: change to tile
+                case TilePropertyType.Guid:
+                    return Instantiate(optionPrefabTile, parent).GetComponent<UIOptionEditor>();
+            }
+
+            return null;
         }
     }
 }

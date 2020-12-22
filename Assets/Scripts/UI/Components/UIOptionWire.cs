@@ -104,6 +104,7 @@ namespace Puzzled.Editor
                 _param1Toggle.onValueChanged.RemoveAllListeners();
                 _param1Toggle.isOn = (wireOption & wireToggleMask) == wireToggleMask;
                 _param1Toggle.onValueChanged.AddListener(OnToggleValueChanged);
+                wire.dark = !_param1Toggle.isOn;
             }
         }
 
@@ -111,6 +112,7 @@ namespace Puzzled.Editor
         {
             var mask = wireToggleMask;
             wireOption = (wireOption & (~mask)) | (value ? mask : 0);
+            wire.dark = !value;
         }
 
         private void OnWireSelectionChanged(Wire selectedWire)

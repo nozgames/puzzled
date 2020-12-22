@@ -5,6 +5,7 @@
         Arrow,
         ArrowWithPlus,
         ArrowWithMinus,
-        ArrowWithNot
+        ArrowWithNot,
+        ArrowWithMove
     }
 }

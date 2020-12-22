@@ -17,7 +17,9 @@ namespace Puzzled
                 _on = value;
 
                 UpdateVisuals();
-                tile.SetOutputsActive(_on);
+
+                if(tile != null)
+                    tile.SetOutputsActive(_on);
             }
         }
 
@@ -29,6 +31,7 @@ namespace Puzzled
         private void OnStart(StartEvent evt)
         {
             UpdateVisuals();
+            tile.SetOutputsActive(_on);
         }
 
         [ActorEventHandler]

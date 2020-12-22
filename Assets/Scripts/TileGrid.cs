@@ -42,6 +42,14 @@ namespace Puzzled
         public Tile[] GetLinkedTiles() => _tiles.Where(t => t != null).ToArray();
 
         /// <summary>
+        /// Get all linked tiles within the given bounds
+        /// </summary>
+        /// <param name="min">Min cell</param>
+        /// <param name="max">Max cdell</param>
+        /// <returns>Array of tiles</returns>
+        public Tile[] GetLinkedTiles(Cell min, Cell max) => _tiles.Where(t => t != null && t.cell.x >= min.x && t.cell.x <= max.x && t.cell.y >= min.y && t.cell.y <= max.y).ToArray();
+
+        /// <summary>
         /// Return the first tile that matches the given tile info
         /// </summary>
         /// <param name="tileInfo">Tile info to search for</param>
@@ -159,6 +167,8 @@ namespace Puzzled
             tiles[index] = null;
             if (destroy && tile != null)
                 tile.Destroy();
+            else
+                tile.cell = Cell.invalid;
 
             _linking = false;
         }

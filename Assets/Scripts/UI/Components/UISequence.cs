@@ -36,7 +36,7 @@ namespace Puzzled
                 if (null == _tile)
                     return;
 
-                _steps = _tile.GetPropertyValue<string[]>("steps").ToList();
+                _steps = _tile.GetPropertyValue<string[]>("steps")?.ToList() ?? new List<string>();
                 if (_steps.Count == 0)
                 {
                     OnAddButton();

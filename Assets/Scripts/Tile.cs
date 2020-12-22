@@ -60,9 +60,10 @@ namespace Puzzled
                 Debug.Assert(puzzle != null);
 
                 // Unlink ourselves from the tile we are in
-                if (isLinked)
+                if (isLinked && !puzzle.grid.isLinking)
                     puzzle.grid.UnlinkTile(this);
 
+                var old = _cell;
                 _cell = value;
 
                 if (_cell == Cell.invalid)
@@ -70,11 +71,17 @@ namespace Puzzled
 
                 transform.position = puzzle.grid.CellToWorld(_cell);
 
+                foreach (var input in inputs)
+                    input.UpdatePositions();
+
+                foreach (var output in outputs)
+                    output.UpdatePositions();
+
                 if (!puzzle.grid.isLinking)
                     puzzle.grid.LinkTile(this);
 
                 // Give our own components a chance to react to the cell change
-                Send(new CellChangedEvent(this));
+                Send(new CellChangedEvent(this, old));
             }
         }
 
