@@ -93,6 +93,12 @@ namespace Puzzled
             upAction.action.Disable();
             downAction.action.Disable();
             useAction.action.Disable();
+
+            isLeftHeld = false;
+            isRightHeld = false;
+            isUpHeld = false;
+            isDownHeld = false;
+            isUseHeld = false;
         }
 
         [ActorEventHandler]

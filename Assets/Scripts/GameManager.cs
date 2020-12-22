@@ -68,6 +68,18 @@ namespace Puzzled
             }
         }
 
+        public static Puzzle GetPuzzle (string name)
+        {
+            for(int i=0; i<_instance._puzzles.childCount; i++)
+            {
+                var puzzle = _instance._puzzles.GetChild(i).GetComponent<Puzzle>();
+                if (!puzzle.isEditing && puzzle.filename == name)
+                    return puzzle;                
+            }
+
+            return null;
+        }
+
         private void OnEnable()
         {
             _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
