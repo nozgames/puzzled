@@ -39,7 +39,17 @@ namespace Puzzled
         {
             evt.IsHandled = true;
 
-            // Toggle the state
+            ToggleSwitchState();
+        }
+
+        [ActorEventHandler]
+        private void OnActivateWire(WireActivatedEvent evt)
+        {
+            ToggleSwitchState();
+        }
+
+        private void ToggleSwitchState()
+        {
             isOn = !isOn;
         }
 
