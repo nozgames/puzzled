@@ -52,20 +52,21 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
-            // Always retport we were used, even if the use fails
+            // Always report we were used, even if the use fails
             evt.IsHandled = true;
 
-            if (_locked && requiresKey)
+            if (!requiresKey)
+                return;
+
+            if (_locked)
             {
                 // check if the using actor has the keyItem
                 _locked = evt.user.Send(new QueryHasItemEvent(keyItem));
             }
 
-            // Door cannot be opened if locked
-            if (_locked)
-                return;
-
-            Open();            
+            // Open if no longer locked
+            if (!_locked)
+                Open();            
         }
 
         [ActorEventHandler]
