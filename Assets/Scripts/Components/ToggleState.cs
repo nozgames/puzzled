@@ -12,29 +12,16 @@ namespace Puzzled
         [SerializeField] private GameObject visualOff;
 
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
-        {
-            TurnOn();
-        }
+        private void OnActivateWire(WireActivatedEvent evt) => UpdateState();
 
         [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt)
-        {
-            TurnOff();
-        }
+        private void OnDeactivateWire(WireDeactivatedEvent evt) => UpdateState();
 
-        private void TurnOn()
+        private void UpdateState()
         {
-            isOn = true;
+            isOn = tile.hasActiveInput;
             UpdateVisuals();
-            tile.SetOutputsActive(true);
-        }
-
-        private void TurnOff()
-        {
-            isOn = false;
-            UpdateVisuals();
-            tile.SetOutputsActive(false);
+            tile.SetOutputsActive(isOn);
         }
 
         private void UpdateVisuals()
