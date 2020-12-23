@@ -17,6 +17,13 @@ namespace Puzzled
             UpdateOutputWires();
         }
 
+        [ActorEventHandler]
+        private void OnWireValueChanged(WireValueChangedEvent evt)
+        {
+            stateIndex = evt.wire.value;
+            UpdateOutputWires();
+        }
+
         private void UpdateOutputWires()
         {
             for (int i = 0; i < tile.outputCount; ++i)

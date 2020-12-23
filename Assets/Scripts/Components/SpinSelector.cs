@@ -39,8 +39,18 @@ namespace Puzzled
         private void OnUse(UseEvent evt)
         {
             evt.IsHandled = true;
+        }
 
+        [ActorEventHandler]
+        private void OnActivateWire(WireActivatedEvent evt)
+        {
+            IncrementValue();
+        }
+
+        private void IncrementValue()
+        {
             value++;
+            tile.SetOutputValue(value);
         }
 
         private void OnUpdateValue()
