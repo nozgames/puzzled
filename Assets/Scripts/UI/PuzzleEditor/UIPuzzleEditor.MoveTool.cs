@@ -21,7 +21,6 @@ namespace Puzzled
         private Cell _moveDragMin;
         private Cell _moveDragMax;
         private MoveDragState _moveDragState = MoveDragState.None;
-        private object _cells;
 
         private void EnableMoveTool ()
         {
@@ -33,6 +32,7 @@ namespace Puzzled
             canvas.onLButtonDrag = onMoveToolDrag;
             canvas.onLButtonDragEnd = onMoveToolDragEnd;
 
+            _onKey = OnMoveKey;
             _moveDragState = MoveDragState.None;
 
             _getCursor = OnMoveGetCursor;
@@ -121,19 +121,7 @@ namespace Puzzled
                     SetSelectionRect(_moveDragMin, _moveDragMax);
                 } 
                 else
-                {
-                    var offset = _selectionMin - _moveDragMin;
-                    var cells = _movingTiles.Select(t => t.cell).ToArray();
-                    foreach (var tile in _movingTiles)
-                        puzzle.grid.UnlinkTile(tile);
-
-                    for (int i = 0; i < _movingTiles.Length; i++)
-                        _movingTiles[i].cell = cells[i] + offset;
-
-                    var startEvent = new StartEvent();
-                    foreach (var tile in _movingTiles)
-                        tile.Send(startEvent);
-                }
+                    ExecuteCommand(new Editor.Commands.TileMoveCommand(_movingTiles, _moveDragMin, _selectionMin, _selectionSize));
             }
             else
                 selectionRect.gameObject.SetActive(false);
@@ -204,6 +192,37 @@ namespace Puzzled
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Return and array of all selected tiles
+        /// </summary>
+        private Tile[] GetSelectedTiles() =>
+            selectionRect.gameObject.activeSelf ?
+                puzzle.grid.GetLinkedTiles(_selectionMin, _selectionMax).Where(t => layerToggles[(int)t.info.layer].isOn).ToArray() :
+                null;
+
+        /// <summary>
+        /// Handle keyboard keys for move too
+        /// </summary>
+        /// <param name="keyCode">Key</param>
+        private void OnMoveKey(KeyCode keyCode)
+        {
+            switch (keyCode)
+            {
+                case KeyCode.Delete:
+                    var tiles = GetSelectedTiles();
+                    if (null == tiles)
+                        return;
+
+                    var combine = false;
+                    foreach(var tile in tiles)
+                    {
+                        ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile), combine);
+                        combine = true;
+                    }
+                    break;
+            }
         }
     }
 }

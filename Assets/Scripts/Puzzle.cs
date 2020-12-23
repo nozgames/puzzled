@@ -56,6 +56,11 @@ namespace Puzzled
         public bool isEditing { get; set; }
 
         /// <summary>
+        /// True if the puzzle is currently loading
+        /// </summary>
+        public bool isLoading { get; private set; }
+
+        /// <summary>
         /// True if the grid lines should be visible for this puzzle
         /// </summary>
         public bool showGrid {
@@ -363,6 +368,7 @@ namespace Puzzled
         public static Puzzle Load(string path)
         {
             var puzzle = GameManager.InstantiatePuzzle();
+            puzzle.isLoading = true;
             try
             {
                 try
@@ -377,6 +383,7 @@ namespace Puzzled
                 }
 
                 puzzle._path = path;
+                puzzle.isLoading = false;
 
                 Debug.Log($"Puzzled Loaded: [{puzzle._tiles.transform.childCount} tiles, {puzzle._wires.transform.childCount} wires]");
             } 

@@ -17,11 +17,12 @@ namespace Puzzled
         {
         }
 
-        private void OnDrawToolLButtonDown(Vector2 position) => Draw(position);
+        private void OnDrawToolLButtonDown(Vector2 position) => Draw(position, false);
 
-        private void OnDrawToolDrag(Vector2 position, Vector2 delta) => Draw(position);
+        private void OnDrawToolDrag(Vector2 position, Vector2 delta) => Draw(position, true);
 
-        private void Draw (Vector2 position)
+
+        private void Draw (Vector2 position, bool group)
         {
             if (null == drawTile)
                 return;
@@ -42,7 +43,7 @@ namespace Puzzled
                     return;
             }
 
-            ExecuteCommand(new Editor.Commands.TileAddCommand(drawTile, cell));
+            ExecuteCommand(new Editor.Commands.TileAddCommand(drawTile, cell), group);
         }
     }
 }

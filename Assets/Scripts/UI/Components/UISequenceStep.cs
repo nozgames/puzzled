@@ -21,6 +21,7 @@ namespace Puzzled
         private void Awake()
         {
             _input.onEndEdit.AddListener(OnEndEdit);
+            _input.onDeselect.AddListener(OnEndEdit);
         }
 
         private void OnEnable()
@@ -42,14 +43,14 @@ namespace Puzzled
 
         private void OnEndEdit(string value)
         {
-            if (value == _text.text)
-                return;
+            if (value != _text.text)
+            {
+                _text.text = value;
+                onNameChanged?.Invoke(this);
+            }
 
-            _text.text = value;
             _text.gameObject.SetActive(true);
             _input.gameObject.SetActive(false);
-
-            onNameChanged?.Invoke(this);
         }
     }
 }
