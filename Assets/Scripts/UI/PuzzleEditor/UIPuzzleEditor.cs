@@ -74,6 +74,7 @@ namespace Puzzled
         private Cell _selectionMin;
         private Cell _selectionMax;
         private Cell _selectionSize;
+        private Action<KeyCode> _onKey;
 
         public static UIPuzzleEditor instance { get; private set; }
 
@@ -113,6 +114,7 @@ namespace Puzzled
             palette.SetActive(false);
 
             _getCursor = null;
+            _onKey = null;
 
             canvas.UnregisterAll();
 
@@ -270,7 +272,7 @@ namespace Puzzled
                 mode = Mode.Decal;
         }
 
-        private void SetSelectionRect(Cell min, Cell max)
+        public void SetSelectionRect(Cell min, Cell max)
         {
             _selectionMin = Cell.Min(min, max);
             _selectionMax = Cell.Max(min, max);
@@ -581,6 +583,8 @@ namespace Puzzled
                         Redo();
                     break;
             }
+
+            _onKey?.Invoke(keyCode);
         }
 
         void KeyboardManager.IKeyboardHandler.OnModifiersChanged(bool shift, bool ctrl, bool alt)

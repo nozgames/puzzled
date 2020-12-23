@@ -34,6 +34,7 @@ namespace Puzzled.Editor.Commands
         {
             wire.from.tile.outputs.Insert(fromIndex, wire);
             wire.to.tile.inputs.Insert(toIndex, wire);
+            UIPuzzleEditor.selectedWire = wire;
             UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
         }
 

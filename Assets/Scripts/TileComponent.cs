@@ -19,6 +19,12 @@ namespace Puzzled
         /// </summary>
         public bool isEditing => puzzle.isEditing;
 
+        /// <summary>
+        /// True if the component is in the process of loading
+        /// </summary>
+        public bool isLoading => puzzle.isLoading;
+
+
         public bool SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing = CellEventRouting.All) =>
             puzzle.grid.SendToCell(evt, cell, routing);
 

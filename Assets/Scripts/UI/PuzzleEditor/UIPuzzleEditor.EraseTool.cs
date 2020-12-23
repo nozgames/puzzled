@@ -5,6 +5,9 @@ namespace Puzzled
     public partial class UIPuzzleEditor
     {
         private Cell _lastEraseCell;
+        private TileLayer _eraseLayer = TileLayer.Static;
+        private bool _eraseLayerOnly;
+        private bool _eraseStarted;
 
         private void EnableEraseTool()
         {
@@ -26,7 +29,16 @@ namespace Puzzled
         {
         }
 
-        private void OnEraseToolLButtonDown(Vector2 position) => Erase(canvas.CanvasToCell(position));
+        private void OnEraseToolLButtonDown(Vector2 position)
+        {
+            var cell = canvas.CanvasToCell(position);
+            var tile = GetTile(cell);
+            _eraseLayerOnly = !eraseToolAllLayers.isOn && tile != null;
+            _eraseLayer = tile != null ? tile.info.layer : TileLayer.Logic;
+            _eraseStarted = false;
+
+            Erase(cell);
+        }
 
         private void OnEraseToolLButtonUp(Vector2 position)
         {
@@ -44,24 +56,26 @@ namespace Puzzled
 
             if (eraseToolAllLayers.isOn)
             {
-                var group = false;
                 for(int layer = (int)TileLayer.Logic; layer >= (int)TileLayer.Floor; layer --)
                 {
                     var tile = GetTile(cell, (TileLayer)layer);
                     if (null == tile)
                         continue;
 
-                    ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile), group);
-                    group = true;
+                    ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile), _eraseStarted);
+                    _eraseStarted = true;
                 }
             } 
             else
             {
-                var tile = GetTile(cell);
+                var tile = _eraseLayerOnly ? GetTile(cell,_eraseLayer) : GetTile(cell);
                 if (null == tile)
                     return;
 
-                ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile));
+                if (_eraseLayerOnly && tile.info.layer != _eraseLayer)
+                    return;
+
+                ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile), _eraseStarted);
             }
         }
     }

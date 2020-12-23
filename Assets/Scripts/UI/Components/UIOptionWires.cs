@@ -142,10 +142,18 @@ namespace Puzzled.Editor
             UpdateButtons();
         }
 
+        private UIOptionWire GetWireEditor(int index) =>
+            _wires.GetChild(index).GetComponent<UIOptionWire>();
+
         public void OnDeleteButton()
         {
-            var wireEditor = _wires.GetChild(_list.selected).GetComponent<UIOptionWire>();
+            var wireEditor = GetWireEditor(_list.selected);
             var wire = (Wire)wireEditor.target;
+            if (_list.selected + 1 < _list.itemCount)
+                GetWireEditor(_list.selected + 1).wire.selected = true;
+            else if (_list.selected > 0)
+                GetWireEditor(_list.selected - 1).wire.selected = true;
+
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireDestroyCommand(wire));
         }
 

@@ -45,6 +45,8 @@ namespace Puzzled
             canvas.onLButtonDrag = OnLogicLButtonDrag;
             canvas.onLButtonDragEnd = OnLogicLButtonDragEnd;
 
+            _onKey = OnLogicKey;
+
             inspector.SetActive(true);
 
             logicCycleSelection = false;
@@ -268,6 +270,17 @@ namespace Puzzled
             }
 
             return null;
+        }
+
+        private void OnLogicKey(KeyCode keyCode)
+        {
+            switch (keyCode)
+            {
+                case KeyCode.Delete:
+                    if(selectedTile != null)
+                        ExecuteCommand(new Editor.Commands.TileDestroyCommand(selectedTile));
+                    break;
+            }
         }
     }
 }
