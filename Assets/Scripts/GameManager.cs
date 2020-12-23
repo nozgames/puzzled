@@ -136,14 +136,16 @@ namespace Puzzled
         /// </summary>
         /// <param name="path">Puzzle path</param>
         /// <returns>Loaded puzzle</returns>
-        public static Puzzle LoadPuzzle(string path)
+        public static Puzzle LoadPuzzle(string path, bool editing=false)
         {
             // Disable the puzzle first to ensure two puzzles are never enabled at the same time
             var oldPuzzle = Puzzle.current;
             Puzzle.current = null;
 
             // Load and set the new puzzle
-            Puzzle.current = Puzzle.Load(path);
+            var puzzle = Puzzle.Load(path);
+            puzzle.isEditing = true;
+            Puzzle.current = puzzle;
 
             // If the new puzzle failed to load then set the old puzzle back to active
             if (Puzzle.current == null)

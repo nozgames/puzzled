@@ -406,68 +406,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &247255360
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 247255361}
-  m_Layer: 0
-  m_Name: Wires
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &247255361
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 247255360}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 316890848}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &316890847
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 316890848}
-  m_Layer: 0
-  m_Name: Pan
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &316890848
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 316890847}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 247255361}
-  - {fileID: 998443774}
-  m_Father: {fileID: 1737696697}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -579,7 +517,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1737696697}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &864840652
 GameObject:
@@ -720,36 +658,6 @@ MonoBehaviour:
       m_Groups: 
       m_Action: Key Ctrl
       m_Flags: 0
---- !u!1 &998443773
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 998443774}
-  m_Layer: 0
-  m_Name: Deleted
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &998443774
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 998443773}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 316890848}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1232339877
 GameObject:
   m_ObjectHideFlags: 0
@@ -910,7 +818,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 519420032}
-  - {fileID: 316890848}
   - {fileID: 573457856}
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -931,16 +838,6 @@ MonoBehaviour:
   _puzzlePrefab: {fileID: 9042586967530197633, guid: 3f65aececffee964dba520e1c1e022af, type: 3}
   _puzzles: {fileID: 573457856}
   _cameraManager: {fileID: 21689903}
-  floorLayer: 10
-  staticLayer: 11
-  dynamicLayer: 12
-  logicLayer: 13
-  playLayers:
-    serializedVersion: 2
-    m_Bits: 7168
-  defaultLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!1001 &85366572808506436
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1239,7 +1136,7 @@ PrefabInstance:
     - target: {fileID: 3801852044663621676, guid: 04d0dcbd212b0cd459dbb70d837005d4, type: 3}
       propertyPath: _deletedObjects
       value: 
-      objectReference: {fileID: 998443774}
+      objectReference: {fileID: 0}
     - target: {fileID: 4476941654385715813, guid: 04d0dcbd212b0cd459dbb70d837005d4, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0

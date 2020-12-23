@@ -32,7 +32,10 @@ namespace Puzzled
 
         private void ActivateCamera()
         {
-            CameraManager.TransitionToCell(tile.cell, zoomLevel, transitionTime);
+            if(isEditing)
+                CameraManager.JumpToCell(tile.cell, zoomLevel);
+            else
+                CameraManager.TransitionToCell(tile.cell, zoomLevel, transitionTime);
         }
 
         [ActorEventHandler]

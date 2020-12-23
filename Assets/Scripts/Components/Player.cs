@@ -24,6 +24,11 @@ namespace Puzzled
 
         [SerializeField] private Transform visuals = null;
 
+        [SerializeField] private GameObject visualsUp = null;
+        [SerializeField] private GameObject visualsLeft = null;
+        [SerializeField] private GameObject visualsRight = null;
+        [SerializeField] private GameObject visualsDown = null;
+
         [SerializeField] private InputActionReference leftAction = null;
         [SerializeField] private InputActionReference rightAction = null;
         [SerializeField] private InputActionReference upAction = null;
@@ -105,6 +110,12 @@ namespace Puzzled
         private void OnStart(StartEvent evt)
         {
             SendToCell(new EnterCellEvent(tile, tile.cell), tile.cell);
+
+            // TODO: option for intial facing
+            visualsLeft.SetActive(true);
+            visualsRight.SetActive(false);
+            visualsUp.SetActive(false);
+            visualsDown.SetActive(false);
         }
 
         [ActorEventHandler]
@@ -144,26 +155,38 @@ namespace Puzzled
 
         private void OnLeftActionStarted(InputAction.CallbackContext ctx)
         {
-            isLeftHeld = true;
-            desiredMovement = leftCell;
+            isLeftHeld = !KeyboardManager.isShiftPressed;
+            if (!isLeftHeld)
+                UpdateVisuals(Cell.left);
+            else
+                desiredMovement = leftCell;
         }
 
         private void OnRightActionStarted(InputAction.CallbackContext ctx)
         {
-            isRightHeld = true;
-            desiredMovement = rightCell;
+            isRightHeld = !KeyboardManager.isShiftPressed;
+            if (!isRightHeld)
+                UpdateVisuals(Cell.right);
+            else
+                desiredMovement = rightCell;
         }
 
         private void OnUpActionStarted(InputAction.CallbackContext ctx)
         {
-            isUpHeld = true;
-            desiredMovement = upCell;
+            isUpHeld = !KeyboardManager.isShiftPressed;
+            if (!isUpHeld)
+                UpdateVisuals(Cell.up);
+            else
+                desiredMovement = upCell;
         }
 
         private void OnDownActionStarted(InputAction.CallbackContext ctx)
         {
-            isDownHeld = true;
-            desiredMovement = downCell;
+            isDownHeld = !KeyboardManager.isShiftPressed;
+            if (!isDownHeld)
+                UpdateVisuals(Cell.down);
+            else
+                desiredMovement = downCell;
         }
 
         private void OnLeftActionEnded(InputAction.CallbackContext ctx)
@@ -237,10 +260,12 @@ namespace Puzzled
             queuedMoveTime = float.MinValue;
 
             // Change facing direction 
-            if (cell.x < 0)
-                visuals.localScale = new Vector3(-1, 1, 1);
-            else if (cell.x > 0)
-                visuals.localScale = Vector3.one;
+            /*            if (cell.x < 0)
+                            visuals.localScale = new Vector3(-1, 1, 1);
+                        else if (cell.x > 0)
+                            visuals.localScale = Vector3.one;
+            */
+            UpdateVisuals(cell);
 
             if (isUseHeld)
             {
@@ -252,7 +277,7 @@ namespace Puzzled
                 if (PullMove(cell))
                 {
                     // flip him back to face the pulled object
-                    visuals.localScale.Scale(new Vector3(-1, 1, 1));
+                    //visuals.localScale.Scale(new Vector3(-1, 1, 1));
                     return;
                 }
             }
@@ -269,11 +294,11 @@ namespace Puzzled
             queuedMoveTime = float.MinValue;
 
             // Change facing direction 
-            if (cell.x < 0)
+/*            if (cell.x < 0)
                 visuals.localScale = new Vector3(-1, 1, 1);
             else if (cell.x > 0)
                 visuals.localScale = Vector3.one;
-
+*/
             // Try a use move
             if (Use(cell))
                 return;
@@ -457,6 +482,14 @@ namespace Puzzled
             {
                 evt.IsHandled = true;
             }
+        }
+
+        private void UpdateVisuals(Cell cell)
+        {
+            visualsLeft.SetActive(cell.x < 0);
+            visualsRight.SetActive(cell.x > 0);
+            visualsDown.SetActive(cell.y < 0);
+            visualsUp.SetActive(cell.y > 0);
         }
     }
 }

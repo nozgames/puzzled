@@ -469,8 +469,7 @@ namespace Puzzled
                 if (_puzzle != null)
                     _puzzle.Destroy();
 
-                _puzzle = GameManager.LoadPuzzle(path);
-                _puzzle.isEditing = true;
+                _puzzle = GameManager.LoadPuzzle(path, true);
                 _puzzle.showGrid = true;
 
                 // Center the camera on the player
