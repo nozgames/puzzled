@@ -12,7 +12,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
         {
-            // FIXME: get value from wire
+            wireIndex = evt.wire.value;
             UpdateOutputWires();
         }
 
