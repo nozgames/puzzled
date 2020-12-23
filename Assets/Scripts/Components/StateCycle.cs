@@ -7,11 +7,14 @@ namespace Puzzled
     {
         private int stateIndex;
 
-        private bool isCycling { get; set; } = false;
-        private bool wasCycling { get; set; } = false;
+        private bool isCycling = false;
+        private bool wasCycling = false;
 
         [Editable]
         public bool clearOnDeactivate { get; set; } = true;
+
+        [Editable]
+        public bool isLooping { get; set; } = true;
 
         [Editable(hidden = true)]
         public string[] steps { get; set; }
@@ -44,7 +47,17 @@ namespace Puzzled
                 return;
 
             if (wasCycling)
-                stateIndex = (stateIndex + 1) % steps.Length;
+            {
+                ++stateIndex;
+
+                if (stateIndex >= steps.Length)
+                {
+                    if (isLooping)
+                        stateIndex = 0;
+                    else
+                        stateIndex = steps.Length - 1;
+                }
+            }
 
             wasCycling = isCycling;
 

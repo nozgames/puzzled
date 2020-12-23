@@ -7,8 +7,14 @@ namespace Puzzled
     {
         private int wireIndex;
 
+        private bool isCycling = false;
+        private bool wasCycling = false;
+
         [Editable]
-        public bool isCycling { get; set; } = true;
+        public bool clearOnDeactivate { get; set; } = true;
+
+        [Editable]
+        public bool isLooping { get; set; } = true;
 
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
@@ -23,24 +29,62 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
+        private void OnStart(StartEvent evt) => UpdateOutputWires();
+
+        [ActorEventHandler]
         private void OnTickStart(TickEvent evt)
         {
             if (!isCycling)
+            {
+                wasCycling = false;
                 return;
+            }
 
             if (tile.outputCount == 0)
                 return;
 
-            int oldWireIndex = wireIndex;
-            wireIndex = (wireIndex + 1) % tile.outputCount;
+            if (wasCycling)
+            {
+                ++wireIndex;
 
-            tile.SetOutputActive(oldWireIndex, false);
-            tile.SetOutputActive(wireIndex, true);
+                if (wireIndex >= tile.outputCount)
+                {
+                    if (isLooping)
+                        wireIndex = 0;
+                    else
+                        wireIndex = tile.outputCount - 1;
+                }
+            }
+
+            wasCycling = isCycling;
+
+            UpdateOutputWires();
         }
 
         private void UpdateCyclingState()
         {
             isCycling = tile.hasActiveInput;
+
+            if (!isCycling && clearOnDeactivate)
+            {
+                wireIndex = 0;
+                UpdateOutputWires();
+            }
+        }
+
+        private void UpdateOutputWires()
+        {
+            if (!isCycling && clearOnDeactivate)
+            {
+                tile.SetOutputsActive(false);
+                return;
+            }
+
+            for (int i = 0; i < tile.outputCount; ++i)
+            {
+                bool isWireActive = (wireIndex == i);
+                tile.outputs[i].enabled = isWireActive;
+            }
         }
     }
 }
