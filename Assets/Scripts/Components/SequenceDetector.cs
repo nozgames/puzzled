@@ -6,45 +6,32 @@ namespace Puzzled
 {
     class SequenceDetector : TileComponent
     {
-        [Editable]
-        public bool resetOnDeactivate { get; set; }
-
-        // FIXME: we need some sort of sequence data structure here to check against
         private int sequenceIndex = 0;
-        private List<int> wireOrder;
 
         [Editable(hidden = true)]
         public string[] steps { get; set; }
         
-        void Start()
-        {
-            // FIXME, we need to find some way to choose the wire order
-            wireOrder = new List<int>();
-            for (int i = 0; i < tile.inputCount; ++i)
-                wireOrder.Add(i);
-        }
-
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
         {
-            if (tile.inputs[sequenceIndex] == evt.wire)
-                HandleCorrectWire();
-            else 
-                HandleIncorrectWire();
-        }
+            for (int i = 0; i < tile.inputCount; ++i)
+            {
+                bool isWireExpected = ((tile.GetInputOption(i, 0) & (1 << sequenceIndex)) != 0);
+                if ((tile.inputs[i] == evt.wire) && !isWireExpected)
+                {
+                    // failure
+                    HandleIncorrectWire();
+                    return;
+                }
+            }
 
-        [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt)
-        {
-            // FIXME: should we allow for back-sequencing?
-            if (resetOnDeactivate)
-                Reset();
+            HandleCorrectWire();
         }
 
         private void HandleCorrectWire()
         {
             ++sequenceIndex;
-            if (sequenceIndex >= tile.inputCount)
+            if (sequenceIndex >= steps.Length)
                 HandleSequenceComplete();
         }
 
