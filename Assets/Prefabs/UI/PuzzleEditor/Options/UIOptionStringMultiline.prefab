@@ -404,7 +404,7 @@ GameObject:
   - component: {fileID: 6910281527542142307}
   - component: {fileID: 2755209342323578577}
   m_Layer: 5
-  m_Name: UIOptionString
+  m_Name: UIOptionStringMultiline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -445,7 +445,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   labelText: {fileID: 6735611937700678993}
   input: {fileID: 3106839771201355325}
-  _lineHeight: 30
 --- !u!114 &2755209342323578577
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -690,7 +689,7 @@ MonoBehaviour:
   m_ResetOnDeActivation: 1
   m_RestoreOriginalTextOnEscape: 1
   m_isRichTextEditingAllowed: 0
-  m_LineLimit: 10
+  m_LineLimit: 0
   m_InputValidator: {fileID: 0}
 --- !u!114 &2444455157242335965
 MonoBehaviour:
