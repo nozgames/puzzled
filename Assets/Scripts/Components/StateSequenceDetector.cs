@@ -4,20 +4,31 @@ using System.Collections.Generic;
 
 namespace Puzzled
 {
-    class SequenceDetector : TileComponent
+    class StateSequenceDetector : TileComponent
     {
         private int sequenceIndex = 0;
 
         [Editable(hidden = true)]
         public string[] steps { get; set; }
-        
+
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
+        {
+            HandleWireChange();
+        }
+
+        [ActorEventHandler]
+        private void OnDeactivateWire(WireDeactivatedEvent evt)
+        {
+            HandleWireChange();
+        }
+
+        private void HandleWireChange()
         {
             for (int i = 0; i < tile.inputCount; ++i)
             {
                 bool isWireExpected = ((tile.GetInputOption(i, 0) & (1 << sequenceIndex)) != 0);
-                if ((tile.inputs[i] == evt.wire) && !isWireExpected)
+                if (tile.inputs[i].enabled != isWireExpected)
                 {
                     // failure
                     HandleIncorrectWire();
