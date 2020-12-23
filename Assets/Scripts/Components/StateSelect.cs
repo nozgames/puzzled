@@ -3,14 +3,17 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class WireSelect : TileComponent
+    class StateSelect : TileComponent
     {
-        private int wireIndex;
+        private int stateIndex;
+
+        [Editable(hidden = true)]
+        public string[] steps { get; set; }
 
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
         {
-            wireIndex = evt.wire.value;
+            stateIndex = evt.wire.value;
             UpdateOutputWires();
         }
 
@@ -18,8 +21,8 @@ namespace Puzzled
         {
             for (int i = 0; i < tile.outputCount; ++i)
             {
-                bool isActive = (i == wireIndex);
-                tile.SetOutputActive(i, isActive);
+                bool isWireActive = ((tile.GetOutputOption(i, 0) & (1 << stateIndex)) != 0);
+                tile.outputs[i].enabled = isWireActive;
             }
         }
     }

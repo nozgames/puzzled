@@ -189,7 +189,7 @@ namespace Puzzled
         /// <summary>
         /// True if all inputs are active
         /// </summary>
-        public bool allInputsActive => activeInputCount == inputCount;
+        public bool allInputsActive => hasActiveInput && activeInputCount == inputCount;
 
         /// <summary>
         /// True if the tile has at least one active input
