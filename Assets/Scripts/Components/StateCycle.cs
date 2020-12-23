@@ -16,6 +16,11 @@ namespace Puzzled
         [Editable]
         public bool isLooping { get; set; } = true;
 
+        [Editable]
+        public int ticksPerState { get; set; } = 1;
+
+        private int _tickCount = 0;
+
         [Editable(hidden = true)]
         public string[] steps { get; set; }
 
@@ -48,6 +53,10 @@ namespace Puzzled
 
             if (wasCycling)
             {
+                ++_tickCount;
+                if (_tickCount < ticksPerState)
+                    return;
+
                 ++stateIndex;
 
                 if (stateIndex >= steps.Length)
@@ -68,10 +77,15 @@ namespace Puzzled
         {
             isCycling = tile.hasActiveInput;
 
-            if (!isCycling && clearOnDeactivate)
+            if (!isCycling)
             {
-                stateIndex = 0;
-                UpdateOutputWires();
+                if (clearOnDeactivate)
+                {
+                    stateIndex = 0;
+                    UpdateOutputWires();
+                }
+
+                _tickCount = 0;
             }
         }
 

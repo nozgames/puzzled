@@ -16,6 +16,11 @@ namespace Puzzled
         [Editable]
         public bool isLooping { get; set; } = true;
 
+        [Editable]
+        public int ticksPerWire { get; set; } = 1;
+
+        private int _tickCount = 0;
+
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
         {
@@ -45,7 +50,12 @@ namespace Puzzled
 
             if (wasCycling)
             {
+                ++_tickCount;
+                if (_tickCount < ticksPerWire)
+                    return;
+
                 ++wireIndex;
+                _tickCount = 0;
 
                 if (wireIndex >= tile.outputCount)
                 {
@@ -65,10 +75,15 @@ namespace Puzzled
         {
             isCycling = tile.hasActiveInput;
 
-            if (!isCycling && clearOnDeactivate)
+            if (!isCycling)
             {
-                wireIndex = 0;
-                UpdateOutputWires();
+                if (clearOnDeactivate)
+                {
+                    wireIndex = 0;
+                    UpdateOutputWires();
+                }
+
+                _tickCount = 0;
             }
         }
 
