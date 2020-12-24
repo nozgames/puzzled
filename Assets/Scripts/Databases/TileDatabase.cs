@@ -37,6 +37,8 @@ namespace Puzzled
         /// </summary>
         private Dictionary<Guid, TileProperty[]> _tileProperties = new Dictionary<Guid, TileProperty[]>();
 
+        public static bool isLoaded => _instance != null && _instance.loaded;
+
         private void Awake()
         {
             _instance = this;
@@ -77,7 +79,7 @@ namespace Puzzled
         /// <summary>
         /// Returns the tile preview for a given tile
         /// </summary>
-        public static Texture2D GetPreview(Tile tile) => GetPreview(tile.guid);
+        public static Texture2D GetPreview(Tile tile) => tile == null ? null : GetPreview(tile.guid);
 
         /// <summary>
         /// Returns the tile preview for a given tile guid

@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 
+using Puzzled.Editor;
+
 namespace Puzzled
 {
     public partial class UIPuzzleEditor
     {
-        private int _lastSelectedDecal = -1;
-
-        private Decal _decalNone;
+        [Header("DecalTool")]
+        [SerializeField] private UIDecalPalette _decalPalette = null;
 
         private void EnableDecalTool()
         {
@@ -15,9 +16,12 @@ namespace Puzzled
 
             _getCursor = OnDecalGetCursor;
 
-            var first = FilterPalette(typeof(UIDecalItem));
-            palette.SetActive(true);
-            _paletteList.Select(_lastSelectedDecal == -1 ? first : _lastSelectedDecal);
+            _decalPalette.gameObject.SetActive(true);
+        }
+
+        private void DisableDecalTool()
+        {
+            _decalPalette.gameObject.SetActive(false);
         }
 
         private CursorType OnDecalGetCursor(Cell cell)
@@ -33,16 +37,11 @@ namespace Puzzled
             if (null == property)
                 return CursorType.ArrowWithNot;
 
-            var decal = _paletteList.GetItem(_paletteList.selected).GetComponent<UIDecalItem>().decal;
+            var decal = _decalPalette.selected;
             if(null == decal || decal.sprite == null || KeyboardManager.isCtrlPressed)
                 return CursorType.ArrowWithMinus;
 
             return CursorType.ArrowWithPlus;
-        }
-
-        private void DisableDecalTool()
-        {
-            _lastSelectedDecal = _paletteList.selected;
         }
 
         private void OnDecalToolLButtonDown(Vector2 position) => DrawDecal(position);
@@ -61,10 +60,7 @@ namespace Puzzled
             if (null == property)
                 return;
 
-            var decal = 
-                KeyboardManager.isCtrlPressed ?
-                    _decalNone :
-                    _paletteList.GetItem(_paletteList.selected).GetComponent<UIDecalItem>().decal;
+            var decal = KeyboardManager.isCtrlPressed ? null : _decalPalette.selected;
             if (property.GetValue<Decal>(tile) == decal)
                 return;
 

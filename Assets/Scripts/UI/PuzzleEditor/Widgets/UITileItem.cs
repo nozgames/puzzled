@@ -2,13 +2,12 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
-    public class UITileItem : MonoBehaviour
+    public class UITileItem : UIPaletteItem
     {
         [SerializeField] private RawImage preview = null;
         [SerializeField] private TMPro.TextMeshProUGUI nameText = null;
-        [SerializeField] private Toggle _toggle = null;
 
         private Tile _tile;
 
@@ -25,9 +24,6 @@ namespace Puzzled
             }
         }
 
-        private void OnEnable()
-        {
-            _toggle.group = GetComponentInParent<ToggleGroup>();
-        }
+        public override object value => _tile;
     }
 }

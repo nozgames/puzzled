@@ -2,9 +2,9 @@
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
-    class UIListItem : MonoBehaviour, IPointerDownHandler, IPointerClickHandler
+    public class UIListItem : MonoBehaviour, IPointerDownHandler, IPointerClickHandler
     {
         [Tooltip("Object to enable when the item is selected")]
         [SerializeField] private GameObject _selectedVisuals = null;
@@ -80,7 +80,10 @@ namespace Puzzled
         public void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.clickCount == 2 && eventData.button == PointerEventData.InputButton.Left)
+            {
                 onDoubleClick?.Invoke();
+                list.OnDoubleClickItem(transform.GetSiblingIndex());
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ namespace Puzzled
         [SerializeField] private RawImage inspectorTilePreview = null;
         [SerializeField] private UIOptionEditor optionPrefabInt = null;
         [SerializeField] private UIOptionEditor optionPrefabBool = null;
+        [SerializeField] private UIOptionEditor optionPrefabDecal = null;
         [SerializeField] private UIOptionEditor optionPrefabString = null;
         [SerializeField] private UIOptionEditor optionPrefabStringMultiline = null;
         [SerializeField] private UIOptionEditor optionPrefabTile = null;
@@ -250,26 +251,35 @@ namespace Puzzled
 
         private UIOptionEditor InstantiateOptionEditor(TileProperty property, Transform parent)
         {
+            UIOptionEditor prefab = null;
             switch (property.type)
             {
                 case TilePropertyType.String:
-                    if(property.editable.multiline)
-                        return Instantiate(optionPrefabStringMultiline, parent).GetComponent<UIOptionEditor>();
-
-                    return Instantiate(optionPrefabString, parent).GetComponent<UIOptionEditor>();
+                    prefab = property.editable.multiline ? optionPrefabStringMultiline : optionPrefabString;
+                    break;
 
                 case TilePropertyType.Int:
-                    return Instantiate(optionPrefabInt, parent).GetComponent<UIOptionEditor>();
+                    prefab = optionPrefabInt;
+                    break;
 
                 case TilePropertyType.Bool:
-                    return Instantiate(optionPrefabBool, parent).GetComponent<UIOptionEditor>();
+                    prefab = optionPrefabBool;
+                    break;
 
                 // TODO: change to tile
                 case TilePropertyType.Guid:
-                    return Instantiate(optionPrefabTile, parent).GetComponent<UIOptionEditor>();
+                    prefab = optionPrefabTile;
+                    break;
+
+                case TilePropertyType.Decal:
+                    prefab = optionPrefabDecal;
+                    break;
+
+                default:
+                    return null;
             }
 
-            return null;
+            return Instantiate(prefab.gameObject, parent).GetComponent<UIOptionEditor>();
         }
 
         private void OnLogicKey(KeyCode keyCode)

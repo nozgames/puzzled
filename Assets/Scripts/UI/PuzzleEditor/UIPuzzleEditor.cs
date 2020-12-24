@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-using Puzzled.PuzzleEditor;
+using Puzzled.Editor;
 
 namespace Puzzled
 {
@@ -23,7 +23,6 @@ namespace Puzzled
         [Header("General")]
         [SerializeField] private UICanvas canvas = null;
         [SerializeField] private RectTransform _canvasCenter = null;
-        [SerializeField] private GameObject piecePrefab = null;
         [SerializeField] private RectTransform selectionRect = null;
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
         [SerializeField] private Button playButton = null;
@@ -57,19 +56,15 @@ namespace Puzzled
         [SerializeField] private Transform loadPopupFiles = null;
         [SerializeField] private GameObject loadPopupFilePrefab = null;
         [SerializeField] private Transform tileSelectorTiles = null;
-
-        [Header("Palette")]
-        [SerializeField] private GameObject palette = null;
-        [SerializeField] private UIList _paletteList = null;
-        [SerializeField] private GameObject tileButtonPrefab = null;
-        [SerializeField] private GameObject paletteDecalItemPrefab = null;
+        [SerializeField] private GameObject _chooseDecalPopup= null;
+        [SerializeField] private UIDecalPalette _chooseDecalPalette = null;
 
         private Mode _mode = Mode.Unknown;
 
         private Puzzle _puzzle = null;
-        private Tile drawTile = null;
         private bool playing;
         private Action<Tile> tileSelectorCallback;
+        private Action<Decal> _chooseDecalCallback;
         private Mode savedMode;
         private Cell _selectionMin;
         private Cell _selectionMax;
@@ -111,7 +106,6 @@ namespace Puzzled
         private void UpdateMode()
         {
             inspector.SetActive(false);
-            palette.SetActive(false);
 
             _getCursor = null;
             _onKey = null;
@@ -140,6 +134,11 @@ namespace Puzzled
         {
             instance = this;
 
+            _chooseDecalPalette.onDoubleClickDecal += (decal) => {
+                _chooseDecalCallback?.Invoke(decal);
+                HidePopup();
+            };
+
             foreach (var toggle in layerToggles)
                 toggle.onValueChanged.AddListener((value) => {
                     UpdateLayers();
@@ -160,8 +159,6 @@ namespace Puzzled
             popups.SetActive(false);
             inspector.SetActive(false);            
 
-            InitializePalette();
-
             selectionRect.gameObject.SetActive(false);
 
             // Start off with an empty puzzle
@@ -173,38 +170,6 @@ namespace Puzzled
             ClearUndo();
 
             InitializeCursor();
-        }
-
-        private void InitializePalette()
-        {
-            _paletteList.transform.DetachAndDestroyChildren();
-
-            foreach (var tile in TileDatabase.GetTiles())
-                GeneratePreview(tile);
-
-            _decalNone = new Decal(Guid.Empty, null);
-            var noneDecal = Instantiate(paletteDecalItemPrefab, _paletteList.transform).GetComponent<UIDecalItem>();
-            noneDecal.decal = _decalNone;
-
-            foreach (var decal in DecalDatabase.GetDecals())
-            {
-                var decalItem = Instantiate(paletteDecalItemPrefab, _paletteList.transform).GetComponent<UIDecalItem>();
-                decalItem.decal = decal;
-            }
-        }
-
-        private int FilterPalette(Type itemType)
-        {
-            var first = -1;
-            for (int i = 0; i < _paletteList.transform.childCount; i++)
-            {
-                var child = _paletteList.transform.GetChild(i);
-                child.gameObject.SetActive(child.GetComponent(itemType) != null);
-                if (child.gameObject.activeSelf && first == -1)
-                    first = i;
-            }
-
-            return first;
         }
 
         private void OnScroll(Vector2 position, Vector2 delta)
@@ -235,24 +200,6 @@ namespace Puzzled
             }
 
             GameManager.busy--;
-        }
-
-        private void GeneratePreview(Tile prefab)
-        {
-            if (null == prefab)
-                return;
-
-            var t = TileDatabase.GetPreview(prefab.guid);
-
-            var tileObject = Instantiate(piecePrefab, _paletteList.transform);
-            var toggle = tileObject.GetComponent<Toggle>();
-            toggle.group = _paletteList.transform.GetComponent<ToggleGroup>();
-            toggle.onValueChanged.AddListener(v => {
-                if (v)
-                    drawTile = prefab;
-            });
-            tileObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = prefab.name;
-            tileObject.GetComponentInChildren<RawImage>().texture = t;
         }
 
         public void OnToolChanged()
@@ -401,7 +348,6 @@ namespace Puzzled
 
             tools.SetActive(true);
             inspector.SetActive(mode == Mode.Logic);
-            palette.SetActive(mode == Mode.Draw);
 
             playing = false;
             playButton.gameObject.SetActive(true);
@@ -436,7 +382,6 @@ namespace Puzzled
             savedMode = mode;
             mode = Mode.Unknown;
             inspector.SetActive(false);
-            palette.SetActive(false);
 
             GameManager.busy = 0;
 
@@ -531,8 +476,15 @@ namespace Puzzled
             Destroy(wire.gameObject);
         }
 
+        public void ChooseDecal (Action<Decal> callback)
+        {
+            _chooseDecalCallback = callback;
+            ShowPopup(_chooseDecalPopup);
+        }
+
         public void OpenTileSelector(Type componentType, Action<Tile> callback)
         {
+#if false
             tileSelectorCallback = callback;
 
             ShowPopup(tileSelectorPopup);
@@ -547,6 +499,7 @@ namespace Puzzled
                     CloseTileSelector(tile);                    
                 });
             }
+#endif
         }
 
         public void CloseTileSelector (Tile tile)

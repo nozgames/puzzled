@@ -17,6 +17,8 @@ namespace Puzzled
             _instance = this;
         }
 
+        public static bool isLoaded => _instance != null && _instance.loaded;
+
         public static Decal[] GetDecals() => _instance._decalsByGuid.Values.ToArray();
 
         public static Decal GetDecal(Guid guid) => _instance._decalsByGuid.TryGetValue(guid, out var decal) ? decal : null;

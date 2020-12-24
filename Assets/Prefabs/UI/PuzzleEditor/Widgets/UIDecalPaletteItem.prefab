@@ -110,7 +110,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -32, y: -32}
+  m_SizeDelta: {x: -48, y: -48}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5865390158968611877
 CanvasRenderer:
@@ -162,10 +162,9 @@ GameObject:
   - component: {fileID: 1982481423106839132}
   - component: {fileID: 2741314630061960320}
   - component: {fileID: 342643717121969350}
-  - component: {fileID: 6009996935749463011}
   - component: {fileID: 7344488758580339487}
   m_Layer: 5
-  m_Name: UIDecalItem
+  m_Name: UIDecalPaletteItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -252,25 +251,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &6009996935749463011
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4642312077439141805}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3957507a6b00b7d4a817190937aca4ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _selectedVisuals: {fileID: 8340207742874282679}
-  onSelectionChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  onDoubleClick:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &7344488758580339487
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -283,6 +263,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3184f1ca48b5f6c429088ce52940f3c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _selectedVisuals: {fileID: 8340207742874282679}
+  onSelectionChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDoubleClick:
+    m_PersistentCalls:
+      m_Calls: []
   _nameText: {fileID: 8606311165298289421}
   _previewImage: {fileID: 2380145758595925651}
 --- !u!1 &7323273936628971505

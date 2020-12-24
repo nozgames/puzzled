@@ -5,8 +5,6 @@ namespace Puzzled
 {
     public class UILoadingScreen : UIScreen
     {
-        [SerializeField] private AddressableDatabaseBase[] waitForDatabases;
-
         private void OnEnable()
         {
             StartCoroutine(WaitForLoad());
@@ -14,15 +12,8 @@ namespace Puzzled
 
         private IEnumerator WaitForLoad ()
         {
-            var loaded = false;
-            while (!loaded)
-            {
-                loaded = true;
-                foreach (var db in waitForDatabases)
-                    loaded &= db.loaded;
-
+            while (!TileDatabase.isLoaded || !DecalDatabase.isLoaded)
                 yield return null;
-            }
 
             UIManager.instance.ShowMainMenu();
         }

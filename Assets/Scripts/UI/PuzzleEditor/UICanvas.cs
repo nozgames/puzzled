@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
-namespace Puzzled.PuzzleEditor
+namespace Puzzled.Editor
 {
     public class UICanvas : MonoBehaviour, 
         IPointerClickHandler, 

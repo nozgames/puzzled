@@ -1,15 +1,19 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
     class UIList : MonoBehaviour
     {
         public int selected { get; private set; } = -1;
 
+        public UIListItem selectedItem => selected == -1 ? null : GetItem(selected);
+
         public int itemCount => transform.childCount;
 
         public event Action<int> onSelectionChanged;
+
+        public event Action<int> onDoubleClickItem;
 
         private void OnTransformChildrenChanged()
         {
@@ -45,5 +49,10 @@ namespace Puzzled
         public void ClearSelection() => SetSelection(-1);
 
         public UIListItem GetItem(int index) => transform.GetChild(index).GetComponent<UIListItem>();
+
+        public void OnDoubleClickItem(int index)
+        {
+            onDoubleClickItem?.Invoke(index);
+        }
     }
 }
