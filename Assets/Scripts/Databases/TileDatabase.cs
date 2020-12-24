@@ -111,7 +111,7 @@ namespace Puzzled
             previewCamera.Render();
 
             var t = new Texture2D(previewCamera.targetTexture.width, previewCamera.targetTexture.height, TextureFormat.ARGB32, false);
-            t.filterMode = FilterMode.Point;
+            t.filterMode = FilterMode.Bilinear;
 
             RenderTexture.active = previewCamera.targetTexture;
             t.ReadPixels(new Rect(0, 0, t.width, t.height), 0, 0);
