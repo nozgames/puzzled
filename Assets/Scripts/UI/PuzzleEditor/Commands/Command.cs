@@ -12,6 +12,9 @@ namespace Puzzled.Editor.Commands
 
         public Tile selectedTile { get; private set; }
 
+        public Wire selectedWireUndo { get; set; }
+        public Wire selectedWireRedo { get; set; }
+
         public bool isExecuted { get; private set; }
 
         /// <summary>
@@ -22,6 +25,7 @@ namespace Puzzled.Editor.Commands
         public Command ()
         {
             selectedTile = UIPuzzleEditor.selectedTile;
+            selectedWireUndo = UIPuzzleEditor.selectedWire;
             mode = UIPuzzleEditor.instance.mode;
         }
 

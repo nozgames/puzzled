@@ -22,9 +22,6 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnRedo()
         {
-            if (wire.selected)
-                UIPuzzleEditor.selectedWire = null;
-
             wire.from.tile.outputs.RemoveAt(fromIndex);
             wire.to.tile.inputs.RemoveAt(toIndex);
             UIPuzzleEditor.MoveToTrash(wire.gameObject);
@@ -32,10 +29,9 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnUndo()
         {
+            UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
             wire.from.tile.outputs.Insert(fromIndex, wire);
             wire.to.tile.inputs.Insert(toIndex, wire);
-            UIPuzzleEditor.selectedWire = wire;
-            UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
         }
 
         protected override void OnDestroy()

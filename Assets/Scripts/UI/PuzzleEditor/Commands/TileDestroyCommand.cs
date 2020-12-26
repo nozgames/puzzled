@@ -31,10 +31,10 @@
 
         protected override void OnUndo()
         {
-            children?.Undo();
-
             UIPuzzleEditor.RestoreFromTrash(tile.gameObject);
             tile.cell = cell;
+
+            children?.Undo();
         }
 
         protected override void OnRedo()

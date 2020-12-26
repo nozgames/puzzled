@@ -70,6 +70,8 @@ namespace Puzzled
                 command.redoState = selectedTile.inspectorState;
             }
 
+            command.selectedWireRedo = selectedWire;
+
             instance.mode = command.mode;
             selectedTile = command.selectedTile;
         }
@@ -95,6 +97,8 @@ namespace Puzzled
                 tile.inspectorState = command.undoState;
             selectedTile = tile;
 
+            selectedWire = command.selectedWireUndo;
+
             UpdateUndoButtons();
         }
 
@@ -118,6 +122,8 @@ namespace Puzzled
             if (tile != null)
                 tile.inspectorState = command.redoState;
             selectedTile = tile;
+
+            selectedWire = command.selectedWireRedo;
 
             UpdateUndoButtons();
         }
