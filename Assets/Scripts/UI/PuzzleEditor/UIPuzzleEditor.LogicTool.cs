@@ -26,6 +26,7 @@ namespace Puzzled
         private bool logicCycleSelection = false;
         private Tile _selectedTile = null;
         private Wire _selectedWire = null;
+        private bool _allowLogicDrag = false;
 
         public static Tile selectedTile {
             get => instance._selectedTile;
@@ -48,6 +49,7 @@ namespace Puzzled
             canvas.onLButtonDragEnd = OnLogicLButtonDragEnd;
 
             _onKey = OnLogicKey;
+            _getCursor = OnLogicGetCursor;
 
             inspector.SetActive(true);
 
@@ -69,6 +71,47 @@ namespace Puzzled
         {
             // Ensure the cell being dragged is the selected cell
             var cell = canvas.CanvasToCell(position);
+
+            if (_selectedTile != null && KeyboardManager.isShiftPressed)
+            {
+                _allowLogicDrag = false;
+
+                if (_selectedTile.cell == cell || !_selectedTile.info.allowWireOutputs)
+                    return;
+
+                var group = false;
+                for (int i = selectedTile.outputCount - 1; i >= 0; i--)
+                {
+                    var output = selectedTile.outputs[i];
+                    if (output.to.cell == cell && layerToggles[(int)output.to.tile.info.layer].isOn)
+                    {
+                        ExecuteCommand(new Editor.Commands.WireDestroyCommand(output), group);
+                        group = true;
+                    }
+                }
+
+                for (int i = selectedTile.inputCount - 1; i >= 0; i--)
+                {
+                    var input = selectedTile.outputs[i];
+                    if (input.to.cell == cell && layerToggles[(int)input.from.tile.info.layer].isOn)
+                    {
+                        ExecuteCommand(new Editor.Commands.WireDestroyCommand(input), group);
+                        group = true;
+                    }
+                }
+
+                if(!group)
+                {
+                    var target = GetTile(cell, GetTileFlag.AllowInputs);
+                    if(null != target)
+                        ExecuteCommand(new Editor.Commands.WireAddCommand(selectedTile, target));
+                }
+
+                UpdateCursor();
+
+                return;
+            }
+
             if (_selectedTile == null || _selectedTile.cell != cell)
             {
                 SelectTile(GetTile(cell, TileLayer.Logic));
@@ -76,6 +119,8 @@ namespace Puzzled
             }
             else
                 logicCycleSelection = true;
+
+            _allowLogicDrag = selectedTile != null && _selectedTile.info.allowWireOutputs;
         }
 
         private void OnLogicLButtonUp(Vector2 position)
@@ -99,6 +144,9 @@ namespace Puzzled
 
         private void OnLogicLButtonDragBegin(Vector2 position)
         {
+            if (!_allowLogicDrag)
+                return;
+
             var cell = canvas.CanvasToCell(position);
             if (_selectedTile == null || !_selectedTile.info.allowWireOutputs)
                 return;
@@ -302,5 +350,27 @@ namespace Puzzled
                     break;
             }
         }
+
+        private CursorType OnLogicGetCursor(Cell cell)
+        {
+            if (KeyboardManager.isShiftPressed && selectedTile != null)
+            {
+                if (cell == selectedTile.cell || !selectedTile.info.allowWireOutputs)
+                    return CursorType.ArrowWithNot;
+
+                foreach(var output in selectedTile.outputs)
+                    if(output.to.cell == cell && layerToggles[(int)output.to.tile.info.layer].isOn)
+                        return CursorType.ArrowWithMinus;
+
+                foreach (var input in selectedTile.inputs)
+                    if (input.from.cell == cell && layerToggles[(int)input.from.tile.info.layer].isOn)
+                        return CursorType.ArrowWithMinus;
+
+                return GetTile(cell, GetTileFlag.AllowInputs) != null ? CursorType.ArrowWithPlus : CursorType.ArrowWithNot;
+            }
+
+            return CursorType.Arrow;
+        }
+
     }
 }

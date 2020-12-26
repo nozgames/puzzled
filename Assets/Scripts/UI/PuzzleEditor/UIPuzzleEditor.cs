@@ -458,12 +458,28 @@ namespace Puzzled
             popups.SetActive(false);
         }
 
-        private Tile GetTile(Cell cell, TileLayer topLayer = TileLayer.Logic)
+        [Flags]
+        private enum GetTileFlag
+        {
+            None = 0,
+            AllowInputs  = 1,
+            AllowOutputs = 2
+        }
+
+        private Tile GetTile(Cell cell, GetTileFlag flags) => GetTile(cell, TileLayer.Logic, flags);
+
+        private Tile GetTile(Cell cell, TileLayer topLayer = TileLayer.Logic, GetTileFlag flags = GetTileFlag.None)
         {
             for (int i = (int)topLayer; i >= 0; i--)
             {
                 var tile = _puzzle.grid.CellToTile(cell, (TileLayer)i);
                 if (null == tile)
+                    continue;
+
+                if (!tile.info.allowWireInputs && (flags & GetTileFlag.AllowInputs) == GetTileFlag.AllowInputs)
+                    continue;
+
+                if (!tile.info.allowWireOutputs && (flags & GetTileFlag.AllowOutputs) == GetTileFlag.AllowOutputs)
                     continue;
 
                 // Do not return tiles on hidden layers
