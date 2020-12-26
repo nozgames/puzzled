@@ -9,21 +9,22 @@ namespace Puzzled
     {
         [SerializeField] private UIDecalEditor _decalEditor = null;
 
-        private void Awake()
-        {
-            _decalEditor.onDecalChanged += (decal) => {
-                var option = ((TilePropertyOption)target);
-                UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, decal));
-            };
-        }
-
         protected override void OnTargetChanged(object target)
         {
             base.OnTargetChanged(target);
 
             var option = ((TilePropertyOption)target);
             label = option.name;
+            _decalEditor.interactable = option.tile.info.layer != TileLayer.Floor || option.tile.puzzle.grid.CellToTile(option.tile.cell, TileLayer.Static) == null;
             _decalEditor.decal = option.GetValue<Decal>();
+            _decalEditor.onDecalChanged -= OnDecalChanged;
+            _decalEditor.onDecalChanged += OnDecalChanged;
+        }
+
+        private void OnDecalChanged(Decal decal)
+        {
+            var option = ((TilePropertyOption)target);
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, decal));
         }
     }
 }

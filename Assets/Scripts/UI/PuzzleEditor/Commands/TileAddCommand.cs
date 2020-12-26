@@ -15,17 +15,32 @@ namespace Puzzled.Editor.Commands
             this.cell = cell;
         }
 
+        private void AddChild(Command child)
+        {
+            if (null == children)
+                children = new GroupCommand();
+
+            children.Add(child);
+        }
+
         protected override void OnExecute()
         {
             // Remove what is already in that slot
             // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
             var existing = puzzle.grid.CellToTile(cell, prefab.info.layer);            
             if(null != existing)
-            {
-                if (null == children)
-                    children = new GroupCommand();
+                AddChild(new TileDestroyCommand(existing));
 
-                children.Add(new TileDestroyCommand(existing));
+            // If the incoming tile has a surface            
+            var decal = Decal.none;
+            if (prefab.info.layer == TileLayer.Static)
+            {
+                var floorSurface = DecalSurface.FromCell(puzzle, cell, TileLayer.Floor);
+                if (null != floorSurface)
+                {
+                    decal = floorSurface.tile.GetPropertyValue<Decal>("decal");
+                    AddChild(new TileSetPropertyCommand(floorSurface.tile, "decal", Decal.none));
+                }
             }
 
             // Destroy all other instances of this tile regardless of variant
@@ -33,12 +48,7 @@ namespace Puzzled.Editor.Commands
             {
                 existing = puzzle.grid.GetLinkedTile(prefab.info);
                 if (null != existing)
-                {
-                    if (null == children)
-                        children = new GroupCommand();
-
-                    children.Add(new TileDestroyCommand(existing));
-                }
+                    AddChild(new TileDestroyCommand(existing));
             }
 
             children?.Execute();
@@ -47,6 +57,9 @@ namespace Puzzled.Editor.Commands
             tile = puzzle.InstantiateTile(prefab, cell);
             if (null == tile)
                 return;
+
+            if (decal != Decal.none)
+                tile.SetPropertyValue("decal", decal);
 
             // Ensure the tile is started when created
             tile.Send(new StartEvent());

@@ -12,10 +12,13 @@ namespace Puzzled.Editor
         [SerializeField] private Toggle _toggleFlipX = null;
         [SerializeField] private Toggle _toggleFlipY = null;
         [SerializeField] private Toggle _toggleRotate = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _nameText = null;
 
         private Decal _decal;
 
         public Action<Decal> onDecalChanged;
+
+        public bool interactable { get; set; }
 
         public Decal decal {
             get => _decal;
@@ -23,13 +26,14 @@ namespace Puzzled.Editor
                 _decal = value;
                 _preview.gameObject.SetActive(_decal != Decal.none);
                 _preview.sprite = _decal.sprite;
+                _nameText.text = _decal.sprite == null ? "None" : _decal.sprite.name;
 
                 _toggleFlipX.SetIsOnWithoutNotify((_decal.flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal);
                 _toggleFlipY.SetIsOnWithoutNotify((_decal.flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical);
                 _toggleRotate.SetIsOnWithoutNotify((_decal.flags & DecalFlags.Rotate) == DecalFlags.Rotate);
-                _toggleFlipX.gameObject.SetActive(_decal != Decal.none);
-                _toggleFlipY.gameObject.SetActive(_decal != Decal.none);
-                _toggleRotate.gameObject.SetActive(_decal != Decal.none);
+                _toggleFlipX.gameObject.SetActive(interactable && _decal != Decal.none);
+                _toggleFlipY.gameObject.SetActive(interactable && _decal != Decal.none);
+                _toggleRotate.gameObject.SetActive(interactable && _decal != Decal.none);
 
                 _preview.transform.localScale = new Vector3(_toggleFlipX.isOn ? -1 : 1, _toggleFlipY.isOn?-1:1, 1);
                 _preview.transform.localRotation = Quaternion.Euler(0, 0, _toggleRotate.isOn ? -90 : 0);
@@ -66,6 +70,9 @@ namespace Puzzled.Editor
             });
 
             _button.onDoubleClick.AddListener(() => {
+                if (!interactable)
+                    return;
+
                 UIPuzzleEditor.instance.ChooseDecal((d) => {
                     decal = d;
                     onDecalChanged?.Invoke(decal);
