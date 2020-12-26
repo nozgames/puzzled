@@ -82,28 +82,6 @@ namespace Puzzled
             // Normalize and apply the calculated offset
             var scrollPos = Mathf.Clamp(scrollRect.verticalNormalizedPosition - scrollRect.NormalizeScrollDistance(1, offset), 0, 1);
             scrollRect.verticalNormalizedPosition = scrollPos;
-            //scrollRect.content.offsetMin = new Vector2(0, Mathf.Abs(offset));
-            //Debug.Log(scrollRect.content.offsetMin);
-
-            //scrollRect.StartCoroutine(ApplyScrollPosition(scrollRect, scrollPos));
-
-            IEnumerator iFocusOn(ScrollRect sr, float x)
-            {
-                yield return new WaitForEndOfFrame();
-                sr.verticalNormalizedPosition = x;
-            }
-            
-            IEnumerator ApplyScrollPosition(ScrollRect sr, float verticalPos)
-            {
-                //                Canvas.ForceUpdateCanvases();
-                //LayoutRebuilder.ForceRebuildLayoutImmediate(sr.transform.parent.parent.parent.GetComponent<RectTransform>());
-                Debug.Log(sr.content.offsetMin);
-                yield return new WaitForEndOfFrame();
-                Debug.Log(sr.content.offsetMin);
-                //sr.verticalNormalizedPosition = verticalPos;
-//                UpdateLayout(scrollRect.transform.parent.parent);
-                //LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)sr.transform);
-            }
         }
 
         public static void UpdateLayout(Transform xform)

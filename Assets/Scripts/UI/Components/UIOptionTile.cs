@@ -11,20 +11,24 @@ namespace Puzzled
         {
             base.OnTargetChanged(target);
 
-            var option = (TilePropertyOption)target;
-            label = option.name;
-            preview.texture = TileDatabase.GetPreview(option.GetValue<System.Guid>());
+            label = ((TilePropertyOption)target).name;
+            UpdatePreview();
         }
 
         public void OnSelectTile ()
         {
-            UIPuzzleEditor.instance.OpenTileSelector(typeof(Item), 
+            UIPuzzleEditor.instance.ChooseTile(typeof(Item), 
                 (tile) => {
-                    var option = (TilePropertyOption)target;
-                    option.SetValue(tile.guid);
-                    preview.texture = TileDatabase.GetPreview(tile.guid);
+                    ((TilePropertyOption)target).SetValue(tile.guid);
+                    UpdatePreview();
                 }
             );
+        }
+
+        private void UpdatePreview()
+        {
+            preview.texture = TileDatabase.GetPreview(((TilePropertyOption)target).GetValue<System.Guid>());
+            preview.gameObject.SetActive(preview.texture != null);
         }
     }
 }

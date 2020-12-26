@@ -51,11 +51,11 @@ namespace Puzzled
         [SerializeField] private GameObject fileMenuPopup = null;
         [SerializeField] private GameObject puzzleNamePopup = null;
         [SerializeField] private GameObject loadPopup = null;
-        [SerializeField] private GameObject tileSelectorPopup = null;
         [SerializeField] private TMPro.TMP_InputField puzzleNameInput = null;
         [SerializeField] private Transform loadPopupFiles = null;
         [SerializeField] private GameObject loadPopupFilePrefab = null;
-        [SerializeField] private Transform tileSelectorTiles = null;
+        [SerializeField] private GameObject _chooseTilePopup = null;
+        [SerializeField] private UITilePalette _chooseTilePalette = null;
         [SerializeField] private GameObject _chooseDecalPopup= null;
         [SerializeField] private UIDecalPalette _chooseDecalPalette = null;
 
@@ -63,7 +63,7 @@ namespace Puzzled
 
         private Puzzle _puzzle = null;
         private bool playing;
-        private Action<Tile> tileSelectorCallback;
+        private Action<Tile> _chooseTileCallback;
         private Action<Decal> _chooseDecalCallback;
         private Mode savedMode;
         private Cell _selectionMin;
@@ -136,6 +136,11 @@ namespace Puzzled
 
             _chooseDecalPalette.onDoubleClickDecal += (decal) => {
                 _chooseDecalCallback?.Invoke(decal);
+                HidePopup();
+            };
+
+            _chooseTilePalette.onDoubleClickTile += (tile) => {
+                _chooseTileCallback?.Invoke(tile);
                 HidePopup();
             };
 
@@ -482,30 +487,17 @@ namespace Puzzled
             ShowPopup(_chooseDecalPopup);
         }
 
-        public void OpenTileSelector(Type componentType, Action<Tile> callback)
+        public void ChooseTile (Type componentType, Action<Tile> callback)
         {
-#if false
-            tileSelectorCallback = callback;
-
-            ShowPopup(tileSelectorPopup);
-
-            tileSelectorTiles.DetachAndDestroyChildren();
-
-            foreach(var tile in TileDatabase.GetTiles().Where(t => t.GetComponent(componentType) != null))
-            {
-                var tileButton = Instantiate(tileButtonPrefab, tileSelectorTiles).GetComponent<UITileItem>();
-                tileButton.tile = tile;
-                tileButton.GetComponent<Toggle>().onValueChanged.AddListener((value) => {
-                    CloseTileSelector(tile);                    
-                });
-            }
-#endif
+            _chooseTileCallback = callback;
+            _chooseTilePalette.componentFilter = componentType;
+            ShowPopup(_chooseTilePopup);
         }
 
         public void CloseTileSelector (Tile tile)
         {
             if (tile != null)
-                tileSelectorCallback?.Invoke(tile);
+                _chooseTileCallback?.Invoke(tile);
 
             HidePopup();
         }        

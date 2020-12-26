@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -20,10 +21,26 @@ namespace Puzzled.Editor
         [SerializeField] private Toggle _filterFloor = null;
         [SerializeField] private Toggle _filterStatic = null;
 
+        private Type _componentFilter;
+
+        public event Action<Tile> onDoubleClickTile;
+
         public Tile selected { get; private set; }
+
+        public Type componentFilter {
+            get => _componentFilter;
+            set {
+                _componentFilter = value;
+                UpdateFilter();
+            }
+        }
 
         private void Awake()
         {
+            _list.onDoubleClickItem += (index) => {
+                onDoubleClickTile?.Invoke(_list.GetItem(index).GetComponent<UITilePaletteItem>().tile);
+            };
+
             _list.onSelectionChanged += (index) => {
                 selected = _list.selectedItem?.GetComponent<UITilePaletteItem>().tile;
                 _selectedPreview.texture = TileDatabase.GetPreview(selected);
@@ -49,6 +66,8 @@ namespace Puzzled.Editor
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UITilePaletteItem>().tile = tile;
 
             _list.Select(0);
+
+            UpdateFilter();
 
             _filterAll.onValueChanged.AddListener(OnLayerValueChanged);
             _filterLogic.onValueChanged.AddListener(OnLayerValueChanged);
@@ -84,6 +103,7 @@ namespace Puzzled.Editor
                 var active = true;
                 active &= !checkText || tile.name.ToLower().Contains(text);
                 active &= !checkLayer || tile.info.layer == layer;
+                active &= (_componentFilter == null) || (tile.GetComponentInChildren(_componentFilter) != null);
                     
                 _list.GetItem(i).gameObject.SetActive(active);
             }
