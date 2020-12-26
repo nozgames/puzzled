@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
 using Puzzled.Editor;
+using System;
 
 namespace Puzzled
 {
@@ -14,6 +15,8 @@ namespace Puzzled
             canvas.onLButtonDown = OnDrawToolLButtonDown;
             canvas.onLButtonDrag = OnDrawToolDrag;
 
+            _getCursor = OnDrawGetCursor;
+
             _tilePalette.gameObject.SetActive(true);
         }
 
@@ -21,6 +24,9 @@ namespace Puzzled
         {
             _tilePalette.gameObject.SetActive(false);
         }
+
+        private CursorType OnDrawGetCursor(Cell arg) => 
+            KeyboardManager.isAltPressed ? CursorType.EyeDropper : CursorType.Crosshair;
 
         private void OnDrawToolLButtonDown(Vector2 position) => Draw(position, false);
 
@@ -32,8 +38,15 @@ namespace Puzzled
             if (null == _tilePalette.selected)
                 return;
 
-            var tile = _tilePalette.selected;
             var cell = canvas.CanvasToCell(position);
+
+            if (KeyboardManager.isAltPressed)
+            {
+                EyeDropper(cell, !group);
+                return;
+            }
+  
+            var tile = _tilePalette.selected;
 
             // Dont draw if the same tile is already there.  This will prevent
             // accidental removal of connections and properties
@@ -50,6 +63,28 @@ namespace Puzzled
             }
 
             ExecuteCommand(new Editor.Commands.TileAddCommand(tile, cell), group);
+        }
+
+        private void EyeDropper(Cell cell, bool cycle)
+        {
+            var selected = _tilePalette.selected;
+            var existing = GetTile(cell, (selected == null || !cycle) ? TileLayer.Logic : selected.info.layer);
+            if (cycle && existing != null && selected != null && existing.guid == selected.guid)
+            {
+                if (existing.info.layer != TileLayer.Floor)
+                    existing = GetTile(cell, (TileLayer)(existing.info.layer - 1));
+                else
+                    existing = null;
+            }
+
+            if (null == existing)
+            {
+                existing = GetTile(cell, TileLayer.Logic);
+                if (null == existing)
+                    return;
+            }
+
+            _tilePalette.selected = TileDatabase.GetTile(existing.guid);
         }
     }
 }

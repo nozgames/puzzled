@@ -22,10 +22,34 @@ namespace Puzzled.Editor
         [SerializeField] private Toggle _filterStatic = null;
 
         private Type _componentFilter;
+        private Tile _selected;
 
         public event Action<Tile> onDoubleClickTile;
 
-        public Tile selected { get; private set; }
+        public Tile selected {
+            get => _selected;
+            set {
+                if (_selected != null && value != null && value.guid == _selected.guid)
+                    return;
+
+                _selected = value;
+
+                if (_selected != null)
+                    for (int i = _list.itemCount - 1; i >= 0; i--)
+                    {
+                        var item = GetItem(i);
+                        if (item.tile.guid == _selected.guid)
+                        {
+                            item.selected = true;
+                            if (item.gameObject.activeSelf)
+                                _scrollRect.ScrollTo(GetItem(i).GetComponent<RectTransform>());
+                            break;
+                        }
+                    }
+
+                _selectedPreview.texture = TileDatabase.GetPreview(selected);
+            }
+        }
 
         public Type componentFilter {
             get => _componentFilter;
@@ -42,7 +66,7 @@ namespace Puzzled.Editor
             };
 
             _list.onSelectionChanged += (index) => {
-                selected = _list.selectedItem?.GetComponent<UITilePaletteItem>().tile;
+                _selected = _list.selectedItem?.GetComponent<UITilePaletteItem>().tile;
                 _selectedPreview.texture = TileDatabase.GetPreview(selected);
             };
 
@@ -129,5 +153,7 @@ namespace Puzzled.Editor
                     break;
             }
         }
+
+        private UITilePaletteItem GetItem(int index) => _list.transform.GetChild(index).GetComponent<UITilePaletteItem>();
     }
 }

@@ -6,6 +6,8 @@
         ArrowWithPlus,
         ArrowWithMinus,
         ArrowWithNot,
-        ArrowWithMove
+        ArrowWithMove,
+        EyeDropper,
+        Crosshair
     }
 }

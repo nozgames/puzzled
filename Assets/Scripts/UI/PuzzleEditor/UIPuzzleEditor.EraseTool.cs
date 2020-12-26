@@ -15,6 +15,8 @@ namespace Puzzled
             canvas.onLButtonUp = OnEraseToolLButtonUp;
             canvas.onLButtonDrag = OnEraseToolDrag;
 
+            _getCursor = OnEraseGetCursor;
+
             eraseToolOptions.SetActive(true);
 
             _lastEraseCell = Cell.invalid;
@@ -78,5 +80,7 @@ namespace Puzzled
                 ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile), _eraseStarted);
             }
         }
+
+        private CursorType OnEraseGetCursor(Cell arg) => CursorType.Crosshair;
     }
 }
