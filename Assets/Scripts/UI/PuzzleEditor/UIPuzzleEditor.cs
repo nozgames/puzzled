@@ -529,9 +529,18 @@ namespace Puzzled
             switch (keyCode)
             {
                 case KeyCode.Escape:
-                    ShowPopup(fileMenuPopup);
+                    if (playing)
+                        OnStopButton();
+                    else
+                        ShowPopup(fileMenuPopup);
                     break;
+            }
 
+            if (playing)
+                return;
+
+            switch (keyCode)
+            {
                 case KeyCode.W:
                     mode = Mode.Logic;
                     break;

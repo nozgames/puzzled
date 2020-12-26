@@ -5,7 +5,9 @@ namespace Puzzled
 {
     public class Chest : TileComponent
     {
+        [Header("General")]
         [SerializeField] private Tile keyItem = null;
+        [SerializeField] private AudioClip _unlockSound = null;
 
         [Editable]
         public System.Guid prizeItem { get; private set; }
@@ -41,6 +43,9 @@ namespace Puzzled
                 locked = !evt.user.Send(new QueryHasItemEvent(keyItem.guid));
                 if (locked)
                     return;
+
+                if(_unlockSound != null)
+                    AudioManager.Instance.Play(_unlockSound);
             }
 
             var cell = tile.cell;

@@ -5,16 +5,20 @@ namespace Puzzled
 {
     public class Item : TileComponent
     {
-        //[SerializeField] private Sprite _icon = null;
         [SerializeField] private GameObject _visuals = null;
-        
+        [SerializeField] private AudioClip _pickupSound = null;
+
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
             evt.IsHandled = true;
 
-            if(evt.user.Send(new GiveItemEvent(this)))
+            if (evt.user.Send(new GiveItemEvent(this)))
+            {
+                if(_pickupSound != null)
+                    AudioManager.Instance.Play(_pickupSound);
                 tile.Destroy();
+            }
         }
 
         public GameObject CloneVisuals (Transform parent)
