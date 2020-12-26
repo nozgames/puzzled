@@ -1,32 +1,29 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+using Puzzled.Editor;
+
 namespace Puzzled
 {
     public class UIOptionDecal : UIOptionEditor
     {
-        [SerializeField] private Image preview = null;
+        [SerializeField] private UIDecalEditor _decalEditor = null;
+
+        private void Awake()
+        {
+            _decalEditor.onDecalChanged += (decal) => {
+                var option = ((TilePropertyOption)target);
+                UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, decal));
+            };
+        }
 
         protected override void OnTargetChanged(object target)
         {
             base.OnTargetChanged(target);
 
-            label = ((TilePropertyOption)target).name;
-            UpdatePreview();
-        }
-
-        public void ChooseDecal()
-        {
-            UIPuzzleEditor.instance.ChooseDecal ((decal) => {
-                ((TilePropertyOption)target).SetValue(decal);
-                UpdatePreview();
-            });
-        }
-
-        private void UpdatePreview()
-        {
-            preview.sprite = ((TilePropertyOption)target).GetValue<Decal>().sprite;
-            preview.gameObject.SetActive(preview.sprite != null);
+            var option = ((TilePropertyOption)target);
+            label = option.name;
+            _decalEditor.decal = option.GetValue<Decal>();
         }
     }
 }

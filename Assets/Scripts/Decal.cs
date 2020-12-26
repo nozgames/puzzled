@@ -8,7 +8,8 @@ namespace Puzzled
     {
         None,
         FlipHorizontal = 1, 
-        FlipVertical = 2
+        FlipVertical = 2,
+        Rotate = 4
     }
 
     public struct Decal

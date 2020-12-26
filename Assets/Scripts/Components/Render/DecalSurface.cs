@@ -16,8 +16,13 @@ namespace Puzzled
 
                 _renderer.enabled = _decal != null && _decal.sprite != null;
 
-                if(_decal != null)
+                if (_decal != null)
+                {
                     _renderer.sprite = _decal.sprite;
+                    _renderer.flipX = (_decal.flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal;
+                    _renderer.flipY = (_decal.flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical;
+                    _renderer.transform.transform.localRotation = Quaternion.Euler(0, 0, ((_decal.flags & DecalFlags.Rotate) == DecalFlags.Rotate) ? -90 : 0);
+                }
             }
         }
 

@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace Puzzled
 {
-    class UIBlockInput : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
+    class UIClickBlocker : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
     {
         public void OnPointerClick(PointerEventData eventData)
         {

@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 1;
+        private const int FileVersion = 2;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -293,6 +293,7 @@ namespace Puzzled
 
                             case TilePropertyType.Decal:
                                 writer.Write(((Decal)value).guid);
+                                writer.Write((int)((Decal)value).flags);
                                 break;
 
                             case TilePropertyType.DecalArray:
@@ -389,8 +390,9 @@ namespace Puzzled
                     using (var reader = new BinaryReader(file))
                         puzzle.Load(reader);
                 } 
-                catch
+                catch (Exception e)
                 {
+                    Debug.LogException(e);
                     puzzle.LoadJson(path);
                 }
 
@@ -425,7 +427,9 @@ namespace Puzzled
 
             switch (version)
             {
-                case 1: LoadV1(reader, version); break;
+                case 1:
+                case 2:
+                    LoadV1(reader, version); break;
                 default:
                     throw new NotImplementedException();
             }
@@ -503,8 +507,13 @@ namespace Puzzled
                             break;
 
                         case TilePropertyType.Decal:
-                            value = DecalDatabase.GetDecal(reader.ReadGuid());
+                        {
+                            var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                            if (version > 1)
+                                decal.flags = (DecalFlags)reader.ReadInt32();
+                            value = decal;
                             break;
+                        }
 
                         case TilePropertyType.DecalArray:
                         {
