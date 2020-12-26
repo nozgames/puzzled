@@ -17,8 +17,17 @@ namespace Puzzled
         [Header("Keys")]
         [SerializeField] private InputAction keyEscape = null;
         [SerializeField] private InputAction keyDelete = null;
+        [SerializeField] private InputAction keyB = null;
+        [SerializeField] private InputAction keyD = null;
+        [SerializeField] private InputAction keyE = null;
+        [SerializeField] private InputAction keyV = null;
+        [SerializeField] private InputAction keyW = null;
         [SerializeField] private InputAction keyY = null;
         [SerializeField] private InputAction keyZ = null;
+        [SerializeField] private InputAction key1 = null;
+        [SerializeField] private InputAction key2 = null;
+        [SerializeField] private InputAction key3 = null;
+        [SerializeField] private InputAction key4 = null;
 
         [Header("Modifiers")]
         [SerializeField] private InputAction keyShift = null;
@@ -60,6 +69,15 @@ namespace Puzzled
         {
             keyEscape.performed += (ctx) => SendKey(KeyCode.Escape);
             keyDelete.performed += (ctx) => SendKey(KeyCode.Delete);
+            key1.performed += (ctx) => SendKey(KeyCode.Alpha1);
+            key2.performed += (ctx) => SendKey(KeyCode.Alpha2);
+            key3.performed += (ctx) => SendKey(KeyCode.Alpha3);
+            key4.performed += (ctx) => SendKey(KeyCode.Alpha4);
+            keyW.performed += (ctx) => SendKey(KeyCode.W);
+            keyE.performed += (ctx) => SendKey(KeyCode.E);
+            keyB.performed += (ctx) => SendKey(KeyCode.B);
+            keyD.performed += (ctx) => SendKey(KeyCode.D);
+            keyV.performed += (ctx) => SendKey(KeyCode.V);
             keyZ.performed += (ctx) => SendKey(KeyCode.Z);
             keyY.performed += (ctx) => SendKey(KeyCode.Y);
             keyShift.started += (ctx) => isShiftPressed = true;
@@ -76,6 +94,15 @@ namespace Puzzled
 
             keyEscape.Enable();
             keyDelete.Enable();
+            key1.Enable();
+            key2.Enable();
+            key3.Enable();
+            key4.Enable();
+            keyW.Enable();
+            keyE.Enable();
+            keyB.Enable();
+            keyD.Enable();
+            keyV.Enable();
             keyY.Enable();
             keyZ.Enable();
             keyShift.Enable();

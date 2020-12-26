@@ -532,6 +532,42 @@ namespace Puzzled
                     ShowPopup(fileMenuPopup);
                     break;
 
+                case KeyCode.W:
+                    mode = Mode.Logic;
+                    break;
+
+                case KeyCode.B:
+                    mode = Mode.Draw;
+                    break;
+
+                case KeyCode.E:
+                    mode = Mode.Erase;
+                    break;
+
+                case KeyCode.V:
+                    mode = Mode.Move;
+                    break;
+
+                case KeyCode.D:
+                    mode = Mode.Decal;
+                    break;
+
+                case KeyCode.Alpha1:
+                    layerToggles[0].isOn = !layerToggles[0].isOn;
+                    break;
+
+                case KeyCode.Alpha2:
+                    layerToggles[1].isOn = !layerToggles[1].isOn;
+                    break;
+
+                case KeyCode.Alpha3:
+                    layerToggles[2].isOn = !layerToggles[2].isOn;
+                    break;
+
+                case KeyCode.Alpha4:
+                    layerToggles[3].isOn = !layerToggles[3].isOn;
+                    break;
+
                 case KeyCode.Z:
                     if (KeyboardManager.isCtrlPressed && !KeyboardManager.isShiftPressed)
                         Undo();
