@@ -46,5 +46,9 @@ public class SwitchShortcutsProfileOnPlay
         ShortcutManager.instance.activeProfileId = PlayingProfileId;
         ShortcutManager.instance.RebindShortcut("Main Menu/Edit/Undo", ShortcutBinding.empty);
         ShortcutManager.instance.RebindShortcut("Main Menu/Edit/Redo", ShortcutBinding.empty);
+
+        if(ShortcutManager.instance.GetShortcutBinding("Animation/Play Animation").keyCombinationSequence != ShortcutBinding.empty.keyCombinationSequence)
+            foreach (var shortcut in ShortcutManager.instance.GetAvailableShortcutIds())
+                ShortcutManager.instance.RebindShortcut(shortcut, ShortcutBinding.empty);
     }
 }
