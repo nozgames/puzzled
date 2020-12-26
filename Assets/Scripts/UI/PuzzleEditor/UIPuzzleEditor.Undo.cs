@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Puzzled.Editor.Commands;
+using System;
 
 namespace Puzzled
 {
@@ -22,7 +23,7 @@ namespace Puzzled
         /// Execute a new command
         /// </summary>
         /// <param name="command">Command to execute</param>
-        public static void ExecuteCommand (Command command, bool combine=false)
+        public static void ExecuteCommand (Command command, bool combine=false, Action<Command> callback = null)
         {
             if (combine && instance._undo.Count > 0)
             {
@@ -53,7 +54,24 @@ namespace Puzzled
                 instance.UpdateUndoButtons();
             }
 
+            if (selectedTile != null)
+            {
+                instance.UpdateInspectorState(selectedTile);
+                command.undoState = selectedTile.inspectorState;
+            }
+
             command.Execute();
+
+            callback?.Invoke(command);
+
+            if (selectedTile != null)
+            {
+                instance.UpdateInspectorState(selectedTile);
+                command.redoState = selectedTile.inspectorState;
+            }
+
+            instance.mode = command.mode;
+            selectedTile = command.selectedTile;
         }
 
         /// <summary>
@@ -68,6 +86,15 @@ namespace Puzzled
             _undo.RemoveAt(_undo.Count - 1);
             _redo.Add(command);
             command.Undo();
+
+            instance.mode = command.mode;
+
+            var tile = selectedTile;
+            selectedTile = null;
+            if (tile != null)
+                tile.inspectorState = command.undoState;
+            selectedTile = tile;
+
             UpdateUndoButtons();
         }
 
@@ -83,6 +110,15 @@ namespace Puzzled
             _redo.RemoveAt(_redo.Count - 1);
             _undo.Add(command);
             command.Redo();
+
+            instance.mode = command.mode;
+
+            var tile = selectedTile;
+            selectedTile = null;
+            if (tile != null)
+                tile.inspectorState = command.redoState;
+            selectedTile = tile;
+
             UpdateUndoButtons();
         }
 

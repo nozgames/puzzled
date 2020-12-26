@@ -3,16 +3,41 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    public class Decal
+    [Flags]
+    public enum DecalFlags
     {
+        None,
+        FlipHorizontal = 1, 
+        FlipVertical = 2
+    }
+
+    public struct Decal
+    {
+        public static readonly Decal none = new Decal(Guid.Empty, null);
+
         public Guid guid { get; private set; }
 
         public Sprite sprite { get; private set; }
+
+        public DecalFlags flags { get; set; }
+
+        public static bool operator ==(Decal lhs, Decal rhs) => lhs.guid == rhs.guid;
+
+        public static bool operator !=(Decal lhs, Decal rhs) => lhs.guid != rhs.guid;
+
+        public bool Equals(Decal other) => guid == other.guid;
+
+        public override bool Equals(object other) => other.GetType() == typeof(Decal) && Equals((Decal)other);
+
+        public override int GetHashCode() => guid.GetHashCode();
+
+        public override string ToString() => $"{guid.ToString()}";
 
         public Decal(Guid guid, Sprite sprite)
         {
             this.guid = guid;
             this.sprite = sprite;
+            flags = DecalFlags.None;
         }
     }
 }

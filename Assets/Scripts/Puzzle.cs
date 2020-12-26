@@ -295,6 +295,18 @@ namespace Puzzled
                                 writer.Write(((Decal)value).guid);
                                 break;
 
+                            case TilePropertyType.DecalArray:
+                            {
+                                var darray = (Decal[])value;
+                                writer.Write(darray.Length);
+                                foreach (var decal in darray)
+                                {
+                                    writer.Write(decal.guid);
+                                    writer.Write((int)decal.flags);
+                                }
+                                break;
+                            }
+
                             case TilePropertyType.StringArray:
                             {
                                 var sarray = (string[])value;
@@ -493,6 +505,22 @@ namespace Puzzled
                         case TilePropertyType.Decal:
                             value = DecalDatabase.GetDecal(reader.ReadGuid());
                             break;
+
+                        case TilePropertyType.DecalArray:
+                        {
+                            var decals = new Decal[reader.ReadInt32()];
+                            for (int i = 0; i < decals.Length; i++)
+                            {
+                                var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                                var flags = (DecalFlags)reader.ReadInt32();
+
+                                decal.flags = flags;
+                                decals[i] = decal;
+                            }
+
+                            value = decals;
+                            break;
+                        }
 
                         case TilePropertyType.Tile:
                             value = TileDatabase.GetTile(reader.ReadGuid());

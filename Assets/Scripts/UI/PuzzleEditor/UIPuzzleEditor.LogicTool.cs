@@ -14,6 +14,7 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionPrefabInt = null;
         [SerializeField] private UIOptionEditor optionPrefabBool = null;
         [SerializeField] private UIOptionEditor optionPrefabDecal = null;
+        [SerializeField] private UIOptionEditor optionPrefabDecalArray = null;
         [SerializeField] private UIOptionEditor optionPrefabString = null;
         [SerializeField] private UIOptionEditor optionPrefabStringMultiline = null;
         [SerializeField] private UIOptionEditor optionPrefabTile = null;
@@ -141,6 +142,11 @@ namespace Puzzled
 
         private void SelectTile(Cell cell) => SelectTile(GetTile(cell));
 
+        private void UpdateInspectorState(Tile tile)
+        {
+            tile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>().Select(p => p.GetState()).ToArray();
+        }
+
         private void SelectTile(Tile tile)
         {
             if (tile == null && _selectedTile == null)
@@ -149,7 +155,7 @@ namespace Puzzled
             // Save the inspector state
             if (_selectedTile != null)
             {
-                _selectedTile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>().Select(p => p.GetState()).ToArray();
+                UpdateInspectorState(_selectedTile);
 
                 foreach (var input in _selectedTile.inputs)
                     input.dark = false;
@@ -273,6 +279,10 @@ namespace Puzzled
 
                 case TilePropertyType.Decal:
                     prefab = optionPrefabDecal;
+                    break;
+
+                case TilePropertyType.DecalArray:
+                    prefab = optionPrefabDecalArray;
                     break;
 
                 default:

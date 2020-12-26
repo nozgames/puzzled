@@ -25,7 +25,7 @@ namespace Puzzled
 
         private void UpdatePreview()
         {
-            preview.sprite = ((TilePropertyOption)target).GetValue<Decal>()?.sprite;
+            preview.sprite = ((TilePropertyOption)target).GetValue<Decal>().sprite;
             preview.gameObject.SetActive(preview.sprite != null);
         }
     }

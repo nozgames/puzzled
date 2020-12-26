@@ -12,7 +12,7 @@ namespace Puzzled
         /// <summary>
         /// Puzzle the parent tile is attached to
         /// </summary>
-        public Puzzle puzzle => tile.puzzle;
+        public Puzzle puzzle => tile == null ? null : tile.puzzle;
 
         /// <summary>
         /// True if the component is being edited
@@ -22,7 +22,7 @@ namespace Puzzled
         /// <summary>
         /// True if the component is in the process of loading
         /// </summary>
-        public bool isLoading => puzzle.isLoading;
+        public bool isLoading => puzzle == null || puzzle.isLoading;
 
 
         public bool SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing = CellEventRouting.All) =>

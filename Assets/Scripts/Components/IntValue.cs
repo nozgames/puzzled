@@ -6,14 +6,12 @@ namespace Puzzled
     class IntValue : TileComponent
     {
         [Editable]
-        public int value { get; private set; }
+        public int value { get; set; }
 
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
         {
-            foreach (Wire wire in tile.outputs)
-                wire.value = value;
-
+            tile.SetOutputValue(value);
             tile.PulseOutputs();
         }
     }

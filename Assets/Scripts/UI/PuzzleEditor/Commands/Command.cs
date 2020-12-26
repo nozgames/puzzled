@@ -1,11 +1,16 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Puzzled.Editor.Commands
 {
     public abstract class Command
     {
-        private Tile selectedTile;
-        private UIPuzzleEditor.Mode mode;
+        public IInspectorState[] undoState { get; set; }
+        public IInspectorState[] redoState { get; set; }
+
+        public UIPuzzleEditor.Mode mode { get; private set; }
+
+        public Tile selectedTile { get; private set; }
 
         public bool isExecuted { get; private set; }
 
@@ -20,28 +25,22 @@ namespace Puzzled.Editor.Commands
             mode = UIPuzzleEditor.instance.mode;
         }
 
-        public void Execute ()
+        public void Execute (Action<Command> callback = null)
         {
-            isExecuted = true;
+            isExecuted = true;            
             OnExecute();
-            UIPuzzleEditor.instance.mode = mode;
-            UIPuzzleEditor.selectedTile = selectedTile;
         }
 
         public void Undo ()
         {
             OnUndo();
             isExecuted = false;
-            UIPuzzleEditor.instance.mode = mode;
-            UIPuzzleEditor.selectedTile = selectedTile;
         }
 
         public void Redo()
         {
             isExecuted = true;
             OnRedo();
-            UIPuzzleEditor.instance.mode = mode;
-            UIPuzzleEditor.selectedTile = selectedTile;
         }
 
         public void Destroy()

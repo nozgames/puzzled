@@ -60,7 +60,7 @@ namespace Puzzled
             if (null == property)
                 return;
 
-            var decal = KeyboardManager.isCtrlPressed ? null : _decalPalette.selected;
+            var decal = KeyboardManager.isCtrlPressed ? Decal.none : _decalPalette.selected;
             if (property.GetValue<Decal>(tile) == decal)
                 return;
 

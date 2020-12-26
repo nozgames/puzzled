@@ -21,7 +21,7 @@ namespace Puzzled
 
         public static Decal[] GetDecals() => _instance._decalsByGuid.Values.ToArray();
 
-        public static Decal GetDecal(Guid guid) => _instance._decalsByGuid.TryGetValue(guid, out var decal) ? decal : null;
+        public static Decal GetDecal(Guid guid) => _instance._decalsByGuid.TryGetValue(guid, out var decal) ? decal : Decal.none;
 
         protected override string label => "decal";
 

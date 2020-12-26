@@ -33,11 +33,11 @@ namespace Puzzled.Editor
             };
 
             _list.onSelectionChanged += (index) => {
-                selected = _list.selectedItem?.GetComponent<UIDecalPaletteItem>().decal;
+                selected = _list.selectedItem?.GetComponent<UIDecalPaletteItem>().decal ?? Decal.none;
             };
 
             // Add a none decal
-            Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = null;
+            Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = Decal.none;
 
             // Add all decals to the palette
             foreach (var decal in DecalDatabase.GetDecals())

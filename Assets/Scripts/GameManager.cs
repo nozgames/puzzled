@@ -144,7 +144,7 @@ namespace Puzzled
 
             // Load and set the new puzzle
             var puzzle = Puzzle.Load(path);
-            puzzle.isEditing = true;
+            puzzle.isEditing = editing;
             Puzzle.current = puzzle;
 
             // If the new puzzle failed to load then set the old puzzle back to active
