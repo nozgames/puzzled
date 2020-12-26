@@ -42,7 +42,7 @@ namespace Puzzled.Editor
                         {
                             item.selected = true;
                             if (item.gameObject.activeSelf)
-                                _scrollRect.ScrollTo(GetItem(i).GetComponent<RectTransform>());
+                                _scrollRect.ScrollTo(item.GetComponent<RectTransform>());
                             break;
                         }
                     }

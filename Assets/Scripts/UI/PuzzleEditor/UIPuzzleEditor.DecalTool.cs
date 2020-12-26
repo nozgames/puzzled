@@ -9,6 +9,8 @@ namespace Puzzled
         [Header("DecalTool")]
         [SerializeField] private UIDecalPalette _decalPalette = null;
 
+        private bool _allowDecalDrag = false;
+
         private void EnableDecalTool()
         {
             canvas.onLButtonDown = OnDecalToolLButtonDown;
@@ -29,6 +31,9 @@ namespace Puzzled
             if (cell == Cell.invalid)
                 return CursorType.Arrow;
 
+            if(KeyboardManager.isAltPressed)
+                return CursorType.EyeDropper;
+
             var tile = GetTile(cell);
             if (null == tile)
                 return CursorType.ArrowWithNot;
@@ -46,11 +51,26 @@ namespace Puzzled
 
         private void OnDecalToolLButtonDown(Vector2 position) => DrawDecal(position);
 
-        private void OnDecalToolDrag(Vector2 position, Vector2 delta) => DrawDecal(position);
+        private void OnDecalToolDrag(Vector2 position, Vector2 delta)
+        {
+            if (!_allowDecalDrag)
+                return;
+
+            DrawDecal(position);
+        }
 
         private void DrawDecal(Vector2 position)
         {
             var cell = canvas.CanvasToCell(position);
+
+            _allowDecalDrag = !KeyboardManager.isAltPressed;
+            if(!_allowDecalDrag)
+            {
+                var surface = DecalSurface.FromCell(puzzle, cell);
+                if (surface != null)
+                    _decalPalette.selected = surface.decal;
+                return;
+            }
 
             var tile = GetTile(cell);
             if (null == tile)

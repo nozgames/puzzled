@@ -18,7 +18,7 @@ namespace Puzzled.Editor
 
         public Action<Decal> onDecalChanged;
 
-        public bool interactable { get; set; }
+        public bool interactable { get; set; } = true;
 
         public Decal decal {
             get => _decal;
