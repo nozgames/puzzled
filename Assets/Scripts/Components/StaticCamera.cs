@@ -19,6 +19,21 @@ namespace Puzzled
             private set => _transitionTime = Mathf.Max(value, 0);
         }
 
+        [Editable]
+        public Background background {
+            get => _background;
+            set {
+                if (_background == value)
+                    return;
+
+                _background = value;
+
+                if(isInitialLocation)
+                    CameraManager.TransitionToBackground(_background, 0);
+            }
+        }
+
+        private Background _background;
         private int _zoomLevel = CameraManager.DefaultZoomLevel;
         private int _transitionTime = 4;
 
@@ -32,10 +47,13 @@ namespace Puzzled
 
         private void ActivateCamera()
         {
-            if(isEditing)
+            if (isEditing)
                 CameraManager.JumpToCell(tile.cell, zoomLevel);
             else
+            {
                 CameraManager.TransitionToCell(tile.cell, zoomLevel, transitionTime);
+                CameraManager.TransitionToBackground(_background, transitionTime);
+            }
         }
 
         [ActorEventHandler]
@@ -43,6 +61,9 @@ namespace Puzzled
         {
             if (isInitialLocation && !isEditing)
                 CameraManager.JumpToCell(tile.cell, zoomLevel);
+
+            if(isInitialLocation)
+                CameraManager.TransitionToBackground(_background, 0);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Puzzled
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
         [SerializeField] private Transform _wires = null;
-        [SerializeField] private GameObject _grid = null;
+        [SerializeField] private GridMesh _grid = null;
         [SerializeField] private Transform _trash = null;
         [SerializeField] private GameObject _wirePrefab = null;
 
@@ -64,8 +64,8 @@ namespace Puzzled
         /// True if the grid lines should be visible for this puzzle
         /// </summary>
         public bool showGrid {
-            get => _grid.activeSelf;
-            set => _grid.SetActive(value);
+            get => _grid.gameObject.activeSelf;
+            set => _grid.gameObject.SetActive(value);
         }
 
         /// <summary>
@@ -291,6 +291,10 @@ namespace Puzzled
                                 writer.Write((Guid)value);
                                 break;
 
+                            case TilePropertyType.Background:
+                                writer.Write(((Background)value)?.guid ?? Guid.Empty);
+                                break;
+
                             case TilePropertyType.Decal:
                                 writer.Write(((Decal)value).guid);
                                 writer.Write((int)((Decal)value).flags);
@@ -505,6 +509,13 @@ namespace Puzzled
                         case TilePropertyType.Guid:
                             value = reader.ReadGuid();
                             break;
+
+                        case TilePropertyType.Background:
+                        {
+                            var background = BackgroundDatabase.GetBackground(reader.ReadGuid());
+                            value = background;
+                            break;
+                        }
 
                         case TilePropertyType.Decal:
                         {

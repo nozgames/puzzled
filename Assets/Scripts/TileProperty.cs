@@ -19,7 +19,8 @@ namespace Puzzled
         StringArray,
         Decal,
         DecalArray,
-        Tile
+        Tile,
+        Background
     }
 
     public class TileProperty
@@ -75,6 +76,8 @@ namespace Puzzled
                 type = TilePropertyType.DecalArray;
             else if (info.PropertyType == typeof(Tile))
                 type = TilePropertyType.Tile;
+            else if (info.PropertyType == typeof(Background))
+                type = TilePropertyType.Background;
             else
                 throw new NotImplementedException();
         }

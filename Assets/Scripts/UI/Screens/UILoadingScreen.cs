@@ -12,7 +12,7 @@ namespace Puzzled
 
         private IEnumerator WaitForLoad ()
         {
-            while (!TileDatabase.isLoaded || !DecalDatabase.isLoaded)
+            while (!TileDatabase.isLoaded || !DecalDatabase.isLoaded || !BackgroundDatabase.isLoaded)
                 yield return null;
 
             UIManager.instance.ShowMainMenu();

@@ -13,6 +13,7 @@ namespace Puzzled
         [SerializeField] private RawImage inspectorTilePreview = null;
         [SerializeField] private UIOptionEditor optionPrefabInt = null;
         [SerializeField] private UIOptionEditor optionPrefabBool = null;
+        [SerializeField] private UIOptionEditor optionPrefabBackground = null;
         [SerializeField] private UIOptionEditor optionPrefabDecal = null;
         [SerializeField] private UIOptionEditor optionPrefabDecalArray = null;
         [SerializeField] private UIOptionEditor optionPrefabString = null;
@@ -318,6 +319,10 @@ namespace Puzzled
 
                 case TilePropertyType.Bool:
                     prefab = optionPrefabBool;
+                    break;
+
+                case TilePropertyType.Background:
+                    prefab = optionPrefabBackground;
                     break;
 
                 // TODO: change to tile

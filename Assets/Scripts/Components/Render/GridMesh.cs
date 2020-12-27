@@ -8,7 +8,6 @@
     public class GridMesh : MonoBehaviour
     {
         [SerializeField] private int GridSize;
-        [SerializeField] private Color color = Color.black;
 
         void Awake()
         {
@@ -38,9 +37,7 @@
             mesh.SetIndices(indicies.ToArray(), MeshTopology.Lines, 0);
             filter.mesh = mesh;
 
-            MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = new Material(Shader.Find("Sprites/Default"));
-            meshRenderer.sharedMaterial.color = color;
+            gameObject.GetComponent<MeshRenderer>().sharedMaterial = CameraManager.gridMaterial;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Puzzled
         {
             s_ToggleMixed = null;
             s_AddressableAssetToggleText = new GUIContent("Addressable", "Check this to mark this asset as an Addressable Asset, which includes it in the bundled data and makes it loadable via script by its address.");
-            Editor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
+            UnityEditor.Editor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
         }
 
 #if false
@@ -82,7 +82,7 @@ namespace Puzzled
         }
 #endif
 
-        static void OnPostHeaderGUI(Editor editor)
+        static void OnPostHeaderGUI(UnityEditor.Editor editor)
         {
 #if false
             var aaSettings = AddressableAssetSettingsDefaultObject.Settings;
@@ -174,6 +174,24 @@ namespace Puzzled
                 }
             }
 #endif
+            if(editor.target != null && editor.target is Background background)
+            {
+                EditorGUI.indentLevel++;
+                var contains = BackgroundDatabase.GetDatabase().Contains(background);
+                var result = EditorGUILayout.Toggle("Database", contains);
+                EditorGUI.indentLevel--;
+
+                if(result != contains)
+                {
+                    if(result)
+                        BackgroundDatabase.GetDatabase().Add(background);
+                    else
+                        BackgroundDatabase.GetDatabase().Remove(background);
+
+                    EditorUtility.SetDirty(BackgroundDatabase.GetDatabase());
+                }
+            }
+
             if (editor.target != null && editor.target is TextureImporter)
             {
                 var sprite = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(editor.target)).FirstOrDefault(a => a is Sprite);

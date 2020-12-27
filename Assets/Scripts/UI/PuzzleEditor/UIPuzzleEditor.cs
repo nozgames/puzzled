@@ -58,6 +58,8 @@ namespace Puzzled
         [SerializeField] private UITilePalette _chooseTilePalette = null;
         [SerializeField] private GameObject _chooseDecalPopup= null;
         [SerializeField] private UIDecalPalette _chooseDecalPalette = null;
+        [SerializeField] private GameObject _chooseBackgroundPopup = null;
+        [SerializeField] private UIBackgroundPalette _chooseBackgroundPalette = null;
 
         private Mode _mode = Mode.Unknown;
 
@@ -65,6 +67,7 @@ namespace Puzzled
         private bool playing;
         private Action<Tile> _chooseTileCallback;
         private Action<Decal> _chooseDecalCallback;
+        private Action<Background> _chooseBackgroundCallback;
         private Mode savedMode;
         private Cell _selectionMin;
         private Cell _selectionMax;
@@ -133,6 +136,11 @@ namespace Puzzled
         private void Awake()
         {
             instance = this;
+
+            _chooseBackgroundPalette.onDoubleClickBackground += (background) => {
+                _chooseBackgroundCallback?.Invoke(background);
+                HidePopup();
+            };
 
             _chooseDecalPalette.onDoubleClickDecal += (decal) => {
                 _chooseDecalCallback?.Invoke(decal);
@@ -309,6 +317,7 @@ namespace Puzzled
             selectionRect.gameObject.SetActive(false);
 
             // Reset the camera back to zero,zero
+            CameraManager.TransitionToBackground(null, 0);
             Center(new Cell(0, 0), CameraManager.DefaultZoomLevel);
             ClearUndo();
             HidePopup();
@@ -428,8 +437,10 @@ namespace Puzzled
                 Center(CameraManager.cell, CameraManager.DefaultZoomLevel);
 
                 puzzleName.text = _puzzle.filename;
-            } catch
+            } 
+            catch (Exception e)
             {
+                Debug.LogException(e);
                 NewPuzzle();
                 return;
             }
@@ -495,6 +506,13 @@ namespace Puzzled
         private void RemoveWire(Wire wire)
         {
             Destroy(wire.gameObject);
+        }
+
+        public void ChooseBackground(Action<Background> callback, Background current = null)
+        {
+            _chooseBackgroundCallback = callback;
+            _chooseBackgroundPalette.selected = current;
+            ShowPopup(_chooseBackgroundPopup);
         }
 
         public void ChooseDecal (Action<Decal> callback)
