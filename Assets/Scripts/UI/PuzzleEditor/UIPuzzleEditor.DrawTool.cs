@@ -30,8 +30,24 @@ namespace Puzzled
             if (KeyboardManager.isAltPressed)
                 return CursorType.EyeDropper;
 
-            if (!layerToggles[(int)_tilePalette.selected.info.layer].isOn)
+            var tile = _tilePalette.selected;
+
+            // Dont allow drawing with a tile that is on a hidden layer
+            if (!layerToggles[(int)tile.info.layer].isOn)
                 return CursorType.Not;
+
+            // Static objects cannot be placed on floor objects.
+            if (tile.info.layer == TileLayer.Dynamic)
+            {
+                var staticTile = _puzzle.grid.CellToTile(cell, TileLayer.Static);
+                if (staticTile != null && !staticTile.info.allowDynamic)
+                    return CursorType.Not;
+            }
+
+            // Dont allow drawing of a static tile that does not allow dynamics on top of a dynamic
+            if (tile.info.layer == TileLayer.Static && !tile.info.allowDynamic)
+                if (null != _puzzle.grid.CellToTile(cell, TileLayer.Dynamic))
+                    return CursorType.Not;
 
             return CursorType.Crosshair;
         }
@@ -57,6 +73,9 @@ namespace Puzzled
                 EyeDropper(cell, !group);
                 return;
             }
+
+            if (UIManager.cursor != CursorType.Crosshair)
+                return;
   
             var tile = _tilePalette.selected;
 
@@ -65,14 +84,6 @@ namespace Puzzled
             var existing = _puzzle.grid.CellToTile(cell, tile.info.layer);
             if (existing != null && existing.guid == tile.guid)
                 return;
-
-            // Static objects cannot be placed on floor objects.
-            if (tile.info.layer == TileLayer.Dynamic)
-            {
-                var staticTile = _puzzle.grid.CellToTile(cell, TileLayer.Static);
-                if (staticTile != null && !staticTile.info.allowDynamic)
-                    return;
-            }
 
             ExecuteCommand(new Editor.Commands.TileAddCommand(tile, cell), group);
         }
