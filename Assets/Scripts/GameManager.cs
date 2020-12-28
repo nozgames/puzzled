@@ -206,6 +206,8 @@ namespace Puzzled
 
         public static void Stop ()
         {
+            UIManager.ClosePopup();
+
             CameraManager.Stop();
             
             paused = true;
