@@ -25,9 +25,17 @@ namespace Puzzled
             _tilePalette.gameObject.SetActive(false);
         }
 
-        private CursorType OnDrawGetCursor(Cell arg) => 
-            KeyboardManager.isAltPressed ? CursorType.EyeDropper : CursorType.Crosshair;
+        private CursorType OnDrawGetCursor(Cell cell)
+        {
+            if (KeyboardManager.isAltPressed)
+                return CursorType.EyeDropper;
 
+            if (!layerToggles[(int)_tilePalette.selected.info.layer].isOn)
+                return CursorType.Not;
+
+            return CursorType.Crosshair;
+        }
+            
         private void OnDrawToolLButtonDown(Vector2 position) => Draw(position, false);
 
         private void OnDrawToolDrag(Vector2 position, Vector2 delta) => Draw(position, true);
@@ -36,6 +44,10 @@ namespace Puzzled
         private void Draw (Vector2 position, bool group)
         {
             if (null == _tilePalette.selected)
+                return;
+
+            // Dont allow drawing with a tile that is hidden
+            if (!layerToggles[(int)_tilePalette.selected.info.layer].isOn)
                 return;
 
             var cell = canvas.CanvasToCell(position);

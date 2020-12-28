@@ -8,6 +8,7 @@
         ArrowWithNot,
         ArrowWithMove,
         EyeDropper,
-        Crosshair
+        Crosshair,
+        Not
     }
 }
