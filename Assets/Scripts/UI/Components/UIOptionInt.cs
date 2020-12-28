@@ -29,14 +29,16 @@ namespace Puzzled
 
         private void OnInputValueChanged(string text)
         {
-            ((TilePropertyOption)target).SetValue(int.TryParse(text, out var parsed) ? parsed : 0);
+            var option = ((TilePropertyOption)target);
+            var newValue = int.TryParse(text, out var parsed) ? parsed : 0;
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, newValue));
         }
 
         protected override void OnTargetChanged(object target)
         {
             var option = ((TilePropertyOption)target);
             label = option.name;
-            input.text = option.GetValue<int>().ToString();
+            input.SetTextWithoutNotify(option.GetValue<int>().ToString());
         }
     }
 }

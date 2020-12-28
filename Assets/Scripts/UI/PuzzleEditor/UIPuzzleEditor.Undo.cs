@@ -95,7 +95,7 @@ namespace Puzzled
             selectedTile = null;
             if (tile != null)
                 tile.inspectorState = command.undoState;
-            selectedTile = tile;
+            selectedTile = command.selectedTile;
 
             selectedWire = command.selectedWireUndo;
 
@@ -121,7 +121,7 @@ namespace Puzzled
             selectedTile = null;
             if (tile != null)
                 tile.inspectorState = command.redoState;
-            selectedTile = tile;
+            selectedTile = command.selectedTile;
 
             selectedWire = command.selectedWireRedo;
 

@@ -14,7 +14,8 @@ namespace Puzzled.Editor
             _doubleClick.onDoubleClick.AddListener(() => {
                 UIPuzzleEditor.instance.ChooseBackground(
                     (background) => {
-                        ((TilePropertyOption)target).SetValue(background);
+                        var option = ((TilePropertyOption)target);
+                        UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, background));
                         UpdatePreview();
                     }, 
                     ((TilePropertyOption)target).GetValue<Background>());

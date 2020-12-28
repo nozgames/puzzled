@@ -19,7 +19,8 @@ namespace Puzzled
 
         private void OnToggleValueChanged(bool newValue)
         {
-            ((TilePropertyOption)target).SetValue(newValue);
+            var option = ((TilePropertyOption)target);
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, newValue));
         }
 
         protected override void OnTargetChanged(object target)

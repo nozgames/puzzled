@@ -9,24 +9,25 @@ namespace Puzzled
 
         private void OnEnable()
         {
-            input.onValueChanged.AddListener(OnInputValueChanged);
+            input.onEndEdit.AddListener(OnSubmitValue);
         }
 
         private void OnDisable()
         {
-            input.onValueChanged.RemoveListener(OnInputValueChanged);
+            input.onEndEdit.RemoveListener(OnSubmitValue);
         }
 
-        private void OnInputValueChanged(string text)
+        private void OnSubmitValue(string text)
         {
-            ((TilePropertyOption)target).SetValue(text);
+            var option = ((TilePropertyOption)target);
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, text));
         }
 
         protected override void OnTargetChanged(object target)
         {
             var option = ((TilePropertyOption)target);
             label = option.name;
-            input.text = option.GetValue<string>();
+            input.SetTextWithoutNotify(option.GetValue<string>());
         }
     }
 }

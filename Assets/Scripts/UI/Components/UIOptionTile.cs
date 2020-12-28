@@ -19,7 +19,8 @@ namespace Puzzled
         {
             UIPuzzleEditor.instance.ChooseTile(typeof(Item), 
                 (tile) => {
-                    ((TilePropertyOption)target).SetValue(tile.guid);
+                    var option = ((TilePropertyOption)target);
+                    UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, tile.guid));
                     UpdatePreview();
                 }
             );

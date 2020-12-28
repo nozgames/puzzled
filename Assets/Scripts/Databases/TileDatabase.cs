@@ -132,7 +132,9 @@ namespace Puzzled
                 tile.guid = kv.Key;
                 return tile;
             })
-                .OrderBy(t => t.name)
+                .OrderBy(t => t.info.layer)
+                .ThenBy(t => t.info.name)
+                .ThenBy(t => t.name)
                 .ToArray();
 
             // Build the tile properties array for each tile 
