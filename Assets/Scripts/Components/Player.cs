@@ -39,6 +39,7 @@ namespace Puzzled
         private bool isDownHeld = false;
         private bool isUseHeld = false;
 
+        private Cell facingDirection; // this is the direction the player is facing
         private Cell desiredMovement; // this is the currently held input
         private Cell queuedMovement;  // this is the last desired movement (if within input threshold it will be treated as desired)
         private Cell lastMovement;  // this is the last continuous movement made (cleared when desired is cleared)
@@ -233,10 +234,10 @@ namespace Puzzled
 
         private void OnUseAction(InputAction.CallbackContext ctx)
         {
-            if (desiredMovement == Cell.zero)
+            if (facingDirection == Cell.zero)
                 return; // use needs a direction
 
-            PerformUse(desiredMovement);
+            PerformUse(facingDirection);
         }
 
         private void UpdateDesiredMovement()
@@ -484,6 +485,8 @@ namespace Puzzled
 
         private void UpdateVisuals(Cell cell)
         {
+            facingDirection = cell;
+
             visualsLeft.SetActive(cell.x < 0);
             visualsRight.SetActive(cell.x > 0);
             visualsDown.SetActive(cell.y < 0);
