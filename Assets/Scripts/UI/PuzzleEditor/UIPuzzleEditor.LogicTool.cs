@@ -16,6 +16,7 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionPrefabBackground = null;
         [SerializeField] private UIOptionEditor optionPrefabDecal = null;
         [SerializeField] private UIOptionEditor optionPrefabDecalArray = null;
+        [SerializeField] private UIOptionEditor optionPrefabIntArray = null;
         [SerializeField] private UIOptionEditor optionPrefabString = null;
         [SerializeField] private UIOptionEditor optionPrefabStringMultiline = null;
         [SerializeField] private UIOptionEditor optionPrefabTile = null;
@@ -333,6 +334,10 @@ namespace Puzzled
 
                 case TilePropertyType.DecalArray:
                     prefab = optionPrefabDecalArray;
+                    break;
+
+                case TilePropertyType.IntArray:
+                    prefab = optionPrefabIntArray;
                     break;
 
                 default:
