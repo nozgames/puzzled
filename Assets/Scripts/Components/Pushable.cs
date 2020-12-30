@@ -23,6 +23,13 @@ namespace Puzzled
                 SendToCell(new LeaveCellEvent(tile, cell), cell);
         }
 
+        [ActorEventHandler]
+        private void OnUse(UseEvent evt)
+        {
+            evt.IsHandled = true;
+            evt.user.Send(new GrabEvent(tile.cell));
+        }
+
         [ActorEventHandler(priority=1)]
         private void OnQueryMove(QueryMoveEvent evt)
         {
