@@ -21,9 +21,9 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt) => UpdateDecal(evt.wire.value);
+        private void OnActivateWire(WireActivatedEvent evt) => UpdateDecal(evt.wire.value - 1);
 
         [ActorEventHandler]
-        private void OnWireValueChanged(WireValueChangedEvent evt) => UpdateDecal(evt.wire.value);
+        private void OnWireValueChanged(WireValueChangedEvent evt) => UpdateDecal(evt.wire.value - 1);
     }
 }

@@ -13,14 +13,14 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnActivateWire(WireActivatedEvent evt)
         {
-            stateIndex = evt.wire.value;
+            stateIndex = evt.wire.value - 1;
             UpdateOutputWires();
         }
 
         [ActorEventHandler]
         private void OnWireValueChanged(WireValueChangedEvent evt)
         {
-            stateIndex = evt.wire.value;
+            stateIndex = evt.wire.value - 1;
             UpdateOutputWires();
         }
 
