@@ -4,6 +4,8 @@ namespace Puzzled
 {
     public class TileComponent : ActorComponent
     {
+        private int _processedTickFrame = 0;
+
         /// <summary>
         /// Tile the component is attached to
         /// </summary>
@@ -28,6 +30,26 @@ namespace Puzzled
         /// True if the current frame is a tick
         /// </summary>
         public bool isTickFrame => tile == null ? false : tile.isTickFrame;
+
+        /// <summary>
+        /// True if the current tick frame has been processed
+        /// </summary>
+        public bool isTickFrameProcessed
+        {
+            get => _processedTickFrame == tile.tickFrame;
+            set
+            {
+                if (value)
+                    _processedTickFrame = tile.tickFrame;
+                else
+                    _processedTickFrame = 0;
+            }
+        }
+
+        /// <summary>
+        /// current tick frame index
+        /// </summary>
+        public int tickFrame => tile == null ? 0 : tile.tickFrame;
 
 
         public bool SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing = CellEventRouting.All) =>
