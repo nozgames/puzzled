@@ -39,6 +39,9 @@ namespace Puzzled.Editor
 
         private void OnSequenceSelectionChanged(int selection)
         {
+            if (selection == -1)
+                return;
+
             if (_sequence != null)
                 label = $"{(isInput ? "Inputs" : "Outputs")} ({_sequence.GetStepName(selection)})";
 

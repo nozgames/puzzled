@@ -8,6 +8,7 @@ namespace Puzzled
     {
         [SerializeField] private TMPro.TMP_InputField _input = null;
         [SerializeField] private TMPro.TextMeshProUGUI _text = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _index = null;
 
         public event Action<UISequenceStep> onNameChanged;
 
@@ -28,6 +29,7 @@ namespace Puzzled
         {
             _input.gameObject.SetActive(false);
             _text.gameObject.SetActive(true);
+            _index.text = transform.GetSiblingIndex().ToString();
         }
 
         public void OnPointerClick(PointerEventData eventData)

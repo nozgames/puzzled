@@ -90,7 +90,7 @@ namespace Puzzled
 
                 for (int i = selectedTile.inputCount - 1; i >= 0; i--)
                 {
-                    var input = selectedTile.outputs[i];
+                    var input = selectedTile.inputs[i];
                     if (input.from.cell == cell && layerToggles[(int)input.from.tile.info.layer].isOn)
                         group.Add(new Editor.Commands.WireDestroyCommand(input));
                 }
