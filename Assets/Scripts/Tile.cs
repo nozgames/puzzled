@@ -12,6 +12,8 @@ namespace Puzzled
 
         private static List<Tile> _tick = new List<Tile>();
         private static TickEvent _tickEvent = new TickEvent();
+        private static bool _isTickFrame = false;
+        private static int _tickFrame = 1;
 
         public List<Wire> inputs { get; private set; } = new List<Wire>();
         public List<Wire> outputs { get; private set; } = new List<Wire>();
@@ -22,6 +24,16 @@ namespace Puzzled
         /// True if the tile is being edited
         /// </summary>
         public bool isEditing => puzzle.isEditing;
+
+        /// <summary>
+        /// Is currently on a tick frame
+        /// </summary>
+        public bool isTickFrame => _isTickFrame;
+
+        /// <summary>
+        /// current tick frame index
+        /// </summary>
+        public int tickFrame => _tickFrame;
 
         /// <summary>
         /// Return the unique identifier for this tile type
@@ -383,9 +395,12 @@ namespace Puzzled
         }
 
         public static void Tick ()
-        {            
+        {
+            _isTickFrame = true;
+            ++_tickFrame;
             foreach (var tile in _tick)
                 tile.Send(_tickEvent);
+            _isTickFrame = false;
         }
 
         protected override void OnEnable()

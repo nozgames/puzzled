@@ -16,6 +16,7 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionPrefabBackground = null;
         [SerializeField] private UIOptionEditor optionPrefabDecal = null;
         [SerializeField] private UIOptionEditor optionPrefabDecalArray = null;
+        [SerializeField] private UIOptionEditor optionPrefabIntArray = null;
         [SerializeField] private UIOptionEditor optionPrefabString = null;
         [SerializeField] private UIOptionEditor optionPrefabStringMultiline = null;
         [SerializeField] private UIOptionEditor optionPrefabTile = null;
@@ -73,6 +74,7 @@ namespace Puzzled
             // Ensure the cell being dragged is the selected cell
             var cell = canvas.CanvasToCell(position);
 
+            var group = new Editor.Commands.GroupCommand();
             if (_selectedTile != null && KeyboardManager.isShiftPressed)
             {
                 _allowLogicDrag = false;
@@ -80,33 +82,29 @@ namespace Puzzled
                 if (_selectedTile.cell == cell || !_selectedTile.info.allowWireOutputs)
                     return;
 
-                var group = false;
                 for (int i = selectedTile.outputCount - 1; i >= 0; i--)
                 {
                     var output = selectedTile.outputs[i];
                     if (output.to.cell == cell && layerToggles[(int)output.to.tile.info.layer].isOn)
-                    {
-                        ExecuteCommand(new Editor.Commands.WireDestroyCommand(output), group);
-                        group = true;
-                    }
+                        group.Add(new Editor.Commands.WireDestroyCommand(output));
                 }
 
                 for (int i = selectedTile.inputCount - 1; i >= 0; i--)
                 {
-                    var input = selectedTile.outputs[i];
-                    if (input.to.cell == cell && layerToggles[(int)input.from.tile.info.layer].isOn)
-                    {
-                        ExecuteCommand(new Editor.Commands.WireDestroyCommand(input), group);
-                        group = true;
-                    }
+                    var input = selectedTile.inputs[i];
+                    if (input.from.cell == cell && layerToggles[(int)input.from.tile.info.layer].isOn)
+                        group.Add(new Editor.Commands.WireDestroyCommand(input));
                 }
 
-                if(!group)
+                if(!group.hasCommands)
                 {
                     var target = GetTile(cell, GetTileFlag.AllowInputs);
                     if(null != target)
-                        ExecuteCommand(new Editor.Commands.WireAddCommand(selectedTile, target));
+                        group.Add(new Editor.Commands.WireAddCommand(selectedTile, target));
                 }
+
+                if (group.hasCommands)
+                    ExecuteCommand(group);
 
                 UpdateCursor();
 
@@ -336,6 +334,10 @@ namespace Puzzled
 
                 case TilePropertyType.DecalArray:
                     prefab = optionPrefabDecalArray;
+                    break;
+
+                case TilePropertyType.IntArray:
+                    prefab = optionPrefabIntArray;
                     break;
 
                 default:

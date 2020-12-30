@@ -7,6 +7,7 @@ namespace Puzzled.Editor
     {
         [Header("General")]
         [SerializeField] private TMPro.TextMeshProUGUI _tileName = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _indexText = null;
         [SerializeField] private UIListItem _item = null;
 
         [Header("Parameters")]
@@ -36,6 +37,8 @@ namespace Puzzled.Editor
 
         private void OnEnable()
         {
+            _indexText.text = transform.GetSiblingIndex().ToString();
+
             _item.onSelectionChanged.AddListener(OnSelectionChanged);
             UIPuzzleEditor.onSelectedWireChanged += OnWireSelectionChanged;
 
@@ -75,24 +78,31 @@ namespace Puzzled.Editor
             OnWireSelectionChanged(UIPuzzleEditor.selectedWire);
         }
 
-        private void OnSequenceStepMoved(int from, int to)
+        private void OnSequenceStepMoved(int from, int to, Editor.Commands.GroupCommand group)
         {
             var value = (wireOption >> from) & 1;
 
             // Remove the bit
             var mask = (1 << from) - 1;
-            wireOption = (wireOption & mask) | ((wireOption >> 1) & ~mask);
+            var option = (wireOption & mask) | ((wireOption >> 1) & ~mask);
 
             // Insert the bit
             mask = (1 << to) - 1;
-            wireOption = ((wireOption & mask) | ((wireOption << 1) & ~mask)) & (~(1 << to)) | (value << to);
+            option = ((option & mask) | ((option << 1) & ~mask)) & (~(1 << to)) | (value << to);
+
+            group.Add(new Editor.Commands.WireSetOptionCommand(wire, wiresEditor.isInput, 0, option));
         }
 
-        private void OnSequenceStepRemoved(int step)
+        private void OnSequenceStepRemoved(int step, Editor.Commands.GroupCommand group)
         {
             // Remove the bit for the step
             var mask = (1 << step) - 1;
-            wireOption = (wireOption & mask) | ((wireOption >> 1) & ~mask);
+            //wireOption = (wireOption & mask) | ((wireOption >> 1) & ~mask);
+            group.Add(new Editor.Commands.WireSetOptionCommand(
+                wire, 
+                wiresEditor.isInput, 
+                0, 
+                (wireOption & mask) | ((wireOption >> 1) & ~mask)));
         }
 
         public void UpdateState ()

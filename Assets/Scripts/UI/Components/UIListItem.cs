@@ -16,12 +16,12 @@ namespace Puzzled.Editor
 
         public UnityEvent onDoubleClick = new UnityEvent();
 
-        private void Awake()
+        protected virtual void Awake()
         {
             list = GetComponentInParent<UIList>();
         }
 
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
             UpdateVisuals();
             list = GetComponentInParent<UIList>();            
@@ -32,7 +32,7 @@ namespace Puzzled.Editor
             list = GetComponentInParent<UIList>();
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        public virtual void OnPointerDown(PointerEventData eventData)
         {
             if (null == list || eventData.button != PointerEventData.InputButton.Left)
                 return;
@@ -77,7 +77,7 @@ namespace Puzzled.Editor
             _selectedVisuals.SetActive(_selected);
         }
 
-        public void OnPointerClick(PointerEventData eventData)
+        public virtual void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.clickCount == 2 && eventData.button == PointerEventData.InputButton.Left)
             {

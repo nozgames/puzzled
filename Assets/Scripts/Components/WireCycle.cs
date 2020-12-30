@@ -39,11 +39,21 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnTickStart(TickEvent evt)
         {
+            HandleTick();
+        }
+
+        private void HandleTick()
+        {
+            if (isTickFrameProcessed)
+                return; // already processed this tick
+
             if (!isCycling)
             {
                 wasCycling = false;
                 return;
             }
+
+            isTickFrameProcessed = true;
 
             if (tile.outputCount == 0)
                 return;
@@ -75,7 +85,11 @@ namespace Puzzled
         {
             isCycling = tile.hasActiveInput;
 
-            if (!isCycling)
+            if (isCycling)            
+            {
+                HandleTick();
+            }
+            else
             {
                 if (clearOnDeactivate)
                 {

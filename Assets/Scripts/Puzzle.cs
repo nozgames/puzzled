@@ -279,6 +279,15 @@ namespace Puzzled
                                 writer.Write((int)value);
                                 break;
 
+                            case TilePropertyType.IntArray:
+                            {
+                                var intArray = (int[])value;
+                                writer.Write(intArray.Length);
+                                foreach (var intValue in intArray)
+                                    writer.Write(intValue);
+                                break;
+                            }
+
                             case TilePropertyType.Bool:
                                 writer.Write((bool)value);
                                 break;
@@ -488,6 +497,15 @@ namespace Puzzled
                         case TilePropertyType.Int:
                             value = reader.ReadInt32();
                             break;
+
+                        case TilePropertyType.IntArray:
+                        {
+                            var intArray = new int[reader.ReadInt32()];
+                            for (int i = 0; i < intArray.Length; i++)
+                                intArray[i] = reader.ReadInt32();
+                            value = intArray;
+                            break;
+                        }
 
                         case TilePropertyType.Bool:
                             value = reader.ReadBoolean();

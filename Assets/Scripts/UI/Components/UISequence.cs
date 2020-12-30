@@ -18,8 +18,8 @@ namespace Puzzled
         [SerializeField] private Button _addButton = null;
 
         public event Action<int> onSelectionChanged;
-        public event Action<int> onStepRemoved;
-        public event Action<int,int> onStepMoved;
+        public event Action<int,Editor.Commands.GroupCommand> onStepRemoved;
+        public event Action<int,int,Editor.Commands.GroupCommand> onStepMoved;
 
         private Tile _tile;
         private List<string> _steps;
@@ -79,14 +79,18 @@ namespace Puzzled
                 return;
 
             var selection = _list.selected;
+            var group = new Editor.Commands.GroupCommand();
             var step = _steps[selection];
             _steps.RemoveAt(selection);
             _steps.Insert(selection - 1, step);
-            _tile.SetPropertyValue("steps", _steps.ToArray());
+            group.Add(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
 
-            onStepMoved?.Invoke(selection, selection - 1);
+            onStepMoved?.Invoke(selection, selection + 1, group);
 
-            _list.Select(_list.selected - 1);
+            UIPuzzleEditor.ExecuteCommand(group, false, (c) => {
+                _list.Select(_list.selected - 1);
+            });
+
         }
 
         public void OnMoveDownButton()
@@ -95,14 +99,17 @@ namespace Puzzled
                 return;
 
             var selection = _list.selected;
+            var group = new Editor.Commands.GroupCommand();
             var step = _steps[selection];
             _steps.RemoveAt(selection);
             _steps.Insert(selection + 1, step);
-            _tile.SetPropertyValue("steps", _steps.ToArray());
+            group.Add(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
 
-            onStepMoved?.Invoke(selection, selection + 1);
+            onStepMoved?.Invoke(selection, selection + 1, group);
 
-            _list.Select(_list.selected + 1);
+            UIPuzzleEditor.ExecuteCommand(group, false, (c) => {
+                _list.Select(_list.selected + 1);
+            });
         }
 
         public void OnAddButton()
@@ -129,6 +136,17 @@ namespace Puzzled
 
         public void OnRemoveButton()
         {
+            var group = new Editor.Commands.GroupCommand();
+            _steps.RemoveAt(_list.selected);
+            group.Add(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
+
+            onStepRemoved?.Invoke(_list.selected, group);
+
+            UIPuzzleEditor.ExecuteCommand(group, false, (c) => {
+                _list.Select(Mathf.Min(_list.selected, _steps.Count - 1));
+            });
+
+#if false
             _steps.RemoveAt(_list.selected);
             _tile.SetPropertyValue("steps", _steps.ToArray());
 
@@ -141,6 +159,7 @@ namespace Puzzled
 
             _list.ClearSelection();
             _list.Select(Mathf.Min(selected,_list.itemCount-1));
+#endif
         }
 
         private void UpdateButtons()

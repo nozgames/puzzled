@@ -2,37 +2,40 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Puzzled
+namespace Puzzled.Editor    
 {
-    class UISequenceStep : MonoBehaviour, IPointerClickHandler
+    class UIOptionIntArrayItem : UIListItem
     {
         [SerializeField] private TMPro.TMP_InputField _input = null;
         [SerializeField] private TMPro.TextMeshProUGUI _text = null;
-        [SerializeField] private TMPro.TextMeshProUGUI _index = null;
 
-        public event Action<UISequenceStep> onNameChanged;
+        public event Action<int> onValueChanged;
 
-        public string text {
-            get => _text.text;
+        public int value {
+            get => int.Parse(_input.text);
             set {
-                _text.text = value;
+                _input.SetTextWithoutNotify(value.ToString());
+                _text.text = _input.text;
             }
         }
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             _input.onEndEdit.AddListener(OnEndEdit);
             _input.onDeselect.AddListener(OnEndEdit);
         }
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             _input.gameObject.SetActive(false);
             _text.gameObject.SetActive(true);
-            _index.text = (transform.GetSiblingIndex() + 1).ToString();
         }
 
-        public void OnPointerClick(PointerEventData eventData)
+        public override void OnPointerClick(PointerEventData eventData)
         {
             if (eventData.clickCount == 2 && !_input.gameObject.activeSelf)
             {
@@ -40,7 +43,8 @@ namespace Puzzled
                 _input.gameObject.SetActive(true);
                 _text.gameObject.SetActive(false);
                 EventSystem.current.SetSelectedGameObject(_input.gameObject);
-            }
+            } else
+                base.OnPointerClick(eventData);
         }
 
         private void OnEndEdit(string value)
@@ -48,11 +52,11 @@ namespace Puzzled
             if (value != _text.text)
             {
                 _text.text = value;
-                onNameChanged?.Invoke(this);
+                onValueChanged?.Invoke(int.Parse(value));
             }
 
             _text.gameObject.SetActive(true);
-            _input.gameObject.SetActive(false);
+            _input.gameObject.SetActive(false);            
         }
     }
 }
