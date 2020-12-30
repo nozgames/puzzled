@@ -24,6 +24,9 @@ namespace Puzzled
         [Tooltip("Layer the tile is linked to")]
         [SerializeField] private TileLayer _layer = TileLayer.Static;
 
+        [Tooltip("True if the the tile should no longer be used")]
+        [SerializeField] private bool _deprecated = false;
+
         [Serializable]
         public struct CustomOptionEditor
         {
@@ -45,6 +48,8 @@ namespace Puzzled
 
         public bool allowWireInputs => _allowWireInputs;
         public bool allowWireOutputs => _allowWireOuputs;
+
+        public bool isDeprecated => _deprecated;
 
         public string displayName => string.IsNullOrEmpty(_displayName) ? name : _displayName;
 
