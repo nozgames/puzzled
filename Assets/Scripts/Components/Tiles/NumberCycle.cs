@@ -31,6 +31,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnCycleUpdate(CycleUpdateEvent evt)
         {
+            if (values == null || values.Length == 0)
+                return;
+
             Debug.Assert(valueIndex < values.Length);
             tile.SetOutputValue(values[valueIndex]);
             tile.SetOutputsActive(true);

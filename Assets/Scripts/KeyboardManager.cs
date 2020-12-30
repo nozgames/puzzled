@@ -145,7 +145,13 @@ namespace Puzzled
             return _instance._handlers.Peek();
         }
 
-        private void SendKey(KeyCode keyCode) => GetHandler()?.OnKey(keyCode);
+        private void SendKey(KeyCode keyCode)
+        {
+            if (null != EventSystem.current.currentSelectedGameObject && EventSystem.current.currentSelectedGameObject.GetComponent<TMPro.TMP_InputField>() != null)
+                return;
+
+            GetHandler()?.OnKey(keyCode);
+        }
 
         private void UpdateModifiers() => GetHandler()?.OnModifiersChanged(_instance.shift, _instance.ctrl, _instance.alt);
     }

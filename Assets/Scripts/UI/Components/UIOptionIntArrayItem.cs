@@ -52,7 +52,7 @@ namespace Puzzled.Editor
             if (value != _text.text)
             {
                 _text.text = value;
-                onValueChanged?.Invoke(int.Parse(value));
+                onValueChanged?.Invoke(int.TryParse(value, out var parsed) ? parsed : 0);
             }
 
             _text.gameObject.SetActive(true);
