@@ -49,5 +49,11 @@ namespace Puzzled
         public override int GetHashCode() => x + y * 99999;
 
         public override string ToString() => $"({x},{y})";
+
+        public int DistanceTo(Cell other) => Mathf.Abs(x - other.x) + Mathf.Abs(y - other.y);
+
+        public bool IsAdjacentTo(Cell other) => DistanceTo(other) == 1;
+
+        public Cell Flipped() => new Cell(-x, -y);
     }
 }

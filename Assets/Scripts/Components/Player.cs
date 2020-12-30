@@ -33,6 +33,8 @@ namespace Puzzled
         [SerializeField] private InputActionReference downAction = null;
         [SerializeField] private InputActionReference useAction = null;
 
+        private bool isGrabbing = false;
+
         private bool isLeftHeld = false;
         private bool isRightHeld = false;
         private bool isUpHeld = false;
@@ -152,10 +154,21 @@ namespace Puzzled
             }
         }
 
+        [ActorEventHandler]
+        private void OnGrab(GrabEvent evt)
+        {
+            Debug.Assert(evt.target.IsAdjacentTo(tile.cell));
+
+            Cell targetDirection = evt.target - tile.cell;
+            UpdateVisuals(targetDirection);
+
+            isGrabbing = true;
+        }
+
         private void OnLeftActionStarted(InputAction.CallbackContext ctx)
         {
             isLeftHeld = !KeyboardManager.isShiftPressed;
-            if (!isLeftHeld)
+            if (!isLeftHeld && !isGrabbing)
                 UpdateVisuals(Cell.left);
             else
                 desiredMovement = leftCell;
@@ -164,7 +177,7 @@ namespace Puzzled
         private void OnRightActionStarted(InputAction.CallbackContext ctx)
         {
             isRightHeld = !KeyboardManager.isShiftPressed;
-            if (!isRightHeld)
+            if (!isRightHeld && !isGrabbing)
                 UpdateVisuals(Cell.right);
             else
                 desiredMovement = rightCell;
@@ -173,7 +186,7 @@ namespace Puzzled
         private void OnUpActionStarted(InputAction.CallbackContext ctx)
         {
             isUpHeld = !KeyboardManager.isShiftPressed;
-            if (!isUpHeld)
+            if (!isUpHeld && !isGrabbing)
                 UpdateVisuals(Cell.up);
             else
                 desiredMovement = upCell;
@@ -182,7 +195,7 @@ namespace Puzzled
         private void OnDownActionStarted(InputAction.CallbackContext ctx)
         {
             isDownHeld = !KeyboardManager.isShiftPressed;
-            if (!isDownHeld)
+            if (!isDownHeld && !isGrabbing)
                 UpdateVisuals(Cell.down);
             else
                 desiredMovement = downCell;
@@ -230,7 +243,7 @@ namespace Puzzled
         }
 
         private void OnUseActionStarted(InputAction.CallbackContext ctx) => isUseHeld = true;
-        private void OnUseActionEnded(InputAction.CallbackContext ctx) => isUseHeld = false;
+        private void OnUseActionEnded(InputAction.CallbackContext ctx) => isUseHeld = isGrabbing = false; 
 
         private void OnUseAction(InputAction.CallbackContext ctx)
         {
@@ -258,15 +271,7 @@ namespace Puzzled
         {
             queuedMoveTime = float.MinValue;
 
-            // Change facing direction 
-            /*            if (cell.x < 0)
-                            visuals.localScale = new Vector3(-1, 1, 1);
-                        else if (cell.x > 0)
-                            visuals.localScale = Vector3.one;
-            */
-            UpdateVisuals(cell);
-
-            if (isUseHeld)
+            if (isGrabbing)
             {
                 // Try a push move
                 if (PushMove(cell))
@@ -280,6 +285,14 @@ namespace Puzzled
                     return;
                 }
             }
+
+            // Change facing direction 
+            /*            if (cell.x < 0)
+                            visuals.localScale = new Vector3(-1, 1, 1);
+                        else if (cell.x > 0)
+                            visuals.localScale = Vector3.one;
+            */
+            UpdateVisuals(cell);
 
             if (Move(cell))
                 return;
@@ -331,6 +344,11 @@ namespace Puzzled
 
         private bool PushMove (Cell offset)
         {
+            Debug.Assert(isGrabbing);
+
+            if (facingDirection != offset)
+                return false; // can only push in direction of grabbed object
+
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;
 
@@ -357,6 +375,11 @@ namespace Puzzled
 
         private bool PullMove(Cell offset)
         {
+            Debug.Assert(isGrabbing);
+
+            if (facingDirection != offset.Flipped())
+                return false; // can only pull in opposite direction of grabbed object
+
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;
             var pullFromCell = tile.cell - offset;
