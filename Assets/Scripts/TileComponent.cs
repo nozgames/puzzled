@@ -24,6 +24,11 @@ namespace Puzzled
         /// </summary>
         public bool isLoading => puzzle == null || puzzle.isLoading;
 
+        /// <summary>
+        /// True if the current frame is a tick
+        /// </summary>
+        public bool isTickFrame => tile == null ? false : tile.isTickFrame;
+
 
         public bool SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing = CellEventRouting.All) =>
             puzzle.grid.SendToCell(evt, cell, routing);
