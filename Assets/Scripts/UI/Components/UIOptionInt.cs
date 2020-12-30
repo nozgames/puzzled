@@ -10,21 +10,12 @@ namespace Puzzled
 
         private void OnEnable()
         {
-            input.onValueChanged.AddListener(OnInputValueChanged);
-            input.onValidateInput = OnValidateInput;
+            input.onEndEdit.AddListener(OnInputValueChanged);
         }
 
         private void OnDisable()
         {
-            input.onValueChanged.RemoveListener(OnInputValueChanged);
-        }
-
-        private char OnValidateInput(string text, int charIndex, char addedChar)
-        {
-            if (addedChar < '0' || addedChar > '9')
-                return '\0';
-
-            return addedChar;
+            input.onEndEdit.RemoveListener(OnInputValueChanged);
         }
 
         private void OnInputValueChanged(string text)
