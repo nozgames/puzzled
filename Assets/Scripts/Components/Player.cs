@@ -278,12 +278,9 @@ namespace Puzzled
                     return;
 
                 // Try a pull move
-                if (PullMove(cell))
-                {
-                    // flip him back to face the pulled object
-                    //visuals.localScale.Scale(new Vector3(-1, 1, 1));
-                    return;
-                }
+                PullMove(cell);
+
+                return;  // block other movement
             }
 
             // Change facing direction 
@@ -376,7 +373,7 @@ namespace Puzzled
         private bool PullMove(Cell offset)
         {
             Debug.Assert(isGrabbing);
-
+ 
             if (facingDirection != offset.Flipped())
                 return false; // can only pull in opposite direction of grabbed object
 
