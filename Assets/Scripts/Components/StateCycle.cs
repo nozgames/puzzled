@@ -3,109 +3,32 @@ using UnityEngine;
 
 namespace Puzzled
 {
+    [RequireComponent(typeof(Cycle))]
     class StateCycle : TileComponent
     {
         private int stateIndex;
-
-        private bool isCycling = false;
-        private bool wasCycling = false;
-
-        [Editable]
-        public bool clearOnDeactivate { get; set; } = true;
-
-        [Editable]
-        public bool isLooping { get; set; } = true;
-
-        [Editable]
-        public int ticksPerState { get; set; } = 1;
-
-        private int _tickCount = 0;
 
         [Editable(hidden = true)]
         public string[] steps { get; set; }
 
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
+        private void OnCycleAdvance(CycleAdvanceEvent evt)
         {
-            UpdateCyclingState();
-        }
+            ++stateIndex;
 
-        [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt)
-        {
-            UpdateCyclingState();
-        }
-
-        [ActorEventHandler]
-        private void OnStart(StartEvent evt) => UpdateOutputWires();
-
-        [ActorEventHandler]
-        private void OnTickStart(TickEvent evt)
-        {
-            HandleTick();
-        }
-
-        private void HandleTick()
-        {
-            if (isTickFrameProcessed)
-                return;
-
-            if (!isCycling)
+            if (stateIndex >= steps.Length)
             {
-                wasCycling = false;
-                return;
-            }
-
-            isTickFrameProcessed = true;
-
-            if (tile.outputCount == 0)
-                return;
-
-            if (wasCycling)
-            {
-                ++_tickCount;
-                if (_tickCount < ticksPerState)
-                    return;
-
-                ++stateIndex;
-
-                if (stateIndex >= steps.Length)
-                {
-                    if (isLooping)
-                        stateIndex = 0;
-                    else
-                        stateIndex = steps.Length - 1;
-                }
-            }
-
-            wasCycling = isCycling;
-
-            UpdateOutputWires();
-        }
-
-        private void UpdateCyclingState()
-        {
-            isCycling = tile.hasActiveInput;
-
-            if (isCycling)
-            {
-                HandleTick();
-            }
-            else
-            {
-                if (clearOnDeactivate)
-                {
+                if (evt.isLooping)
                     stateIndex = 0;
-                    UpdateOutputWires();
-                }
-
-                _tickCount = 0;
+                else
+                    stateIndex = steps.Length - 1;
             }
         }
 
-        private void UpdateOutputWires()
+        [ActorEventHandler]
+        private void OnCycleUpdate(CycleUpdateEvent evt)
         {
-            if (!isCycling && clearOnDeactivate)
+            if (!evt.isActive)
             {
                 tile.SetOutputsActive(false);
                 return;
@@ -116,6 +39,12 @@ namespace Puzzled
                 bool isWireActive = ((tile.GetOutputOption(i, 0) & (1 << stateIndex)) != 0);
                 tile.outputs[i].enabled = isWireActive;
             }
+        }
+
+        [ActorEventHandler]
+        private void OnCycleReset(CycleResetEvent evt)
+        {
+            stateIndex = 0;
         }
     }
 }
