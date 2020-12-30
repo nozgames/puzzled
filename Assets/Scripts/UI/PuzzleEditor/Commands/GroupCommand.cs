@@ -7,6 +7,8 @@ namespace Puzzled.Editor.Commands
     {
         private List<Command> commands = new List<Command>();
 
+        public bool hasCommands => commands.Count > 0;
+
         public GroupCommand()
         {
         }
