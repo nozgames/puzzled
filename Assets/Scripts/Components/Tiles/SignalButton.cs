@@ -3,17 +3,17 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class PulseButton : TileComponent
+    class SignalButton : TileComponent
     {
         [Editable]
         [Port(PortFlow.Output, PortType.Signal, legacy = true)]
-        public Port usePort { get; set; }
+        private Port signalOutPort { get; set; }
 
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
             evt.IsHandled = true;
-            usePort.SendSignal();
+            signalOutPort.SendSignal();
         }
     }
 }

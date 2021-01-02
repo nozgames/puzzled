@@ -18,14 +18,14 @@ namespace Puzzled
         /// </summary>
         [Editable]
         [Port(PortFlow.Input, PortType.Number, legacy = true)]
-        public Port selectPort { get; set; }
+        private Port valueInPort { get; set; }
 
         /// <summary>
         /// Output used to send the current selected decal index
         /// </summary>
         [Editable]
         [Port(PortFlow.Output, PortType.Number, legacy = true)]
-        public Port valuePort { get; set; }
+        private Port valueOutPort { get; set; }
 
         private void UpdateDecal(int decalIndex)
         {
@@ -34,7 +34,7 @@ namespace Puzzled
 
             _decalIndex = Mathf.Clamp(decalIndex, 1, decals.Length);
 
-            valuePort.SendValue(_decalIndex);
+            valueOutPort.SendValue(_decalIndex);
 
             var surface = DecalSurface.FromCell(puzzle, tile.cell);
             if (surface != null)

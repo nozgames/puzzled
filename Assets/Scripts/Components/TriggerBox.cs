@@ -1,5 +1,4 @@
 ﻿using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
@@ -9,7 +8,7 @@ namespace Puzzled
 
         [Editable]
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
-        public Port powerOutPort {get; set;}
+        private Port powerOutPort {get; set;}
 
         public bool entered { get; private set; }
 

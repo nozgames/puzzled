@@ -771,6 +771,13 @@ namespace Puzzled
                         {
                             var port = tile.GetPropertyValue<Port>(name);
                             var portWireCount = reader.ReadInt32();
+                            if (null == port)
+                            {
+                                for (int i = 0; i < portWireCount; i++)
+                                    reader.ReadInt32();
+                                continue;
+                            }
+
                             var portWires = new List<Wire>(portWireCount);
                             for (int i = 0; i < portWireCount; i++)
                             {
@@ -807,6 +814,13 @@ namespace Puzzled
                 if (toOptions != null)
                     for (int i = 0; i < toOptionCount; i++)
                         toOptions[i] = reader.ReadInt32();
+
+                // If the wire isnt valid then just remove it
+                if (wire.from.port == null || wire.to.port == null)
+                {
+                    wire.Destroy();
+                    continue;
+                }
 
                 wire.from.SetOptions(fromOptions);
                 wire.to.SetOptions(toOptions);

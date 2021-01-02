@@ -19,7 +19,7 @@ namespace Puzzled
         /// </summary>
         [Editable]
         [Port(PortFlow.Output, PortType.Number, legacy = true)]
-        public Port valueOutPort { get; set; }
+        private Port valueOutPort { get; set; }
 
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)

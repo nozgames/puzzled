@@ -3,20 +3,20 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class IntValue : TileComponent
+    class Number : TileComponent
     {
         [Editable]
         public int value { get; set; }
 
         [Editable]
         [Port(PortFlow.Input, PortType.Signal, legacy = true)]
-        public Port triggerPort { get; set; }
+        private Port signalInPort { get; set; }
         
         [Editable]
         [Port(PortFlow.Output, PortType.Number, legacy = true)]
-        public Port valuePort { get; set; }
+        private Port valueOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnSignalEvent(SignalEvent evt) => valuePort.SendValue(value);
+        private void OnSignalEvent(SignalEvent evt) => valueOutPort.SendValue(value);
     }
 }

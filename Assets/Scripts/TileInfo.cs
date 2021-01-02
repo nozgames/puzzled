@@ -9,17 +9,8 @@ namespace Puzzled
         [SerializeField] private string _displayName = "";
         [SerializeField] private string description;
 
-        [Tooltip("True if this tile can be added to a puzzled more than once")]
-        [SerializeField] private bool _allowMultiple = true;
-
-        [Tooltip("True if a dynamic tile can be placed on top on top of this tile")]
-        [SerializeField] private bool _allowDynamic = false;
-        
         [Tooltip("Layer the tile is linked to")]
         [SerializeField] private TileLayer _layer = TileLayer.Static;
-
-        [Tooltip("True if the the tile should no longer be used")]
-        [SerializeField] private bool _deprecated = false;
 
         [Serializable]
         public class CustomPropertyEditor
@@ -29,8 +20,14 @@ namespace Puzzled
         }
 
         [Header("Editor")]
-        [SerializeField] private GameObject _inputsPrefab = null;
-        [SerializeField] private GameObject _outputsPrefab = null;
+        [Tooltip("True if this tile can be added to a puzzled more than once")]
+        [SerializeField] private bool _allowMultiple = true;
+
+        [Tooltip("True if a dynamic tile can be placed on top on top of this tile")]
+        [SerializeField] private bool _allowDynamic = false;
+        [Tooltip("True if the the tile should no longer be used")]
+        [SerializeField] private bool _deprecated = false;
+
         [SerializeField] private CustomPropertyEditor[] _customPropertyEditors = null;
 
         public bool allowMultiple => _allowMultiple;
@@ -45,8 +42,6 @@ namespace Puzzled
         public string displayName => string.IsNullOrEmpty(_displayName) ? name : _displayName;
 
         public CustomPropertyEditor[] customOptionEditors => _customPropertyEditors;
-        public GameObject inputsPrefab => _inputsPrefab;
-        public GameObject outputsPrefab => _outputsPrefab;
 
         public TileLayer layer => _layer;        
 

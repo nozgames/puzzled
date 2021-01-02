@@ -35,7 +35,7 @@ namespace Puzzled
 
         [Editable]
         [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(TriggerEvent))]
-        public Port triggerPort { get; set; }
+        public Port triggerIn { get; set; }
 
         private Background _background;
         private int _zoomLevel = CameraManager.DefaultZoomLevel;

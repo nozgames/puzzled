@@ -44,7 +44,7 @@ namespace Puzzled.Editor
 
         private void OnEnable()
         {
-            _indexText.text = transform.GetSiblingIndex().ToString();
+            _indexText.text = (transform.GetSiblingIndex() + 1).ToString();
 
             _item.onSelectionChanged.AddListener(OnSelectionChanged);
             UIPuzzleEditor.onSelectedWireChanged += OnWireSelectionChanged;

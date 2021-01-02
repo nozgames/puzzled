@@ -6,12 +6,16 @@ namespace Puzzled
     class ActivationLimit : TileComponent
     {
         [Editable]
-        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(TriggerEvent))]
-        public Port triggerInPort { get; set; }
+        [Port(PortFlow.Input, PortType.Signal, legacy = true)]
+        private Port signalInPort { get; set; }
 
         [Editable]
         [Port(PortFlow.Output, PortType.Signal, legacy = true)]
-        public Port triggerOutPort { get; set; }
+        private Port signalOutPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(ResetSignal))]
+        private Port resetPort { get; set; }
 
         [Editable]
         public int limit { get; private set; } = 1;
@@ -25,14 +29,17 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnTrigger(TriggerEvent evt)
+        private void OnTrigger(SignalEvent evt)
         {
             if (_activationCount >= limit)
                 return;
 
             ++_activationCount;
 
-            triggerOutPort.SendSignal();
+            signalOutPort.SendSignal();
         }
+
+        [ActorEventHandler]
+        private void OnReset(ResetSignal evt) => _activationCount = 0;
     }
 }

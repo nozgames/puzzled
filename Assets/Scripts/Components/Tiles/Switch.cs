@@ -12,21 +12,15 @@ namespace Puzzled
         [SerializeField] private GameObject visualOn = null;
         [SerializeField] private GameObject visualOff = null;
 
+        private bool _default = false;
         private bool _on = false;
-
-        /// <summary>
-        /// Inport signal port to toggle the switch state
-        /// </summary>
-        [Editable]
-        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(ToggleEvent))]
-        public Port togglePort { get; set; }
 
         /// <summary>
         /// Input power port that is used to disable the switch if power is off
         /// </summary>
         [Editable]
         [Port(PortFlow.Input, PortType.Power)]
-        public Port powerInPort { get; set; }
+        private Port powerInPort { get; set; }
 
         // TODO: on/off/reset ports?
 
@@ -35,7 +29,35 @@ namespace Puzzled
         /// </summary>
         [Editable]
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
-        public Port powerOutPort { get; set; }
+        private Port powerOutPort { get; set; }
+
+        /// <summary>
+        /// Inport signal port to toggle the switch state
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(ToggleSignal))]
+        private Port togglePort { get; set; }
+
+        /// <summary>
+        /// Signal port to reset the switch to its default state
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(OnSignal))]
+        private Port onPort { get; set; }
+
+        /// <summary>
+        /// Signal port to reset the switch to its default state
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(OffSignal))]
+        private Port offPort { get; set; }
+
+        /// <summary>
+        /// Signal port to reset the switch to its default state
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(ResetSignal))]
+        private Port resetPort { get; set; }
 
         [Editable]
         public bool isOn {
@@ -59,7 +81,11 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnStart(StartEvent evt) => UpdateState();
+        private void OnStart(StartEvent evt)
+        {
+            _default = isOn;
+            UpdateState();
+        }
 
         [ActorEventHandler(autoRegister = false)]
         private void OnUse(UseEvent evt)
@@ -69,10 +95,22 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnToggle(ToggleEvent evt) => isOn = !isOn;
+        private void OnToggle(ToggleSignal evt) => isOn = !isOn;
+
+        [ActorEventHandler]
+        private void OnOnSignal(OnSignal evt) => isOn = true;
+
+        [ActorEventHandler]
+        private void OnOffSignal (OnSignal evt) => isOn = false;
+
+        [ActorEventHandler]
+        private void OnResetSignal (OnSignal evt) => isOn = _default;
 
         private void UpdateState ()
         {
+            if (isLoading)
+                return;
+
             powerOutPort.SetPowered(isOn);
 
             if(visualOn != null)

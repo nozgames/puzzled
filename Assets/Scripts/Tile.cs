@@ -291,7 +291,7 @@ namespace Puzzled
         /// </summary>
         /// <param name="name">Name of property</param>
         /// <returns>Property value</returns>
-        public object GetPropertyValue(string name) => GetProperty(name).GetValue(this);
+        public object GetPropertyValue(string name) => GetProperty(name)?.GetValue(this);
 
         /// <summary>
         /// Return the property value for the given property and cast it to the given type

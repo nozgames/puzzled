@@ -11,7 +11,7 @@ namespace Puzzled
         /// </summary>
         [Editable]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]
-        public Port powerInPort { get; set; }
+        public Port powerInPort { get; private set; }
 
         [Editable]
         public bool clearOnDeactivate { get; set; } = true;

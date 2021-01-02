@@ -171,7 +171,7 @@ namespace Puzzled
 
         private void OnDisable()
         {
-            if (to.port.type == PortType.Power)
+            if (to?.port.type == PortType.Power)
                 to.tile.Send(new WirePowerChangedEvent(this));
 
             bold = false;
@@ -179,11 +179,18 @@ namespace Puzzled
 
         private void OnDestroy()
         {
-            if(from != null)
-                from.port.wires.Remove(this);
+            from.port?.wires.Remove(this);
+            to.port?.wires.Remove(this);
+        }
 
-            if(to != null)
-                to.port.wires.Remove(this);
+        public void Destroy()
+        {
+            from.port?.wires.Remove(this);
+            to.port?.wires.Remove(this);
+            from.port = null;
+            to.port = null;
+            transform.SetParent(null);
+            Destroy(gameObject);
         }
 
         /// <summary>

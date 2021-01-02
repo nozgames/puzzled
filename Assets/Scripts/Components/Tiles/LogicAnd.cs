@@ -7,14 +7,14 @@ namespace Puzzled
     {
         [Editable]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]
-        public Port powerInPort { get; set; }
+        private Port powerInPort { get; set; }
 
         [Editable]
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
-        public Port powerOutPort { get; set; }
+        private Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnWirePower(WirePowerChangedEvent evt) => UpdateState();
+        private void OnWirePowerChanged (WirePowerChangedEvent evt) => UpdateState();
 
         private void UpdateState()
         {

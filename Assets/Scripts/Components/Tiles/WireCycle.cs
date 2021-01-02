@@ -13,14 +13,14 @@ namespace Puzzled
         /// </summary>
         [Editable]
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
-        public Port powerOutPort { get; set; }
+        private Port powerOutPort { get; set; }
 
         /// <summary>
         /// Output port used to send the current cycle value
         /// </summary>
         [Editable]
         [Port(PortFlow.Output, PortType.Number)]
-        public Port valueOutPort { get; set; }
+        private Port valueOutPort { get; set; }
 
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)

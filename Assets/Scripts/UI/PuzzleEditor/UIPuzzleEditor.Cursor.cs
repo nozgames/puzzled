@@ -38,7 +38,10 @@ namespace Puzzled
             var cell = canvas.CanvasToCell(ctx.ReadValue<Vector2>());
             if (cell == _cursorCell)
                 return;
-            
+
+            if (cell == Cell.invalid)
+                return;
+
             _cursorCell = cell;
             UpdateCursor();
         }
