@@ -25,7 +25,7 @@ namespace Puzzled
         public class CustomPropertyEditor
         {
             public string name;
-            public UIOptionEditor prefab;
+            public UIPropertyEditor prefab;
         }
 
         [Header("Editor")]

@@ -3,15 +3,14 @@ using UnityEngine.UI;
 
 namespace Puzzled
 {
-    public class UIOptionTile : UIOptionEditor
+    public class UIOptionTile : UIPropertyEditor
     {
         [SerializeField] private RawImage preview = null;
 
-        protected override void OnTargetChanged(object target)
+        protected override void OnTargetChanged()
         {
-            base.OnTargetChanged(target);
-
-            label = ((TilePropertyEditorTarget)target).name;
+            base.OnTargetChanged();
+            label = target.name;
             UpdatePreview();
         }
 

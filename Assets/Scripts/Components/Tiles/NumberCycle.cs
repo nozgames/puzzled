@@ -18,8 +18,8 @@ namespace Puzzled
         /// Output port used to send the current cycle value
         /// </summary>
         [Editable]
-        [Port(PortFlow.Output, PortType.Number)]
-        public Port valuePort { get; set; }
+        [Port(PortFlow.Output, PortType.Number, legacy = true)]
+        public Port valueOutPort { get; set; }
 
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)
@@ -41,7 +41,7 @@ namespace Puzzled
             if (values == null || values.Length == 0)
                 return;
 
-            valuePort.SendValue(values[valueIndex]);
+            valueOutPort.SendValue(values[valueIndex]);
         }
 
         [ActorEventHandler]

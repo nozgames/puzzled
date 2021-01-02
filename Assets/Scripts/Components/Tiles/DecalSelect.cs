@@ -17,14 +17,14 @@ namespace Puzzled
         /// Selected decal
         /// </summary>
         [Editable]
-        [Port(PortFlow.Input, PortType.Number)]
+        [Port(PortFlow.Input, PortType.Number, legacy = true)]
         public Port selectPort { get; set; }
 
         /// <summary>
         /// Output used to send the current selected decal index
         /// </summary>
         [Editable]
-        [Port(PortFlow.Output, PortType.Number)]
+        [Port(PortFlow.Output, PortType.Number, legacy = true)]
         public Port valuePort { get; set; }
 
         private void UpdateDecal(int decalIndex)

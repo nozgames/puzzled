@@ -5,11 +5,10 @@ using UnityEngine.UI;
 
 namespace Puzzled.Editor
 {
-    public class UIOptionWires : UIOptionEditor, IInspectorStateProvider
+    public class UIPortEditor : UIPropertyEditor, IInspectorStateProvider
     {
         [SerializeField] private Transform _wires = null;
         [SerializeField] private GameObject _wirePrefab = null;
-        [SerializeField] private bool _input = true;
         [SerializeField] private bool _reorderable = false;
         [SerializeField] private GameObject _content = null;
         [SerializeField] private GameObject _empty = null;
@@ -20,12 +19,15 @@ namespace Puzzled.Editor
 
         [SerializeField] private UISequence _sequence = null;
 
-        public bool isInput => _input;
+        private Port _port;
+
+        private List<Wire> wires => _port.wires;
+
         public bool isReorderable => _reorderable;
 
         public UISequence sequence => _sequence;
 
-        private List<Wire> wires => target.tileProperty.GetValue<Port>(target.tile).wires;
+        public Port port => _port;
 
         private void Awake()
         {
@@ -42,10 +44,16 @@ namespace Puzzled.Editor
             if (selection == -1)
                 return;
 
-            if (_sequence != null)
-                label = $"{(isInput ? "Inputs" : "Outputs")} ({_sequence.GetStepName(selection)})";
-
+            UpdateLabel();
             UpdateWires();
+        }
+
+        private void UpdateLabel()
+        {
+            if (_sequence != null)
+                label = $"{target.name} ({_sequence.GetStepName(_sequence.selection)})";
+            else
+                label = target.name;
         }
 
         private void OnSelectionChanged(int obj)
@@ -53,32 +61,33 @@ namespace Puzzled.Editor
             UpdateButtons();
         }
 
-        protected override void OnTargetChanged(object target)
+        protected override void OnTargetChanged()
         {
-            var tile = (Tile)target;
+            _port = target.tileProperty.GetValue<Port>(target.tile);
 
             _wires.DetachAndDestroyChildren();
 
             foreach (var wire in wires)
-                Instantiate(_wirePrefab, _wires).GetComponent<UIOptionWire>().wire = wire;
+                Instantiate(_wirePrefab, _wires).GetComponent<UIWireEditor>().wire = wire;
 
             _empty.SetActive(_wires.childCount <= 0);
             _content.SetActive(_wires.childCount > 0);
 
             if (_sequence != null)
-                _sequence.tile = tile;
+                _sequence.tile = target.tile;
 
+            UpdateLabel();
             UpdateWires();
             UpdateButtons();
 
-            base.OnTargetChanged(target);
+            base.OnTargetChanged();
         }
 
         public void UpdateWires()
         {
             for (int i = 0; i < _wires.childCount; i++)
             {
-                _wires.GetChild(i).GetComponent<UIOptionWire>().UpdateState();
+                _wires.GetChild(i).GetComponent<UIWireEditor>().UpdateState();
             }
         }
 
@@ -87,37 +96,37 @@ namespace Puzzled.Editor
             if (_wires.childCount == 0)
                 return;
 
-            _wires.GetChild(Mathf.Clamp(index, 0, _wires.childCount - 1)).GetComponent<UIOptionWire>().Select();
+            _wires.GetChild(Mathf.Clamp(index, 0, _wires.childCount - 1)).GetComponent<UIWireEditor>().Select();
         }
 
         public void OnMoveUpButton()
         {
             var index = _list.selected;
-            var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
+            var wireEditor = _wires.GetChild(index).GetComponent<UIWireEditor>();
             var wire = wireEditor.wire;
             if (index == 0)
                 return;
 
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(
-                isInput ? wire.to.port.wires : wire.from.port.wires, index, index - 1), false, (cmd) => {
-                    _list.Select(index - 1);
-                });
+                _port.wires, index, index - 1), false, (cmd) => {
+                _list.Select(index - 1);
+            });
         }
 
         public void OnMoveDownButton()
         {
             var index = _list.selected;
-            var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
+            var wireEditor = _wires.GetChild(index).GetComponent<UIWireEditor>();
             var wire = wireEditor.wire;
 
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(
-                isInput ? wire.to.port.wires : wire.from.port.wires, index, index + 1), false, (cmd) => {
-                    _list.Select(index + 1);
-                });
+                _port.wires, index, index + 1), false, (cmd) => {
+                _list.Select(index + 1);
+            });
         }
 
-        private UIOptionWire GetWireEditor(int index) =>
-            _wires.GetChild(index).GetComponent<UIOptionWire>();
+        private UIWireEditor GetWireEditor(int index) =>
+            _wires.GetChild(index).GetComponent<UIWireEditor>();
 
         public void OnDeleteButton()
         {
@@ -143,24 +152,26 @@ namespace Puzzled.Editor
         /// </summary>
         private class WiresState : IInspectorState
         {
-            public bool isInput;
-            public Wire selectedWire;
+            public Port port;
+            //public Wire selectedWire;
             public int sequenceStep;
 
             public void Apply(Transform inspector)
             {
-                var editor = inspector.GetComponentsInChildren<UIOptionWires>().FirstOrDefault(c => c.isInput == isInput);
+                var editor = inspector.GetComponentsInChildren<UIPortEditor>().FirstOrDefault(c => c._port == port);
                 if (null == editor)
                     return;
 
                 if (editor._sequence != null && sequenceStep > 0)
                     editor._sequence.selection = sequenceStep;
 
+#if false
                 if (selectedWire != null)
                 {
                     UIPuzzleEditor.selectedWire = selectedWire;
-                    editor._wires.GetComponentsInChildren<UIOptionWire>().FirstOrDefault(o => o.wire == selectedWire);
+                    editor._wires.GetComponentsInChildren<UIWireEditor>().FirstOrDefault(o => o.wire == selectedWire);
                 }
+#endif
             }
         }
 
@@ -169,8 +180,8 @@ namespace Puzzled.Editor
         /// </summary>
         IInspectorState IInspectorStateProvider.GetState() =>
             new WiresState {
-                isInput = isInput,
-                selectedWire = wires.FirstOrDefault(w => w.selected),
+                port = _port,
+                //selectedWire = wires.FirstOrDefault(w => w.selected),
                 sequenceStep = _sequence != null ? _sequence.selection : -1
             };
     }

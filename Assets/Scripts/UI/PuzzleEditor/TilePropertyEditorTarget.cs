@@ -12,7 +12,12 @@ namespace Puzzled
         {
             this.tile = tile;
             this.tileProperty = tileProperty;
-            name = tileProperty.info.Name.NicifyName();
+            name = tileProperty.info.Name;
+            if (name.EndsWith("Port"))
+                name = name.Substring(0, name.Length - 4);
+            
+            name = name.NicifyName();
+
         }
 
         public void SetValue(object value) => tileProperty.SetValue(tile, value);

@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Puzzled
 {
-    public class UIOptionString : UIOptionEditor
+    public class UIStringEditor : UIPropertyEditor
     {
         [SerializeField] private TMPro.TMP_InputField input = null;
 
@@ -23,11 +23,10 @@ namespace Puzzled
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, text));
         }
 
-        protected override void OnTargetChanged(object target)
+        protected override void OnTargetChanged()
         {
-            var option = ((TilePropertyEditorTarget)target);
-            label = option.name;
-            input.SetTextWithoutNotify(option.GetValue<string>());
+            label = target.name;
+            input.SetTextWithoutNotify(target.GetValue<string>());
         }
     }
 }

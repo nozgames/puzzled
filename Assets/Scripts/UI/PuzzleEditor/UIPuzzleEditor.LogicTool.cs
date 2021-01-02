@@ -11,16 +11,16 @@ namespace Puzzled
         [SerializeField] private GameObject inspectorContent = null;
         [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
         [SerializeField] private RawImage inspectorTilePreview = null;
-        [SerializeField] private UIOptionEditor optionPrefabInt = null;
-        [SerializeField] private UIOptionEditor optionPrefabBool = null;
-        [SerializeField] private UIOptionEditor optionPrefabBackground = null;
-        [SerializeField] private UIOptionEditor optionPrefabDecal = null;
-        [SerializeField] private UIOptionEditor optionPrefabDecalArray = null;
-        [SerializeField] private UIOptionEditor optionPrefabIntArray = null;
-        [SerializeField] private UIOptionEditor optionPrefabString = null;
-        [SerializeField] private UIOptionEditor optionPrefabStringMultiline = null;
-        [SerializeField] private UIOptionEditor optionPrefabTile = null;
-        [SerializeField] private UIOptionEditor optionPrefabPort = null;
+        [SerializeField] private UIPropertyEditor backgroundEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor boolEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor decalEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor decalArrayEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor numberEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor numberArrayEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor portEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor stringEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor stringMultilineEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
 
         private WireMesh dragWire = null;
@@ -194,6 +194,9 @@ namespace Puzzled
 
         private void SetWiresDark (Tile tile, bool dark)
         {
+            if (null == tile || null == tile.properties)
+                return;
+
             foreach (var property in tile.properties)
                 if (property.type == TilePropertyType.Port)
                     foreach (var wire in property.GetValue<Port>(tile).wires)
@@ -208,8 +211,8 @@ namespace Puzzled
             // Save the inspector state
             if (_selectedTile != null)
             {
+                SetWiresDark(_selectedTile, false);
                 UpdateInspectorState(_selectedTile);
-                SetWiresDark(tile, false);
             }
 
             _selectedTile = tile;
@@ -270,22 +273,34 @@ namespace Puzzled
             var tile = _selectedTile;
             options.DetachAndDestroyChildren();
 
-            Transform properties = null;
+            GameObject propertiesGroup = null;
+            Transform propertiesGroupContent = null;
             foreach (var tileProperty in tile.properties)
             {
                 // Skip hidden properties
                 if (tileProperty.editable.hidden)
                     continue;
 
-                if (properties == null)
-                    properties = Instantiate(optionPropertiesPrefab, options).transform.Find("Content");
-
-                var optionEditor = InstantiatePropertyEditor(tile, tileProperty, properties);
+                var optionEditor = InstantiatePropertyEditor(tile, tileProperty, options);
                 if (null == optionEditor)
                     continue;
 
+                if(!optionEditor.isGrouped)
+                {
+                    if (null == propertiesGroup)
+                    {
+                        propertiesGroup = Instantiate(optionPropertiesPrefab, options);
+                        propertiesGroupContent = propertiesGroup.transform.Find("Content");
+                    }
+
+                    optionEditor.transform.SetParent(propertiesGroupContent);
+                }
+
                 optionEditor.target = new TilePropertyEditorTarget(tile, tileProperty);
             }
+
+            if (propertiesGroup != null)
+                propertiesGroup.transform.SetAsFirstSibling();
 
             // Apply the saved inspector state
             if (_selectedTile.inspectorState != null)
@@ -300,50 +315,30 @@ namespace Puzzled
         /// <param name="property">Property</param>
         /// <param name="parent">Parent transform to instantiate in to</param>
         /// <returns>The instantiated editor</returns>
-        private UIOptionEditor InstantiatePropertyEditor(Tile tile, TileProperty property, Transform parent)
+        private UIPropertyEditor InstantiatePropertyEditor(Tile tile, TileProperty property, Transform parent)
         {
             var prefab = tile.info.GetCustomPropertyEditor(property)?.prefab ?? null;
             if(null == prefab)
                 switch (property.type)
                 {
                     case TilePropertyType.String:
-                        prefab = property.editable.multiline ? optionPrefabStringMultiline : optionPrefabString;
+                        prefab = property.editable.multiline ? stringMultilineEditorPrefab : stringEditorPrefab;
                         break;
 
-                    case TilePropertyType.Int:
-                        prefab = optionPrefabInt;
-                        break;
-
-                    case TilePropertyType.Bool:
-                        prefab = optionPrefabBool;
-                        break;
-
-                    case TilePropertyType.Background:
-                        prefab = optionPrefabBackground;
-                        break;
-
-                    // TODO: change to tile
-                    case TilePropertyType.Guid:
-                        prefab = optionPrefabTile;
-                        break;
-
-                    case TilePropertyType.Decal:
-                        prefab = optionPrefabDecal;
-                        break;
-
-                    case TilePropertyType.DecalArray:
-                        prefab = optionPrefabDecalArray;
-                        break;
-
-                    case TilePropertyType.IntArray:
-                        prefab = optionPrefabIntArray;
-                        break;
+                    case TilePropertyType.Int: prefab = numberEditorPrefab; break;
+                    case TilePropertyType.IntArray: prefab = numberArrayEditorPrefab; break;
+                    case TilePropertyType.Bool: prefab = boolEditorPrefab; break;
+                    case TilePropertyType.Background: prefab = backgroundEditorPrefab; break;
+                    case TilePropertyType.Guid: prefab = tileEditorPrefab; break;
+                    case TilePropertyType.Decal: prefab = decalEditorPrefab; break;
+                    case TilePropertyType.DecalArray: prefab = decalArrayEditorPrefab; break;
+                    case TilePropertyType.Port: prefab = portEditorPrefab; break;
 
                     default:
                         return null;
                 }
 
-            return Instantiate(prefab.gameObject, parent).GetComponent<UIOptionEditor>();
+            return Instantiate(prefab.gameObject, parent).GetComponent<UIPropertyEditor>();
         }
 
         private void OnLogicKey(KeyCode keyCode)

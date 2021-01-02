@@ -50,20 +50,12 @@ namespace Puzzled
             }
         }
 
-        protected override void OnEnable()
+        protected override void OnAwake ()
         {
-            base.OnEnable();
+            base.OnAwake();
 
             if(_usable)
                 RegisterHandler<UseEvent>();
-        }
-
-        protected override void OnDisable()
-        {
-            if (_usable)
-                UnregisterHandler<UseEvent>();
-
-            base.OnDisable();
         }
 
         [ActorEventHandler]

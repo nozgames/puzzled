@@ -34,7 +34,7 @@ namespace Puzzled
         }
 
         [Editable]
-        [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(TriggerEvent))]
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(TriggerEvent))]
         public Port triggerPort { get; set; }
 
         private Background _background;

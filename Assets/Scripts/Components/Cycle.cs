@@ -7,7 +7,7 @@ namespace Puzzled
         private bool isCycling = false;
 
         /// <summary>
-        /// Input port used to trigger the next cycle 
+        /// Input port used to enable/disable the cycle
         /// </summary>
         [Editable]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Puzzled.Editor    
 {
-    class UIOptionIntArray : UIOptionEditor, IInspectorStateProvider
+    class UIOptionIntArray : UIPropertyEditor, IInspectorStateProvider
     {
         [SerializeField] private GameObject _itemPrefab = null;
         [SerializeField] private UIList _items = null;
@@ -17,9 +17,9 @@ namespace Puzzled.Editor
 
         private List<int> _values;
 
-        protected override void OnTargetChanged(object target)
+        protected override void OnTargetChanged()
         {
-            base.OnTargetChanged(target);
+            base.OnTargetChanged();
 
             _items.transform.DetachAndDestroyChildren();
             _items.onSelectionChanged += (index) => UpdateButtons();
@@ -29,12 +29,11 @@ namespace Puzzled.Editor
             _moveUpButton.onClick.AddListener(OnMoveUpButton);
             _moveDownButton.onClick.AddListener(OnMoveDownButton);
 
-            var option = ((TilePropertyEditorTarget)target);
-            _values = option.GetValue<int[]>()?.ToList() ?? new List<int>();
+            _values = target.GetValue<int[]>()?.ToList() ?? new List<int>();
             foreach (var value in _values)
                 AddValue(value);
 
-            label = option.name;
+            label = target.name;
 
             UpdateButtons();
         }

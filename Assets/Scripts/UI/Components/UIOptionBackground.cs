@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Puzzled.Editor
 {
-    public class UIOptionBackground : UIOptionEditor
+    public class UIOptionBackground : UIPropertyEditor
     {
         [SerializeField] private Image _preview = null;
         [SerializeField] private UIDoubleClick _doubleClick= null;
@@ -22,11 +22,10 @@ namespace Puzzled.Editor
             });
         }
 
-        protected override void OnTargetChanged(object target)
+        protected override void OnTargetChanged()
         {
-            base.OnTargetChanged(target);
-
-            label = ((TilePropertyEditorTarget)target).name;
+            base.OnTargetChanged();
+            label = target.name;
             UpdatePreview();
         }
 

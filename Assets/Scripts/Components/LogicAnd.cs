@@ -6,11 +6,11 @@ namespace Puzzled
     class LogicAnd : TileComponent
     {
         [Editable]
-        [Port(PortFlow.Input, PortType.Power, legacy = false)]
+        [Port(PortFlow.Input, PortType.Power, legacy = true)]
         public Port powerInPort { get; set; }
 
         [Editable]
-        [Port(PortFlow.Output, PortType.Power, legacy = false)]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
         public Port powerOutPort { get; set; }
 
         [ActorEventHandler]

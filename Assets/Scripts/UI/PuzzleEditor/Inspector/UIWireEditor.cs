@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Puzzled.Editor
 {
-    class UIOptionWire : UIOptionEditor
+    class UIWireEditor : MonoBehaviour
     {
         [Header("General")]
         [SerializeField] private TMPro.TextMeshProUGUI _tileName = null;
@@ -13,7 +13,7 @@ namespace Puzzled.Editor
         [Header("Parameters")]
         [SerializeField] private Toggle _param1Toggle = null;
 
-        private UIOptionWires wiresEditor = null;
+        private UIPortEditor wiresEditor = null;
         private Wire _wire = null;
 
         public Wire wire {
@@ -28,20 +28,18 @@ namespace Puzzled.Editor
         }
 
         private int wireOption {
-            get => wiresEditor.isInput ? _wire.to.GetOption(0) : _wire.from.GetOption(0);
-            set {
-                if (wiresEditor.isInput)
-                    _wire.to.SetOption(0, value);
-                else
-                    _wire.from.SetOption(0, value);
-            }
+            get => _wire.GetConnection(wiresEditor.port).GetOption(0);
+            set => _wire.GetConnection(wiresEditor.port).SetOption(0, value);
         }
 
         private int wireToggleMask => wiresEditor.sequence != null ? (1<<wiresEditor.sequence.selection) : 1;
 
         private void Awake()
         {
-            wiresEditor = GetComponentInParent<UIOptionWires>();                      
+            wiresEditor = GetComponentInParent<UIPortEditor>();
+            _item.onDoubleClick.AddListener(() => {
+                UIPuzzleEditor.selectedTile = _wire.GetOppositeConnection(wiresEditor.port).tile;
+            });
         }
 
         private void OnEnable()
@@ -75,12 +73,9 @@ namespace Puzzled.Editor
             if (null == _wire)
                 return;
 
-            var tile = wiresEditor.isInput ? _wire.from.tile : _wire.to.tile;
-
-            _tileName.text = tile.info.displayName;
+            _tileName.text = (_wire.GetOppositeConnection(wiresEditor.port).tile).info.displayName;
 
             UpdateState();
-
             UpdateIndex();
 
             OnWireSelectionChanged(UIPuzzleEditor.selectedWire);
@@ -98,7 +93,7 @@ namespace Puzzled.Editor
             mask = (1 << to) - 1;
             option = ((option & mask) | ((option << 1) & ~mask)) & (~(1 << to)) | (value << to);
 
-            group.Add(new Editor.Commands.WireSetOptionCommand(wire, wiresEditor.isInput, 0, option));
+            group.Add(new Editor.Commands.WireSetOptionCommand(wire.GetConnection(wiresEditor.port), 0, option));
         }
 
         private void OnSequenceStepRemoved(int step, Editor.Commands.GroupCommand group)
@@ -107,8 +102,7 @@ namespace Puzzled.Editor
             var mask = (1 << step) - 1;
             //wireOption = (wireOption & mask) | ((wireOption >> 1) & ~mask);
             group.Add(new Editor.Commands.WireSetOptionCommand(
-                wire, 
-                wiresEditor.isInput, 
+                wire.GetConnection(wiresEditor.port),
                 0, 
                 (wireOption & mask) | ((wireOption >> 1) & ~mask)));
         }
@@ -140,16 +134,13 @@ namespace Puzzled.Editor
 
         public void OnSelectionChanged (bool selected)
         {
-            if (null == target)
-                return;
-
             if (selected)
                 UIPuzzleEditor.selectedWire = _wire;
         }
 
         public void UpdateIndex()
         {
-            label = (transform.GetSiblingIndex() + 1).ToString();            
+            _indexText.text = (transform.GetSiblingIndex() + 1).ToString();            
         }
 
         public void Select() => _item.selected = true;

@@ -61,14 +61,13 @@ namespace Puzzled
 
         protected void EndBusy() => GameManager.busy--;
 
-        protected override void OnEnable()
+        [ActorEventHandler]
+        private void OnAwake (AwakeEvent evt)
         {
-            base.OnEnable();
-
             // Automatically create all of the ports for ourself
             var properties = TileDatabase.GetProperties(tile);
             var type = GetType();
-            foreach(var property in properties)
+            foreach (var property in properties)
             {
                 if (property.info.DeclaringType != type)
                     continue;
@@ -76,16 +75,17 @@ namespace Puzzled
                 if (property.type != TilePropertyType.Port)
                     continue;
 
-                if (null == property.GetValue<Port>(tile))
+                if (null != property.GetValue<Port>(tile))
                     continue;
-                
+
                 property.SetValue(tile, new Port(tile, property.port));
             }
+
+            OnAwake();
         }
 
-        protected override void OnDisable()
+        protected virtual void OnAwake ()
         {
-            base.OnDisable();
         }
     }
 }

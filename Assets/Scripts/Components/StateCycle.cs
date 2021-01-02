@@ -12,7 +12,7 @@ namespace Puzzled
         /// Output port used to forward power to active states
         /// </summary>
         [Editable]
-        [Port(PortFlow.Output, PortType.Power)]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
         public Port powerOutPort { get; set; }
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace Puzzled
         /// </summary>
         [Editable]
         [Port(PortFlow.Output, PortType.Number)]
-        public Port valuePort { get; set; }
+        public Port valueOutPort { get; set; }
 
         [Editable(hidden = true)]
         public string[] steps { get; set; }
@@ -28,6 +28,12 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)
         {
+            if (steps == null || steps.Length == 0)
+            {
+                _stateIndex = -1;
+                return;
+            }
+
             ++_stateIndex;
 
             if (_stateIndex >= steps.Length)
@@ -42,7 +48,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnCycleUpdate(CycleUpdateEvent evt)
         {
-            valuePort.SendValue(_stateIndex + 1);
+            valueOutPort.SendValue(_stateIndex + 1);
 
             if (!evt.isActive)
             {

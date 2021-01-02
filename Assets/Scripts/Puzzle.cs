@@ -168,8 +168,9 @@ namespace Puzzled
             var tile = Instantiate(prefab.gameObject, _tiles.transform).GetComponent<Tile>();
             tile.puzzle = this;
             tile.guid = prefab.guid;
-            tile.cell = cell;
             tile.gameObject.SetChildLayers(CameraManager.TileLayerToObjectLayer(tile.info.layer));
+            tile.Send(new AwakeEvent());
+            tile.cell = cell;
             return tile;
         }
 
@@ -258,7 +259,6 @@ namespace Puzzled
         /// <param name="writer">Write to save to</param>
         private void Save(Tile[] tiles, BinaryWriter writer)
         {
-#if false
             // Write the fourcc 
             writer.WriteFourCC('P', 'U', 'Z', 'L');
 
@@ -267,6 +267,16 @@ namespace Puzzled
 
             // Write the tiles
             writer.Write(tiles.Length);
+
+            // Collect all the wires to write
+            var wires = new List<Wire>();
+            foreach (var tile in tiles)
+                foreach (var property in tile.properties)
+                    if (property.type == TilePropertyType.Port && property.port.flow == PortFlow.Output)
+                        wires.AddRange(property.GetValue<Port>(tile).wires);
+
+            // Write the wire count
+            writer.Write(wires.Count);
 
             for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
             {
@@ -352,6 +362,18 @@ namespace Puzzled
                                 writer.Write(((Tile)value).guid);
                                 break;
 
+                            case TilePropertyType.Port:
+                            {
+                                var portWires = ((Port)value).wires;
+                                writer.Write(portWires.Count);
+                                foreach(var wire in portWires)
+                                {
+                                    var wireIndex = wires.IndexOf(wire);
+                                    writer.Write(wireIndex);
+                                }
+                                break;
+                            }
+
                             default:
                                 throw new NotImplementedException();
                         }
@@ -367,42 +389,19 @@ namespace Puzzled
                 writer.BaseStream.Seek(returnPosition, SeekOrigin.Begin);
             }
 
-            // Write all wires by writing the output list of each tile
-            writer.Write(tiles.Sum(t => t.outputCount));
-
-            for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
+            // Write all the wire options
+            foreach(var wire in wires)
             {
-                var tile = tiles[tileIndex];
+                writer.Write((byte)(wire.from.options?.Length ?? 0));
+                if (wire.from.hasOptions)
+                    foreach (var option in wire.from.options)
+                        writer.Write(option);
 
-                for (int outputIndex = 0; outputIndex < tile.outputs.Count; outputIndex++)
-                {
-                    var output = tile.outputs[outputIndex];
-
-                    // Find the tile index of the 'to' connection
-                    var to = 0;
-                    for (to = 0; to < tiles.Length && tiles[to] != output.to.tile; to++)
-                        ;
-
-                    var toTile = tiles[to];
-
-                    // From
-                    writer.Write(tileIndex);
-                    writer.Write(outputIndex);
-                    writer.Write((byte)(output.from.options?.Length ?? 0));
-                    if (output.from.hasOptions)
-                        foreach (var option in output.from.options)
-                            writer.Write(option);
-
-                    // To
-                    writer.Write(to);
-                    writer.Write(output.to.tile.inputs.FindIndex(w => w == output));
-                    writer.Write((byte)(output.to.options?.Length ?? 0));
-                    if (output.to.hasOptions)
-                        foreach (var option in output.to.options)
-                            writer.Write(option);
-                }
+                writer.Write((byte)(wire.to.options?.Length ?? 0));
+                if (wire.to.hasOptions)
+                    foreach (var option in wire.to.options)
+                        writer.Write(option);
             }
-#endif
         }
 
         /// <summary>
@@ -650,7 +649,169 @@ namespace Puzzled
 
         private void LoadV3 (BinaryReader reader, int version)
         {
+            // Create the tile array
+            var tiles = new Tile[reader.ReadInt32()];
 
+            // Instantiate all the wires
+            var wires = new Wire[reader.ReadInt32()];
+            for (int wireIndex = 0; wireIndex < wires.Length; wireIndex++)
+                wires[wireIndex] = Instantiate(_wirePrefab, _wires).GetComponent<Wire>();
+
+            // Instantiate the tiles
+            for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
+            {
+                var guid = reader.ReadGuid();
+                var size = reader.ReadInt32();
+                var start = reader.BaseStream.Position;
+
+                // Find the tile prefab and if it doesnt exist skip the tile
+                var prefab = TileDatabase.GetTile(guid);
+                if (null == prefab)
+                {
+                    reader.BaseStream.Position = start + size;
+                    continue;
+                }
+
+                // Create the tile and if it fails skip the tile
+                var cell = reader.ReadCell();
+                var tile = InstantiateTile(prefab, cell);
+                if (tile == null)
+                {
+                    reader.BaseStream.Position = start + size;
+                    continue;
+                }
+
+                tiles[tileIndex] = tile;
+
+                // Read the tile properties
+                while (true)
+                {
+                    // Last property should be an Unknown
+                    var type = (TilePropertyType)reader.ReadByte();
+                    if (type == TilePropertyType.Unknown)
+                        break;
+
+                    // Read the property value
+                    var name = reader.ReadString();
+                    var value = (object)null;
+
+                    switch (type)
+                    {
+                        case TilePropertyType.Int:
+                            value = reader.ReadInt32();
+                            break;
+
+                        case TilePropertyType.IntArray:
+                        {
+                            var intArray = new int[reader.ReadInt32()];
+                            for (int i = 0; i < intArray.Length; i++)
+                                intArray[i] = reader.ReadInt32();
+                            value = intArray;
+                            break;
+                        }
+
+                        case TilePropertyType.Bool:
+                            value = reader.ReadBoolean();
+                            break;
+
+                        case TilePropertyType.String:
+                            value = reader.ReadString();
+                            break;
+
+                        case TilePropertyType.StringArray:
+                        {
+                            var sarray = new string[reader.ReadInt32()];
+                            for (int i = 0; i < sarray.Length; i++)
+                                sarray[i] = reader.ReadString();
+                            value = sarray;
+                            break;
+                        }
+
+                        case TilePropertyType.Guid:
+                            value = reader.ReadGuid();
+                            break;
+
+                        case TilePropertyType.Background:
+                        {
+                            var background = BackgroundDatabase.GetBackground(reader.ReadGuid());
+                            value = background;
+                            break;
+                        }
+
+                        case TilePropertyType.Decal:
+                        {
+                            var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                            if (version > 1)
+                                decal.flags = (DecalFlags)reader.ReadInt32();
+                            value = decal;
+                            break;
+                        }
+
+                        case TilePropertyType.DecalArray:
+                        {
+                            var decals = new Decal[reader.ReadInt32()];
+                            for (int i = 0; i < decals.Length; i++)
+                            {
+                                var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                                var flags = (DecalFlags)reader.ReadInt32();
+
+                                decal.flags = flags;
+                                decals[i] = decal;
+                            }
+
+                            value = decals;
+                            break;
+                        }
+
+                        case TilePropertyType.Tile:
+                            value = TileDatabase.GetTile(reader.ReadGuid());
+                            break;
+
+                        case TilePropertyType.Port:
+                        {
+                            var port = tile.GetPropertyValue<Port>(name);
+                            var portWireCount = reader.ReadInt32();
+                            var portWires = new List<Wire>(portWireCount);
+                            for (int i = 0; i < portWireCount; i++)
+                            {
+                                var wire = wires[reader.ReadInt32()];
+                                if (port.flow == PortFlow.Input)
+                                    wire.to.port = port;
+                                else
+                                    wire.from.port = port;
+
+                                portWires.Add(wire);
+                            }
+                            port.wires.AddRange(portWires);
+                            continue;
+                        }
+
+                        default:
+                            throw new NotImplementedException();
+                    }
+
+                    tile.SetPropertyValue(name, value);
+                }
+            }
+
+            foreach(var wire in wires)
+            {
+                var fromOptionCount = (int)reader.ReadByte();
+                var fromOptions = fromOptionCount == 0 ? null : new int[fromOptionCount];
+                if (fromOptions != null)
+                    for (int i = 0; i < fromOptionCount; i++)
+                        fromOptions[i] = reader.ReadInt32();
+
+                var toOptionCount = (int)reader.ReadByte();
+                var toOptions = toOptionCount == 0 ? null : new int[toOptionCount];
+                if (toOptions != null)
+                    for (int i = 0; i < toOptionCount; i++)
+                        toOptions[i] = reader.ReadInt32();
+
+                wire.from.SetOptions(fromOptions);
+                wire.to.SetOptions(toOptions);
+                wire.UpdatePositions();
+            }
         }
 
         [Serializable]

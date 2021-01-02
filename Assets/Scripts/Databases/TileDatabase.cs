@@ -150,21 +150,21 @@ namespace Puzzled
 
                 // Ensure there is only one signal/power output
                 if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.type != PortType.Number) > 1)
-                    throw new InvalidOperationException("Multiple signal/power outputs are not allowed");
+                    throw new InvalidOperationException($"{tile.name}: Multiple signal/power outputs are not allowed");
 
                 // Ensure there is only one number output port
                 if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.type == PortType.Number) > 1)
-                    throw new InvalidOperationException("Multiple number outputs are not allowed");
+                    throw new InvalidOperationException($"{tile.name}: Multiple number outputs are not allowed");
 
                 // If there is at least one output then there needs to be a legacy output
                 if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output) > 0 &&
                    properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.legacy) <= 0)
-                    throw new InvalidOperationException("At least one legacy output must be specified");
+                    throw new InvalidOperationException($"{tile.name}: At least one legacy output must be specified");
 
                 // If there is at least one input then there must be a legacy input
                 if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Input) > 0 &&
                    properties.Count(p => p.port != null && p.port.flow == PortFlow.Input && p.port.legacy) <= 0)
-                    throw new InvalidOperationException("At least one legacy input must be specified");
+                    throw new InvalidOperationException($"{tile.name}: At least one legacy input must be specified");
             }
         }
     }

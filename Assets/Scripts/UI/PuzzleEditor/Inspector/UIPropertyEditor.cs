@@ -3,16 +3,19 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    public class UIOptionEditor : MonoBehaviour
+    public class UIPropertyEditor : MonoBehaviour
     {
         [SerializeField] private TMPro.TextMeshProUGUI labelText = null;
+        [SerializeField] private bool _grouped = false;
 
         protected string label {
             get => labelText.text;
             set => labelText.text = value;
         }
 
-        public event Action<object> onTargetChanged;
+        public bool isGrouped => _grouped;
+
+        public event Action<TilePropertyEditorTarget> onTargetChanged;
 
         private TilePropertyEditorTarget _target;
 
@@ -24,11 +27,11 @@ namespace Puzzled
                 if (_target == null)
                     return;
 
-                OnTargetChanged(target);
+                OnTargetChanged();
             }
         }
 
-        protected virtual void OnTargetChanged(object target)
+        protected virtual void OnTargetChanged()
         {
             onTargetChanged?.Invoke(target);
         }
