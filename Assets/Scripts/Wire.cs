@@ -286,5 +286,12 @@ namespace Puzzled
 
             SendSignalInternal();
         }
+
+#if false
+        public static Tuple<Port,Port>[] GetValidConnections (Tile from, Tile to)
+        {
+            
+        }
+#endif
     }
 }

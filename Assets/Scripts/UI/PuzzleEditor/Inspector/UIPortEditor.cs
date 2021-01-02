@@ -32,11 +32,13 @@ namespace Puzzled.Editor
         private void Awake()
         {
             _list.onSelectionChanged += OnSelectionChanged;
-            
+
+            _deleteButton.onClick.AddListener(OnDeleteButton);
+            _moveUpButton.onClick.AddListener(OnMoveUpButton);
+            _moveDownButton.onClick.AddListener(OnMoveDownButton);
+
             if(_sequence != null)
-            {
                 _sequence.onSelectionChanged += OnSequenceSelectionChanged;
-            }
         }
 
         private void OnSequenceSelectionChanged(int selection)
@@ -101,28 +103,12 @@ namespace Puzzled.Editor
 
         public void OnMoveUpButton()
         {
-            var index = _list.selected;
-            var wireEditor = _wires.GetChild(index).GetComponent<UIWireEditor>();
-            var wire = wireEditor.wire;
-            if (index == 0)
-                return;
-
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(
-                _port.wires, index, index - 1), false, (cmd) => {
-                _list.Select(index - 1);
-            });
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(_port.wires, _list.selected, _list.selected - 1));
         }
 
         public void OnMoveDownButton()
         {
-            var index = _list.selected;
-            var wireEditor = _wires.GetChild(index).GetComponent<UIWireEditor>();
-            var wire = wireEditor.wire;
-
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(
-                _port.wires, index, index + 1), false, (cmd) => {
-                _list.Select(index + 1);
-            });
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(_port.wires, _list.selected, _list.selected + 1));
         }
 
         private UIWireEditor GetWireEditor(int index) =>

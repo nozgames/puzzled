@@ -177,7 +177,16 @@ namespace Puzzled
                 target = GetTile(cell, (TileLayer)(target.info.layer - 1));
 
             if (target != null && target.hasInputs)
-                ExecuteCommand(new Editor.Commands.WireAddCommand(_selectedTile.GetLegacyPort(PortFlow.Output), target.GetLegacyPort(PortFlow.Input)));
+            {
+                try
+                {
+                    ExecuteCommand(new Editor.Commands.WireAddCommand(_selectedTile.GetLegacyPort(PortFlow.Output), target.GetLegacyPort(PortFlow.Input)));
+                } 
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
 
             RefreshInspectorInternal();
 
