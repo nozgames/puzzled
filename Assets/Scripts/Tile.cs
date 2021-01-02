@@ -58,6 +58,34 @@ namespace Puzzled
         public Puzzle puzzle { get; set; }
 
         /// <summary>
+        /// True if the tile has one or more outputs
+        /// </summary>
+        public bool hasOutputs {
+            get {
+                // TODO: cache somehow (runtime info that stores properties?)
+
+                foreach (var property in properties)
+                    if (property.type == TilePropertyType.Port && property.port.flow == PortFlow.Output)
+                        return true;
+
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// True if the tile has one ore more inputs
+        /// </summary>
+        public bool hasInputs {
+            get {
+                foreach (var property in properties)
+                    if (property.type == TilePropertyType.Port && property.port.flow == PortFlow.Input)
+                        return true;
+
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Current cell
         /// </summary>
         public Cell cell {
