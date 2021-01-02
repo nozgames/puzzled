@@ -162,7 +162,7 @@ namespace Puzzled
                 to.tile.Send(new WirePowerChangedEvent(this));
             // When a wire is powered and is connected to a signal port then fire the signal
             else if (to.port.type == PortType.Signal)
-                SendSignal();
+                SendSignalInternal();
 
             _visuals.target = to.tile.cell;
 
@@ -252,6 +252,27 @@ namespace Puzzled
             to.tile.Send(evt);
         }
 
+        private void SendSignalInternal ()
+        {
+            // Send generic value signal event if no signal event was specified
+            if (null == to.port.signalEventType)
+            {
+                to.tile.Send(new SignalEvent(this));
+                return;
+            }
+
+            // Create the custom signal event
+            var evt = Activator.CreateInstance(to.port.signalEventType, new object[] { this } ) as SignalEvent;
+            if (null == evt)
+            {
+                Debug.LogError($"Failed to create signal event of type '{to.port.signalEventType.Name}'");
+                return;
+            }
+
+            // Send the event to the tile
+            to.tile.Send(evt);
+        }
+
         /// <summary>
         /// Signal the target
         /// </summary>
@@ -263,23 +284,7 @@ namespace Puzzled
                 return;
             }
 
-            // Send generic value signal event if no signal event was specified
-            if (null == to.port.signalEventType)
-            {
-                to.tile.Send(new SignalEvent(this));
-                return;
-            }
-
-            // Create the custom signal event
-            var evt = Activator.CreateInstance(to.port.signalEventType) as SignalEvent;
-            if (null == evt)
-            {
-                Debug.LogError($"Failed to create signal event of type '{to.port.signalEventType.Name}'");
-                return;
-            }
-
-            // Send the event to the tile
-            to.tile.Send(evt);
+            SendSignalInternal();
         }
     }
 }
