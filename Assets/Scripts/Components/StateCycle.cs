@@ -6,7 +6,21 @@ namespace Puzzled
     [RequireComponent(typeof(Cycle))]
     class StateCycle : TileComponent
     {
-        private int stateIndex;
+        private int _stateIndex;
+
+        /// <summary>
+        /// Output port used to forward power to active states
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power)]
+        public Port powerOutPort { get; set; }
+
+        /// <summary>
+        /// Output port used to send the current cycle value
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number)]
+        public Port valuePort { get; set; }
 
         [Editable(hidden = true)]
         public string[] steps { get; set; }
@@ -14,37 +28,33 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)
         {
-            ++stateIndex;
+            ++_stateIndex;
 
-            if (stateIndex >= steps.Length)
+            if (_stateIndex >= steps.Length)
             {
                 if (evt.isLooping)
-                    stateIndex = 0;
+                    _stateIndex = 0;
                 else
-                    stateIndex = steps.Length - 1;
+                    _stateIndex = steps.Length - 1;
             }
         }
 
         [ActorEventHandler]
         private void OnCycleUpdate(CycleUpdateEvent evt)
         {
+            valuePort.SendValue(_stateIndex + 1);
+
             if (!evt.isActive)
             {
-                tile.SetOutputsActive(false);
+                powerOutPort.SetPowered(false);
                 return;
             }
 
-            for (int i = 0; i < tile.outputCount; ++i)
-            {
-                bool isWireActive = ((tile.GetOutputOption(i, 0) & (1 << stateIndex)) != 0);
-                tile.outputs[i].enabled = isWireActive;
-            }
+            for (int i = 0; i < powerOutPort.wireCount; ++i)
+                powerOutPort.SetPowered(i, (tile.GetOutputOption(i, 0) & (1 << _stateIndex)) != 0);
         }
 
         [ActorEventHandler]
-        private void OnCycleReset(CycleResetEvent evt)
-        {
-            stateIndex = 0;
-        }
+        private void OnCycleReset(CycleResetEvent evt) => _stateIndex = 0;
     }
 }

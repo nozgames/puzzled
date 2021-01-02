@@ -1,4 +1,6 @@
-﻿using NoZ;
+﻿using System;
+using System.Collections.Generic;
+using NoZ;
 
 namespace Puzzled
 {
@@ -58,5 +60,32 @@ namespace Puzzled
         protected void BeginBusy() => GameManager.busy++;
 
         protected void EndBusy() => GameManager.busy--;
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            // Automatically create all of the ports for ourself
+            var properties = TileDatabase.GetProperties(tile);
+            var type = GetType();
+            foreach(var property in properties)
+            {
+                if (property.info.DeclaringType != type)
+                    continue;
+
+                if (property.type != TilePropertyType.Port)
+                    continue;
+
+                if (null == property.GetValue<Port>(tile))
+                    continue;
+                
+                property.SetValue(tile, new Port(property.port));
+            }
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+        }
     }
 }

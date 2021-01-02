@@ -5,29 +5,25 @@ namespace Puzzled
 {
     class WireSelect : TileComponent
     {
-        private int wireIndex;
+        /// <summary>
+        /// Selected wire index
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Number, legacy = true)]
+        public Port selectPort { get; set; }
 
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
-        {
-            wireIndex = evt.wire.value - 1;
-            UpdateOutputWires();
-        }
+        private void OnValueSignal(ValueSignalEvent evt) => UpdateOutputs(evt.value);
 
-        [ActorEventHandler]
-        private void OnWireValueChanged(WireValueChangedEvent evt)
+        private void UpdateOutputs(int value)
         {
-            wireIndex = evt.wire.value - 1;
-            UpdateOutputWires();
-        }
+            // Signal all number ouputs with the new index
+            tile.SignalOutputs(value);
 
-        private void UpdateOutputWires()
-        {
+            // Enable power for the selected wire and disabled for any other
+            var wireIndex = value - 1;
             for (int i = 0; i < tile.outputCount; ++i)
-            {
-                bool isActive = (i == wireIndex);
-                tile.SetOutputActive(i, isActive);
-            }
+                tile.SetOutputPowered(i, (i == wireIndex));
         }
     }
 }

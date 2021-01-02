@@ -9,8 +9,7 @@ namespace Puzzled
         private void OnUse(UseEvent evt)
         {
             evt.IsHandled = true;
-
-            tile.PulseOutputs();
+            tile.SendSignalToOutputs();
         }
     }
 }

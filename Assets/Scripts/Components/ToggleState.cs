@@ -11,17 +11,20 @@ namespace Puzzled
         [SerializeField] private GameObject visualOn;
         [SerializeField] private GameObject visualOff;
 
-        [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt) => UpdateState();
+        [Editable]
+        [Port(PortFlow.Input, PortType.Power, legacy = true)]
+        public Port powerInPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt) => UpdateState();
-
-        private void UpdateState()
+        private void OnWirePower (WirePowerEvent evt)
         {
-            isOn = tile.hasActiveInput;
+            isOn = powerInPort.hasPower;
             UpdateVisuals();
-            tile.SetOutputsActive(isOn);
+            powerOutPort.SetPowered(isOn);
         }
 
         private void UpdateVisuals()

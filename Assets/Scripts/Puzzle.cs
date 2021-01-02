@@ -176,36 +176,53 @@ namespace Puzzled
         /// <summary>
         /// Instantiate a new wire in the puzzle
         /// </summary>
-        /// <param name="from">Tile from</param>
-        /// <param name="to">Tile to</param>
+        /// <param name="from">Port from</param>
+        /// <param name="to">Port to</param>
         /// <returns>Instantiated wire or null if the wire could not be created</returns>
-        public Wire InstantiateWire(Tile from, Tile to)
+        public Wire InstantiateWire(Port from, Port to)
         {
-            // Ensure the wire has a valid tile on both ends
+            // Ensure the wire has a valid port on both ends
             if (from == null || to == null)
                 return null;
 
-            // Ensure the tiles allow wires
-            if (!to.info.allowWireInputs || !from.info.allowWireOutputs)
+            // Ensure we arent linking to ourself
+            if (from == to || from.tile == to.tile)
                 return null;
 
-            // Ensure we arent linking to ourself
-            if (from == to)
+
+            if (from.flow != PortFlow.Output || to.flow != PortFlow.Input)
                 return null;
+
+            switch (from.type)
+            {
+                case PortType.Number:
+                    // Can only connect number to number
+                    if (to.type != PortType.Number)
+                        return null;
+                    break;
+
+                case PortType.Power:
+                    // Power ports cannot connect to number ports
+                    if (to.type == PortType.Number)
+                        return null;
+                    break;
+
+                case PortType.Signal:
+                    // Signal can only connect to signal
+                    if (to.type != PortType.Signal)
+                        return null;
+                    break;
+            }
 
             // Already connected?
-            if (from.HasOutput(to))
-                return null;
-
-            // Back connection?
-            if (from.HasInput(to))
+            if (to.IsConnectedTo(from))
                 return null;
 
             var wire = Instantiate(_wirePrefab, _wires).GetComponent<Wire>();
-            wire.from.tile = from;
-            wire.to.tile = to;
-            from.outputs.Add(wire);
-            to.inputs.Add(wire);
+            wire.from.port = from;
+            wire.to.port = to;
+            from.wires.Add(wire);
+            to.wires.Add(wire);
             wire.transform.position = _tiles.CellToWorld(wire.from.tile.cell);
             return wire;
         }
@@ -593,7 +610,9 @@ namespace Puzzled
                     for (int i = 0; i < toOptionCount; i++)
                         toOptions[i] = reader.ReadInt32();
 
-                var wire = InstantiateWire(tiles[fromIndex], tiles[toIndex]);
+                var wire = InstantiateWire(
+                    tiles[fromIndex].GetLegacyPort(PortFlow.Output), 
+                    tiles[toIndex].GetLegacyPort(PortFlow.Input));
                 if (null == wire)
                     continue;
 
@@ -669,7 +688,9 @@ namespace Puzzled
                 var wireObjects = new List<Wire>();
                 foreach (var serializedWire in serializedPuzzle.wires)
                 {
-                    var wire = InstantiateWire(tilesObjects[serializedWire.from], tilesObjects[serializedWire.to]);
+                    var wire = InstantiateWire(
+                        tilesObjects[serializedWire.from].GetLegacyPort(PortFlow.Output), 
+                        tilesObjects[serializedWire.to].GetLegacyPort(PortFlow.Input));
                     wireObjects.Add(wire);
                     if (null == wire)
                         continue;
@@ -739,11 +760,10 @@ namespace Puzzled
         /// <param name="show">True to show wires and flase to hide wires</param>
         public void ShowWires(Tile tile, bool show = true)
         {
-            foreach (var output in tile.outputs)
-                output.visible = show;
-
-            foreach (var input in tile.inputs)
-                input.visible = show;
+            foreach (var property in tile.properties)
+                if (property.type == TilePropertyType.Port)
+                    foreach (var wire in property.GetValue<Port>(tile).wires)
+                        wire.visible = show;
         }
 
         /// <summary>
@@ -818,3 +838,21 @@ namespace Puzzled
 #endif
     }
 }
+
+
+
+#if false
+
+    how to serialize ports
+
+    - when reading in ports from v1 we need to connect any to wires to some port
+        - find the port marked legacy and connect to that
+        - if output is from a tile with no outputs but is a value tile then connect to the legacy number port instead
+
+    - when loading a v3 file
+        - load all wires into an array
+        - when loading a port property look up the wires by index and send array to port
+
+
+
+#endif

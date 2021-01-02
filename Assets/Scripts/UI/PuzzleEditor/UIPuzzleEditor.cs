@@ -487,11 +487,13 @@ namespace Puzzled
                 if (null == tile)
                     continue;
 
+#if false
                 if (!tile.info.allowWireInputs && (flags & GetTileFlag.AllowInputs) == GetTileFlag.AllowInputs)
                     continue;
 
                 if (!tile.info.allowWireOutputs && (flags & GetTileFlag.AllowOutputs) == GetTileFlag.AllowOutputs)
                     continue;
+#endif
 
                 // Do not return tiles on hidden layers
                 if (!layerToggles[i].isOn)

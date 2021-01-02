@@ -5,7 +5,37 @@ namespace Puzzled
 {
     class Switch : TileComponent
     {
+        [Header("General")]
+        [SerializeField] private bool _usable = true;
+
+        [Header("Visuals")]
+        [SerializeField] private GameObject visualOn = null;
+        [SerializeField] private GameObject visualOff = null;
+
         private bool _on = false;
+
+        /// <summary>
+        /// Inport signal port to toggle the switch state
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(ToggleEvent))]
+        public Port togglePort { get; set; }
+
+        /// <summary>
+        /// Input power port that is used to disable the switch if power is off
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Power)]
+        public Port powerInPort { get; set; }
+
+        // TODO: on/off/reset ports?
+
+        /// <summary>
+        /// Output power port that is used to power targets when the switch is on
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
 
         [Editable]
         public bool isOn {
@@ -16,47 +46,46 @@ namespace Puzzled
 
                 _on = value;
 
-                UpdateVisuals();
-
-                if(tile != null)
-                    tile.SetOutputsActive(_on);
+                UpdateState();
             }
         }
 
-        [Header("Visuals")]
-        [SerializeField] private GameObject visualOn;
-        [SerializeField] private GameObject visualOff;
-
-        [ActorEventHandler]
-        private void OnStart(StartEvent evt)
+        protected override void OnEnable()
         {
-            UpdateVisuals();
-            tile.SetOutputsActive(_on);
+            base.OnEnable();
+
+            if(_usable)
+                RegisterHandler<UseEvent>();
+        }
+
+        protected override void OnDisable()
+        {
+            if (_usable)
+                UnregisterHandler<UseEvent>();
+
+            base.OnDisable();
         }
 
         [ActorEventHandler]
+        private void OnStart(StartEvent evt) => UpdateState();
+
+        [ActorEventHandler(autoRegister = false)]
         private void OnUse(UseEvent evt)
         {
             evt.IsHandled = true;
-
-            ToggleSwitchState();
-        }
-
-        [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
-        {
-            ToggleSwitchState();
-        }
-
-        private void ToggleSwitchState()
-        {
             isOn = !isOn;
         }
 
-        private void UpdateVisuals()
+        [ActorEventHandler]
+        private void OnToggle(ToggleEvent evt) => isOn = !isOn;
+
+        private void UpdateState ()
         {
-            visualOn.SetActive(isOn);
-            visualOff.SetActive(!isOn);
+            if(visualOn != null)
+                visualOn.SetActive(isOn);
+
+            if(visualOff != null)
+                visualOff.SetActive(!isOn);
         }
     }
 }

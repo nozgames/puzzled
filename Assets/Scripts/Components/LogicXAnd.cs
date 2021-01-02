@@ -5,28 +5,27 @@ namespace Puzzled
 {
     class LogicXAnd : TileComponent
     {
-        [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt) => UpdateState();
+        [Editable]
+        [Port(PortFlow.Input, PortType.Power, legacy = true)]
+        public Port powerInPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt) => UpdateState();
-
-        private void UpdateState()
-        {
-            bool bMatches = true;
-            for (int i = 0; i < tile.inputCount; ++i)
-            {
-                if (tile.inputs[i].enabled != (tile.GetInputOption(i, 0) == 1))
-                {
-                    bMatches = false;
-                    break;
-                }
-            }
-
-            tile.SetOutputsActive(bMatches);
-        }
+        private void OnWirePower(WirePowerEvent evt) => UpdateState();
 
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => UpdateState();
+
+        private void UpdateState()
+        {
+            var powered = true;
+            for (int i = 0; i < powerInPort.wireCount && powered; ++i)
+                powered &= (powerInPort.hasPower == (powerInPort.GetOption(i, 0) == 1));
+
+            powerOutPort.SetPowered(powered);
+        }
     }
 }

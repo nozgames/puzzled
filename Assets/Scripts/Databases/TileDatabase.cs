@@ -140,13 +140,31 @@ namespace Puzzled
             // Build the tile properties array for each tile 
             foreach(var tile in _tiles)
             {
-                _tileProperties[tile.guid] =
+                var properties = _tileProperties[tile.guid] =
                     tile.GetComponentsInChildren<TileComponent>()
                         .SelectMany(tc =>
                             tc.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance),
-                            (tc, p) => new TileProperty (p, p.GetCustomAttribute<EditableAttribute>()))
+                            (tc, p) => new TileProperty (p, p.GetCustomAttribute<EditableAttribute>(), p.GetCustomAttribute<PortAttribute>()))
                         .Where(ep => ep.editable != null)
                         .ToArray();
+
+                // Ensure there is only one signal/power output
+                if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.type != PortType.Number) > 1)
+                    throw new InvalidOperationException("Multiple signal/power outputs are not allowed");
+
+                // Ensure there is only one number output port
+                if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.type == PortType.Number) > 1)
+                    throw new InvalidOperationException("Multiple number outputs are not allowed");
+
+                // If there is at least one output then there needs to be a legacy output
+                if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output) > 0 &&
+                   properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.legacy) <= 0)
+                    throw new InvalidOperationException("At least one legacy output must be specified");
+
+                // If there is at least one input then there must be a legacy input
+                if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Input) > 0 &&
+                   properties.Count(p => p.port != null && p.port.flow == PortFlow.Input && p.port.legacy) <= 0)
+                    throw new InvalidOperationException("At least one legacy input must be specified");
             }
         }
     }

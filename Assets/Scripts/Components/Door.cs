@@ -11,6 +11,15 @@ namespace Puzzled
         [Editable]
         public System.Guid keyItem { get; private set; } = System.Guid.Empty;
 
+        [Editable]
+        [Port(PortFlow.Input, PortType.Power, legacy = true)]
+        public Port powerInPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
+
+
         [Header("Visuals")]
         [SerializeField] private GameObject openedVisual;
         [SerializeField] private GameObject closedVisual;
@@ -66,26 +75,24 @@ namespace Puzzled
 
             // Open if no longer locked
             if (!_locked)
-                Open();            
+                isOpen = true;            
         }
 
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
+        private void OnWirePower (WirePowerEvent evt)
         {
-            // Do not let wires open locked doors
-            if (_locked)
-                return;
+            if(powerInPort.hasPower && !isOpen)
+            {
+                // Do not let wires open locked doors
+                if (_locked)
+                    return;
 
-            Open();
+                isOpen = true;
+            }
+            else if(!powerInPort.hasPower && isOpen)
+            {
+                isOpen = false;
+            }
         }
-
-        [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt)
-        {
-            Close();
-        }
-
-        public void Open() => isOpen = true;
-        public void Close() => isOpen = false;
     }
 }

@@ -1,36 +1,43 @@
 ﻿using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
     class StateSelect : TileComponent
     {
-        private int stateIndex;
-
         [Editable(hidden = true)]
         public string[] steps { get; set; }
 
-        [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
-        {
-            stateIndex = evt.wire.value - 1;
-            UpdateOutputWires();
-        }
+        /// <summary>
+        /// Output used to send the current selected state index
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number)]
+        public Port valuePort { get; set; }
+
+        /// <summary>
+        /// Output used to forward power to the current state
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power)]
+        public Port powerOutPort { get; set; }
+
+        /// <summary>
+        /// Input port used to set current selected state
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Number)]
+        public Port selectPort { get; set; }
 
         [ActorEventHandler]
-        private void OnWireValueChanged(WireValueChangedEvent evt)
-        {
-            stateIndex = evt.wire.value - 1;
-            UpdateOutputWires();
-        }
+        private void OnValueSignalEvent (ValueSignalEvent evt) => UpdateOutput(evt.value);
 
-        private void UpdateOutputWires()
+        private void UpdateOutput(int value)
         {
-            for (int i = 0; i < tile.outputCount; ++i)
-            {
-                bool isWireActive = ((tile.GetOutputOption(i, 0) & (1 << stateIndex)) != 0);
-                tile.outputs[i].enabled = isWireActive;
-            }
+            valuePort.SendValue(value);
+
+            var stateIndex = value - 1;
+            for (int i = 0; i < powerOutPort.wireCount; ++i)
+                powerOutPort.SetPowered(i, (tile.GetOutputOption(i, 0) & (1 << stateIndex)) != 0);
         }
     }
 }

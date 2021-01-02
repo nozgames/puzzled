@@ -18,7 +18,7 @@ namespace Puzzled
             /// <summary>
             /// Connected tile
             /// </summary>
-            public Tile tile;
+            public Tile tile => port.tile;
 
             /// <summary>
             /// Optional parameters
@@ -39,6 +39,11 @@ namespace Puzzled
             /// World position of the connected tile
             /// </summary>
             public Vector3 position => tile.transform.position;
+
+            /// <summary>
+            /// Port the wire is connected to.
+            /// </summary>
+            public Port port { get; set; }
 
             /// <summary>
             /// Sets the option at the given index
@@ -79,8 +84,6 @@ namespace Puzzled
         public Connection from { get; private set; } = new Connection();
         public Connection to { get; private set; } = new Connection();
 
-        private int _value = 0;
-
         /// <summary>
         /// Puzzle the wire belongs to
         /// </summary>
@@ -90,6 +93,11 @@ namespace Puzzled
         /// True if the wire is being edited
         /// </summary>
         public bool isEditing => puzzle.isEditing;
+
+        /// <summary>
+        /// True if the wire is powered
+        /// </summary>
+        public bool isPowered => enabled;
 
         /// <summary>
         /// Control the wire visual state
@@ -138,22 +146,6 @@ namespace Puzzled
             }
         }
 
-        /// <summary>
-        /// Current value of the wire
-        /// </summary>
-        public int value {
-            get => _value;
-            set {
-                if (_value == value)
-                    return;
-
-                _value = value;
-
-                if(enabled)
-                    to.tile.Send(new WireValueChangedEvent(this));
-            }
-        }
-        
         public bool visible {
             get => _visuals.gameObject.activeSelf;
             set {
@@ -164,11 +156,13 @@ namespace Puzzled
 
         private void OnEnable()
         {
-            // Send a wire activation event
-            to.tile.Send(new WireActivatedEvent(this));
-
-            // Also send a wire value changed event for convienence
-            to.tile.Send(new WireValueChangedEvent(this));
+            // When a wire is powered and the output port is a port port then
+            // send a power event to the tile
+            if (to.port.type == PortType.Power)
+                to.tile.Send(new WirePowerEvent(this));
+            // When a wire is powered and is connected to a signal port then fire the signal
+            else if (to.port.type == PortType.Signal)
+                SendSignal();
 
             _visuals.target = to.tile.cell;
 
@@ -177,23 +171,86 @@ namespace Puzzled
 
         private void OnDisable()
         {
-            to.tile.Send(new WireDeactivatedEvent(this));
+            if (to.port.type == PortType.Power)
+                to.tile.Send(new WirePowerEvent(this));
+
             bold = false;
         }
 
         private void OnDestroy()
         {
             if(from != null)
-                from.tile.outputs.Remove(this);
+                from.port.wires.Remove(this);
 
             if(to != null)
-                to.tile.inputs.Remove(this);
+                to.port.wires.Remove(this);
         }
 
         public void UpdatePositions()
         {
             transform.position = from.tile.transform.position;
             _visuals.UpdateMesh();
+        }
+
+        /// <summary>
+        /// Signal a value port with the given value
+        /// </summary>
+        /// <param name="value">Value to signal with</param>
+        public void SendValue(int value)
+        {
+            if (from.port.type != PortType.Number || from.port.flow != PortFlow.Output)
+            {
+                Debug.LogWarning("SendValue requires a number output port");
+                return;
+            }
+
+            // Send generic value signal event if no signal event was specified
+            if(null == to.port.signalEventType)
+            {
+                to.tile.Send(new ValueSignalEvent(this,value));
+                return;
+            }
+
+            // Create the custom signal event
+            var evt = Activator.CreateInstance(to.port.signalEventType, this, value) as ValueSignalEvent;
+            if(null == evt)
+            {
+                Debug.LogError($"Failed to create signal event of type '{to.port.signalEventType.Name}'");
+                return;
+            }
+
+            // Send the event to the tile
+            to.tile.Send(evt);
+        }
+
+        /// <summary>
+        /// Signal the target
+        /// </summary>
+        public void SendSignal()
+        {
+            if (from.port.flow != PortFlow.Output || from.port.type != PortType.Signal)
+            {
+                Debug.LogWarning($"SendSignal requires a signal output port");
+                return;
+            }
+
+            // Send generic value signal event if no signal event was specified
+            if (null == to.port.signalEventType)
+            {
+                to.tile.Send(new SignalEvent(this));
+                return;
+            }
+
+            // Create the custom signal event
+            var evt = Activator.CreateInstance(to.port.signalEventType) as SignalEvent;
+            if (null == evt)
+            {
+                Debug.LogError($"Failed to create signal event of type '{to.port.signalEventType.Name}'");
+                return;
+            }
+
+            // Send the event to the tile
+            to.tile.Send(evt);
         }
     }
 }

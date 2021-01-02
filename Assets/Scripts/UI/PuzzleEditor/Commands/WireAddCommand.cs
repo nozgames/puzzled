@@ -26,7 +26,9 @@ namespace Puzzled.Editor.Commands
         protected override void OnExecute()
         {
             Debug.Assert(wire == null);
-            wire = puzzle.InstantiateWire(from, to);
+            wire = puzzle.InstantiateWire(
+                from.GetLegacyPort(PortFlow.Output), 
+                to.GetLegacyPort(PortFlow.Input));
             wire.visible = true;
             fromIndex = wire.from.tile.GetOutputIndex(wire);
             toIndex = wire.to.tile.GetInputIndex(wire);

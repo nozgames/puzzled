@@ -14,6 +14,13 @@ namespace Puzzled
             set;
         }
 
+        /// <summary>
+        /// Output port used to send the current cycle value
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number)]
+        public Port valuePort { get; set; }
+
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)
         {
@@ -24,7 +31,7 @@ namespace Puzzled
                 if (evt.isLooping)
                     valueIndex = 0;
                 else
-                    valueIndex = tile.outputCount - 1;
+                    valueIndex = values.Length - 1;
             }
         }
 
@@ -34,9 +41,7 @@ namespace Puzzled
             if (values == null || values.Length == 0)
                 return;
 
-            Debug.Assert(valueIndex < values.Length);
-            tile.SetOutputValue(values[valueIndex]);
-            tile.SetOutputsActive(true);
+            valuePort.SendValue(values[valueIndex]);
         }
 
         [ActorEventHandler]

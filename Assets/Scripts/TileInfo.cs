@@ -14,12 +14,6 @@ namespace Puzzled
 
         [Tooltip("True if a dynamic tile can be placed on top on top of this tile")]
         [SerializeField] private bool _allowDynamic = false;
-
-        [Tooltip("True if a tile allows wire inputs")]
-        [SerializeField] private bool _allowWireInputs = false;
-
-        [Tooltip("True if a tile allows wire outputs")]
-        [SerializeField] private bool _allowWireOuputs = false;
         
         [Tooltip("Layer the tile is linked to")]
         [SerializeField] private TileLayer _layer = TileLayer.Static;
@@ -45,9 +39,6 @@ namespace Puzzled
         /// Returns true if a static tile allows a dynamic tile to be placed on top of it
         /// </summary>
         public bool allowDynamic => _allowDynamic;
-
-        public bool allowWireInputs => _allowWireInputs;
-        public bool allowWireOutputs => _allowWireOuputs;
 
         public bool isDeprecated => _deprecated;
 

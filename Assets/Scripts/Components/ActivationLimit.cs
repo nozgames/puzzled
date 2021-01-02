@@ -1,10 +1,18 @@
 ﻿using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
+    // TODO: review how this works with new ports
     class ActivationLimit : TileComponent
     {
+        [Editable]
+        [Port(PortFlow.Input, PortType.Power, legacy = true)]
+        public Port powerInPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
+
         [Editable]
         public int limit { get; private set; } = 1;
 
@@ -17,22 +25,20 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
+        private void OnWirePower(WirePowerEvent evt)
         {
             if (_activationCount >= limit)
                 return;
 
-            ++_activationCount;
-            tile.SetOutputsActive(true);
-        }
-
-        [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt)
-        {
-            if (_activationCount >= limit)
-                return;
-
-            tile.SetOutputsActive(false);
+            if (evt.isPowered)
+            {
+                ++_activationCount;
+                powerOutPort.SetPowered(true);
+            }
+            else
+            {
+                powerOutPort.SetPowered(false);
+            }
         }
     }
 }
