@@ -42,6 +42,6 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnSignalEvent(ValueSignalEvent evt) => UpdateDecal(evt.value);
+        private void OnSignalEvent(ValueEvent evt) => UpdateDecal(evt.value);
     }
 }

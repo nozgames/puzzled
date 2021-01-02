@@ -25,12 +25,12 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnWirePower(WirePowerEvent evt)
+        private void OnWirePower(WirePowerChangedEvent evt)
         {
             if (_activationCount >= limit)
                 return;
 
-            if (evt.isPowered)
+            if (evt.hasPower)
             {
                 ++_activationCount;
                 powerOutPort.SetPowered(true);

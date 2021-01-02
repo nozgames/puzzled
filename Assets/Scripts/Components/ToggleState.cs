@@ -20,7 +20,7 @@ namespace Puzzled
         public Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnWirePower (WirePowerEvent evt)
+        private void OnWirePower (WirePowerChangedEvent evt)
         {
             isOn = powerInPort.hasPower;
             UpdateVisuals();

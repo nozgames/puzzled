@@ -1,6 +1,4 @@
 ﻿using NoZ;
-using UnityEngine;
-using System.Collections.Generic;
 
 namespace Puzzled
 {
@@ -8,16 +6,30 @@ namespace Puzzled
     {
         private int sequenceIndex = 0;
 
+        [Editable]
+        [Port(PortFlow.Input, PortType.Power, legacy = true)]
+        public Port powerInPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
+
+        // TODO: number out port for current sequence index
+        // TODO: reset input signal port?
+
         [Editable(hidden = true)]
         public string[] steps { get; set; }
         
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
+        private void OnWirePower (WirePowerChangedEvent evt)
         {
-            for (int i = 0; i < tile.inputCount; ++i)
+            if (!evt.hasPower)
+                return;
+
+            for (int i = 0; i < powerInPort.wireCount; ++i)
             {
-                bool isWireExpected = ((tile.GetInputOption(i, 0) & (1 << sequenceIndex)) != 0);
-                if ((tile.inputs[i] == evt.wire) && !isWireExpected)
+                bool isWireExpected = ((powerInPort.GetWireOption(i, 0) & (1 << sequenceIndex)) != 0);
+                if ((powerInPort.GetWire(i) == evt.wire) && !isWireExpected)
                 {
                     // failure
                     HandleIncorrectWire();
@@ -43,12 +55,12 @@ namespace Puzzled
         private void Reset()
         {
             sequenceIndex = 0;
-            tile.SetOutputsActive(false);
+            powerOutPort.SetPowered(false);
         }
 
         private void HandleSequenceComplete()
         {
-            tile.SetOutputsActive(true);
+            powerOutPort.SetPowered(true);
         }
     }
 }

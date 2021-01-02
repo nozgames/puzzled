@@ -159,7 +159,7 @@ namespace Puzzled
             // When a wire is powered and the output port is a port port then
             // send a power event to the tile
             if (to.port.type == PortType.Power)
-                to.tile.Send(new WirePowerEvent(this));
+                to.tile.Send(new WirePowerChangedEvent(this));
             // When a wire is powered and is connected to a signal port then fire the signal
             else if (to.port.type == PortType.Signal)
                 SendSignal();
@@ -172,7 +172,7 @@ namespace Puzzled
         private void OnDisable()
         {
             if (to.port.type == PortType.Power)
-                to.tile.Send(new WirePowerEvent(this));
+                to.tile.Send(new WirePowerChangedEvent(this));
 
             bold = false;
         }
@@ -207,12 +207,12 @@ namespace Puzzled
             // Send generic value signal event if no signal event was specified
             if(null == to.port.signalEventType)
             {
-                to.tile.Send(new ValueSignalEvent(this,value));
+                to.tile.Send(new ValueEvent(this,value));
                 return;
             }
 
             // Create the custom signal event
-            var evt = Activator.CreateInstance(to.port.signalEventType, this, value) as ValueSignalEvent;
+            var evt = Activator.CreateInstance(to.port.signalEventType, this, value) as ValueEvent;
             if(null == evt)
             {
                 Debug.LogError($"Failed to create signal event of type '{to.port.signalEventType.Name}'");

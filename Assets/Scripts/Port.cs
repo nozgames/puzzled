@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using NoZ;
 
 namespace Puzzled
 {
@@ -196,7 +195,7 @@ namespace Puzzled
         /// <param name="wireIndex">Index of wire to set option for</param>
         /// <param name="option">Index of option</param>
         /// <param name="value">Value to set</param>
-        public void SetOption(int wireIndex, int option, int value) =>
+        public void SetWireOption (int wireIndex, int option, int value) =>
             GetWireConnection(wireIndex).SetOption(option, value);
 
         /// <summary>
@@ -205,71 +204,7 @@ namespace Puzzled
         /// <param name="wireIndex">Wire index</param>
         /// <param name="option">Option to retrieve</param>
         /// <returns></returns>
-        public int GetOption(int wireIndex, int option) =>
+        public int GetWireOption (int wireIndex, int option) =>
             GetWireConnection(wireIndex).GetOption(option);
-    }
-
-
-
-    public class SignalEvent : WireEvent
-    {
-        public SignalEvent(Wire wire) : base(wire) { }
-    }
-
-    public class ToggleSignalEvent : SignalEvent 
-    {
-        public ToggleSignalEvent(Wire wire) : base(wire) { }
-    }
-    
-    public class ResetSignalEvent : SignalEvent 
-    {
-        public ResetSignalEvent(Wire wire) : base(wire) { }
-    }
-
-    public class OffSignalEvent : SignalEvent
-    {
-        public OffSignalEvent(Wire wire) : base(wire) { }
-    }
-
-    public class OnSignalEvent : SignalEvent
-    {
-        public OnSignalEvent(Wire wire) : base(wire) { }
-    }
-
-    public class ValueSignalEvent : SignalEvent
-    {
-        /// <summary>
-        /// Value that the signal was sent with
-        /// </summary>
-        public int value { get; private set; }
-
-        public ValueSignalEvent(Wire wire, int value) : base(wire) 
-        {
-            this.value = value;
-        }
-    }
-
-    public class WireEvent : ActorEvent
-    {
-        public Wire wire { get; private set; }
-        public Port port => wire.to.port;
-
-        public WireEvent (Wire wire)
-        {
-            this.wire = wire;
-        }
-    }
-
-    /// <summary>
-    /// Sent when the power of a wire changes for a given port
-    /// </summary>
-    public class WirePowerEvent : WireEvent
-    {
-        public bool isPowered => wire.enabled;
-        public bool isOff => wire.enabled;
-
-        public WirePowerEvent (Wire wire) : base(wire)
-        {
-        }
     }
 }

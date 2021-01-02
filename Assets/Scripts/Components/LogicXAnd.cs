@@ -14,7 +14,7 @@ namespace Puzzled
         public Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnWirePower(WirePowerEvent evt) => UpdateState();
+        private void OnWirePower(WirePowerChangedEvent evt) => UpdateState();
 
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => UpdateState();
@@ -23,7 +23,7 @@ namespace Puzzled
         {
             var powered = true;
             for (int i = 0; i < powerInPort.wireCount && powered; ++i)
-                powered &= (powerInPort.hasPower == (powerInPort.GetOption(i, 0) == 1));
+                powered &= (powerInPort.hasPower == (powerInPort.GetWireOption(i, 0) == 1));
 
             powerOutPort.SetPowered(powered);
         }

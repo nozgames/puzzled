@@ -30,7 +30,7 @@ namespace Puzzled
         private void OnStart(StartEvent evt) => Send(new CycleUpdateEvent(this));
 
         [ActorEventHandler]
-        private void OnWirePower (WirePowerEvent evt)
+        private void OnWirePower (WirePowerChangedEvent evt)
         {
             UpdateCyclingState();
         }

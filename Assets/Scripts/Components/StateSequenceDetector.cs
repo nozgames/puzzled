@@ -8,27 +8,30 @@ namespace Puzzled
     {
         private int sequenceIndex = 0;
 
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Input, PortType.Power, legacy = true)]
+        public Port powerInPort { get; set; }
+
+        // TODO: trigger to reset?
+
+        // TODO: number out port for current state?
+
         [Editable(hidden = true)]
         public string[] steps { get; set; }
 
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
-        {
-            HandleWireChange();
-        }
-
-        [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt)
-        {
-            HandleWireChange();
-        }
+        private void OnWirePower(WirePowerChangedEvent evt) => HandleWireChange();
 
         private void HandleWireChange()
         {
-            for (int i = 0; i < tile.inputCount; ++i)
+            for (int i = 0; i < powerInPort.wireCount; ++i)
             {
-                bool isWireExpected = ((tile.GetInputOption(i, 0) & (1 << sequenceIndex)) != 0);
-                if (tile.inputs[i].enabled != isWireExpected)
+                bool isWireExpected = ((powerInPort.GetWireOption(i, 0) & (1 << sequenceIndex)) != 0);
+                if (powerInPort.GetWire(i).isPowered != isWireExpected)
                 {
                     // failure
                     HandleIncorrectWire();
@@ -48,18 +51,18 @@ namespace Puzzled
 
         private void HandleIncorrectWire()
         {
-            Reset();
+            ResetSequence();
         }
 
-        private void Reset()
+        private void ResetSequence()
         {
             sequenceIndex = 0;
-            tile.SetOutputsActive(false);
+            powerOutPort.SetPowered(false);
         }
 
         private void HandleSequenceComplete()
         {
-            tile.SetOutputsActive(true);
+            powerOutPort.SetPowered(true);
         }
     }
 }

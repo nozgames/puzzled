@@ -5,6 +5,12 @@ namespace Puzzled
 {
     class TriggerBox : TileComponent
     {
+        // TODO: power in to use as a kill switch ? (no wires = self powered, else use power)
+
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort {get; set;}
+
         public bool entered { get; private set; }
 
         [ActorEventHandler]
@@ -13,7 +19,7 @@ namespace Puzzled
             if (evt.isPlayer)
             {
                 entered = true;
-                tile.SetOutputsActive(true);
+                powerOutPort.SetPowered(true);
             }
         }
 
@@ -23,7 +29,7 @@ namespace Puzzled
             if (evt.isPlayer)
             {
                 entered = false;
-                tile.SetOutputsActive(false);
+                powerOutPort.SetPowered(false);
             }
         }
     }

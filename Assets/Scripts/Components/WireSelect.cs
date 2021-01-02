@@ -1,5 +1,4 @@
 ﻿using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
@@ -12,18 +11,30 @@ namespace Puzzled
         [Port(PortFlow.Input, PortType.Number, legacy = true)]
         public Port selectPort { get; set; }
 
+        /// <summary>
+        /// Output power port that poweres the wire matching the selectPort value
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
+
+        /// Output power port that poweres the wire matching the selectPort value
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number)]
+        public Port valuePort { get; set; }
+
         [ActorEventHandler]
-        private void OnValueSignal(ValueSignalEvent evt) => UpdateOutputs(evt.value);
+        private void OnValueSignal(ValueEvent evt) => UpdateOutputs(evt.value);
 
         private void UpdateOutputs(int value)
         {
-            // Signal all number ouputs with the new index
-            tile.SignalOutputs(value);
+            valuePort.SendValue(value);
 
             // Enable power for the selected wire and disabled for any other
             var wireIndex = value - 1;
-            for (int i = 0; i < tile.outputCount; ++i)
-                tile.SetOutputPowered(i, (i == wireIndex));
+            for (int i = 0; i < powerOutPort.wireCount; ++i)
+                powerOutPort.SetPowered(i, (i == wireIndex));
         }
     }
 }

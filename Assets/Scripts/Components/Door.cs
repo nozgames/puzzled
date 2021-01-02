@@ -79,7 +79,7 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnWirePower (WirePowerEvent evt)
+        private void OnWirePower (WirePowerChangedEvent evt)
         {
             if(powerInPort.hasPower && !isOpen)
             {

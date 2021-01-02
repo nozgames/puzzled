@@ -29,7 +29,7 @@ namespace Puzzled
         public Port selectPort { get; set; }
 
         [ActorEventHandler]
-        private void OnValueSignalEvent (ValueSignalEvent evt) => UpdateOutput(evt.value);
+        private void OnValueSignalEvent (ValueEvent evt) => UpdateOutput(evt.value);
 
         private void UpdateOutput(int value)
         {

@@ -14,6 +14,10 @@ namespace Puzzled
         [SerializeField] private Vector3 decalOffsetPressed;
         [SerializeField] private Vector3 decalOffsetUnpressed;
 
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
+
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => UpdateState();
 
@@ -31,7 +35,7 @@ namespace Puzzled
             _pressed = pressed;
             visualPressed.SetActive(pressed);
             visualUnpressed.SetActive(!pressed);
-            tile.SetOutputsActive(pressed);
+            powerOutPort.SetPowered(pressed);
 
             decalSurface.transform.localPosition = pressed ? decalOffsetPressed : decalOffsetUnpressed;
         }

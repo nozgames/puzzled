@@ -13,7 +13,7 @@ namespace Puzzled
         public Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnWirePower (WirePowerEvent evt) => UpdateState();
+        private void OnWirePower (WirePowerChangedEvent evt) => UpdateState();
 
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => UpdateState();
