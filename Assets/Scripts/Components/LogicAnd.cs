@@ -18,7 +18,7 @@ namespace Puzzled
 
         private void UpdateState()
         {
-            var powered = true;
+            var powered = powerInPort.wireCount > 0;
             for (int i = 0; powered && i < powerInPort.wireCount; i++)
                 powered = powered & powerInPort.GetWire(i).isPowered;
 

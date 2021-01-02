@@ -6,12 +6,12 @@ namespace Puzzled
     class ActivationLimit : TileComponent
     {
         [Editable]
-        [Port(PortFlow.Input, PortType.Power, legacy = true)]
-        public Port powerInPort { get; set; }
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(TriggerEvent))]
+        public Port triggerInPort { get; set; }
 
         [Editable]
-        [Port(PortFlow.Output, PortType.Power, legacy = true)]
-        public Port powerOutPort { get; set; }
+        [Port(PortFlow.Output, PortType.Signal, legacy = true)]
+        public Port triggerOutPort { get; set; }
 
         [Editable]
         public int limit { get; private set; } = 1;
@@ -25,20 +25,14 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnWirePower(WirePowerChangedEvent evt)
+        private void OnTrigger(TriggerEvent evt)
         {
             if (_activationCount >= limit)
                 return;
 
-            if (evt.hasPower)
-            {
-                ++_activationCount;
-                powerOutPort.SetPowered(true);
-            }
-            else
-            {
-                powerOutPort.SetPowered(false);
-            }
+            ++_activationCount;
+
+            triggerOutPort.SendSignal();
         }
     }
 }

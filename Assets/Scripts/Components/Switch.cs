@@ -73,6 +73,8 @@ namespace Puzzled
 
         private void UpdateState ()
         {
+            powerOutPort.SetPowered(isOn);
+
             if(visualOn != null)
                 visualOn.SetActive(isOn);
 

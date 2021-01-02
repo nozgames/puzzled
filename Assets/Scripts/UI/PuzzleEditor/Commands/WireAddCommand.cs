@@ -20,6 +20,8 @@ namespace Puzzled.Editor.Commands
         {
             from.wires.RemoveAt(fromIndex);
             to.wires.RemoveAt(toIndex);
+            from.tile.Send(new StartEvent());
+            to.tile.Send(new StartEvent());
             UIPuzzleEditor.MoveToTrash(wire.gameObject);
         }
 
@@ -32,7 +34,8 @@ namespace Puzzled.Editor.Commands
             toIndex = to.wires.IndexOf(wire);
             UIPuzzleEditor.selectedWire = wire;
 
-            wire.from.tile.Send(new StartEvent());
+            from.tile.Send(new StartEvent());
+            to.tile.Send(new StartEvent());
         }
 
         protected override void OnRedo()
@@ -41,7 +44,8 @@ namespace Puzzled.Editor.Commands
             to.wires.Insert(toIndex, wire);
             UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
 
-            wire.from.tile.Send(new StartEvent());
+            from.tile.Send(new StartEvent());
+            to.tile.Send(new StartEvent());
         }
 
         protected override void OnDestroy()

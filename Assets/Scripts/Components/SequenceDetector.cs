@@ -7,8 +7,8 @@ namespace Puzzled
         private int sequenceIndex = 0;
 
         [Editable]
-        [Port(PortFlow.Input, PortType.Power, legacy = true)]
-        public Port powerInPort { get; set; }
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(TriggerEvent))]
+        public Port triggerPort { get; set; }
 
         [Editable]
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
@@ -21,15 +21,12 @@ namespace Puzzled
         public string[] steps { get; set; }
         
         [ActorEventHandler]
-        private void OnWirePower (WirePowerChangedEvent evt)
+        private void OnTrigger (TriggerEvent evt)
         {
-            if (!evt.hasPower)
-                return;
-
-            for (int i = 0; i < powerInPort.wireCount; ++i)
+            for (int i = 0; i < triggerPort.wireCount; ++i)
             {
-                bool isWireExpected = ((powerInPort.GetWireOption(i, 0) & (1 << sequenceIndex)) != 0);
-                if ((powerInPort.GetWire(i) == evt.wire) && !isWireExpected)
+                bool isWireExpected = ((triggerPort.GetWireOption(i, 0) & (1 << sequenceIndex)) != 0);
+                if ((triggerPort.GetWire(i) == evt.wire) && !isWireExpected)
                 {
                     // failure
                     HandleIncorrectWire();

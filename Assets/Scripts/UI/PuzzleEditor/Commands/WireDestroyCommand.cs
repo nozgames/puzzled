@@ -26,6 +26,8 @@ namespace Puzzled.Editor.Commands
         {
             wire.from.port.wires.RemoveAt(fromIndex);
             wire.to.port.wires.RemoveAt(toIndex);
+            wire.from.tile.Send(new StartEvent());
+            wire.to.tile.Send(new StartEvent());
             UIPuzzleEditor.MoveToTrash(wire.gameObject);
         }
 
@@ -34,6 +36,8 @@ namespace Puzzled.Editor.Commands
             UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
             wire.from.port.wires.Insert(fromIndex, wire);
             wire.to.port.wires.Insert(toIndex, wire);
+            wire.from.tile.Send(new StartEvent());
+            wire.to.tile.Send(new StartEvent());
         }
 
         protected override void OnDestroy()

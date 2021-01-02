@@ -29,7 +29,7 @@ namespace Puzzled
                 wasDelaying = true;
             } 
 
-            if(!powerInPort.hasPower && isDelaying)
+            if(!powerInPort.hasPower && (isDelaying || wasDelaying))
             {
                 tickCount = 0;
                 isDelaying = false;

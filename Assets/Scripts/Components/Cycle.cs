@@ -27,7 +27,11 @@ namespace Puzzled
         public bool shouldBeActive => isCycling || !clearOnDeactivate;
 
         [ActorEventHandler]
-        private void OnStart(StartEvent evt) => Send(new CycleUpdateEvent(this));
+        private void OnStart(StartEvent evt)
+        {
+            UpdateCyclingState();
+            Send(new CycleUpdateEvent(this));
+        }
 
         [ActorEventHandler]
         private void OnWirePower (WirePowerChangedEvent evt)
@@ -60,7 +64,7 @@ namespace Puzzled
 
         private void UpdateCyclingState()
         {
-            isCycling = powerInPort.hasPower;
+            isCycling = powerInPort.wireCount == 0 || powerInPort.hasPower;
 
             if (isCycling)
             {
