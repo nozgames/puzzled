@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 2;
+        private const int FileVersion = 3;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -258,6 +258,7 @@ namespace Puzzled
         /// <param name="writer">Write to save to</param>
         private void Save(Tile[] tiles, BinaryWriter writer)
         {
+#if false
             // Write the fourcc 
             writer.WriteFourCC('P', 'U', 'Z', 'L');
 
@@ -401,6 +402,7 @@ namespace Puzzled
                             writer.Write(option);
                 }
             }
+#endif
         }
 
         /// <summary>
@@ -459,7 +461,13 @@ namespace Puzzled
             {
                 case 1:
                 case 2:
-                    LoadV1(reader, version); break;
+                    LoadV1(reader, version); 
+                    break;
+
+                case 3:
+                    LoadV3(reader, version);
+                    break;
+
                 default:
                     throw new NotImplementedException();
             }
@@ -628,11 +636,22 @@ namespace Puzzled
                 if (wire == null)
                     continue;
 
-                wire.from.tile.SetOutputIndex(wire, wireOrderFrom[wireIndex], true);
-                wire.to.tile.SetInputIndex(wire, wireOrderTo[wireIndex], true);
+                wire.from.port.wires.Remove(wire);
+                while (wire.from.port.wires.Count < wireOrderFrom[wireIndex])
+                    wire.from.port.wires.Add(null);
+                wire.from.port.wires.Insert(wireOrderFrom[wireIndex], wire);
+
+                wire.to.port.wires.Remove(wire);
+                while (wire.to.port.wires.Count < wireOrderTo[wireIndex])
+                    wire.to.port.wires.Add(null);
+                wire.to.port.wires.Insert(wireOrderTo[wireIndex], wire);
             }
         }
 
+        private void LoadV3 (BinaryReader reader, int version)
+        {
+
+        }
 
         [Serializable]
         public class SerializedPuzzle
@@ -706,8 +725,15 @@ namespace Puzzled
                     if (wire == null)
                         continue;
 
-                    wire.from.tile.SetOutputIndex(wire, serializedPuzzle.wires[wireIndex].fromOrder, true);
-                    wire.to.tile.SetInputIndex(wire, serializedPuzzle.wires[wireIndex].toOrder, true);
+                    wire.from.port.wires.Remove(wire);
+                    while (wire.from.port.wires.Count < serializedPuzzle.wires[wireIndex].fromOrder)
+                        wire.from.port.wires.Add(null);
+                    wire.from.port.wires.Insert(serializedPuzzle.wires[wireIndex].fromOrder, wire);
+
+                    wire.to.port.wires.Remove(wire);
+                    while (wire.to.port.wires.Count < serializedPuzzle.wires[wireIndex].toOrder)
+                        wire.to.port.wires.Add(null);
+                    wire.to.port.wires.Insert(serializedPuzzle.wires[wireIndex].toOrder, wire);
                 }
             }
 

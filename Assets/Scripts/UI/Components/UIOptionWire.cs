@@ -16,7 +16,16 @@ namespace Puzzled.Editor
         private UIOptionWires wiresEditor = null;
         private Wire _wire = null;
 
-        public Wire wire => _wire;
+        public Wire wire {
+            get => _wire;
+            set {
+                if (_wire == value)
+                    return;
+
+                _wire = value;
+                OnWireChanged();
+            }
+        }
 
         private int wireOption {
             get => wiresEditor.isInput ? _wire.to.GetOption(0) : _wire.from.GetOption(0);
@@ -61,9 +70,8 @@ namespace Puzzled.Editor
             UIPuzzleEditor.onSelectedWireChanged -= OnWireSelectionChanged;
         }
 
-        protected override void OnTargetChanged(object target)
+        protected void OnWireChanged()
         {
-            _wire = (Wire)target;
             if (null == _wire)
                 return;
 
@@ -136,7 +144,7 @@ namespace Puzzled.Editor
                 return;
 
             if (selected)
-                UIPuzzleEditor.selectedWire = (Wire)target;
+                UIPuzzleEditor.selectedWire = _wire;
         }
 
         public void UpdateIndex()

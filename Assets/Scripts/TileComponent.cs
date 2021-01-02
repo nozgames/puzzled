@@ -79,7 +79,7 @@ namespace Puzzled
                 if (null == property.GetValue<Port>(tile))
                     continue;
                 
-                property.SetValue(tile, new Port(property.port));
+                property.SetValue(tile, new Port(tile, property.port));
             }
         }
 

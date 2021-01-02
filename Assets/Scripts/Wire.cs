@@ -186,6 +186,35 @@ namespace Puzzled
                 to.port.wires.Remove(this);
         }
 
+        /// <summary>
+        /// Return the connection that is connected to the given tile
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        /// <returns>Connection or null if not connected to the tile</returns>
+        public Connection GetConnection (Tile tile) => from.tile == tile ? from : (to.tile == tile ? to : null);
+
+        /// <summary>
+        /// Return the connection that is connected to the given port
+        /// </summary>
+        /// <param name="port">Port</param>
+        /// <returns>Connection or null if not connecte to the port</returns>
+        public Connection GetConnection(Port port) => from.port == port ? from : (to.port == port ? to : null);
+
+        /// <summary>
+        /// Return the connection that opposite to the given tile
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        /// <returns>Connection or null if not connected to the tile</returns>
+        public Connection GetOppositeConnection (Tile tile) => from.tile == tile ? to : (to.tile == tile ? from : null);
+
+        /// <summary>
+        /// Return the connection that is opposite to the given port
+        /// </summary>
+        /// <param name="port">Port</param>
+        /// <returns>Connection or null if not connecte to the port</returns>
+        public Connection GetOppositeConnection (Port port) => from.port == port ? to : (to.port == port ? from : null);
+
+
         public void UpdatePositions()
         {
             transform.position = from.tile.transform.position;

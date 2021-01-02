@@ -25,7 +25,7 @@ namespace Puzzled.Editor
 
         public UISequence sequence => _sequence;
 
-        private List<Wire> wires => _input ? ((Tile)target).inputs : ((Tile)target).outputs;
+        private List<Wire> wires => target.tileProperty.GetValue<Port>(target.tile).wires;
 
         private void Awake()
         {
@@ -60,7 +60,7 @@ namespace Puzzled.Editor
             _wires.DetachAndDestroyChildren();
 
             foreach (var wire in wires)
-                Instantiate(_wirePrefab, _wires).GetComponent<UIOptionWire>().target = wire;
+                Instantiate(_wirePrefab, _wires).GetComponent<UIOptionWire>().wire = wire;
 
             _empty.SetActive(_wires.childCount <= 0);
             _content.SetActive(_wires.childCount > 0);
@@ -94,55 +94,26 @@ namespace Puzzled.Editor
         {
             var index = _list.selected;
             var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
-            var wire = (Wire)wireEditor.target;
+            var wire = wireEditor.wire;
             if (index == 0)
                 return;
 
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(isInput ? wire.to.tile.inputs : wire.from.tile.outputs, index, index - 1));
-
-#if false
-            if (isInput)
-                wire.to.tile.SetInputIndex(wire, index - 1);
-            else
-                wire.from.tile.SetOutputIndex(wire, index - 1);
-#endif
-
-            wireEditor.transform.SetSiblingIndex(index - 1);
-            _list.Select(index - 1);
-
-            UpdateWires();
-            UpdateButtons();
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(
+                isInput ? wire.to.port.wires : wire.from.port.wires, index, index - 1), false, (cmd) => {
+                    _list.Select(index - 1);
+                });
         }
 
         public void OnMoveDownButton()
         {
             var index = _list.selected;
             var wireEditor = _wires.GetChild(index).GetComponent<UIOptionWire>();
-            var wire = (Wire)wireEditor.target;
+            var wire = wireEditor.wire;
 
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(isInput ? wire.to.tile.inputs : wire.from.tile.outputs, index, index + 1));
-
-#if false
-            if (isInput)
-            {
-                if (index >= wire.to.tile.inputCount - 1)
-                    return;
-
-                wire.to.tile.SetInputIndex(wire, index + 1);
-            } else
-            {
-                if (index >= wire.from.tile.outputCount - 1)
-                    return;
-
-                wire.from.tile.SetOutputIndex(wire, index + 1);
-            }
-#endif
-
-            wireEditor.transform.SetSiblingIndex(index + 1);
-            _list.Select(index + 1);
-
-            UpdateWires();
-            UpdateButtons();
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(
+                isInput ? wire.to.port.wires : wire.from.port.wires, index, index + 1), false, (cmd) => {
+                    _list.Select(index + 1);
+                });
         }
 
         private UIOptionWire GetWireEditor(int index) =>
@@ -151,7 +122,7 @@ namespace Puzzled.Editor
         public void OnDeleteButton()
         {
             var wireEditor = GetWireEditor(_list.selected);
-            var wire = (Wire)wireEditor.target;
+            var wire = wireEditor.wire;
             if (_list.selected + 1 < _list.itemCount)
                 GetWireEditor(_list.selected + 1).wire.selected = true;
             else if (_list.selected > 0)

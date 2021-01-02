@@ -11,7 +11,7 @@ namespace Puzzled
         {
             base.OnTargetChanged(target);
 
-            label = ((TilePropertyOption)target).name;
+            label = ((TilePropertyEditorTarget)target).name;
             UpdatePreview();
         }
 
@@ -19,7 +19,7 @@ namespace Puzzled
         {
             UIPuzzleEditor.instance.ChooseTile(typeof(Item), 
                 (tile) => {
-                    var option = ((TilePropertyOption)target);
+                    var option = ((TilePropertyEditorTarget)target);
                     UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, tile.guid));
                     UpdatePreview();
                 }
@@ -28,7 +28,7 @@ namespace Puzzled
 
         private void UpdatePreview()
         {
-            preview.texture = TileDatabase.GetPreview(((TilePropertyOption)target).GetValue<System.Guid>());
+            preview.texture = TileDatabase.GetPreview(((TilePropertyEditorTarget)target).GetValue<System.Guid>());
             preview.gameObject.SetActive(preview.texture != null);
         }
     }

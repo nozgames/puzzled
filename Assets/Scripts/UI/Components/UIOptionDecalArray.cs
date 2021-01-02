@@ -29,7 +29,7 @@ namespace Puzzled.Editor
             _moveUpButton.onClick.AddListener(OnMoveUpButton);
             _moveDownButton.onClick.AddListener(OnMoveDownButton);
 
-            _decals = ((TilePropertyOption)target).GetValue<Decal[]>()?.ToList() ?? new List<Decal>();
+            _decals = ((TilePropertyEditorTarget)target).GetValue<Decal[]>()?.ToList() ?? new List<Decal>();
             foreach (var decal in _decals)
                 AddDecal(decal);
 
@@ -42,7 +42,7 @@ namespace Puzzled.Editor
             AddDecal(Decal.none);
             _items.Select(_items.itemCount - 1);
 
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _decals.ToArray()));
         }
 
@@ -50,7 +50,7 @@ namespace Puzzled.Editor
         {
             _decals.RemoveAt(_items.selected);
 
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             UIPuzzleEditor.ExecuteCommand(
                 new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _decals.ToArray()), false, (command) => {
                     _items.Select(Mathf.Min(_items.selected, _items.itemCount - 1));
@@ -62,7 +62,7 @@ namespace Puzzled.Editor
             var editor = Instantiate(_itemPrefab, _items.transform).GetComponent<UIDecalEditor>();
             editor.decal = decal;
             editor.onDecalChanged += (d) => {
-                var option = ((TilePropertyOption)target);
+                var option = ((TilePropertyEditorTarget)target);
                 _decals[editor.transform.GetSiblingIndex()] = d;
                 UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _decals.ToArray()));
             };
@@ -71,7 +71,7 @@ namespace Puzzled.Editor
 
         private void OnMoveUpButton()
         {
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             var temp = _decals[_items.selected - 1];
             _decals[_items.selected - 1] = _decals[_items.selected];
             _decals[_items.selected] = temp;
@@ -82,7 +82,7 @@ namespace Puzzled.Editor
 
         private void OnMoveDownButton()
         {
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             var temp = _decals[_items.selected + 1];
             _decals[_items.selected + 1] = _decals[_items.selected];
             _decals[_items.selected] = temp;

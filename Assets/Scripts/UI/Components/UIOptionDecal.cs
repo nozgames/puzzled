@@ -13,7 +13,7 @@ namespace Puzzled
         {
             base.OnTargetChanged(target);
 
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             label = option.name;
             _decalEditor.interactable = option.tile.info.layer != TileLayer.Floor || option.tile.puzzle.grid.CellToTile(option.tile.cell, TileLayer.Static) == null;
             _decalEditor.decal = option.GetValue<Decal>();
@@ -23,7 +23,7 @@ namespace Puzzled
 
         private void OnDecalChanged(Decal decal)
         {
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, decal));
         }
     }

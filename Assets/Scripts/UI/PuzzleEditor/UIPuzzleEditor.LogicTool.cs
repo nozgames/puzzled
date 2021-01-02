@@ -20,8 +20,7 @@ namespace Puzzled
         [SerializeField] private UIOptionEditor optionPrefabString = null;
         [SerializeField] private UIOptionEditor optionPrefabStringMultiline = null;
         [SerializeField] private UIOptionEditor optionPrefabTile = null;
-        [SerializeField] private UIOptionEditor optionInputsPrefab = null;
-        [SerializeField] private UIOptionEditor optionOutputsPrefab = null;
+        [SerializeField] private UIOptionEditor optionPrefabPort = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
 
         private WireMesh dragWire = null;
@@ -79,28 +78,27 @@ namespace Puzzled
             {
                 _allowLogicDrag = false;
 
-                if (_selectedTile.cell == cell || !_selectedTile.info.allowWireOutputs)
+                if (_selectedTile.cell == cell || !_selectedTile.hasOutputs)
                     return;
 
-                for (int i = selectedTile.outputCount - 1; i >= 0; i--)
-                {
-                    var output = selectedTile.outputs[i];
-                    if (output.to.cell == cell && layerToggles[(int)output.to.tile.info.layer].isOn)
-                        group.Add(new Editor.Commands.WireDestroyCommand(output));
-                }
-
-                for (int i = selectedTile.inputCount - 1; i >= 0; i--)
-                {
-                    var input = selectedTile.inputs[i];
-                    if (input.from.cell == cell && layerToggles[(int)input.from.tile.info.layer].isOn)
-                        group.Add(new Editor.Commands.WireDestroyCommand(input));
-                }
+                // Destroy all all linked wires
+                foreach(var property in _selectedTile.properties)
+                    if(property.type == TilePropertyType.Port)
+                    {
+                        var port = property.GetValue<Port>(selectedTile);
+                        foreach(var wire in port.wires)
+                        {
+                            var connection = wire.GetOppositeConnection(port);
+                            if (connection.cell == cell && layerToggles[(int)connection.tile.info.layer].isOn)
+                                group.Add(new Editor.Commands.WireDestroyCommand(wire));
+                        }
+                    }
 
                 if(!group.hasCommands)
                 {
                     var target = GetTile(cell, GetTileFlag.AllowInputs);
                     if(null != target)
-                        group.Add(new Editor.Commands.WireAddCommand(selectedTile, target));
+                        group.Add(new Editor.Commands.WireAddCommand(selectedTile.GetLegacyPort(PortFlow.Output), target.GetLegacyPort(PortFlow.Input)));
                 }
 
                 if (group.hasCommands)
@@ -119,7 +117,7 @@ namespace Puzzled
             else
                 logicCycleSelection = true;
 
-            _allowLogicDrag = selectedTile != null && _selectedTile.info.allowWireOutputs;
+            _allowLogicDrag = selectedTile != null && _selectedTile.hasOutputs;
         }
 
         private void OnLogicLButtonUp(Vector2 position)
@@ -147,7 +145,7 @@ namespace Puzzled
                 return;
 
             var cell = canvas.CanvasToCell(position);
-            if (_selectedTile == null || !_selectedTile.info.allowWireOutputs)
+            if (_selectedTile == null || !_selectedTile.hasOutputs)
                 return;
 
             dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
@@ -175,11 +173,11 @@ namespace Puzzled
                 target = null;
 
             // Find the first tile that accepts input
-            while (target != null && !target.info.allowWireInputs && target.info.layer > TileLayer.Floor)
+            while (target != null && !target.hasInputs && target.info.layer > TileLayer.Floor)
                 target = GetTile(cell, (TileLayer)(target.info.layer - 1));
 
-            if (target != null && target.info.allowWireInputs)
-                ExecuteCommand(new Editor.Commands.WireAddCommand(_selectedTile, target));
+            if (target != null && target.hasInputs)
+                ExecuteCommand(new Editor.Commands.WireAddCommand(_selectedTile.GetLegacyPort(PortFlow.Output), target.GetLegacyPort(PortFlow.Input)));
 
             RefreshInspectorInternal();
 
@@ -194,6 +192,14 @@ namespace Puzzled
             tile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>().Select(p => p.GetState()).ToArray();
         }
 
+        private void SetWiresDark (Tile tile, bool dark)
+        {
+            foreach (var property in tile.properties)
+                if (property.type == TilePropertyType.Port)
+                    foreach (var wire in property.GetValue<Port>(tile).wires)
+                        wire.dark = dark;
+        }
+
         private void SelectTile(Tile tile)
         {
             if (tile == null && _selectedTile == null)
@@ -203,12 +209,7 @@ namespace Puzzled
             if (_selectedTile != null)
             {
                 UpdateInspectorState(_selectedTile);
-
-                foreach (var input in _selectedTile.inputs)
-                    input.dark = false;
-
-                foreach (var output in _selectedTile.outputs)
-                    output.dark = false;
+                SetWiresDark(tile, false);
             }
 
             _selectedTile = tile;
@@ -269,16 +270,6 @@ namespace Puzzled
             var tile = _selectedTile;
             options.DetachAndDestroyChildren();
 
-            if (tile.info.allowWireInputs)
-                Instantiate(tile.info.inputsPrefab != null ? tile.info.inputsPrefab : optionInputsPrefab.gameObject, options).GetComponentInChildren<UIOptionEditor>().target = tile;
-
-            if (tile.info.allowWireOutputs)
-                Instantiate(tile.info.outputsPrefab != null ? tile.info.outputsPrefab : optionOutputsPrefab.gameObject, options).GetComponentInChildren<UIOptionEditor>().target = tile;
-
-            if (tile.info.customOptionEditors != null)
-                foreach (var editor in tile.info.customOptionEditors)
-                    Instantiate(editor.prefab, options).GetComponent<UIOptionEditor>().target = tile;
-
             Transform properties = null;
             foreach (var tileProperty in tile.properties)
             {
@@ -289,11 +280,11 @@ namespace Puzzled
                 if (properties == null)
                     properties = Instantiate(optionPropertiesPrefab, options).transform.Find("Content");
 
-                var optionEditor = InstantiateOptionEditor(tileProperty, properties);
+                var optionEditor = InstantiatePropertyEditor(tile, tileProperty, properties);
                 if (null == optionEditor)
                     continue;
 
-                optionEditor.target = new TilePropertyOption(tile, tileProperty);
+                optionEditor.target = new TilePropertyEditorTarget(tile, tileProperty);
             }
 
             // Apply the saved inspector state
@@ -302,47 +293,55 @@ namespace Puzzled
                     state.Apply(inspector.transform);
         }
 
-        private UIOptionEditor InstantiateOptionEditor(TileProperty property, Transform parent)
+        /// <summary>
+        /// Instantiate a property editor for the given property
+        /// </summary>
+        /// <param name="tile">Tile that owns the property</param>
+        /// <param name="property">Property</param>
+        /// <param name="parent">Parent transform to instantiate in to</param>
+        /// <returns>The instantiated editor</returns>
+        private UIOptionEditor InstantiatePropertyEditor(Tile tile, TileProperty property, Transform parent)
         {
-            UIOptionEditor prefab = null;
-            switch (property.type)
-            {
-                case TilePropertyType.String:
-                    prefab = property.editable.multiline ? optionPrefabStringMultiline : optionPrefabString;
-                    break;
+            var prefab = tile.info.GetCustomPropertyEditor(property)?.prefab ?? null;
+            if(null == prefab)
+                switch (property.type)
+                {
+                    case TilePropertyType.String:
+                        prefab = property.editable.multiline ? optionPrefabStringMultiline : optionPrefabString;
+                        break;
 
-                case TilePropertyType.Int:
-                    prefab = optionPrefabInt;
-                    break;
+                    case TilePropertyType.Int:
+                        prefab = optionPrefabInt;
+                        break;
 
-                case TilePropertyType.Bool:
-                    prefab = optionPrefabBool;
-                    break;
+                    case TilePropertyType.Bool:
+                        prefab = optionPrefabBool;
+                        break;
 
-                case TilePropertyType.Background:
-                    prefab = optionPrefabBackground;
-                    break;
+                    case TilePropertyType.Background:
+                        prefab = optionPrefabBackground;
+                        break;
 
-                // TODO: change to tile
-                case TilePropertyType.Guid:
-                    prefab = optionPrefabTile;
-                    break;
+                    // TODO: change to tile
+                    case TilePropertyType.Guid:
+                        prefab = optionPrefabTile;
+                        break;
 
-                case TilePropertyType.Decal:
-                    prefab = optionPrefabDecal;
-                    break;
+                    case TilePropertyType.Decal:
+                        prefab = optionPrefabDecal;
+                        break;
 
-                case TilePropertyType.DecalArray:
-                    prefab = optionPrefabDecalArray;
-                    break;
+                    case TilePropertyType.DecalArray:
+                        prefab = optionPrefabDecalArray;
+                        break;
 
-                case TilePropertyType.IntArray:
-                    prefab = optionPrefabIntArray;
-                    break;
+                    case TilePropertyType.IntArray:
+                        prefab = optionPrefabIntArray;
+                        break;
 
-                default:
-                    return null;
-            }
+                    default:
+                        return null;
+                }
 
             return Instantiate(prefab.gameObject, parent).GetComponent<UIOptionEditor>();
         }
@@ -362,16 +361,20 @@ namespace Puzzled
         {
             if (KeyboardManager.isShiftPressed && selectedTile != null)
             {
-                if (cell == selectedTile.cell || !selectedTile.info.allowWireOutputs)
+                if (cell == selectedTile.cell || !selectedTile.hasOutputs)
                     return CursorType.ArrowWithNot;
 
-                foreach(var output in selectedTile.outputs)
-                    if(output.to.cell == cell && layerToggles[(int)output.to.tile.info.layer].isOn)
-                        return CursorType.ArrowWithMinus;
-
-                foreach (var input in selectedTile.inputs)
-                    if (input.from.cell == cell && layerToggles[(int)input.from.tile.info.layer].isOn)
-                        return CursorType.ArrowWithMinus;
+                foreach (var property in _selectedTile.properties)
+                    if (property.type == TilePropertyType.Port)
+                    {
+                        var port = property.GetValue<Port>(selectedTile);
+                        foreach (var wire in port.wires)
+                        {
+                            var connection = wire.GetOppositeConnection(port);
+                            if (connection.cell == cell && layerToggles[(int)connection.tile.info.layer].isOn)
+                                return CursorType.ArrowWithMinus;
+                        }
+                    }
 
                 return GetTile(cell, GetTileFlag.AllowInputs) != null ? CursorType.ArrowWithPlus : CursorType.ArrowWithNot;
             }

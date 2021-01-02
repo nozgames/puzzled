@@ -14,15 +14,11 @@
 
         protected override void OnExecute()
         {
-            if (tile.inputCount + tile.outputCount > 0)
-            {
-                children = new GroupCommand();
-                foreach (var input in tile.inputs)
-                    children.Add(new WireDestroyCommand(input));
-
-                foreach (var output in tile.outputs)
-                    children.Add(new WireDestroyCommand(output));
-            }
+            // Destroy all wires connected as well
+            foreach(var property in tile.properties)
+                if(property.type == TilePropertyType.Port)
+                    foreach(var wire in property.GetValue<Port>(tile).wires)
+                        children.Add(new WireDestroyCommand(wire));
 
             children?.Execute();
 

@@ -14,11 +14,11 @@ namespace Puzzled.Editor
             _doubleClick.onDoubleClick.AddListener(() => {
                 UIPuzzleEditor.instance.ChooseBackground(
                     (background) => {
-                        var option = ((TilePropertyOption)target);
+                        var option = ((TilePropertyEditorTarget)target);
                         UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, background));
                         UpdatePreview();
                     }, 
-                    ((TilePropertyOption)target).GetValue<Background>());
+                    ((TilePropertyEditorTarget)target).GetValue<Background>());
             });
         }
 
@@ -26,13 +26,13 @@ namespace Puzzled.Editor
         {
             base.OnTargetChanged(target);
 
-            label = ((TilePropertyOption)target).name;
+            label = ((TilePropertyEditorTarget)target).name;
             UpdatePreview();
         }
 
         private void UpdatePreview()
         {
-            var background = ((TilePropertyOption)target).GetValue<Background>();
+            var background = ((TilePropertyEditorTarget)target).GetValue<Background>();
             _preview.color = background != null ? background.color : Color.clear;
             _preview.gameObject.SetActive(background != null);
 

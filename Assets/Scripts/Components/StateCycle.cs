@@ -51,7 +51,7 @@ namespace Puzzled
             }
 
             for (int i = 0; i < powerOutPort.wireCount; ++i)
-                powerOutPort.SetPowered(i, (tile.GetOutputOption(i, 0) & (1 << _stateIndex)) != 0);
+                powerOutPort.SetPowered(i, (powerOutPort.GetWireOption(i, 0) & (1 << _stateIndex)) != 0);
         }
 
         [ActorEventHandler]

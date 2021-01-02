@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using UnityEngine;
 
 namespace Puzzled
@@ -15,9 +14,9 @@ namespace Puzzled
 
         public event Action<object> onTargetChanged;
 
-        private object _target;
+        private TilePropertyEditorTarget _target;
 
-        public object target {
+        public TilePropertyEditorTarget target {
             get => _target;
             set {
                 _target = value;

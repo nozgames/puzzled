@@ -19,13 +19,13 @@ namespace Puzzled
 
         private void OnToggleValueChanged(bool newValue)
         {
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, newValue));
         }
 
         protected override void OnTargetChanged(object target)
         {
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             toggle.SetIsOnWithoutNotify(option.GetValue<bool>());
             label = option.name;
         }

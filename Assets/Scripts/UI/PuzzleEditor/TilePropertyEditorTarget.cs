@@ -2,13 +2,13 @@
 
 namespace Puzzled
 {
-    class TilePropertyOption
+    public class TilePropertyEditorTarget
     {
         public Tile tile { get; private set; }
         public TileProperty tileProperty { get; private set; }
         public string name { get; private set; }
 
-        public TilePropertyOption(Tile tile, TileProperty tileProperty)
+        public TilePropertyEditorTarget(Tile tile, TileProperty tileProperty)
         {
             this.tile = tile;
             this.tileProperty = tileProperty;

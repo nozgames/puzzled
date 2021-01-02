@@ -12,6 +12,18 @@ namespace Puzzled
         private int _value = 0;
 
         [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number)]
+        public Port valuePort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(IncrementEvent))]
+        public Port incrementPort { get; set; }
+
+        [Editable]
         public int target {
             get => _target;
             set {
@@ -47,8 +59,8 @@ namespace Puzzled
             if (tile == null)
                 return;
 
-            tile.SendValueSignalToOutputs(value);
-            tile.SetOutputsPowered(value == _target);
+            valuePort.SendValue(value);
+            powerOutPort.SetPowered(value == _target);
 
             for (int i = 0; i < visualValues.Length; ++i)
                 visualValues[i].SetActive(value == i);

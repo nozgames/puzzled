@@ -136,12 +136,27 @@ namespace Puzzled
         {
             if (type != PortType.Number || flow != PortFlow.Output)
             {
-                Debug.LogWarning("SendValue requires number port output port");
+                Debug.LogWarning("SendValue requires number output port");
                 return;
             }
 
             foreach (var wire in wires)
                 wire.SendValue(value);
+        }
+
+        /// <summary>
+        /// Send signal to all wires
+        /// </summary>
+        public void SendSignal ()
+        {
+            if (type != PortType.Signal || flow != PortFlow.Output)
+            {
+                Debug.LogWarning("SendSignal requires signal output port");
+                return;
+            }
+
+            foreach (var wire in wires)
+                wire.SendSignal();
         }
 
         /// <summary>
@@ -181,13 +196,7 @@ namespace Puzzled
         /// </summary>
         /// <param name="wireIndex">index of wire</param>
         /// <returns>Wire connection that represents the given port</returns>
-        private Wire.Connection GetWireConnection(int wireIndex)
-        {
-            var wire = GetWire(wireIndex);
-            if (wire.from.port == this)
-                return wire.from;
-            return wire.to;
-        }
+        private Wire.Connection GetWireConnection(int wireIndex) => GetWire(wireIndex).GetConnection(this);
 
         /// <summary>
         /// Set an option for a specific wire

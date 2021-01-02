@@ -43,7 +43,7 @@ namespace Puzzled
 
             if (!evt.isActive)
             {
-                tile.SetOutputsPowered(false);
+                powerOutPort.SetPowered(false);
                 return;
             }
 
