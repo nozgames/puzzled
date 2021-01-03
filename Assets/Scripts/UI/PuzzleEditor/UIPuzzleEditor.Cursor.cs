@@ -48,6 +48,12 @@ namespace Puzzled
 
         private void UpdateCursor(bool updatePosition = false)
         {
+            if (popups.activeSelf)
+            {
+                UIManager.cursor = CursorType.Arrow;
+                return;
+            }
+
             if(updatePosition && canvas.isMouseOver)
                 _cursorCell = canvas.CanvasToCell(_pointerAction.action.ReadValue<Vector2>());                
 

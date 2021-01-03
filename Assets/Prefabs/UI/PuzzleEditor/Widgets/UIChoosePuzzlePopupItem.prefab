@@ -220,10 +220,10 @@ GameObject:
   - component: {fileID: 1760910214640489141}
   - component: {fileID: 7482411731751675776}
   - component: {fileID: 7517616381344126924}
-  - component: {fileID: 6743439619888770508}
   - component: {fileID: 8476876256770620275}
+  - component: {fileID: 8031682533264978485}
   m_Layer: 5
-  m_Name: UIPuzzleFile
+  m_Name: UIChoosePuzzlePopupItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -266,7 +266,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 30
+  m_PreferredHeight: 40
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -278,25 +278,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5945178134995788446}
   m_CullTransparentMesh: 0
---- !u!114 &6743439619888770508
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5945178134995788446}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3401a43f808f784dbb99dd8a44c4418, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _selectedVisuals: {fileID: 2007623402697297963}
-  onSelectionChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  onDoubleClick:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &8476876256770620275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,3 +294,23 @@ MonoBehaviour:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+--- !u!114 &8031682533264978485
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5945178134995788446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fd6bc6e68e3fcf4db0a62236f99406e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _selectedVisuals: {fileID: 2007623402697297963}
+  onSelectionChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  onDoubleClick:
+    m_PersistentCalls:
+      m_Calls: []
+  _text: {fileID: 9208760077552222877}

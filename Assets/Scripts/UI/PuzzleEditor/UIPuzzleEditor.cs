@@ -49,11 +49,7 @@ namespace Puzzled
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
         [SerializeField] private GameObject fileMenuPopup = null;
-        [SerializeField] private GameObject puzzleNamePopup = null;
-        [SerializeField] private GameObject loadPopup = null;
-        [SerializeField] private TMPro.TMP_InputField puzzleNameInput = null;
-        [SerializeField] private Transform loadPopupFiles = null;
-        [SerializeField] private GameObject loadPopupFilePrefab = null;
+        [SerializeField] private UIChooseFilePopup _chooseFilePopup = null;
         [SerializeField] private GameObject _chooseTilePopup = null;
         [SerializeField] private UITilePalette _chooseTilePalette = null;
         [SerializeField] private GameObject _chooseDecalPopup = null;
@@ -155,6 +151,16 @@ namespace Puzzled
             instance = this;
 
             inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
+
+            _chooseFilePopup.onCancel += () => HidePopup();
+            _chooseFilePopup.onOpenPuzzle += (filename) => {
+                Load(filename);
+                HidePopup();
+            };
+            _chooseFilePopup.onSaveFile += (filename) => {
+                SaveAs(filename);
+                HidePopup();
+            };
 
             _chooseBackgroundPalette.onDoubleClickBackground += (background) => {
                 _chooseBackgroundCallback?.Invoke(background);
@@ -278,8 +284,8 @@ namespace Puzzled
 
         public void OnSaveButton()
         {
-            if (puzzleName.text == null || String.Compare(puzzleName.text, "unnamed", true) == 0)
-                ShowPopup(puzzleNamePopup);
+            if (!_puzzle.hasPath)
+                OnSaveAsButton();
             else
             {
                 Save();
@@ -289,27 +295,19 @@ namespace Puzzled
 
         public void OnSaveAsButton()
         {
-            ShowPopup(puzzleNamePopup);
-        }
-
-        public void OnSavePuzzleName()
-        {
-            // Dont allow an empty puzzle name or one named "unnamed"
-            if (string.IsNullOrEmpty(puzzleNameInput.text) || string.Compare(puzzleNameInput.text, "unnamed", true) == 0)
-                return;
-
-            // Save the puzzle with the new name
-            _puzzle.Save(Path.Combine(Application.dataPath, $"Puzzles/{puzzleNameInput.text}.puzzle"));
-
-            puzzleName.text = _puzzle.filename;
-
-            HidePopup();
-            Save();
+            ShowPopup(_chooseFilePopup.gameObject);
+            _chooseFilePopup.SavePuzzle(_puzzle.path);
         }
 
         public void OnCancelPopup()
         {
             HidePopup();
+        }
+
+        public void SaveAs(string filename)
+        {
+            _puzzle.Save(filename);
+            puzzleName.text = _puzzle.filename;
         }
 
         public void Save()
@@ -349,27 +347,8 @@ namespace Puzzled
 
         public void OnLoadButton()
         {
-            loadPopupFiles.DetachAndDestroyChildren();
-            
-            // Uncomment to force all files to update
-            //UpgradeAllFiles();
-
-            var files = Directory.GetFiles(Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
-            foreach (var file in files)
-            {
-                var fileGameObject = Instantiate(loadPopupFilePrefab, loadPopupFiles);
-                fileGameObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = Path.GetFileNameWithoutExtension(file);
-                var item = fileGameObject.GetComponent<UIListItem>();
-                item.onSelectionChanged.AddListener((selected) => {
-                    if (!selected)
-                        return;
-                });
-                item.onDoubleClick.AddListener(() => {
-                    Load(file);
-                });
-            }
-
-            ShowPopup(loadPopup);
+            ShowPopup(_chooseFilePopup.gameObject);
+            _chooseFilePopup.OpenPuzzle();            
         }
 
         public void OnStopButton()
@@ -406,7 +385,7 @@ namespace Puzzled
             // Prompt for saving if it has not yet been saved
             if (!_puzzle.hasPath)
             {
-                ShowPopup(puzzleNamePopup);
+                OnSaveAsButton();
                 return;
             }
 
@@ -483,11 +462,13 @@ namespace Puzzled
             popups.transform.DisableChildren();
             popups.SetActive(true);
             popup.SetActive(true);
+            UpdateCursor();
         }
 
         private void HidePopup()
         {
             popups.SetActive(false);
+            UpdateCursor();
         }
 
         [Flags]
