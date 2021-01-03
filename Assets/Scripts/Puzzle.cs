@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 3;
+        private const int FileVersion = 4;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -168,6 +168,7 @@ namespace Puzzled
             var tile = Instantiate(prefab.gameObject, _tiles.transform).GetComponent<Tile>();
             tile.puzzle = this;
             tile.guid = prefab.guid;
+            tile.name = prefab.name;
             tile.gameObject.SetChildLayers(CameraManager.TileLayerToObjectLayer(tile.info.layer));
             tile.Send(new AwakeEvent());
             tile.cell = cell;
@@ -289,6 +290,15 @@ namespace Puzzled
                 writer.Write(0);
 
                 writer.Write(tile.cell);
+
+                // Optionally write the tile name
+                if (tile.name != TileDatabase.GetTile(tile.guid).name)
+                {
+                    writer.Write(true);
+                    writer.Write(tile.name);
+                } 
+                else
+                    writer.Write(false);
 
                 // Write the tile properties
                 if (tile.properties != null)
@@ -461,6 +471,7 @@ namespace Puzzled
                     break;
 
                 case 3:
+                case 4:
                     LoadV3(reader, version);
                     break;
 
@@ -686,6 +697,9 @@ namespace Puzzled
                     reader.BaseStream.Position = start + size;
                     continue;
                 }
+
+                if (version == 4 && reader.ReadBoolean())
+                    tile.name = reader.ReadString();
 
                 tiles[tileIndex] = tile;
 

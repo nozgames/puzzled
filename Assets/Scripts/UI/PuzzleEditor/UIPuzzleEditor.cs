@@ -137,6 +137,8 @@ namespace Puzzled
         {
             instance = this;
 
+            inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
+
             _chooseBackgroundPalette.onDoubleClickBackground += (background) => {
                 _chooseBackgroundCallback?.Invoke(background);
                 HidePopup();

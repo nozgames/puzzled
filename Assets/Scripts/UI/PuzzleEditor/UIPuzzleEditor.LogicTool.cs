@@ -69,6 +69,25 @@ namespace Puzzled
             _puzzle.ShowWires(false);
         }
 
+        private void OnInspectorTileNameChanged(string name)
+        {
+            if (_selectedTile == null)
+                return;
+
+            name = name.Trim();
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                inspectorTileName.SetTextWithoutNotify(_selectedTile.name);
+                return;
+            }
+
+            if (name == _selectedTile.name)
+                return;
+
+            ExecuteCommand(new Editor.Commands.TileRenameCommand(_selectedTile, name));
+        }
+
         private void OnLogicLButtonDown(Vector2 position)
         {
             // Ensure the cell being dragged is the selected cell
@@ -221,6 +240,9 @@ namespace Puzzled
             // Save the inspector state
             if (_selectedTile != null)
             {
+                // Make sure the current edit box finishes before we clear the selected tile
+                if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == inspectorTileName)
+                    UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
                 SetWiresDark(_selectedTile, false);
                 UpdateInspectorState(_selectedTile);
             }
@@ -239,7 +261,7 @@ namespace Puzzled
             else
             {
                 inspectorContent.SetActive(true);
-                inspectorTileName.text = tile.info.displayName;
+                inspectorTileName.SetTextWithoutNotify(tile.name);
                 inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);
 

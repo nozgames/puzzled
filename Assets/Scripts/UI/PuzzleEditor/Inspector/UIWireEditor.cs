@@ -73,7 +73,7 @@ namespace Puzzled.Editor
             if (null == _wire)
                 return;
 
-            _tileName.text = (_wire.GetOppositeConnection(wiresEditor.port).tile).info.displayName;
+            _tileName.text = (_wire.GetOppositeConnection(wiresEditor.port).tile).name;
 
             UpdateState();
             UpdateIndex();
