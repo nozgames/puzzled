@@ -367,10 +367,7 @@ namespace Puzzled
                                 var portWires = ((Port)value).wires;
                                 writer.Write(portWires.Count);
                                 foreach(var wire in portWires)
-                                {
-                                    var wireIndex = wires.IndexOf(wire);
-                                    writer.Write(wireIndex);
-                                }
+                                    writer.Write(wires.IndexOf(wire));
                                 break;
                             }
 
@@ -623,6 +620,9 @@ namespace Puzzled
                 if (null == wire)
                     continue;
 
+                Debug.Assert(wire.from.tile == tiles[fromIndex]);
+                Debug.Assert(wire.to.tile == tiles[toIndex]);
+
                 wires[wireIndex] = wire;
                 wire.from.SetOptions(fromOptions);
                 wire.to.SetOptions(toOptions);
@@ -639,11 +639,17 @@ namespace Puzzled
                 while (wire.from.port.wires.Count < wireOrderFrom[wireIndex])
                     wire.from.port.wires.Add(null);
                 wire.from.port.wires.Insert(wireOrderFrom[wireIndex], wire);
+                var fromWires = wire.from.port.wires.Where(w => w != null).ToList();
+                wire.from.port.wires.Clear();
+                wire.from.port.wires.AddRange(fromWires);
 
                 wire.to.port.wires.Remove(wire);
                 while (wire.to.port.wires.Count < wireOrderTo[wireIndex])
                     wire.to.port.wires.Add(null);
                 wire.to.port.wires.Insert(wireOrderTo[wireIndex], wire);
+                var toWires = wire.to.port.wires.Where(w => w != null).ToList();
+                wire.to.port.wires.Clear();
+                wire.to.port.wires.AddRange(toWires);
             }
         }
 
@@ -781,7 +787,8 @@ namespace Puzzled
                             var portWires = new List<Wire>(portWireCount);
                             for (int i = 0; i < portWireCount; i++)
                             {
-                                var wire = wires[reader.ReadInt32()];
+                                var wireIndex = reader.ReadInt32();
+                                var wire = wires[wireIndex];
                                 if (port.flow == PortFlow.Input)
                                     wire.to.port = port;
                                 else
