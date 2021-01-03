@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -182,11 +183,23 @@ namespace Puzzled
             if (!tile.CanConnectTo(cell))
                 return;
 
-            var target = GetTile(cell, GetTileFlag.AllowInputs);
-            if (null != target)
+            // Get all in the given cell that we can connect to
+            var tiles = puzzle.grid.GetLinkedTiles(cell, cell).Where(t => tile.CanConnectTo(t)).ToArray();
+            if (tiles.Length == 0)
+                return;
+
+            if(tiles.Length == 1)
             {
-                ChoosePort(tile, target, (from, to) => {
+                ChoosePort(tile, tiles[0], (from, to) => {
                     ExecuteCommand(new Editor.Commands.WireAddCommand(from, to));
+                });
+            }
+            else
+            {
+                ChooseTileConnection(tiles, (target) => {
+                    ChoosePort(tile, target, (from, to) => {
+                        ExecuteCommand(new Editor.Commands.WireAddCommand(from, to));
+                    });
                 });
             }
         }

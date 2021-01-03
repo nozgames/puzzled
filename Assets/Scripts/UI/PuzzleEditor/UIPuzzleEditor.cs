@@ -56,11 +56,12 @@ namespace Puzzled
         [SerializeField] private GameObject loadPopupFilePrefab = null;
         [SerializeField] private GameObject _chooseTilePopup = null;
         [SerializeField] private UITilePalette _chooseTilePalette = null;
-        [SerializeField] private GameObject _chooseDecalPopup= null;
+        [SerializeField] private GameObject _chooseDecalPopup = null;
         [SerializeField] private UIDecalPalette _chooseDecalPalette = null;
         [SerializeField] private GameObject _chooseBackgroundPopup = null;
         [SerializeField] private UIBackgroundPalette _chooseBackgroundPalette = null;
         [SerializeField] private UIPortSelector _choosePortPopup = null;
+        [SerializeField] private UITileSelector _chooseTileConnectionPopup = null;
 
         private Mode _mode = Mode.Unknown;
 
@@ -86,21 +87,26 @@ namespace Puzzled
                     return;
 
                 selectionRect.gameObject.SetActive(false);
-                
+
                 _mode = value;
 
                 switch (_mode)
                 {
-                    case Mode.Draw: 
-                        drawTool.isOn = true; break;
+                    case Mode.Draw:
+                        drawTool.isOn = true;
+                        break;
                     case Mode.Move:
-                        moveTool.isOn = true; break;
+                        moveTool.isOn = true;
+                        break;
                     case Mode.Erase:
-                        eraseTool.isOn = true; break;
+                        eraseTool.isOn = true;
+                        break;
                     case Mode.Logic:
-                        wireTool.isOn = true; break;
+                        wireTool.isOn = true;
+                        break;
                     case Mode.Decal:
-                        decalTool.isOn = true; break;
+                        decalTool.isOn = true;
+                        break;
                 }
 
                 UpdateMode();
@@ -124,11 +130,21 @@ namespace Puzzled
 
             switch (_mode)
             {
-                case Mode.Move: EnableMoveTool(); break;
-                case Mode.Draw: EnableDrawTool(); break;
-                case Mode.Erase: EnableEraseTool(); break;
-                case Mode.Logic: EnableLogicTool(); break;
-                case Mode.Decal: EnableDecalTool(); break;
+                case Mode.Move:
+                    EnableMoveTool();
+                    break;
+                case Mode.Draw:
+                    EnableDrawTool();
+                    break;
+                case Mode.Erase:
+                    EnableEraseTool();
+                    break;
+                case Mode.Logic:
+                    EnableLogicTool();
+                    break;
+                case Mode.Decal:
+                    EnableDecalTool();
+                    break;
             }
 
             UpdateCursor();
@@ -173,7 +189,7 @@ namespace Puzzled
             GameManager.busy++;
 
             popups.SetActive(false);
-            inspector.SetActive(false);            
+            inspector.SetActive(false);
 
             selectionRect.gameObject.SetActive(false);
 
@@ -239,7 +255,7 @@ namespace Puzzled
         {
             _selectionMin = Cell.Min(min, max);
             _selectionMax = Cell.Max(min, max);
-            _selectionSize = _selectionMax - _selectionMin; 
+            _selectionSize = _selectionMax - _selectionMin;
 
             selectionRect.anchorMin = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMin) - new Vector3(0.5f, 0.5f, 0));
             selectionRect.anchorMax = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMax) + new Vector3(0.5f, 0.5f, 0));
@@ -247,14 +263,14 @@ namespace Puzzled
             selectionRect.gameObject.SetActive(true);
         }
 
-        private void OnPan (Vector2 position, Vector2 delta)
+        private void OnPan(Vector2 position, Vector2 delta)
         {
             if (playing)
                 return;
 
             CameraManager.Pan(-(canvas.CanvasToWorld(position + delta) - canvas.CanvasToWorld(position)));
 
-            if(selectionRect.gameObject.activeSelf)
+            if (selectionRect.gameObject.activeSelf)
                 SetSelectionRect(_selectionMin, _selectionMax);
 
             UpdateCursor();
@@ -306,7 +322,7 @@ namespace Puzzled
 
         private void NewPuzzle()
         {
-            if(_puzzle != null)
+            if (_puzzle != null)
                 _puzzle.Destroy();
 
             _puzzle = GameManager.InstantiatePuzzle();
@@ -334,6 +350,9 @@ namespace Puzzled
         public void OnLoadButton()
         {
             loadPopupFiles.DetachAndDestroyChildren();
+            
+            // Uncomment to force all files to update
+            //UpgradeAllFiles();
 
             var files = Directory.GetFiles(Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
             foreach (var file in files)
@@ -415,7 +434,7 @@ namespace Puzzled
             GameManager.Play();
         }
 
-        private void Center(Cell cell, int zoomLevel=-1)
+        private void Center(Cell cell, int zoomLevel = -1)
         {
             // Cente around the tile first
             CameraManager.JumpToCell(cell, zoomLevel);
@@ -440,8 +459,7 @@ namespace Puzzled
                 Center(CameraManager.cell, CameraManager.DefaultZoomLevel);
 
                 puzzleName.text = _puzzle.filename;
-            } 
-            catch (Exception e)
+            } catch (Exception e)
             {
                 Debug.LogException(e);
                 NewPuzzle();
@@ -469,7 +487,6 @@ namespace Puzzled
 
         private void HidePopup()
         {
-            _choosePortPopup.transform.SetParent(popups.transform);
             popups.SetActive(false);
         }
 
@@ -477,7 +494,7 @@ namespace Puzzled
         private enum GetTileFlag
         {
             None = 0,
-            AllowInputs  = 1,
+            AllowInputs = 1,
             AllowOutputs = 2
         }
 
@@ -514,7 +531,7 @@ namespace Puzzled
             Destroy(wire.gameObject);
         }
 
-        public void ChoosePort (Tile tileFrom, Tile tileTo, Action<Port, Port> callback)
+        public void ChoosePort(Tile tileFrom, Tile tileTo, Action<Port, Port> callback)
         {
             ShowPopup(_choosePortPopup.gameObject);
             _choosePortPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tileTo.transform.position - new Vector3(0.5f, 0.5f, 0));
@@ -525,6 +542,17 @@ namespace Puzzled
             });
         }
 
+        public void ChooseTileConnection (Tile[] tilesTo, Action<Tile> callback)
+        {
+            ShowPopup(_chooseTileConnectionPopup.gameObject);
+            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position - new Vector3(0.5f, 0.5f, 0));
+            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position + new Vector3(0.5f, 0.5f, 0));
+            _chooseTileConnectionPopup.Open(tilesTo, (target) => {
+                HidePopup();
+                callback?.Invoke(target);
+            });
+        }
+
         public void ChooseBackground(Action<Background> callback, Background current = null)
         {
             _chooseBackgroundCallback = callback;
@@ -532,30 +560,30 @@ namespace Puzzled
             ShowPopup(_chooseBackgroundPopup);
         }
 
-        public void ChooseDecal (Action<Decal> callback)
+        public void ChooseDecal(Action<Decal> callback)
         {
             _chooseDecalCallback = callback;
             ShowPopup(_chooseDecalPopup);
         }
 
-        public void ChooseTile (Type componentType, Action<Tile> callback)
+        public void ChooseTile(Type componentType, Action<Tile> callback)
         {
             _chooseTileCallback = callback;
             _chooseTilePalette.componentFilter = componentType;
             ShowPopup(_chooseTilePopup);
         }
 
-        public void CloseTileSelector (Tile tile)
+        public void CloseTileSelector(Tile tile)
         {
             if (tile != null)
                 _chooseTileCallback?.Invoke(tile);
 
             HidePopup();
-        }        
+        }
 
         private void UpdateLayers()
         {
-            for(int i=0;i<layerToggles.Length; i++)
+            for (int i = 0; i < layerToggles.Length; i++)
                 CameraManager.ShowLayer((TileLayer)i, layerToggles[i].isOn);
         }
 
@@ -646,5 +674,17 @@ namespace Puzzled
         /// <param name="layer">Given layer</param>
         /// <returns>True if the layer is visible</returns>
         public static bool IsLayerVisible(TileLayer layer) => instance.layerToggles[(int)layer].isOn;
+
+
+        public void UpgradeAllFiles()
+        {
+            var files = Directory.GetFiles(Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
+            foreach (var file in files)
+            {
+                var puzzle = Puzzle.Load(file);
+                puzzle.Save();
+                puzzle.Destroy();
+            }
+        }
     }
 }
