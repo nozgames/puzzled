@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _displayName: 
   description: 
+  _layer: 3
   _allowMultiple: 1
   _allowDynamic: 0
-  _layer: 3
   _deprecated: 0
-  _inputsPrefab: {fileID: 6255898787912661604, guid: cca8575156069ad4fac99e85f703f07b, type: 3}
-  _outputsPrefab: {fileID: 0}
   _customPropertyEditors:
-  - name: triggerPort
+  - name: signalInPort
+    prefab: {fileID: 3423112027439244464, guid: 1a69f9ba2be342849a717b1589ea5fbf, type: 3}
+  - name: powerInPort
     prefab: {fileID: 3423112027439244464, guid: 1a69f9ba2be342849a717b1589ea5fbf, type: 3}

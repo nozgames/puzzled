@@ -10,8 +10,6 @@ namespace Puzzled.Editor
         [SerializeField] private Transform _wires = null;
         [SerializeField] private GameObject _wirePrefab = null;
         [SerializeField] private bool _reorderable = false;
-        [SerializeField] private GameObject _content = null;
-        [SerializeField] private GameObject _empty = null;
         [SerializeField] private Button _moveUpButton = null;
         [SerializeField] private Button _moveDownButton = null;
         [SerializeField] private Button _deleteButton = null;
@@ -74,9 +72,6 @@ namespace Puzzled.Editor
 
             foreach (var wire in wires)
                 Instantiate(_wirePrefab, _wires).GetComponent<UIWireEditor>().wire = wire;
-
-            _empty.SetActive(_wires.childCount <= 0);
-            _content.SetActive(_wires.childCount > 0);
 
             if (_sequence != null)
                 _sequence.tile = target.tile;
