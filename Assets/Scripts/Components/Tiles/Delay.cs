@@ -20,7 +20,7 @@ namespace Puzzled
         public Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnWirePower (WirePowerChangedEvent evt)
+        private void OnWirePowerChanged (WirePowerChangedEvent evt)
         {
             if (powerInPort.hasPower && !isDelaying)
             {

@@ -1,5 +1,4 @@
 ﻿using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
@@ -14,7 +13,7 @@ namespace Puzzled
         public Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnWirePower(WirePowerChangedEvent evt) => UpdateState();
+        private void OnWirePowerChanged(WirePowerChangedEvent evt) => UpdateState();
 
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => UpdateState();
@@ -23,7 +22,7 @@ namespace Puzzled
         {
             var powered = true;
             for (int i = 0; i < powerInPort.wireCount && powered; ++i)
-                powered &= (powerInPort.hasPower == (powerInPort.GetWireOption(i, 0) == 1));
+                powered &= (powerInPort.GetWire(i).hasPower == (powerInPort.GetWireOption(i, 0) == 1));
 
             powerOutPort.SetPowered(powered);
         }

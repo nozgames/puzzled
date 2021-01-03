@@ -97,7 +97,7 @@ namespace Puzzled
         /// <summary>
         /// True if the wire is powered
         /// </summary>
-        public bool isPowered => enabled;
+        public bool hasPower => enabled;
 
         /// <summary>
         /// Control the wire visual state

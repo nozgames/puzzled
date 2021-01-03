@@ -31,7 +31,7 @@ namespace Puzzled
             for (int i = 0; i < powerInPort.wireCount; ++i)
             {
                 bool isWireExpected = ((powerInPort.GetWireOption(i, 0) & (1 << sequenceIndex)) != 0);
-                if (powerInPort.GetWire(i).isPowered != isWireExpected)
+                if (powerInPort.GetWire(i).hasPower != isWireExpected)
                 {
                     // failure
                     HandleIncorrectWire();

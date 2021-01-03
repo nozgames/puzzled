@@ -20,7 +20,7 @@ namespace Puzzled
         {
             var powered = powerInPort.wireCount > 0;
             for (int i = 0; powered && i < powerInPort.wireCount; i++)
-                powered = powered & powerInPort.GetWire(i).isPowered;
+                powered = powered & powerInPort.GetWire(i).hasPower;
 
             powerOutPort.SetPowered(powered);
         }

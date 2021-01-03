@@ -83,7 +83,7 @@ namespace Puzzled
         public bool hasPower {
             get {
                 foreach (var wire in wires)
-                    if (wire.isPowered)
+                    if (wire.hasPower)
                         return true;
                 
                 return false;
