@@ -49,7 +49,7 @@ namespace Puzzled
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
         [SerializeField] private GameObject fileMenuPopup = null;
-        [SerializeField] private UIChooseFilePopup _chooseFilePopup = null;
+        [SerializeField] private UIChoosePuzzlePopup _chooseFilePopup = null;
         [SerializeField] private GameObject _chooseTilePopup = null;
         [SerializeField] private UITilePalette _chooseTilePalette = null;
         [SerializeField] private GameObject _chooseDecalPopup = null;
