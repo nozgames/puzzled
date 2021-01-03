@@ -16,6 +16,9 @@ namespace Puzzled.Editor
         [SerializeField] private Button _moveDownButton = null;
         [SerializeField] private Button _deleteButton = null;
         [SerializeField] private UIList _list = null;
+        [SerializeField] private Image _iconSignal = null;
+        [SerializeField] private Image _iconPower = null;
+        [SerializeField] private Image _iconNumber = null;
 
         [SerializeField] private UISequence _sequence = null;
 
@@ -81,6 +84,10 @@ namespace Puzzled.Editor
             UpdateLabel();
             UpdateWires();
             UpdateButtons();
+
+            _iconNumber.gameObject.SetActive(_port.type == PortType.Number);
+            _iconPower.gameObject.SetActive(_port.type == PortType.Power);
+            _iconSignal.gameObject.SetActive(_port.type == PortType.Signal);
 
             base.OnTargetChanged();
         }
