@@ -48,6 +48,19 @@ namespace Puzzled
         public string name => info.Name;
 
         /// <summary>
+        /// Display name of the property
+        /// </summary>
+        public string displayName {
+            get {
+                var displayName = name;
+                if (port != null && displayName.EndsWith("Port"))
+                    displayName = name.Substring(0, name.Length - 4);
+
+                return displayName.NicifyName();
+            }
+        }
+
+        /// <summary>
         /// Type of the property
         /// </summary>
         public TilePropertyType type { get; private set; }

@@ -12,6 +12,11 @@ namespace Puzzled
         [SerializeField] private Camera previewCamera = null;
         [SerializeField] private Transform previewParent = null;
 
+        [Header("Ports")]
+        [SerializeField] private Sprite _powerPortIcon = null;
+        [SerializeField] private Sprite _signalPortIcon = null;
+        [SerializeField] private Sprite _numberPortIcon = null;
+
         /// <summary>
         /// Singleton instance of the tile database
         /// </summary>
@@ -122,6 +127,26 @@ namespace Puzzled
             previewParent.gameObject.SetActive(false);
 
             return t;
+        }
+
+        /// <summary>
+        /// Return the icon for the given port
+        /// </summary>
+        /// <param name="port">Port</param>
+        /// <returns>Icon as sprite</returns>
+        public static Sprite GetPortIcon(Port port)
+        {
+            if (null == port)
+                return null;
+
+            switch (port.type)
+            {
+                case PortType.Number: return _instance._numberPortIcon;
+                case PortType.Signal: return _instance._signalPortIcon;
+                case PortType.Power: return _instance._powerPortIcon;
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
         protected override void OnLoaded()

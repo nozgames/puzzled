@@ -43,9 +43,9 @@ namespace Puzzled
         public List<Wire> wires { get; private set; } = new List<Wire>();
 
         /// <summary>
-        /// Port attributes
+        /// Property that this port represents
         /// </summary>
-        private PortAttribute _attribute;
+        private TileProperty _property;
 
         /// <summary>
         /// Tile the port is attached to
@@ -55,22 +55,32 @@ namespace Puzzled
         /// <summary>
         /// Returns the port type
         /// </summary>
-        public PortType type => _attribute.type;
+        public PortType type => _property.port.type;
 
         /// <summary>
         /// Port flow type
         /// </summary>
-        public PortFlow flow => _attribute.flow;
+        public PortFlow flow => _property.port.flow;
 
         /// <summary>
         /// Returns the port signal event type
         /// </summary>
-        public Type signalEventType => _attribute.signalEvent;
+        public Type signalEventType => _property.port.signalEvent;
 
         /// <summary>
         /// True if this port is the legacy port that inputs were connected to
         /// </summary>
-        public bool isLegacy => _attribute.legacy;
+        public bool isLegacy => _property.port.legacy;
+
+        /// <summary>
+        /// Name of the port
+        /// </summary>
+        public string name => _property.name;
+
+        /// <summary>
+        /// Display name of the port
+        /// </summary>
+        public string displayName => _property.displayName;
 
         /// <summary>
         /// Number of wires connected to the port
@@ -90,10 +100,10 @@ namespace Puzzled
             }
         }
 
-        public Port(Tile tile, PortAttribute attr)
+        public Port(Tile tile, TileProperty tileProperty)
         {
             this.tile = tile;
-            _attribute = attr;
+            _property = tileProperty;
         }
 
         /// <summary>
@@ -108,7 +118,7 @@ namespace Puzzled
         }
 
         /// <summary>
-        /// Returns true if the given port is connected to this port
+        /// Returns true if the port is connected to the given port
         /// </summary>
         /// <param name="port">Port to check</param>
         /// <returns>True if the two ports are connected</returns>
@@ -120,6 +130,41 @@ namespace Puzzled
 
             return false;
         }
+
+        /// <summary>
+        /// Returns true if the port is connected to a given tile
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        /// <returns>True if the port is connected to the tile</returns>
+        public bool IsConnectedTo(Tile tile)
+        { 
+            foreach (var wire in wires)
+                if (wire.to.tile == tile || wire.from.tile == tile)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if the port is connected to a given cell
+        /// </summary>
+        /// <param name="cell">Cell</param>
+        /// <returns>True if connected to the given cell</returns>
+        public bool IsConnectedTo(Cell cell)
+        {
+            foreach (var wire in wires)
+                if (wire.GetOppositeConnection(this).cell == cell)
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if the port can connect to the given port.
+        /// </summary>
+        /// <param name="port">Port to check</param>
+        /// <returns>True if a connection can be made to the given port</returns>
+        public bool CanConnectTo(Port port) => type == port.type || type == PortType.Power && port.type == PortType.Signal;
 
         /// <summary>
         /// Get the wire at the given index

@@ -93,50 +93,30 @@ namespace Puzzled
             // Ensure the cell being dragged is the selected cell
             var cell = canvas.CanvasToCell(position);
 
-            var group = new Editor.Commands.GroupCommand();
+            _allowLogicDrag = false;
+
+            // QuickConnect mode
             if (_selectedTile != null && KeyboardManager.isShiftPressed)
             {
-                _allowLogicDrag = false;
-
-                if (_selectedTile.cell == cell || !_selectedTile.hasOutputs)
-                    return;
-
-                // Destroy all all linked wires
-                foreach(var property in _selectedTile.properties)
-                    if(property.type == TilePropertyType.Port)
-                    {
-                        var port = property.GetValue<Port>(selectedTile);
-                        foreach(var wire in port.wires)
-                        {
-                            var connection = wire.GetOppositeConnection(port);
-                            if (connection.cell == cell && layerToggles[(int)connection.tile.info.layer].isOn)
-                                group.Add(new Editor.Commands.WireDestroyCommand(wire));
-                        }
-                    }
-
-                if(!group.hasCommands)
-                {
-                    var target = GetTile(cell, GetTileFlag.AllowInputs);
-                    if(null != target)
-                        group.Add(new Editor.Commands.WireAddCommand(selectedTile.GetLegacyPort(PortFlow.Output), target.GetLegacyPort(PortFlow.Input)));
-                }
-
-                if (group.hasCommands)
-                    ExecuteCommand(group);
-
-                UpdateCursor();
-
+                Connect(_selectedTile, cell);
                 return;
             }
 
+            if (_selectedTile != null && KeyboardManager.isCtrlPressed)
+            {
+                Disconnect(_selectedTile, cell);
+                return;
+            }
+
+            // Handle no selection or selecting a new tile
             if (_selectedTile == null || _selectedTile.cell != cell)
             {
                 SelectTile(GetTile(cell, TileLayer.Logic));
                 logicCycleSelection = false;
+                return;
             }
-            else
-                logicCycleSelection = true;
 
+            logicCycleSelection = true;
             _allowLogicDrag = selectedTile != null && _selectedTile.hasOutputs;
         }
 
@@ -187,31 +167,48 @@ namespace Puzzled
             if (null == dragWire)
                 return;
 
-            var cell = canvas.CanvasToCell(position);
-            var target = GetTile(cell);
-            if (target == selectedTile)
-                target = null;
-
-            // Find the first tile that accepts input
-            while (target != null && !target.hasInputs && target.info.layer > TileLayer.Floor)
-                target = GetTile(cell, (TileLayer)(target.info.layer - 1));
-
-            if (target != null && target.hasInputs)
-            {
-                try
-                {
-                    ExecuteCommand(new Editor.Commands.WireAddCommand(_selectedTile.GetLegacyPort(PortFlow.Output), target.GetLegacyPort(PortFlow.Input)));
-                } 
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
-            }
-
-            RefreshInspectorInternal();
-
+            // Stop dragging
             Destroy(dragWire.gameObject);
             dragWire = null;
+
+            // Connect to the cell
+            Connect(_selectedTile, canvas.CanvasToCell(position));
+        }
+
+        private void Connect(Tile tile, Cell cell)
+        {
+            var group = new Editor.Commands.GroupCommand();
+
+            if (!tile.CanConnectTo(cell))
+                return;
+
+            var target = GetTile(cell, GetTileFlag.AllowInputs);
+            if (null != target)
+            {
+                ChoosePort(tile, target, (from, to) => {
+                    ExecuteCommand(new Editor.Commands.WireAddCommand(from, to));
+                });
+            }
+        }
+
+        private void Disconnect(Tile tile, Cell cell)
+        {
+            var group = new Editor.Commands.GroupCommand();
+            var outputs = tile.GetPorts(PortFlow.Output);
+            foreach(var output in outputs)
+                foreach(var wire in output.wires)
+                {
+                    var connection = wire.GetOppositeConnection(output);
+                    if(connection.cell != cell)
+                        continue;
+
+                    group.Add(new Editor.Commands.WireDestroyCommand(wire));
+                }
+
+            if(group.hasCommands)
+                ExecuteCommand(group);
+
+            UpdateCursor();
         }
 
         private void SelectTile(Cell cell) => SelectTile(GetTile(cell));
@@ -391,28 +388,15 @@ namespace Puzzled
 
         private CursorType OnLogicGetCursor(Cell cell)
         {
+            // When shift is pressed it means "QuickConnect" mode
             if (KeyboardManager.isShiftPressed && selectedTile != null)
-            {
-                if (cell == selectedTile.cell || !selectedTile.hasOutputs)
-                    return CursorType.ArrowWithNot;
+                return selectedTile.CanConnectTo(cell) ? CursorType.ArrowWithPlus : CursorType.ArrowWithNot;
 
-                foreach (var property in _selectedTile.properties)
-                    if (property.type == TilePropertyType.Port)
-                    {
-                        var port = property.GetValue<Port>(selectedTile);
-                        foreach (var wire in port.wires)
-                        {
-                            var connection = wire.GetOppositeConnection(port);
-                            if (connection.cell == cell && layerToggles[(int)connection.tile.info.layer].isOn)
-                                return CursorType.ArrowWithMinus;
-                        }
-                    }
-
-                return GetTile(cell, GetTileFlag.AllowInputs) != null ? CursorType.ArrowWithPlus : CursorType.ArrowWithNot;
-            }
+            // When ctrl is pressed it means "QuickDisconnect" mode
+            if (KeyboardManager.isCtrlPressed && selectedTile != null)
+                return selectedTile.IsConnectedTo(cell) ? CursorType.ArrowWithMinus : CursorType.ArrowWithNot;
 
             return CursorType.Arrow;
         }
-
     }
 }

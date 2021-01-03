@@ -60,6 +60,7 @@ namespace Puzzled
         [SerializeField] private UIDecalPalette _chooseDecalPalette = null;
         [SerializeField] private GameObject _chooseBackgroundPopup = null;
         [SerializeField] private UIBackgroundPalette _chooseBackgroundPalette = null;
+        [SerializeField] private UIPortSelector _choosePortPopup = null;
 
         private Mode _mode = Mode.Unknown;
 
@@ -468,6 +469,7 @@ namespace Puzzled
 
         private void HidePopup()
         {
+            _choosePortPopup.transform.SetParent(popups.transform);
             popups.SetActive(false);
         }
 
@@ -510,6 +512,17 @@ namespace Puzzled
         private void RemoveWire(Wire wire)
         {
             Destroy(wire.gameObject);
+        }
+
+        public void ChoosePort (Tile tileFrom, Tile tileTo, Action<Port, Port> callback)
+        {
+            ShowPopup(_choosePortPopup.gameObject);
+            _choosePortPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tileTo.transform.position - new Vector3(0.5f, 0.5f, 0));
+            _choosePortPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tileTo.transform.position + new Vector3(0.5f, 0.5f, 0));
+            _choosePortPopup.Open(tileFrom, tileTo, (from, to) => {
+                HidePopup();
+                callback?.Invoke(from, to);
+            });
         }
 
         public void ChooseBackground(Action<Background> callback, Background current = null)
@@ -626,5 +639,12 @@ namespace Puzzled
 
             UpdateCursor();
         }
+
+        /// <summary>
+        /// Returns true if the given tile layer is visible in the editor
+        /// </summary>
+        /// <param name="layer">Given layer</param>
+        /// <returns>True if the layer is visible</returns>
+        public static bool IsLayerVisible(TileLayer layer) => instance.layerToggles[(int)layer].isOn;
     }
 }

@@ -15,6 +15,16 @@ namespace Puzzled
         private static bool _isTickFrame = false;
         private static int _tickFrame = 1;
 
+        /// <summary>
+        /// Cached properties
+        /// </summary>
+        private TileProperty[] _properties = null;
+
+        /// <summary>
+        /// Cached port list
+        /// </summary>
+        private Port[][] _ports;
+
         public TileInfo info => _info;
 
         /// <summary>
@@ -40,7 +50,7 @@ namespace Puzzled
         /// <summary>
         /// Return the tile properties array for this tile
         /// </summary>
-        public TileProperty[] properties => TileDatabase.GetProperties(this);
+        public TileProperty[] properties => _properties == null ? _properties = TileDatabase.GetProperties(this) : _properties;
 
         /// <summary>
         /// Current cell
@@ -326,6 +336,100 @@ namespace Puzzled
                     return property.GetValue<Port>(this);
 
             return null;
+        }
+
+        /// <summary>
+        /// Returns true if the tile is connected to any tile in the given cell
+        /// </summary>
+        /// <param name="cell">Cell</param>
+        /// <returns>True if connected to a tile in the given cell</returns>
+        public bool IsConnectedTo (Cell cell)
+        {
+            foreach (var port in GetPorts())
+                if (port.IsConnectedTo(cell))
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if the tile can connect to the given tile via at least one port.  This
+        /// method takes into account existing connections as well.
+        /// </summary>
+        /// <param name="tile">Tile to connect to</param>
+        /// <returns>True if a connection can be made</returns>
+        public bool CanConnectTo (Tile tile)
+        {
+            if (tile == null)
+                return false;
+
+            var outputs = GetPorts(PortFlow.Output);
+            var inputs = tile.GetPorts(PortFlow.Input);
+
+            if (outputs.Length == 0 || inputs.Length == 0)
+                return false;
+
+            foreach(var output in outputs)
+            {
+                // Skip any outputs already connected to the tile
+                if (output.IsConnectedTo(tile))
+                    continue;
+
+                // Can this output connect to any of the inputs?
+                foreach (var input in inputs)
+                    if (output.CanConnectTo(input))
+                        return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if the tile can connect to any tile in the given cell.  This
+        /// method takes into account existing connections as well.
+        /// </summary>
+        /// <param name="cell">Cell to connect to</param>
+        /// <returns>True if a connection can be made</returns>
+        public bool CanConnectTo(Cell cell)
+        {
+            for (int i = (int)TileLayer.Logic; i >= 0; i--)
+                if (CanConnectTo(puzzle.grid.CellToTile(cell, (TileLayer)i)))
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Return an array of ports for the given flow
+        /// </summary>
+        /// <param name="flow">Port flow</param>
+        /// <returns>Ports</returns>
+        public Port[] GetPorts(PortFlow flow) 
+        {
+            GetPorts();
+            return _ports[1 + (int)flow];
+        }
+
+        /// <summary>
+        /// Return an array of all ports
+        /// </summary>
+        /// <returns></returns>
+        public Port[] GetPorts()
+        {
+            if (null == _ports)
+            {
+                _ports = new Port[3][];
+                var ports = new List<Port>(properties.Length);
+                foreach (var property in properties)
+                    if (property.type == TilePropertyType.Port)
+                        ports.Add(property.GetValue<Port>(this));
+
+                _ports[0] = ports.ToArray();
+                _ports[1] = GetPorts().Where(p => p.flow == PortFlow.Input).ToArray();
+                _ports[2] = GetPorts().Where(p => p.flow == PortFlow.Output).ToArray();
+            }
+
+            return _ports[0];
         }
     }
 }
