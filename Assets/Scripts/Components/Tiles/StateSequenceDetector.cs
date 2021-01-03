@@ -9,12 +9,12 @@ namespace Puzzled
         private int sequenceIndex = 0;
 
         [Editable]
-        [Port(PortFlow.Output, PortType.Power, legacy = true)]
-        public Port powerOutPort { get; set; }
-
-        [Editable]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]
         public Port powerInPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Output, PortType.Power, legacy = true)]
+        public Port powerOutPort { get; set; }
 
         // TODO: trigger to reset?
 
@@ -24,7 +24,7 @@ namespace Puzzled
         public string[] steps { get; set; }
 
         [ActorEventHandler]
-        private void OnWirePower(WirePowerChangedEvent evt) => HandleWireChange();
+        private void OnWirePowerChanged(WirePowerChangedEvent evt) => HandleWireChange();
 
         private void HandleWireChange()
         {

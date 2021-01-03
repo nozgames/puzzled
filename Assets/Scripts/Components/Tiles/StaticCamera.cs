@@ -34,8 +34,8 @@ namespace Puzzled
         }
 
         [Editable]
-        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(TriggerEvent))]
-        public Port triggerIn { get; set; }
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(SignalEvent))]
+        public Port signalInPort { get; set; }
 
         private Background _background;
         private int _zoomLevel = CameraManager.DefaultZoomLevel;
@@ -44,7 +44,7 @@ namespace Puzzled
         [SerializeField] private bool isInitialLocation = false;
 
         [ActorEventHandler]
-        private void OnTrigger(TriggerEvent evt)
+        private void OnSignal (SignalEvent evt)
         { 
             if (isEditing)
                 CameraManager.JumpToCell(tile.cell, zoomLevel);

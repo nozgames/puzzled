@@ -1,5 +1,4 @@
 ﻿using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
@@ -14,15 +13,15 @@ namespace Puzzled
         // TODO: maxvalue
 
         [Editable]
-        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(IncrementEvent))]
-        public Port incrementPort { get; set; }
-        
-        [Editable]
         [Port(PortFlow.Output, PortType.Number, legacy = true)]
-        public Port valuePort { get; set; }
+        public Port valueOutPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(IncrementSignal))]
+        public Port incrementPort { get; set; }
 
         [ActorEventHandler]
-        private void OnIncrement (IncrementEvent evt)
+        private void OnIncrement (IncrementSignal evt)
         {
             _value = (_value + 1) % valueCount;
             SendValue();
@@ -31,6 +30,6 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => SendValue();
 
-        private void SendValue() => valuePort.SendValue(_value + 1);
+        private void SendValue() => valueOutPort.SendValue(_value + 1);
     }
 }

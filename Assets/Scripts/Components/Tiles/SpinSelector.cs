@@ -17,10 +17,10 @@ namespace Puzzled
 
         [Editable]
         [Port(PortFlow.Output, PortType.Number)]
-        public Port valuePort { get; set; }
+        public Port valueOutPort { get; set; }
 
         [Editable]
-        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(IncrementEvent))]
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(IncrementSignal))]
         public Port incrementPort { get; set; }
 
         [Editable]
@@ -49,21 +49,25 @@ namespace Puzzled
         private void OnStart(StartEvent evt) => OnUpdateValue();
 
         [ActorEventHandler]
-        private void OnUse(UseEvent evt) => evt.IsHandled = true;
+        private void OnUse(UseEvent evt)
+        {
+            evt.IsHandled = true;
+            value++;
+        }
 
         [ActorEventHandler]
-        private void OnIncrement(IncrementEvent evt) => value++;
+        private void OnIncrement(IncrementSignal evt) => value++;
 
         private void OnUpdateValue()
         {
             if (tile == null)
                 return;
 
-            valuePort.SendValue(value);
+            valueOutPort.SendValue(value);
             powerOutPort.SetPowered(value == _target);
 
             for (int i = 0; i < visualValues.Length; ++i)
-                visualValues[i].SetActive(value == i);
+                visualValues[i].SetActive(value - 1 == i);
         }
     }
 }
