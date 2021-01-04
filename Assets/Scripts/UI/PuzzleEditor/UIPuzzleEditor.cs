@@ -208,6 +208,9 @@ namespace Puzzled
             ClearUndo();
 
             InitializeCursor();
+
+            // Uncomment to convert all files
+            // UpgradeAllFiles();
         }
 
         private void OnScroll(Vector2 position, Vector2 delta)
@@ -659,7 +662,7 @@ namespace Puzzled
 
         public void UpgradeAllFiles()
         {
-            var files = Directory.GetFiles(Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
+            var files = Directory.GetFiles(Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle", SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 var puzzle = Puzzle.Load(file);
