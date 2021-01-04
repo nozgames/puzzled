@@ -181,6 +181,7 @@ namespace Puzzled
                 if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.type == PortType.Number) > 1)
                     throw new InvalidOperationException($"{tile.name}: Multiple number outputs are not allowed");
 
+#if false
                 // If there is at least one output then there needs to be a legacy output
                 if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output) > 0 &&
                    properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.legacy) <= 0)
@@ -190,6 +191,7 @@ namespace Puzzled
                 if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Input) > 0 &&
                    properties.Count(p => p.port != null && p.port.flow == PortFlow.Input && p.port.legacy) <= 0)
                     throw new InvalidOperationException($"{tile.name}: At least one legacy input must be specified");
+#endif
             }
         }
     }

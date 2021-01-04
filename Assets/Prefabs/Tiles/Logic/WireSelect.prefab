@@ -69,7 +69,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -837423213
-  m_SortingLayer: 8
+  m_SortingLayer: 7
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 8ef8727bf0d9aa347a481ed44adce0f9, type: 3}
   m_Color: {r: 0.927, g: 0.927, b: 0.927, a: 0.7490196}
@@ -92,6 +92,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2819266254877709548}
   - component: {fileID: -8286699205250075377}
+  - component: {fileID: 1873512990231740802}
   - component: {fileID: 1301570008814154818}
   m_Layer: 0
   m_Name: WireSelect
@@ -128,6 +129,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: fdcf56fba30d8724bbcb0a7753cb1f36, type: 2}
+--- !u!114 &1873512990231740802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2af2616caca29bc4fa281d66b71b6c77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1301570008814154818
 MonoBehaviour:
   m_ObjectHideFlags: 0
