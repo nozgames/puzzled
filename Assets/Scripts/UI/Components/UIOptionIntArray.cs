@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Puzzled.Editor    
 {
-    class UIOptionIntArray : UIOptionEditor, IInspectorStateProvider
+    class UIOptionIntArray : UIPropertyEditor, IInspectorStateProvider
     {
         [SerializeField] private GameObject _itemPrefab = null;
         [SerializeField] private UIList _items = null;
@@ -17,9 +17,9 @@ namespace Puzzled.Editor
 
         private List<int> _values;
 
-        protected override void OnTargetChanged(object target)
+        protected override void OnTargetChanged()
         {
-            base.OnTargetChanged(target);
+            base.OnTargetChanged();
 
             _items.transform.DetachAndDestroyChildren();
             _items.onSelectionChanged += (index) => UpdateButtons();
@@ -29,12 +29,11 @@ namespace Puzzled.Editor
             _moveUpButton.onClick.AddListener(OnMoveUpButton);
             _moveDownButton.onClick.AddListener(OnMoveDownButton);
 
-            var option = ((TilePropertyOption)target);
-            _values = option.GetValue<int[]>()?.ToList() ?? new List<int>();
+            _values = target.GetValue<int[]>()?.ToList() ?? new List<int>();
             foreach (var value in _values)
                 AddValue(value);
 
-            label = option.name;
+            label = target.name;
 
             UpdateButtons();
         }
@@ -45,7 +44,7 @@ namespace Puzzled.Editor
             AddValue(1);
             _items.Select(_items.itemCount - 1);
 
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _values.ToArray()));
         }
 
@@ -53,7 +52,7 @@ namespace Puzzled.Editor
         {
             _values.RemoveAt(_items.selected);
 
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             UIPuzzleEditor.ExecuteCommand(
                 new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _values.ToArray()), false, (command) => {
                     _items.Select(Mathf.Min(_items.selected, _items.itemCount - 1));
@@ -64,7 +63,7 @@ namespace Puzzled.Editor
         {
             var editor = Instantiate(_itemPrefab, _items.transform).GetComponent<UIOptionIntArrayItem>();
             editor.onValueChanged += (v) => {
-                var option = ((TilePropertyOption)target);
+                var option = ((TilePropertyEditorTarget)target);
                 _values[editor.transform.GetSiblingIndex()] = v;
                 UIPuzzleEditor.ExecuteCommand(
                     new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _values.ToArray()), false, (command) => {
@@ -77,7 +76,7 @@ namespace Puzzled.Editor
 
         private void OnMoveUpButton()
         {
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             var temp = _values[_items.selected - 1];
             _values[_items.selected - 1] = _values[_items.selected];
             _values[_items.selected] = temp;
@@ -88,7 +87,7 @@ namespace Puzzled.Editor
 
         private void OnMoveDownButton()
         {
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             var temp = _values[_items.selected + 1];
             _values[_items.selected + 1] = _values[_items.selected];
             _values[_items.selected] = temp;

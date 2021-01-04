@@ -15,8 +15,15 @@ namespace Puzzled
         private static bool _isTickFrame = false;
         private static int _tickFrame = 1;
 
-        public List<Wire> inputs { get; private set; } = new List<Wire>();
-        public List<Wire> outputs { get; private set; } = new List<Wire>();
+        /// <summary>
+        /// Cached properties
+        /// </summary>
+        private TileProperty[] _properties = null;
+
+        /// <summary>
+        /// Cached port list
+        /// </summary>
+        private Port[][] _ports;
 
         public TileInfo info => _info;
 
@@ -43,7 +50,7 @@ namespace Puzzled
         /// <summary>
         /// Return the tile properties array for this tile
         /// </summary>
-        public TileProperty[] properties => TileDatabase.GetProperties(this);
+        public TileProperty[] properties => _properties == null ? _properties = TileDatabase.GetProperties(this) : _properties;
 
         /// <summary>
         /// Current cell
@@ -59,6 +66,34 @@ namespace Puzzled
         /// Get/Set the puzzle this tile belongs to
         /// </summary>
         public Puzzle puzzle { get; set; }
+
+        /// <summary>
+        /// True if the tile has one or more outputs
+        /// </summary>
+        public bool hasOutputs {
+            get {
+                // TODO: cache somehow (runtime info that stores properties?)
+
+                foreach (var property in properties)
+                    if (property.type == TilePropertyType.Port && property.port.flow == PortFlow.Output)
+                        return true;
+
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// True if the tile has one ore more inputs
+        /// </summary>
+        public bool hasInputs {
+            get {
+                foreach (var property in properties)
+                    if (property.type == TilePropertyType.Port && property.port.flow == PortFlow.Input)
+                        return true;
+
+                return false;
+            }
+        }
 
         /// <summary>
         /// Current cell
@@ -83,11 +118,11 @@ namespace Puzzled
 
                 transform.position = puzzle.grid.CellToWorld(_cell);
 
-                foreach (var input in inputs)
-                    input.UpdatePositions();
-
-                foreach (var output in outputs)
-                    output.UpdatePositions();
+                // TODO: maintain a list of ports in tile?
+                foreach (var property in properties)
+                    if (property.type == TilePropertyType.Port)
+                        foreach (var wire in property.GetValue<Port>(this).wires)
+                            wire.UpdatePositions();
 
                 if (!puzzle.grid.isLinking)
                     puzzle.grid.LinkTile(this);
@@ -140,16 +175,10 @@ namespace Puzzled
             gameObject.SetActive(false);
             gameObject.transform.SetParent(null);
 
-            // Destroy all input wires
-            foreach (var input in inputs)
-                Destroy(input.gameObject);
-
-            // Destroy all output wires
-            foreach (var output in outputs)
-                Destroy(output.gameObject);
-
-            inputs.Clear();
-            outputs.Clear();
+            // Destroy all connected wires
+            foreach (var property in properties)
+                if (property.type == TilePropertyType.Port)
+                    property.GetValue<Port>(this).Clear();
 
             // Unlink the tile from the tile grid
             if (isLinked && !puzzle.grid.isLinking)
@@ -170,213 +199,6 @@ namespace Puzzled
             if (!_pendingDestroy)
                 Debug.LogWarning("Tile destroyed without calling Tile.Destroy");
         }
-
-        /// <summary>
-        /// Returns the number of active inputs
-        /// </summary>
-        public int activeInputCount {
-            get {
-                if (inputs == null)
-                    return 0;
-
-                var count = 0;
-                foreach (var input in inputs)
-                    if (input.enabled)
-                        count++;
-
-                return count;
-            }
-        }
-
-        /// <summary>
-        /// Total number of inputs
-        /// </summary>
-        public int inputCount => inputs.Count;
-
-        /// <summary>
-        /// Total number of outputs
-        /// </summary>
-        public int outputCount => outputs.Count;
-
-        /// <summary>
-        /// True if all inputs are active
-        /// </summary>
-        public bool allInputsActive => hasActiveInput && activeInputCount == inputCount;
-
-        /// <summary>
-        /// True if the tile has at least one active input
-        /// </summary>
-        public bool hasActiveInput => activeInputCount > 0;
-
-        /// <summary>
-        /// Returns true if the given tile is an output of the tile
-        /// </summary>
-        /// <param name="tile">Tile to check</param>
-        /// <returns>True if the given tile is an output of the tile</returns>
-        public bool HasOutput (Tile tile)
-        {
-            if (null == outputs)
-                return false;
-            
-            foreach(var output in outputs)
-                if (tile == output.to.tile)
-                    return true;
-
-            return false;
-        }
-
-        /// <summary>
-        /// Returns true if the tile has an input from the given tile
-        /// </summary>
-        /// <param name="tile">Tile to check</param>
-        /// <returns>True if the given tile is an input of the tile</returns>
-        public bool HasInput (Tile tile)
-        {
-            if (null == inputs)
-                return false;
-
-            foreach (var input in inputs)
-                if (tile == input.from.tile)
-                    return true;
-
-            return false;
-        }
-
-        /// <summary>
-        /// Set all outputs to the given active state
-        /// </summary>
-        /// <param name="active">New active state</param>
-        public void SetOutputsActive (bool active)
-        {
-            if (null == outputs)
-                return;
-
-            foreach (var output in outputs)
-                output.enabled = active;
-        }
-
-        /// <summary>
-        /// Set the active state for a given output
-        /// </summary>
-        /// <param name="output"></param>
-        /// <param name="active"></param>
-        public void SetOutputActive(int output, bool active)
-        {
-            if (null == outputs)
-                return;
-
-            Debug.Assert(output < outputs.Count);
-            outputs[output].enabled = active;
-        }
-
-        /// <summary>
-        /// Set the output value for a specific output
-        /// </summary>
-        /// <param name="output">Index of the output</param>
-        /// <param name="value">Output value</param>
-        public void SetOutputValue(int output, int value) => outputs[output].value = value;        
-
-        /// <summary>
-        /// Set the output value for all outputs to the given value
-        /// </summary>
-        /// <param name="value">New value of the output</param>
-        public void SetOutputValue(int value)
-        {
-            foreach (var output in outputs)
-                output.value = value;
-        }
-
-        /// <summary>
-        /// Activate and then deactivate all outputs
-        /// </summary>
-        public void PulseOutputs()
-        {
-            SetOutputsActive(true);
-            SetOutputsActive(false);
-        }
-
-        /// <summary>
-        /// Set an option for a specific input
-        /// </summary>
-        /// <param name="input">Index of input to set option for</param>
-        /// <param name="option">Index of option</param>
-        /// <param name="value">Value to set</param>
-        public void SetInputOption(int input, int option, int value) => 
-            inputs[input].to.SetOption(option, value);
-
-        /// <summary>
-        /// Get an option value for a specific input
-        /// </summary>
-        /// <param name="input">Index of the input</param>
-        /// <param name="option">Index of the option</param>
-        /// <returns>Value of the option</returns>
-        public int GetInputOption(int input, int option) =>
-            inputs[input].to.GetOption(option);
-
-        /// <summary>
-        /// Set an option for a specific output
-        /// </summary>
-        /// <param name="output">Index of the output</param>
-        /// <param name="option">Index of the option</param>
-        /// <param name="value">Value of the option</param>
-        public void SetOutputOption(int output, int option, int value) =>
-            outputs[output].from.SetOption(option, value);
-
-        /// <summary>
-        /// Get an option value for a specific output
-        /// </summary>
-        /// <param name="output">Index of the output</param>
-        /// <param name="option">Index of the option</param>
-        /// <returns>Value of the option</returns>
-        public int GetOutputOption(int output, int option) =>
-            outputs[output].from.GetOption(option);
-
-        /// <summary>
-        /// Return the index of the given input wire within inputs list
-        /// </summary>
-        /// <param name="input">Input wire</param>
-        /// <returns>The index of the input wire within the inputs list or -1 if not found</returns>
-        public int GetInputIndex (Wire input) => inputs.FindIndex(i => i == input);
-
-        /// <summary>
-        /// Return the index of the given output wire within the outputs list
-        /// </summary>
-        /// <param name="output">Output wire</param>
-        /// <returns>The index of the output wire within the outputs list or -1 if not found</returns>
-        public int GetOutputIndex(Wire output) => outputs.FindIndex(o => o == output);
-
-        private void SetWireIndex(Wire wire, int index, List<Wire> wires, bool insertNull = false)
-        {
-            // Remove the wire
-            if (!wires.Remove(wire))
-                return;
-
-            // If the list isnt big enough then add empties (this is for loading)
-            if (insertNull)
-                for (int i = index - wires.Count; i > 0; i--)
-                    wires.Add(null);
-
-            // Insert the wire back into the list
-            wires.Insert(index, wire);
-        }
-
-        /// <summary>
-        /// Set the index of the given input within the inputs list
-        /// </summary>
-        /// <param name="input">Input Wire</param>
-        /// <param name="index">New Index</param>
-        /// <param name="insertEmpty">If true insert null wires in the inputs list to ensure the index can be set</param>
-        public void SetInputIndex(Wire input, int index, bool insertNull = false) =>
-            SetWireIndex(input, index, inputs, insertNull);
-
-        /// <summary>
-        /// Set the index of the given output within the outputs list
-        /// </summary>
-        /// <param name="output">Output wire</param>
-        /// <param name="index">New Index</param>
-        /// <param name="insertNull">If true insert null wires in the outputs list to ensure the index can be set</param>
-        public void SetOutputIndex(Wire output, int index, bool insertNull = false) =>
-            SetWireIndex(output, index, outputs, insertNull);
 
         protected override void OnCallbackRegistered(System.Type eventType)
         {
@@ -479,7 +301,7 @@ namespace Puzzled
         /// </summary>
         /// <param name="name">Name of property</param>
         /// <returns>Property value</returns>
-        public object GetPropertyValue(string name) => GetProperty(name).GetValue(this);
+        public object GetPropertyValue(string name) => GetProperty(name)?.GetValue(this);
 
         /// <summary>
         /// Return the property value for the given property and cast it to the given type
@@ -488,5 +310,126 @@ namespace Puzzled
         /// <param name="name">Name of property</param>
         /// <returns>Property value</returns>
         public T GetPropertyValue<T>(string name) => (T)GetPropertyValue(name);
+
+        /// <summary>
+        /// Return the legacy port 
+        /// </summary>
+        /// <returns>Port</returns>
+        public Port GetLegacyPort (PortFlow flow)
+        {
+            foreach (var property in properties)
+                if (property.type == TilePropertyType.Port && property.port.flow == flow && property.port.legacy)
+                    return property.GetValue<Port>(this);
+
+            return null;
+        }
+
+        /// <summary>
+        /// Return the input port with the given name
+        /// </summary>
+        /// <param name="name">Name of the port</param>
+        /// <returns>Input port</returns>
+        public Port GetPort (string name)
+        {
+            foreach (var property in properties)
+                if (property.type == TilePropertyType.Port && property.name == name)
+                    return property.GetValue<Port>(this);
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns true if the tile is connected to any tile in the given cell
+        /// </summary>
+        /// <param name="cell">Cell</param>
+        /// <returns>True if connected to a tile in the given cell</returns>
+        public bool IsConnectedTo (Cell cell)
+        {
+            foreach (var port in GetPorts())
+                if (port.IsConnectedTo(cell))
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if the tile can connect to the given tile via at least one port.  This
+        /// method takes into account existing connections as well.
+        /// </summary>
+        /// <param name="tile">Tile to connect to</param>
+        /// <returns>True if a connection can be made</returns>
+        public bool CanConnectTo (Tile tile)
+        {
+            if (tile == null)
+                return false;
+
+            var outputs = GetPorts(PortFlow.Output);
+            var inputs = tile.GetPorts(PortFlow.Input);
+
+            if (outputs.Length == 0 || inputs.Length == 0)
+                return false;
+
+            foreach(var output in outputs)
+            {
+                // Skip any outputs already connected to the tile
+                if (output.IsConnectedTo(tile))
+                    continue;
+
+                // Can this output connect to any of the inputs?
+                foreach (var input in inputs)
+                    if (output.CanConnectTo(input))
+                        return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if the tile can connect to any tile in the given cell.  This
+        /// method takes into account existing connections as well.
+        /// </summary>
+        /// <param name="cell">Cell to connect to</param>
+        /// <returns>True if a connection can be made</returns>
+        public bool CanConnectTo(Cell cell)
+        {
+            for (int i = (int)TileLayer.Logic; i >= 0; i--)
+                if (CanConnectTo(puzzle.grid.CellToTile(cell, (TileLayer)i)))
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Return an array of ports for the given flow
+        /// </summary>
+        /// <param name="flow">Port flow</param>
+        /// <returns>Ports</returns>
+        public Port[] GetPorts(PortFlow flow) 
+        {
+            GetPorts();
+            return _ports[1 + (int)flow];
+        }
+
+        /// <summary>
+        /// Return an array of all ports
+        /// </summary>
+        /// <returns></returns>
+        public Port[] GetPorts()
+        {
+            if (null == _ports)
+            {
+                _ports = new Port[3][];
+                var ports = new List<Port>(properties.Length);
+                foreach (var property in properties)
+                    if (property.type == TilePropertyType.Port)
+                        ports.Add(property.GetValue<Port>(this));
+
+                _ports[0] = ports.ToArray();
+                _ports[1] = GetPorts().Where(p => p.flow == PortFlow.Input).ToArray();
+                _ports[2] = GetPorts().Where(p => p.flow == PortFlow.Output).ToArray();
+            }
+
+            return _ports[0];
+        }
     }
 }

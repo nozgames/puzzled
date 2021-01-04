@@ -8,5 +8,6 @@ namespace Puzzled
         public bool hidden = false;
         public bool multiline = false;
         public Vector2Int range;
+        public int order = 0;
     }
 }

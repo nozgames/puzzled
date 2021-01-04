@@ -21,7 +21,8 @@ namespace Puzzled
         DecalArray,
         Tile,
         Background,
-        IntArray
+        IntArray,
+        Port
     }
 
     public class TileProperty
@@ -37,9 +38,27 @@ namespace Puzzled
         public EditableAttribute editable { get; private set; }
 
         /// <summary>
+        /// Optional port attribute
+        /// </summary>
+        public PortAttribute port { get; private set; }
+
+        /// <summary>
         /// Name of the property
         /// </summary>
         public string name => info.Name;
+
+        /// <summary>
+        /// Display name of the property
+        /// </summary>
+        public string displayName {
+            get {
+                var displayName = name;
+                if (port != null && displayName.EndsWith("Port"))
+                    displayName = name.Substring(0, name.Length - 4);
+
+                return displayName.NicifyName();
+            }
+        }
 
         /// <summary>
         /// Type of the property
@@ -51,10 +70,11 @@ namespace Puzzled
         /// </summary>
         /// <param name="info"></param>
         /// <param name="editable"></param>
-        public TileProperty(PropertyInfo info, EditableAttribute editable)
+        public TileProperty(PropertyInfo info, EditableAttribute editable, PortAttribute port)
         {
             this.info = info;
             this.editable = editable;
+            this.port = port;
             type = TilePropertyType.Unknown;
 
             // Dont bother setting the type if the property isnt ediable
@@ -81,6 +101,8 @@ namespace Puzzled
                 type = TilePropertyType.Tile;
             else if (info.PropertyType == typeof(Background))
                 type = TilePropertyType.Background;
+            else if (info.PropertyType == typeof(Port))
+                type = TilePropertyType.Port;
             else
                 throw new NotImplementedException();
         }

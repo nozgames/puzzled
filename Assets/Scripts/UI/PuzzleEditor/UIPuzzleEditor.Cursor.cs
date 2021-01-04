@@ -38,13 +38,22 @@ namespace Puzzled
             var cell = canvas.CanvasToCell(ctx.ReadValue<Vector2>());
             if (cell == _cursorCell)
                 return;
-            
+
+            if (cell == Cell.invalid)
+                return;
+
             _cursorCell = cell;
             UpdateCursor();
         }
 
         private void UpdateCursor(bool updatePosition = false)
         {
+            if (popups.activeSelf)
+            {
+                UIManager.cursor = CursorType.Arrow;
+                return;
+            }
+
             if(updatePosition && canvas.isMouseOver)
                 _cursorCell = canvas.CanvasToCell(_pointerAction.action.ReadValue<Vector2>());                
 

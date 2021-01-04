@@ -5,25 +5,24 @@ using Puzzled.Editor;
 
 namespace Puzzled
 {
-    public class UIOptionDecal : UIOptionEditor
+    public class UIOptionDecal : UIPropertyEditor
     {
         [SerializeField] private UIDecalEditor _decalEditor = null;
 
-        protected override void OnTargetChanged(object target)
+        protected override void OnTargetChanged()
         {
-            base.OnTargetChanged(target);
+            base.OnTargetChanged();
 
-            var option = ((TilePropertyOption)target);
-            label = option.name;
-            _decalEditor.interactable = option.tile.info.layer != TileLayer.Floor || option.tile.puzzle.grid.CellToTile(option.tile.cell, TileLayer.Static) == null;
-            _decalEditor.decal = option.GetValue<Decal>();
+            label = target.name;
+            _decalEditor.interactable = target.tile.info.layer != TileLayer.Floor || target.tile.puzzle.grid.CellToTile(target.tile.cell, TileLayer.Static) == null;
+            _decalEditor.decal = target.GetValue<Decal>();
             _decalEditor.onDecalChanged -= OnDecalChanged;
             _decalEditor.onDecalChanged += OnDecalChanged;
         }
 
         private void OnDecalChanged(Decal decal)
         {
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, decal));
         }
     }

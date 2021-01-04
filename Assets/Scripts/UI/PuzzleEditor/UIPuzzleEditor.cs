@@ -49,17 +49,15 @@ namespace Puzzled
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
         [SerializeField] private GameObject fileMenuPopup = null;
-        [SerializeField] private GameObject puzzleNamePopup = null;
-        [SerializeField] private GameObject loadPopup = null;
-        [SerializeField] private TMPro.TMP_InputField puzzleNameInput = null;
-        [SerializeField] private Transform loadPopupFiles = null;
-        [SerializeField] private GameObject loadPopupFilePrefab = null;
+        [SerializeField] private UIChoosePuzzlePopup _chooseFilePopup = null;
         [SerializeField] private GameObject _chooseTilePopup = null;
         [SerializeField] private UITilePalette _chooseTilePalette = null;
-        [SerializeField] private GameObject _chooseDecalPopup= null;
+        [SerializeField] private GameObject _chooseDecalPopup = null;
         [SerializeField] private UIDecalPalette _chooseDecalPalette = null;
         [SerializeField] private GameObject _chooseBackgroundPopup = null;
         [SerializeField] private UIBackgroundPalette _chooseBackgroundPalette = null;
+        [SerializeField] private UIPortSelector _choosePortPopup = null;
+        [SerializeField] private UITileSelector _chooseTileConnectionPopup = null;
 
         private Mode _mode = Mode.Unknown;
 
@@ -85,21 +83,26 @@ namespace Puzzled
                     return;
 
                 selectionRect.gameObject.SetActive(false);
-                
+
                 _mode = value;
 
                 switch (_mode)
                 {
-                    case Mode.Draw: 
-                        drawTool.isOn = true; break;
+                    case Mode.Draw:
+                        drawTool.isOn = true;
+                        break;
                     case Mode.Move:
-                        moveTool.isOn = true; break;
+                        moveTool.isOn = true;
+                        break;
                     case Mode.Erase:
-                        eraseTool.isOn = true; break;
+                        eraseTool.isOn = true;
+                        break;
                     case Mode.Logic:
-                        wireTool.isOn = true; break;
+                        wireTool.isOn = true;
+                        break;
                     case Mode.Decal:
-                        decalTool.isOn = true; break;
+                        decalTool.isOn = true;
+                        break;
                 }
 
                 UpdateMode();
@@ -123,11 +126,21 @@ namespace Puzzled
 
             switch (_mode)
             {
-                case Mode.Move: EnableMoveTool(); break;
-                case Mode.Draw: EnableDrawTool(); break;
-                case Mode.Erase: EnableEraseTool(); break;
-                case Mode.Logic: EnableLogicTool(); break;
-                case Mode.Decal: EnableDecalTool(); break;
+                case Mode.Move:
+                    EnableMoveTool();
+                    break;
+                case Mode.Draw:
+                    EnableDrawTool();
+                    break;
+                case Mode.Erase:
+                    EnableEraseTool();
+                    break;
+                case Mode.Logic:
+                    EnableLogicTool();
+                    break;
+                case Mode.Decal:
+                    EnableDecalTool();
+                    break;
             }
 
             UpdateCursor();
@@ -136,6 +149,18 @@ namespace Puzzled
         private void Awake()
         {
             instance = this;
+
+            inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
+
+            _chooseFilePopup.onCancel += () => HidePopup();
+            _chooseFilePopup.onOpenPuzzle += (filename) => {
+                Load(filename);
+                HidePopup();
+            };
+            _chooseFilePopup.onSaveFile += (filename) => {
+                SaveAs(filename);
+                HidePopup();
+            };
 
             _chooseBackgroundPalette.onDoubleClickBackground += (background) => {
                 _chooseBackgroundCallback?.Invoke(background);
@@ -170,7 +195,7 @@ namespace Puzzled
             GameManager.busy++;
 
             popups.SetActive(false);
-            inspector.SetActive(false);            
+            inspector.SetActive(false);
 
             selectionRect.gameObject.SetActive(false);
 
@@ -236,7 +261,7 @@ namespace Puzzled
         {
             _selectionMin = Cell.Min(min, max);
             _selectionMax = Cell.Max(min, max);
-            _selectionSize = _selectionMax - _selectionMin; 
+            _selectionSize = _selectionMax - _selectionMin;
 
             selectionRect.anchorMin = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMin) - new Vector3(0.5f, 0.5f, 0));
             selectionRect.anchorMax = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMax) + new Vector3(0.5f, 0.5f, 0));
@@ -244,14 +269,14 @@ namespace Puzzled
             selectionRect.gameObject.SetActive(true);
         }
 
-        private void OnPan (Vector2 position, Vector2 delta)
+        private void OnPan(Vector2 position, Vector2 delta)
         {
             if (playing)
                 return;
 
             CameraManager.Pan(-(canvas.CanvasToWorld(position + delta) - canvas.CanvasToWorld(position)));
 
-            if(selectionRect.gameObject.activeSelf)
+            if (selectionRect.gameObject.activeSelf)
                 SetSelectionRect(_selectionMin, _selectionMax);
 
             UpdateCursor();
@@ -259,8 +284,8 @@ namespace Puzzled
 
         public void OnSaveButton()
         {
-            if (puzzleName.text == null || String.Compare(puzzleName.text, "unnamed", true) == 0)
-                ShowPopup(puzzleNamePopup);
+            if (!_puzzle.hasPath)
+                OnSaveAsButton();
             else
             {
                 Save();
@@ -270,27 +295,19 @@ namespace Puzzled
 
         public void OnSaveAsButton()
         {
-            ShowPopup(puzzleNamePopup);
-        }
-
-        public void OnSavePuzzleName()
-        {
-            // Dont allow an empty puzzle name or one named "unnamed"
-            if (string.IsNullOrEmpty(puzzleNameInput.text) || string.Compare(puzzleNameInput.text, "unnamed", true) == 0)
-                return;
-
-            // Save the puzzle with the new name
-            _puzzle.Save(Path.Combine(Application.dataPath, $"Puzzles/{puzzleNameInput.text}.puzzle"));
-
-            puzzleName.text = _puzzle.filename;
-
-            HidePopup();
-            Save();
+            ShowPopup(_chooseFilePopup.gameObject);
+            _chooseFilePopup.SavePuzzle(_puzzle.path);
         }
 
         public void OnCancelPopup()
         {
             HidePopup();
+        }
+
+        public void SaveAs(string filename)
+        {
+            _puzzle.Save(filename);
+            puzzleName.text = _puzzle.filename;
         }
 
         public void Save()
@@ -303,7 +320,7 @@ namespace Puzzled
 
         private void NewPuzzle()
         {
-            if(_puzzle != null)
+            if (_puzzle != null)
                 _puzzle.Destroy();
 
             _puzzle = GameManager.InstantiatePuzzle();
@@ -330,24 +347,8 @@ namespace Puzzled
 
         public void OnLoadButton()
         {
-            loadPopupFiles.DetachAndDestroyChildren();
-
-            var files = Directory.GetFiles(Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
-            foreach (var file in files)
-            {
-                var fileGameObject = Instantiate(loadPopupFilePrefab, loadPopupFiles);
-                fileGameObject.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = Path.GetFileNameWithoutExtension(file);
-                var item = fileGameObject.GetComponent<UIListItem>();
-                item.onSelectionChanged.AddListener((selected) => {
-                    if (!selected)
-                        return;
-                });
-                item.onDoubleClick.AddListener(() => {
-                    Load(file);
-                });
-            }
-
-            ShowPopup(loadPopup);
+            ShowPopup(_chooseFilePopup.gameObject);
+            _chooseFilePopup.OpenPuzzle();            
         }
 
         public void OnStopButton()
@@ -384,7 +385,7 @@ namespace Puzzled
             // Prompt for saving if it has not yet been saved
             if (!_puzzle.hasPath)
             {
-                ShowPopup(puzzleNamePopup);
+                OnSaveAsButton();
                 return;
             }
 
@@ -412,7 +413,7 @@ namespace Puzzled
             GameManager.Play();
         }
 
-        private void Center(Cell cell, int zoomLevel=-1)
+        private void Center(Cell cell, int zoomLevel = -1)
         {
             // Cente around the tile first
             CameraManager.JumpToCell(cell, zoomLevel);
@@ -437,8 +438,7 @@ namespace Puzzled
                 Center(CameraManager.cell, CameraManager.DefaultZoomLevel);
 
                 puzzleName.text = _puzzle.filename;
-            } 
-            catch (Exception e)
+            } catch (Exception e)
             {
                 Debug.LogException(e);
                 NewPuzzle();
@@ -462,18 +462,20 @@ namespace Puzzled
             popups.transform.DisableChildren();
             popups.SetActive(true);
             popup.SetActive(true);
+            UpdateCursor();
         }
 
         private void HidePopup()
         {
             popups.SetActive(false);
+            UpdateCursor();
         }
 
         [Flags]
         private enum GetTileFlag
         {
             None = 0,
-            AllowInputs  = 1,
+            AllowInputs = 1,
             AllowOutputs = 2
         }
 
@@ -487,11 +489,13 @@ namespace Puzzled
                 if (null == tile)
                     continue;
 
+#if false
                 if (!tile.info.allowWireInputs && (flags & GetTileFlag.AllowInputs) == GetTileFlag.AllowInputs)
                     continue;
 
                 if (!tile.info.allowWireOutputs && (flags & GetTileFlag.AllowOutputs) == GetTileFlag.AllowOutputs)
                     continue;
+#endif
 
                 // Do not return tiles on hidden layers
                 if (!layerToggles[i].isOn)
@@ -508,6 +512,28 @@ namespace Puzzled
             Destroy(wire.gameObject);
         }
 
+        public void ChoosePort(Tile tileFrom, Tile tileTo, Action<Port, Port> callback)
+        {
+            ShowPopup(_choosePortPopup.gameObject);
+            _choosePortPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tileTo.transform.position - new Vector3(0.5f, 0.5f, 0));
+            _choosePortPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tileTo.transform.position + new Vector3(0.5f, 0.5f, 0));
+            _choosePortPopup.Open(tileFrom, tileTo, (from, to) => {
+                HidePopup();
+                callback?.Invoke(from, to);
+            });
+        }
+
+        public void ChooseTileConnection (Tile[] tilesTo, Action<Tile> callback)
+        {
+            ShowPopup(_chooseTileConnectionPopup.gameObject);
+            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position - new Vector3(0.5f, 0.5f, 0));
+            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position + new Vector3(0.5f, 0.5f, 0));
+            _chooseTileConnectionPopup.Open(tilesTo, (target) => {
+                HidePopup();
+                callback?.Invoke(target);
+            });
+        }
+
         public void ChooseBackground(Action<Background> callback, Background current = null)
         {
             _chooseBackgroundCallback = callback;
@@ -515,30 +541,30 @@ namespace Puzzled
             ShowPopup(_chooseBackgroundPopup);
         }
 
-        public void ChooseDecal (Action<Decal> callback)
+        public void ChooseDecal(Action<Decal> callback)
         {
             _chooseDecalCallback = callback;
             ShowPopup(_chooseDecalPopup);
         }
 
-        public void ChooseTile (Type componentType, Action<Tile> callback)
+        public void ChooseTile(Type componentType, Action<Tile> callback)
         {
             _chooseTileCallback = callback;
             _chooseTilePalette.componentFilter = componentType;
             ShowPopup(_chooseTilePopup);
         }
 
-        public void CloseTileSelector (Tile tile)
+        public void CloseTileSelector(Tile tile)
         {
             if (tile != null)
                 _chooseTileCallback?.Invoke(tile);
 
             HidePopup();
-        }        
+        }
 
         private void UpdateLayers()
         {
-            for(int i=0;i<layerToggles.Length; i++)
+            for (int i = 0; i < layerToggles.Length; i++)
                 CameraManager.ShowLayer((TileLayer)i, layerToggles[i].isOn);
         }
 
@@ -621,6 +647,25 @@ namespace Puzzled
             }
 
             UpdateCursor();
+        }
+
+        /// <summary>
+        /// Returns true if the given tile layer is visible in the editor
+        /// </summary>
+        /// <param name="layer">Given layer</param>
+        /// <returns>True if the layer is visible</returns>
+        public static bool IsLayerVisible(TileLayer layer) => instance.layerToggles[(int)layer].isOn;
+
+
+        public void UpgradeAllFiles()
+        {
+            var files = Directory.GetFiles(Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle");
+            foreach (var file in files)
+            {
+                var puzzle = Puzzle.Load(file);
+                puzzle.Save();
+                puzzle.Destroy();
+            }
         }
     }
 }

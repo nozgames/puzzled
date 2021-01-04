@@ -4,7 +4,7 @@
     {
         private Tile tile;
         private Cell cell;
-        private GroupCommand children;
+        private GroupCommand children = null;
 
         public TileDestroyCommand(Tile tile)
         {
@@ -12,17 +12,21 @@
             cell = tile.cell;
         }
 
+        private void AddChild(Command command)
+        {
+            if (null == children)
+                children = new GroupCommand();
+
+            children.Add(command);
+        }
+
         protected override void OnExecute()
         {
-            if (tile.inputCount + tile.outputCount > 0)
-            {
-                children = new GroupCommand();
-                foreach (var input in tile.inputs)
-                    children.Add(new WireDestroyCommand(input));
-
-                foreach (var output in tile.outputs)
-                    children.Add(new WireDestroyCommand(output));
-            }
+            // Destroy all wires connected as well
+            foreach(var property in tile.properties)
+                if(property.type == TilePropertyType.Port)
+                    foreach(var wire in property.GetValue<Port>(tile).wires)
+                        AddChild(new WireDestroyCommand(wire));
 
             children?.Execute();
 

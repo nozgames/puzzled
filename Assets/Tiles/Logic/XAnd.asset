@@ -14,11 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _displayName: 
   description: 
+  _layer: 3
   _allowMultiple: 1
   _allowDynamic: 0
-  _allowWireInputs: 1
-  _allowWireOuputs: 1
-  _layer: 3
-  _inputsPrefab: {fileID: 6739686465920637646, guid: 0a5e797b729f406479502ea49f16eaad, type: 3}
-  _outputsPrefab: {fileID: 0}
-  _customEditorPrefabs: []
+  _deprecated: 0
+  _customPropertyEditors:
+  - name: powerInPort
+    prefab: {fileID: 7846575971392604461, guid: cb2a79b149f86f7428b9d32e2e00d24e, type: 3}

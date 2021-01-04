@@ -2,35 +2,28 @@
 {
     public class WireSetOptionCommand : Command
     {
+        private Wire.Connection connection;
         private int option;
         private int redoValue;
         private int undoValue;
         private bool input;
-        private Wire wire;
 
-        public WireSetOptionCommand(Wire wire, bool input, int option, int value)
+        public WireSetOptionCommand(Wire.Connection connection, int option, int value)
         {
+            this.connection = connection;
             this.option = option;
-            this.input = input;
-            this.wire = wire;
             redoValue = value;
-            undoValue = input ? wire.to.GetOption(option) : wire.from.GetOption(option);
+            undoValue = connection.GetOption(option);
         }
 
         protected override void OnExecute()
         {
-            if (input)
-                wire.to.SetOption(option, redoValue);
-            else
-                wire.from.SetOption(option, redoValue);
+            connection.SetOption(option, redoValue);
         }
 
         protected override void OnUndo()
         {
-            if (input)
-                wire.to.SetOption(option, undoValue);
-            else
-                wire.from.SetOption(option, undoValue);
+            connection.SetOption(option, undoValue);
         }
     }
 }

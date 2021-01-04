@@ -1,11 +1,17 @@
 ﻿using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
     public class Cycle : TileComponent
     {
         private bool isCycling = false;
+
+        /// <summary>
+        /// Input port used to enable/disable the cycle
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Power, legacy = true)]
+        public Port powerInPort { get; private set; }
 
         [Editable]
         public bool clearOnDeactivate { get; set; } = true;
@@ -21,25 +27,20 @@ namespace Puzzled
         public bool shouldBeActive => isCycling || !clearOnDeactivate;
 
         [ActorEventHandler]
-        private void OnStart(StartEvent evt) => Send(new CycleUpdateEvent(this));
+        private void OnStart(StartEvent evt)
+        {
+            UpdateCyclingState();
+            Send(new CycleUpdateEvent(this));
+        }
 
         [ActorEventHandler]
-        private void OnActivateWire(WireActivatedEvent evt)
+        private void OnWirePower (WirePowerChangedEvent evt)
         {
             UpdateCyclingState();
         }
 
         [ActorEventHandler]
-        private void OnDeactivateWire(WireDeactivatedEvent evt)
-        {
-            UpdateCyclingState();
-        }
-
-        [ActorEventHandler]
-        private void OnTickStart(TickEvent evt)
-        {
-            UpdateCycle();
-        }
+        private void OnTick(TickEvent evt) => UpdateCycle();
 
         private void UpdateCycle()
         {
@@ -63,7 +64,7 @@ namespace Puzzled
 
         private void UpdateCyclingState()
         {
-            isCycling = tile.hasActiveInput;
+            isCycling = powerInPort.wireCount == 0 || powerInPort.hasPower;
 
             if (isCycling)
             {

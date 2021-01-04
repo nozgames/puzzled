@@ -161,7 +161,6 @@ namespace Puzzled
         public static Puzzle InstantiatePuzzle ()
         {
             var puzzle = Instantiate(_instance._puzzlePrefab.gameObject, _instance._puzzles).GetComponent<Puzzle>();
-            puzzle.gameObject.SetActive(false);
             return puzzle;
         }
 

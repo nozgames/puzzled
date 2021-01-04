@@ -3,15 +3,14 @@ using UnityEngine.UI;
 
 namespace Puzzled
 {
-    public class UIOptionTile : UIOptionEditor
+    public class UIOptionTile : UIPropertyEditor
     {
         [SerializeField] private RawImage preview = null;
 
-        protected override void OnTargetChanged(object target)
+        protected override void OnTargetChanged()
         {
-            base.OnTargetChanged(target);
-
-            label = ((TilePropertyOption)target).name;
+            base.OnTargetChanged();
+            label = target.name;
             UpdatePreview();
         }
 
@@ -19,7 +18,7 @@ namespace Puzzled
         {
             UIPuzzleEditor.instance.ChooseTile(typeof(Item), 
                 (tile) => {
-                    var option = ((TilePropertyOption)target);
+                    var option = ((TilePropertyEditorTarget)target);
                     UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, tile.guid));
                     UpdatePreview();
                 }
@@ -28,7 +27,7 @@ namespace Puzzled
 
         private void UpdatePreview()
         {
-            preview.texture = TileDatabase.GetPreview(((TilePropertyOption)target).GetValue<System.Guid>());
+            preview.texture = TileDatabase.GetPreview(((TilePropertyEditorTarget)target).GetValue<System.Guid>());
             preview.gameObject.SetActive(preview.texture != null);
         }
     }

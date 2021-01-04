@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Puzzled
 {
-    public class UIOptionBool : UIOptionEditor
+    public class UIOptionBool : UIPropertyEditor
     {
         [SerializeField] private Toggle toggle = null;
 
@@ -19,15 +19,14 @@ namespace Puzzled
 
         private void OnToggleValueChanged(bool newValue)
         {
-            var option = ((TilePropertyOption)target);
+            var option = ((TilePropertyEditorTarget)target);
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, newValue));
         }
 
-        protected override void OnTargetChanged(object target)
+        protected override void OnTargetChanged()
         {
-            var option = ((TilePropertyOption)target);
-            toggle.SetIsOnWithoutNotify(option.GetValue<bool>());
-            label = option.name;
+            toggle.SetIsOnWithoutNotify(target.GetValue<bool>());
+            label = target.name;
         }
     }
 }

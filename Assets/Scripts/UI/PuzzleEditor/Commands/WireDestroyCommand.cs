@@ -15,8 +15,8 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnExecute()
         {
-            fromIndex = wire.from.tile.GetOutputIndex(wire);
-            toIndex = wire.to.tile.GetInputIndex(wire);
+            fromIndex = wire.from.port.wires.IndexOf(wire);
+            toIndex = wire.to.port.wires.IndexOf(wire);
             Debug.Assert(fromIndex >= 0);
             Debug.Assert(toIndex >= 0);
             OnRedo();
@@ -24,16 +24,20 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnRedo()
         {
-            wire.from.tile.outputs.RemoveAt(fromIndex);
-            wire.to.tile.inputs.RemoveAt(toIndex);
+            wire.from.port.wires.RemoveAt(fromIndex);
+            wire.to.port.wires.RemoveAt(toIndex);
+            wire.from.tile.Send(new StartEvent());
+            wire.to.tile.Send(new StartEvent());
             UIPuzzleEditor.MoveToTrash(wire.gameObject);
         }
 
         protected override void OnUndo()
         {
             UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
-            wire.from.tile.outputs.Insert(fromIndex, wire);
-            wire.to.tile.inputs.Insert(toIndex, wire);
+            wire.from.port.wires.Insert(fromIndex, wire);
+            wire.to.port.wires.Insert(toIndex, wire);
+            wire.from.tile.Send(new StartEvent());
+            wire.to.tile.Send(new StartEvent());
         }
 
         protected override void OnDestroy()

@@ -9,35 +9,26 @@ namespace Puzzled
         [SerializeField] private string _displayName = "";
         [SerializeField] private string description;
 
+        [Tooltip("Layer the tile is linked to")]
+        [SerializeField] private TileLayer _layer = TileLayer.Static;
+
+        [Serializable]
+        public class CustomPropertyEditor
+        {
+            public string name;
+            public UIPropertyEditor prefab;
+        }
+
+        [Header("Editor")]
         [Tooltip("True if this tile can be added to a puzzled more than once")]
         [SerializeField] private bool _allowMultiple = true;
 
         [Tooltip("True if a dynamic tile can be placed on top on top of this tile")]
         [SerializeField] private bool _allowDynamic = false;
-
-        [Tooltip("True if a tile allows wire inputs")]
-        [SerializeField] private bool _allowWireInputs = false;
-
-        [Tooltip("True if a tile allows wire outputs")]
-        [SerializeField] private bool _allowWireOuputs = false;
-        
-        [Tooltip("Layer the tile is linked to")]
-        [SerializeField] private TileLayer _layer = TileLayer.Static;
-
         [Tooltip("True if the the tile should no longer be used")]
         [SerializeField] private bool _deprecated = false;
 
-        [Serializable]
-        public struct CustomOptionEditor
-        {
-            public GameObject prefab;
-            public int order;
-        }
-
-        [Header("Editor")]
-        [SerializeField] private GameObject _inputsPrefab = null;
-        [SerializeField] private GameObject _outputsPrefab = null;
-        [SerializeField] private CustomOptionEditor[] _customEditorPrefabs = null;
+        [SerializeField] private CustomPropertyEditor[] _customPropertyEditors = null;
 
         public bool allowMultiple => _allowMultiple;
 
@@ -46,18 +37,30 @@ namespace Puzzled
         /// </summary>
         public bool allowDynamic => _allowDynamic;
 
-        public bool allowWireInputs => _allowWireInputs;
-        public bool allowWireOutputs => _allowWireOuputs;
-
         public bool isDeprecated => _deprecated;
 
         public string displayName => string.IsNullOrEmpty(_displayName) ? name : _displayName;
 
-        public CustomOptionEditor[] customOptionEditors => _customEditorPrefabs;
-        public GameObject inputsPrefab => _inputsPrefab;
-        public GameObject outputsPrefab => _outputsPrefab;
+        public CustomPropertyEditor[] customOptionEditors => _customPropertyEditors;
 
         public TileLayer layer => _layer;        
+
+        /// <summary>
+        /// Return the custom property editor for the given property
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public CustomPropertyEditor GetCustomPropertyEditor(TileProperty property)
+        {
+            if (null == _customPropertyEditors)
+                return null;
+
+            foreach (var editor in _customPropertyEditors)
+                if (string.Compare(editor.name, property.name, false) == 0)
+                    return editor;
+
+            return null;
+        }
     }
 }
 

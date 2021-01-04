@@ -4,13 +4,13 @@ namespace Puzzled.Editor.Commands
 {
     class WireAddCommand : Command
     {
-        private Tile from;
-        private Tile to;
+        private Port from;
+        private Port to;
         private int fromIndex;
         private int toIndex;
         private Wire wire;
 
-        public WireAddCommand(Tile from, Tile to)
+        public WireAddCommand(Port from, Port to)
         {
             this.from = from;
             this.to = to;
@@ -18,8 +18,10 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnUndo()
         {
-            wire.from.tile.outputs.RemoveAt(fromIndex);
-            wire.to.tile.inputs.RemoveAt(toIndex);
+            from.wires.RemoveAt(fromIndex);
+            to.wires.RemoveAt(toIndex);
+            from.tile.Send(new StartEvent());
+            to.tile.Send(new StartEvent());
             UIPuzzleEditor.MoveToTrash(wire.gameObject);
         }
 
@@ -28,20 +30,22 @@ namespace Puzzled.Editor.Commands
             Debug.Assert(wire == null);
             wire = puzzle.InstantiateWire(from, to);
             wire.visible = true;
-            fromIndex = wire.from.tile.GetOutputIndex(wire);
-            toIndex = wire.to.tile.GetInputIndex(wire);
+            fromIndex = from.wires.IndexOf(wire);
+            toIndex = to.wires.IndexOf(wire);
             UIPuzzleEditor.selectedWire = wire;
 
-            wire.from.tile.Send(new StartEvent());
+            from.tile.Send(new StartEvent());
+            to.tile.Send(new StartEvent());
         }
 
         protected override void OnRedo()
         {
-            wire.from.tile.outputs.Insert(fromIndex, wire);
-            wire.to.tile.inputs.Insert(toIndex, wire);
+            from.wires.Insert(fromIndex, wire);
+            to.wires.Insert(toIndex, wire);
             UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
 
-            wire.from.tile.Send(new StartEvent());
+            from.tile.Send(new StartEvent());
+            to.tile.Send(new StartEvent());
         }
 
         protected override void OnDestroy()

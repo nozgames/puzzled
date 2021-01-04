@@ -12,6 +12,11 @@ namespace Puzzled
         [SerializeField] private Camera previewCamera = null;
         [SerializeField] private Transform previewParent = null;
 
+        [Header("Ports")]
+        [SerializeField] private Sprite _powerPortIcon = null;
+        [SerializeField] private Sprite _signalPortIcon = null;
+        [SerializeField] private Sprite _numberPortIcon = null;
+
         /// <summary>
         /// Singleton instance of the tile database
         /// </summary>
@@ -124,6 +129,26 @@ namespace Puzzled
             return t;
         }
 
+        /// <summary>
+        /// Return the icon for the given port
+        /// </summary>
+        /// <param name="port">Port</param>
+        /// <returns>Icon as sprite</returns>
+        public static Sprite GetPortIcon(Port port)
+        {
+            if (null == port)
+                return null;
+
+            switch (port.type)
+            {
+                case PortType.Number: return _instance._numberPortIcon;
+                case PortType.Signal: return _instance._signalPortIcon;
+                case PortType.Power: return _instance._powerPortIcon;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
         protected override void OnLoaded()
         {
             base.OnLoaded();
@@ -140,13 +165,31 @@ namespace Puzzled
             // Build the tile properties array for each tile 
             foreach(var tile in _tiles)
             {
-                _tileProperties[tile.guid] =
+                var properties = _tileProperties[tile.guid] =
                     tile.GetComponentsInChildren<TileComponent>()
                         .SelectMany(tc =>
-                            tc.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance),
-                            (tc, p) => new TileProperty (p, p.GetCustomAttribute<EditableAttribute>()))
+                            tc.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance),
+                            (tc, p) => new TileProperty (p, p.GetCustomAttribute<EditableAttribute>(), p.GetCustomAttribute<PortAttribute>()))
                         .Where(ep => ep.editable != null)
                         .ToArray();
+
+                // Ensure there is only one signal/power output
+                if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.type != PortType.Number) > 1)
+                    throw new InvalidOperationException($"{tile.name}: Multiple signal/power outputs are not allowed");
+
+                // Ensure there is only one number output port
+                if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.type == PortType.Number) > 1)
+                    throw new InvalidOperationException($"{tile.name}: Multiple number outputs are not allowed");
+
+                // If there is at least one output then there needs to be a legacy output
+                if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output) > 0 &&
+                   properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.legacy) <= 0)
+                    throw new InvalidOperationException($"{tile.name}: At least one legacy output must be specified");
+
+                // If there is at least one input then there must be a legacy input
+                if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Input) > 0 &&
+                   properties.Count(p => p.port != null && p.port.flow == PortFlow.Input && p.port.legacy) <= 0)
+                    throw new InvalidOperationException($"{tile.name}: At least one legacy input must be specified");
             }
         }
     }
