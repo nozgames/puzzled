@@ -73,7 +73,7 @@ namespace Puzzled.Editor
                 if (!interactable)
                     return;
 
-                UIPuzzleEditor.instance.ChooseDecal((d) => {
+                UIPuzzleEditor.instance.ChooseDecal(decal, (d) => {
                     decal = d;
                     onDecalChanged?.Invoke(decal);
                 });

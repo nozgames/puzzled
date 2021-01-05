@@ -22,6 +22,12 @@ namespace Puzzled
 
         public DecalFlags flags { get; set; }
 
+        public bool flipHorizontal => (flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal;
+
+        public bool flipVertical => (flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical;
+
+        public bool rotate => (flags & DecalFlags.Rotate) == DecalFlags.Rotate;
+
         public static bool operator ==(Decal lhs, Decal rhs) => lhs.guid == rhs.guid;
 
         public static bool operator !=(Decal lhs, Decal rhs) => lhs.guid != rhs.guid;

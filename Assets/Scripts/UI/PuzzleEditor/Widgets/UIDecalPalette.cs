@@ -63,7 +63,7 @@ namespace Puzzled.Editor
             };
 
             _list.onSelectionChanged += (index) => {
-                selected = _list.selectedItem?.GetComponent<UIDecalPaletteItem>().decal ?? Decal.none;
+                _selected = _list.selectedItem?.GetComponent<UIDecalPaletteItem>().decal ?? Decal.none;
             };
 
             _searchClearButton.onClick.AddListener(() => {

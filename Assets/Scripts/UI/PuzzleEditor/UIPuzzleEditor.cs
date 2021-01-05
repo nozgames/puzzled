@@ -544,10 +544,14 @@ namespace Puzzled
             ShowPopup(_chooseBackgroundPopup);
         }
 
-        public void ChooseDecal(Action<Decal> callback)
+        public void ChooseDecal(Decal decal, Action<Decal> callback)
         {
             _chooseDecalCallback = callback;
+
             ShowPopup(_chooseDecalPopup);
+
+            if (decal != Decal.none)
+                _chooseDecalPalette.selected = decal;
         }
 
         public void ChooseTile(Type componentType, Action<Tile> callback)

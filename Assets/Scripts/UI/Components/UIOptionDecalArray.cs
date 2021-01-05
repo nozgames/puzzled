@@ -21,6 +21,8 @@ namespace Puzzled.Editor
         {
             base.OnTargetChanged();
 
+            label = target.name;
+
             _items.transform.DetachAndDestroyChildren();
             _items.onSelectionChanged += (index) => UpdateButtons();
 
@@ -38,21 +40,21 @@ namespace Puzzled.Editor
 
         public void OnAddButton()
         {
-            _decals.Add(Decal.none);
-            AddDecal(Decal.none);
-            _items.Select(_items.itemCount - 1);
-
-            var option = ((TilePropertyEditorTarget)target);
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _decals.ToArray()));
+            UIPuzzleEditor.instance.ChooseDecal(Decal.none, (decal) => {
+                _decals.Add(decal);
+                UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (cmd) => {
+                    AddDecal(decal);
+                    _items.Select(_items.itemCount - 1);
+                });
+            });
         }
 
         public void OnRemoveButton()
         {
             _decals.RemoveAt(_items.selected);
 
-            var option = ((TilePropertyEditorTarget)target);
             UIPuzzleEditor.ExecuteCommand(
-                new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _decals.ToArray()), false, (command) => {
+                new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (command) => {
                     _items.Select(Mathf.Min(_items.selected, _items.itemCount - 1));
                 });
         }
@@ -62,31 +64,28 @@ namespace Puzzled.Editor
             var editor = Instantiate(_itemPrefab, _items.transform).GetComponent<UIDecalEditor>();
             editor.decal = decal;
             editor.onDecalChanged += (d) => {
-                var option = ((TilePropertyEditorTarget)target);
                 _decals[editor.transform.GetSiblingIndex()] = d;
-                UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _decals.ToArray()));
+                UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()));
             };
             return editor;
         }
 
         private void OnMoveUpButton()
         {
-            var option = ((TilePropertyEditorTarget)target);
             var temp = _decals[_items.selected - 1];
-            _decals[_items.selected - 1] = _decals[_items.selected];
+           _decals[_items.selected - 1] = _decals[_items.selected];
             _decals[_items.selected] = temp;
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _decals.ToArray()), false, (cmd) => {
+            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (cmd) => {
                 _items.Select(_items.selected - 1);
             });
         }
 
         private void OnMoveDownButton()
         {
-            var option = ((TilePropertyEditorTarget)target);
             var temp = _decals[_items.selected + 1];
             _decals[_items.selected + 1] = _decals[_items.selected];
             _decals[_items.selected] = temp;
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _decals.ToArray()), false, (cmd) => {
+            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (cmd) => {
                 _items.Select(_items.selected + 1);
             });
         }
@@ -105,10 +104,11 @@ namespace Puzzled.Editor
         private class InspectorState : IInspectorState
         {
             public int selectedIndex;
+            public TileProperty property;
 
             public void Apply(Transform inspector)
             {
-                var editor = inspector.GetComponentsInChildren<UIOptionDecalArray>().FirstOrDefault();
+                var editor = inspector.GetComponentsInChildren<UIOptionDecalArray>().Where(e => e.target.tileProperty == property).FirstOrDefault();
                 if (null == editor)
                     return;
 
@@ -119,6 +119,9 @@ namespace Puzzled.Editor
             }
         }
 
-        public IInspectorState GetState() => new InspectorState { selectedIndex = _items.selected };
+        public IInspectorState GetState() => new InspectorState { 
+            selectedIndex = _items.selected,
+            property = target.tileProperty 
+        };
     }
 }

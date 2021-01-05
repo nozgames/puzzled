@@ -116,6 +116,8 @@ namespace Puzzled.Editor
         {
             _save.gameObject.SetActive(true);
             _saveFilename.text = filename;
+            _title.text = string.IsNullOrWhiteSpace(filename) ? 
+                "Save Puzzle" : "Save Puzzle As";
 
             UpdateWorlds();
 

@@ -3,14 +3,19 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class Keypad : TileComponent
+    class NumberKeypad : TileComponent
     {
         [Header("Visuals")]
-        [SerializeField] private GameObject _visualLocked;
-        [SerializeField] private GameObject _visualUnlocked;
+        [SerializeField] private GameObject _visualLocked = null;
+        [SerializeField] private GameObject _visualUnlocked = null;
         [SerializeField] private UIKeypadPopup _popupPrefab = null;
 
+        [SerializeField] private Sprite[] _numbers = null;
+
         private bool _locked = true;
+
+        private static Decal[] _buttons = null;
+        private Decal[] _solution = null;
 
         /// <summary>
         /// Powered when keypad is unlocked
@@ -27,13 +32,7 @@ namespace Puzzled
         private Port usePort { get; set; }
 
         [Editable]
-        private int columnCount { get; set; } = 3;
-
-        [Editable]
-        private Decal[] solution { get; set; }
-
-        [Editable]
-        private Decal[] buttons { get; set; }
+        private int value { get; set; } = 1111;
 
         [ActorEventHandler]
         private void OnUseSignal(UseSignal evt) => HandleUse();
@@ -51,8 +50,23 @@ namespace Puzzled
 
         private void HandleUse()
         {
-            var keypad = UIManager.ShowPopup(_popupPrefab).GetComponent<UIKeypadPopup>(); ;
-            keypad.Open(buttons, solution, columnCount, () => {
+            if(null == _buttons)
+            {
+                _buttons = new Decal[_numbers.Length];
+                for (int i = 0; i < _numbers.Length; i++)
+                    _buttons[i] = new Decal(System.Guid.NewGuid(), _numbers[i]);
+            }
+
+            if(null == _solution)
+            {
+                var v = value.ToString();
+                _solution = new Decal[v.Length];
+                for (int i = 0; i < v.Length; i++)
+                    _solution[i] = _buttons[((v[i] - '0') + 9) % 10];
+            }
+            
+            var keypad = UIManager.ShowPopup(_popupPrefab).GetComponent<UIKeypadPopup>();
+            keypad.Open(_buttons, _solution, 3, () => {
                 _locked = false;
                 powerOutPort.SetPowered(true);
             });
