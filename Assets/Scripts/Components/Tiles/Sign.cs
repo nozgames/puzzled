@@ -9,6 +9,13 @@ namespace Puzzled
 
         private string _text = "";
 
+        /// <summary>
+        /// Import use port to activate sign
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(UseSignal))]
+        private Port usePort { get; set; }
+
         [Editable(multiline = true)]
         public string text {
             get => _text;
@@ -24,9 +31,17 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
+        private void OnUseSignal(UseSignal evt) => HandleUse();
+
+        [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
             evt.IsHandled = true;
+            HandleUse();
+        }
+
+        private void HandleUse()
+        {
             var popup = UIManager.ShowPopup(_popupPrefab);
             popup.GetComponentInChildren<UIPopupText>().text = text;
         }

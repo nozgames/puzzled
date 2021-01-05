@@ -14,4 +14,5 @@
     public class DownSignal : SignalEvent { public DownSignal(Wire wire) : base(wire) { } }
     public class LeftSignal : SignalEvent { public LeftSignal(Wire wire) : base(wire) { } }
     public class RightSignal : SignalEvent { public RightSignal(Wire wire) : base(wire) { } }
+    public class UseSignal : SignalEvent { public UseSignal(Wire wire) : base(wire) { } }
 }
