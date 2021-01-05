@@ -84,7 +84,10 @@ namespace Puzzled
         public Connection from { get; private set; } = new Connection();
         public Connection to { get; private set; } = new Connection();
 
-        public int value { get; set; }
+        /// <summary>
+        /// Return the value that is persisted on the wire
+        /// </summary>
+        public int value { get; private set; }
 
         /// <summary>
         /// Puzzle the wire belongs to
@@ -100,6 +103,11 @@ namespace Puzzled
         /// True if the wire is powered
         /// </summary>
         public bool hasPower => enabled;
+
+        /// <summary>
+        /// Returns true if the wire has a persistant value
+        /// </summary>
+        public bool hasValue => value != 0;
 
         /// <summary>
         /// Control the wire visual state
@@ -234,7 +242,7 @@ namespace Puzzled
         /// Signal a value port with the given value
         /// </summary>
         /// <param name="value">Value to signal with</param>
-        public void SendValue(int value)
+        public void SendValue(int value, bool persist = false)
         {
             if (from.port.type != PortType.Number || from.port.flow != PortFlow.Output)
             {
@@ -257,7 +265,8 @@ namespace Puzzled
                 return;
             }
 
-            value = evt.value;
+            if(persist)
+                value = evt.value;
 
             // Send the event to the tile
             to.tile.Send(evt);
