@@ -84,6 +84,8 @@ namespace Puzzled
         public Connection from { get; private set; } = new Connection();
         public Connection to { get; private set; } = new Connection();
 
+        public int value { get; set; }
+
         /// <summary>
         /// Puzzle the wire belongs to
         /// </summary>
@@ -254,6 +256,8 @@ namespace Puzzled
                 Debug.LogError($"Failed to create signal event of type '{to.port.signalEventType.Name}'");
                 return;
             }
+
+            value = evt.value;
 
             // Send the event to the tile
             to.tile.Send(evt);
