@@ -114,10 +114,10 @@ namespace Puzzled
             {
                 SelectTile(GetTile(cell, TileLayer.Logic));
                 logicCycleSelection = false;
-                return;
             }
+            else
+                logicCycleSelection = true;
 
-            logicCycleSelection = true;
             _allowLogicDrag = selectedTile != null && _selectedTile.hasOutputs;
         }
 
