@@ -101,10 +101,10 @@ namespace Puzzled
         private void OnOnSignal(OnSignal evt) => isOn = true;
 
         [ActorEventHandler]
-        private void OnOffSignal (OnSignal evt) => isOn = false;
+        private void OnOffSignal (OffSignal evt) => isOn = false;
 
         [ActorEventHandler]
-        private void OnResetSignal (OnSignal evt) => isOn = _default;
+        private void OnResetSignal (ResetSignal evt) => isOn = _default;
 
         private void UpdateState ()
         {
