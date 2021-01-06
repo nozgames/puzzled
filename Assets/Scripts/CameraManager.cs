@@ -136,6 +136,9 @@ namespace Puzzled
 
         public static void TransitionToBackground(Background to, int transitionTime = 4)
         {
+            if (_instance._background == to)
+                return;
+
             to = to == null ? _instance._defaultBackground : to;
 
             _instance._gridMaterialInstance.color = to.gridColor;
