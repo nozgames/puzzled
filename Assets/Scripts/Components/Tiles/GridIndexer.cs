@@ -25,20 +25,20 @@ namespace Puzzled
         public Port valueOutPort { get; set; }
 
         [Editable]
-        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(UpSignal))]
-        public Port upPort { get; set; }
-
-        [Editable]
-        [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(DownSignal))]
-        public Port downPort { get; set; }
-
-        [Editable]
         [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(LeftSignal))]
         public Port leftPort { get; set; }
 
         [Editable]
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(UpSignal))]
+        public Port upPort { get; set; }
+
+        [Editable]
         [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(RightSignal))]
         public Port rightPort { get; set; }
+
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(DownSignal))]
+        public Port downPort { get; set; }
 
         [Editable]
         [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(ResetSignal))]
