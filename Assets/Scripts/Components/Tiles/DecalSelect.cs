@@ -19,6 +19,10 @@ namespace Puzzled
                 return;
 
             // get first 
+
+            if (evt.transientValue <= 0)
+                return;
+
             var surface = DecalSurface.FromCell(puzzle, tile.cell);
             if (surface != null)
                 surface.decal = decals[evt.transientValue - 1];

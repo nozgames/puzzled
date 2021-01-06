@@ -6,7 +6,7 @@ namespace Puzzled
     class Number : TileComponent
     {
         [Editable]
-        public int value { get; set; }
+        public int value { get; set; } = 1;
 
         [Editable]
         [Port(PortFlow.Input, PortType.Signal, legacy = true)]
