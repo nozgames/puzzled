@@ -63,7 +63,7 @@ namespace Puzzled
             if (tile == null)
                 return;
 
-            valueOutPort.SendValue(value);
+            valueOutPort.SendValue(value, true);
             powerOutPort.SetPowered(value == _target);
 
             for (int i = 0; i < visualValues.Length; ++i)

@@ -1,5 +1,6 @@
 ﻿using NoZ;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace Puzzled
 {
@@ -16,10 +17,21 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnSelectUpdate(SelectUpdateEvent evt)
         {
-            // Enable power for the selected wire and disabled for any other
-            var wireIndex = evt.value - 1;
+            HashSet<int> wireValues = new HashSet<int>();
+
+            // add transient value first (may be 0)
+            if (evt.transientValue > 0)
+                wireValues.Add(evt.transientValue - 1);
+
+            foreach (Wire wire in evt.wires)
+                wireValues.Add(wire.value - 1);
+
+            // Enable power for the selected wires and disabled for any other
             for (int i = 0; i < powerOutPort.wireCount; ++i)
-                powerOutPort.SetPowered(i, (i == wireIndex));
+            {
+                bool isPowered = wireValues.Contains(i) ;
+                powerOutPort.SetPowered(i, isPowered);
+            }
         }
     }
 }

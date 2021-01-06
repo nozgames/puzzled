@@ -18,9 +18,10 @@ namespace Puzzled
             if (isEditing || isLoading || decals == null)
                 return;
 
+            // get first 
             var surface = DecalSurface.FromCell(puzzle, tile.cell);
             if (surface != null)
-                surface.decal = decals[evt.value - 1];
+                surface.decal = decals[evt.transientValue - 1];
         }
     }
 }

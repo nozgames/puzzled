@@ -52,7 +52,7 @@ namespace Puzzled
             if (isEditing || isLoading || decals == null)
                 return;
             
-            valueOutPort.SendValue(_decalIndex);
+            valueOutPort.SendValue(_decalIndex, true);
 
             var surface = DecalSurface.FromCell(puzzle, tile.cell);
             if (surface != null)

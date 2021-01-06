@@ -1,16 +1,24 @@
 ﻿using NoZ;
+using UnityEngine;
 
 namespace Puzzled
 {
     class GridIndexer : TileComponent
     {
-        private int _index = 0;
+        private int _row = 1;
+        private int _column = 1;
 
         [Editable]
         public int rowCount { get; private set; } = 3;
 
         [Editable]
         public int columnCount { get; private set; } = 3;
+
+        [Editable]
+        public int initialRow { get; private set; } = 1;
+
+        [Editable]
+        public int initialColumn { get; private set; } = 1;
 
         [Editable]
         [Port(PortFlow.Output, PortType.Number, legacy = true)]
@@ -32,32 +40,27 @@ namespace Puzzled
         [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(RightSignal))]
         public Port rightPort { get; set; }
 
-        private int GetRow()
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, signalEvent = typeof(ResetSignal))]
+        public Port resetPort { get; set; }
+
+        private int GetIndex(int row, int column)
         {
-            return (_index / columnCount);
+            return row * columnCount + column;
         }
 
-        private int GetColumn()
+        [ActorEventHandler]
+        private void OnReset(ResetSignal evt)
         {
-            return (_index % columnCount);
-        }
-
-        private void SetRowAndColumn(int row, int column)
-        {
-            _index = row * columnCount + column;
+            HandleReset();
         }
 
         [ActorEventHandler]
         private void OnUp(UpSignal evt)
         {
-            int row = GetRow();
-            int column = GetColumn();
-
-            --row;
-            if (row < 0)
-                row = rowCount - 1;
-
-            SetRowAndColumn(row, column);
+            --_row;
+            if (_row < 0)
+                _row = rowCount - 1;
 
             SendValue();
         }
@@ -65,14 +68,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnDown(DownSignal evt)
         {
-            int row = GetRow();
-            int column = GetColumn();
-            
-            ++row;
-            if (row >= (rowCount))
-                row = 0;
-
-            SetRowAndColumn(row, column);
+            ++_row;
+            if (_row >= (rowCount))
+                _row = 0;
 
             SendValue();
         }
@@ -80,14 +78,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnLeft(LeftSignal evt)
         {
-            int row = GetRow();
-            int column = GetColumn();
-            
-            --column;
-            if (column < 0)
-                column = columnCount - 1;
-
-            SetRowAndColumn(row, column);
+            --_column;
+            if (_column < 0)
+                _column = columnCount - 1;
 
             SendValue();
         }
@@ -95,21 +88,27 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnRight(RightSignal evt)
         {
-            int row = GetRow();
-            int column = GetColumn();
-
-            ++column;
-            if (column >= columnCount)
-                column = 0;
-
-            SetRowAndColumn(row, column);
+            ++_column;
+            if (_column >= columnCount)
+                _column = 0;
 
             SendValue();
         }
 
         [ActorEventHandler]
-        private void OnStart(StartEvent evt) => SendValue();
+        private void OnStart(StartEvent evt)
+        {
+            HandleReset();
+        }
 
-        private void SendValue() => valueOutPort.SendValue(_index + 1);
+        private void HandleReset()
+        {
+            _row = Mathf.Clamp(initialRow - 1, 0, rowCount - 1);
+            _column = Mathf.Clamp(initialColumn - 1, 0, columnCount - 1);
+
+            SendValue();
+        }
+
+        private void SendValue() => valueOutPort.SendValue(GetIndex(_row, _column) + 1, true);
     }
 }

@@ -19,9 +19,29 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnSelectUpdate(SelectUpdateEvent evt)
         {
-            var stateIndex = evt.value - 1;
             for (int i = 0; i < powerOutPort.wireCount; ++i)
-                powerOutPort.SetPowered(i, (powerOutPort.GetWireOption(i, 0) & (1 << stateIndex)) != 0);
+            {
+                int wireStates = powerOutPort.GetWireOption(i, 0);
+
+                bool isPowered = false;
+
+                // check transient value first
+                if (evt.transientValue > 0)
+                {
+                    int stateIndex = evt.transientValue - 1;
+                    if ((wireStates & (1 << stateIndex)) != 0)
+                        isPowered = true;
+                }
+
+                foreach (Wire wire in evt.wires)
+                {
+                    int stateIndex = wire.value - 1;
+                    if ((wireStates & (1 << stateIndex)) != 0)
+                        isPowered = true;
+                }
+
+                powerOutPort.SetPowered(i, isPowered);
+            }
         }
     }
 }

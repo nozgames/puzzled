@@ -41,7 +41,7 @@ namespace Puzzled
             if (values == null || values.Length == 0)
                 return;
 
-            valueOutPort.SendValue(values[valueIndex]);
+            valueOutPort.SendValue(values[valueIndex], true);
         }
 
         [ActorEventHandler]
