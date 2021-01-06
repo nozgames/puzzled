@@ -18,10 +18,18 @@ namespace Puzzled
 
         // TODO: trigger to reset?
 
-        // TODO: number out port for current state?
+        /// <summary>
+        /// Output port used to send the current cycle value
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number, legacy = true)]
+        private Port valueOutPort { get; set; }
 
         [Editable(hidden = true)]
         public string[] steps { get; set; }
+
+        [ActorEventHandler]
+        private void OnStart(StartEvent evt) => SetSequenceIndex(sequenceIndex);
 
         [ActorEventHandler]
         private void OnWirePowerChanged(WirePowerChangedEvent evt) => HandleWireChange();
@@ -44,9 +52,7 @@ namespace Puzzled
 
         private void HandleCorrectWire()
         {
-            ++sequenceIndex;
-            if (sequenceIndex >= steps.Length)
-                HandleSequenceComplete();
+            SetSequenceIndex(sequenceIndex + 1);
         }
 
         private void HandleIncorrectWire()
@@ -56,13 +62,22 @@ namespace Puzzled
 
         private void ResetSequence()
         {
-            sequenceIndex = 0;
+            SetSequenceIndex(0);
             powerOutPort.SetPowered(false);
         }
 
         private void HandleSequenceComplete()
         {
             powerOutPort.SetPowered(true);
+        }
+
+        private void SetSequenceIndex(int index)
+        {
+            sequenceIndex = index;
+            if (sequenceIndex >= steps.Length)
+                HandleSequenceComplete();
+
+            valueOutPort.SendValue(sequenceIndex + 1, true);
         }
     }
 }

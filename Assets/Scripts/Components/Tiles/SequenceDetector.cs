@@ -14,12 +14,21 @@ namespace Puzzled
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
         public Port powerOutPort { get; set; }
 
-        // TODO: number out port for current sequence index
+        /// <summary>
+        /// Output port used to send the current cycle value
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number, legacy = true)]
+        private Port valueOutPort { get; set; }
+
         // TODO: reset input signal port?
 
         [Editable(hidden = true)]
-        public string[] steps { get; set; }
-        
+        public string[] steps { get; set; } = new string[0];
+
+        [ActorEventHandler]
+        private void OnStart(StartEvent evt) => SetSequenceIndex(sequenceIndex);
+
         [ActorEventHandler]
         private void OnSignal (SignalEvent evt)
         {
@@ -39,9 +48,7 @@ namespace Puzzled
 
         private void HandleCorrectWire()
         {
-            ++sequenceIndex;
-            if (sequenceIndex >= steps.Length)
-                HandleSequenceComplete();
+            SetSequenceIndex(sequenceIndex + 1);
         }
 
         private void HandleIncorrectWire()
@@ -51,8 +58,17 @@ namespace Puzzled
 
         private void Reset()
         {
-            sequenceIndex = 0;
+            SetSequenceIndex(0);
             powerOutPort.SetPowered(false);
+        }
+
+        private void SetSequenceIndex(int index)
+        {
+            sequenceIndex = index;
+            if (sequenceIndex >= steps.Length)
+                HandleSequenceComplete();
+
+            valueOutPort.SendValue(sequenceIndex + 1, true);
         }
 
         private void HandleSequenceComplete()
