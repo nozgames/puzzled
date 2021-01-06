@@ -8,8 +8,8 @@ namespace Puzzled
         [Header("Visuals")]
         [SerializeField] private GameObject[] visualValues;
 
-        private int _target = 0;
-        private int _value = 0;
+        private int _target = 1;
+        private int _value = 1;
 
         [Editable]
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
@@ -37,9 +37,9 @@ namespace Puzzled
             get => _value;
             set {
                 if (visualValues == null || visualValues.Length == 0)
-                    _value = 0;
+                    _value = 1;
                 else
-                    _value = 1 + ((value - 1) % visualValues.Length);
+                    _value = Mathf.Clamp(1 + ((value - 1) % visualValues.Length), 1, visualValues.Length);
 
                 OnUpdateValue();
             }
@@ -63,7 +63,7 @@ namespace Puzzled
             if (tile == null)
                 return;
 
-            valueOutPort.SendValue(value);
+            valueOutPort.SendValue(value, true);
             powerOutPort.SetPowered(value == _target);
 
             for (int i = 0; i < visualValues.Length; ++i)

@@ -4,7 +4,8 @@ namespace Puzzled
 {
     public class Select : TileComponent
     {
-        private int _selectIndex = 1;
+        // this value is stored internally and only used for cases where a value is signaled
+        private int _transientIndex = 0;
 
         /// <summary>
         /// Selected wire index
@@ -13,24 +14,21 @@ namespace Puzzled
         [Port(PortFlow.Input, PortType.Number, legacy = true)]
         public Port valueInPort { get; set; }
 
-        /// Output power port that poweres the wire matching the selectPort value
-        /// </summary>
-        [Editable]
-        [Port(PortFlow.Output, PortType.Number)]
-        public Port valueOutPort { get; set; }
+        [ActorEventHandler]
+        private void OnStart(StartEvent evt) => UpdateOutputs(_transientIndex);
 
         [ActorEventHandler]
-        private void OnStart(StartEvent evt) => UpdateOutputs(_selectIndex);
+        private void OnValueSignal(ValueEvent evt) 
+        {
+            if (!evt.wire.hasValue)
+                _transientIndex = evt.value;
 
-        [ActorEventHandler]
-        private void OnValueSignal(ValueEvent evt) => UpdateOutputs(evt.value);
+            UpdateOutputs(_transientIndex);
+        }
 
         private void UpdateOutputs(int value)
         {
-            _selectIndex = value;
-            valueOutPort.SendValue(value);
-
-            Send(new SelectUpdateEvent(this, value));
+            Send(new SelectUpdateEvent(this, _transientIndex, valueInPort.wires));
         }
     }
 }

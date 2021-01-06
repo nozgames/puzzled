@@ -48,7 +48,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnCycleUpdate(CycleUpdateEvent evt)
         {
-            valueOutPort.SendValue(_stateIndex + 1);
+            valueOutPort.SendValue(_stateIndex + 1, true);
 
             if (!evt.isActive)
             {

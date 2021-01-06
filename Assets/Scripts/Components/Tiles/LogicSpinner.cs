@@ -30,6 +30,6 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => SendValue();
 
-        private void SendValue() => valueOutPort.SendValue(_value + 1);
+        private void SendValue() => valueOutPort.SendValue(_value + 1, true);
     }
 }
