@@ -177,7 +177,7 @@ namespace Puzzled
         /// Send number value to the target ports
         /// </summary>
         /// <param name="value"Value to send></param>
-        public void SendValue(int value)
+        public void SendValue(int value, bool persist)
         {
             if (type != PortType.Number || flow != PortFlow.Output)
             {
@@ -186,7 +186,7 @@ namespace Puzzled
             }
 
             foreach (var wire in wires)
-                wire.SendValue(value);
+                wire.SendValue(value, persist);
         }
 
         /// <summary>

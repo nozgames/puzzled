@@ -250,8 +250,11 @@ namespace Puzzled
                 return;
             }
 
+            if (persist)
+                this.value = value;
+
             // Send generic value signal event if no signal event was specified
-            if(null == to.port.signalEventType)
+            if (null == to.port.signalEventType)
             {
                 to.tile.Send(new ValueEvent(this,value));
                 return;
@@ -264,9 +267,6 @@ namespace Puzzled
                 Debug.LogError($"Failed to create signal event of type '{to.port.signalEventType.Name}'");
                 return;
             }
-
-            if(persist)
-                value = evt.value;
 
             // Send the event to the tile
             to.tile.Send(evt);
