@@ -54,8 +54,14 @@ namespace Puzzled
                 return;
             }
 
-            if(updatePosition && canvas.isMouseOver)
-                _cursorCell = canvas.CanvasToCell(_pointerAction.action.ReadValue<Vector2>());                
+            if (updatePosition && canvas.isMouseOver)
+            {
+                var cell = canvas.CanvasToCell(_pointerAction.action.ReadValue<Vector2>());
+                if (cell == Cell.invalid)
+                    return;
+
+                _cursorCell = cell;
+            }
 
             UIManager.cursor = _getCursor?.Invoke(_cursorCell) ?? CursorType.Arrow;
         }

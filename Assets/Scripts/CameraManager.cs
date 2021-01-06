@@ -11,6 +11,7 @@ namespace Puzzled
         public Vector3 position;
         public float orthographicSize;
         public Background background;
+        public bool editor;
     }
 
     /// <summary>
@@ -34,7 +35,8 @@ namespace Puzzled
         public const int MaxZoomLevel = 20;
 
         [Header("General")]
-        [SerializeField] private Camera _camera = null;
+        [SerializeField] private Camera _cameraPlayer = null;
+        [SerializeField] private Camera _cameraEditor = null;
 
         [Header("Layers")]
         [SerializeField] [Layer] private int floorLayer = 0;
@@ -53,6 +55,8 @@ namespace Puzzled
         private Background _background;
         private Material _floorGradientMaterialInstance;
         private Material _gridMaterialInstance;
+        private float _z;
+        private Camera _cameraCurrent;
 
         private static CameraManager _instance = null;
 
@@ -65,6 +69,14 @@ namespace Puzzled
 
         public static Material gridMaterial => _instance._gridMaterialInstance;
 
+        public static bool isEditor {
+            get => _instance._cameraEditor.gameObject.activeSelf;
+            set {
+                _instance._cameraEditor.gameObject.SetActive(value);
+                _instance._cameraPlayer.gameObject.SetActive(!value);
+            }
+        }
+
         /// <summary>
         /// Current background
         /// </summary>
@@ -75,28 +87,33 @@ namespace Puzzled
         /// </summary>
         public static CameraState state {
             get => new CameraState {
-                position = _instance._camera.transform.position,
-                orthographicSize = _instance._camera.orthographicSize,
-                background = background
+                position = _instance._cameraCurrent.transform.position,
+                orthographicSize = _instance._cameraCurrent.orthographicSize,
+                background = background,
+                editor = isEditor
             };
             set {
-                _instance._camera.transform.position = value.position;
-                _instance._camera.orthographicSize = value.orthographicSize;
+                _instance._cameraCurrent.transform.position = value.position;
+                _instance._cameraCurrent.orthographicSize = value.orthographicSize;
                 TransitionToBackground(value.background, 0);
+                isEditor = value.editor;
             }
         }
 
         public void Initialize ()
         {
-            _zoomLevel = (int)_camera.orthographicSize;
+            _cameraCurrent = _cameraEditor;
+            _z = _cameraCurrent.transform.position.z;
+
+            _zoomLevel = (int)_cameraCurrent.orthographicSize;
 
             // Set default camera mask layers
-            _camera.cullingMask = defaultLayers;
+            _cameraCurrent.cullingMask = defaultLayers;
 
-            _instance._camera.backgroundColor = _instance._defaultBackground.color;
+            _instance._cameraCurrent.backgroundColor = _instance._defaultBackground.color;
 
             _instance._floorGradientMaterialInstance = new Material(_instance._floorGradientMaterial);
-            _instance._floorGradientMaterialInstance.color = _instance._camera.backgroundColor;
+            _instance._floorGradientMaterialInstance.color = _instance._cameraCurrent.backgroundColor;
 
             _instance._gridMaterialInstance = new Material(_instance._gridMaterial);
             _instance._gridMaterialInstance.color = _defaultBackground.gridColor;
@@ -119,15 +136,15 @@ namespace Puzzled
         /// </summary>
         /// <param name="screen">Screen coordinate</param>
         /// <returns>World coordinate</returns>
-        public static Vector3 ScreenToWorld(Vector3 screen) => _instance._camera.ScreenToWorldPoint(screen);
+        public static Vector3 ScreenToWorld(Vector3 screen) => _instance._cameraCurrent.ScreenToWorldPoint(screen);
 
         public static void JumpToCell(Cell cell, int zoomLevel=-1)
         {
-            _instance._camera.transform.position = Puzzle.current.grid.CellToWorld(cell);
+            _instance._cameraCurrent.transform.position = Puzzle.current.grid.CellToWorld(cell) + Vector3.forward * _instance._z;
 
             if (zoomLevel >= 0)
             {
-                _instance._camera.orthographicSize = zoomLevel / 2;
+                _instance._cameraCurrent.orthographicSize = zoomLevel / 2;
                 _instance._zoomLevel = zoomLevel;
             }
 
@@ -149,7 +166,7 @@ namespace Puzzled
             if (transitionTime == 0)
             {
                 _instance._floorGradientMaterialInstance.color = to.color;
-                _instance._camera.backgroundColor = to.color;
+                _instance._cameraCurrent.backgroundColor = to.color;
             } 
             else
             {
@@ -164,7 +181,7 @@ namespace Puzzled
             var lerped = tween.Param1 * (1f - t) + tween.Param2 * t;
             var color = new Color(lerped.x, lerped.y, lerped.z, 1.0f);
             _instance._floorGradientMaterialInstance.color = color;
-            _instance._camera.backgroundColor = color;
+            _instance._cameraCurrent.backgroundColor = color;
             return true;
         }
 
@@ -181,13 +198,13 @@ namespace Puzzled
                 tweenGroup.Child(Tween.Custom(_instance.CameraZoomUpdate, new Vector4(_instance._zoomLevel, zoomLevel, 0), Vector4.zero));
 
             if (cell != _instance._cell)
-                tweenGroup.Child(Tween.Move(Puzzle.current.grid.CellToWorld(_instance._cell), Puzzle.current.grid.CellToWorld(cell), false));
+                tweenGroup.Child(Tween.Move(Puzzle.current.grid.CellToWorld(_instance._cell) + Vector3.forward * _instance._z, Puzzle.current.grid.CellToWorld(cell) + Vector3.forward * _instance._z, false));
 
             float duration = transitionTime * GameManager.tick;
 
             tweenGroup.Duration(duration)
                 .OnStop(_instance.OnCameraTransitionComplete)
-                .Start(_instance._camera.gameObject);
+                .Start(_instance._cameraCurrent.gameObject);
 
             _instance._cell = cell;
             _instance._zoomLevel = zoomLevel;
@@ -199,13 +216,13 @@ namespace Puzzled
         /// <param name="pan"></param>
         public static void Pan (Vector3 pan)
         {
-            _instance._camera.transform.position += Vector3.Scale(pan, new Vector3(1, 1, 0));
-            _instance._cell = Puzzle.current.grid.WorldToCell(_instance._camera.transform.position);
+            _instance._cameraCurrent.transform.position += Vector3.Scale(pan, new Vector3(1, 1, 0));
+            _instance._cell = Puzzle.current.grid.WorldToCell(_instance._cameraCurrent.transform.position);
         }
 
         private bool CameraZoomUpdate(Tween tween, float t)
         {
-            _camera.orthographicSize = Mathf.Lerp(tween.Param1.x, tween.Param1.y, t) / 2;
+            _cameraCurrent.orthographicSize = Mathf.Lerp(tween.Param1.x, tween.Param1.y, t) / 2;
 
             return true;
         }
@@ -217,20 +234,20 @@ namespace Puzzled
 
         public static void Play()
         {
-            _instance._camera.cullingMask = _instance.playLayers;
+            _instance._cameraCurrent.cullingMask = _instance.playLayers;
 
             if (_instance._cell == Cell.invalid)
             {
                 if (Puzzle.current.playerCell != Cell.invalid)
                     _instance._cell = Puzzle.current.playerCell;
                 else
-                    _instance._cell = Puzzle.current.grid.WorldToCell(_instance._camera.transform.position);
+                    _instance._cell = Puzzle.current.grid.WorldToCell(_instance._cameraCurrent.transform.position);
             }
         }
 
         public static void Stop()
         {
-            _instance._camera.cullingMask = _instance.defaultLayers;
+            _instance._cameraCurrent.cullingMask = _instance.defaultLayers;
         }
 
         /// <summary>
@@ -266,9 +283,9 @@ namespace Puzzled
         public static void ShowLayer(TileLayer layer, bool show=true)
         {
             if (show)
-                _instance._camera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
+                _instance._cameraCurrent.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else
-                _instance._camera.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
+                _instance._cameraCurrent.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
         }
     }
 }

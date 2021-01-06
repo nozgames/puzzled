@@ -114,9 +114,9 @@ namespace Puzzled
 
             // TODO: option for intial facing
             visualsLeft.SetActive(true);
-            visualsRight.SetActive(false);
-            visualsUp.SetActive(false);
-            visualsDown.SetActive(false);
+            //visualsRight.SetActive(false);
+            //visualsUp.SetActive(false);
+            //visualsDown.SetActive(false);
         }
 
         [ActorEventHandler]
@@ -507,10 +507,19 @@ namespace Puzzled
         {
             facingDirection = cell;
 
-            visualsLeft.SetActive(cell.x < 0);
-            visualsRight.SetActive(cell.x > 0);
-            visualsDown.SetActive(cell.y < 0);
-            visualsUp.SetActive(cell.y > 0);
+            //visualsLeft.SetActive(cell.x < 0);
+            //visualsRight.SetActive(cell.x > 0);
+            //visualsDown.SetActive(cell.y < 0);
+            //visualsUp.SetActive(cell.y > 0);
+
+            if(cell.x == -1)
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, 90);
+            else if (cell.x == 1)
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, -90);
+            else if (cell.y == 1)
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            else if (cell.y == -1)
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, 180);
         }
     }
 }

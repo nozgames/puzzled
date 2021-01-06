@@ -147,6 +147,9 @@ namespace Puzzled
             puzzle.isEditing = editing;
             Puzzle.current = puzzle;
 
+            // TODO: put this somewhere better
+            CameraManager.isEditor = puzzle.isEditing;
+
             // If the new puzzle failed to load then set the old puzzle back to active
             if (Puzzle.current == null)
                 Puzzle.current = oldPuzzle;

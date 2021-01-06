@@ -337,6 +337,7 @@ namespace Puzzled
             selectionRect.gameObject.SetActive(false);
 
             // Reset the camera back to zero,zero
+            CameraManager.isEditor = true;
             CameraManager.TransitionToBackground(null, 0);
             Center(new Cell(0, 0), CameraManager.DefaultZoomLevel);
             ClearUndo();

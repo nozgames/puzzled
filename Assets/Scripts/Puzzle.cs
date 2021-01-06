@@ -131,6 +131,8 @@ namespace Puzzled
         {
             if (_savedCameraState.orthographicSize > 0)
                 CameraManager.state = _savedCameraState;
+
+            CameraManager.isEditor = isEditing;
         }
 
         private void OnDisable()
@@ -432,7 +434,7 @@ namespace Puzzled
                 {
                     Debug.LogException(e);
                     puzzle.LoadJson(path);
-                }
+                }                
 
                 puzzle._path = path;
                 puzzle.isLoading = false;
