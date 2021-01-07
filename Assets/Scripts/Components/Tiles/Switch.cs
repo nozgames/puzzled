@@ -8,12 +8,9 @@ namespace Puzzled
         [Header("General")]
         [SerializeField] private bool _usable = true;
 
-        [Header("Visuals")]
-        [SerializeField] private GameObject visualOn = null;
-        [SerializeField] private GameObject visualOff = null;
-
         private bool _default = false;
         private bool _on = false;
+        private Animator _animator = null;
 
         /// <summary>
         /// Input power port that is used to disable the switch if power is off
@@ -68,6 +65,11 @@ namespace Puzzled
 
                 _on = value;
 
+                if (value)
+                    _animator.SetTrigger(isLoading ? "On" : "OffToOn");
+                else
+                    _animator.SetTrigger(isLoading ? "Off" : "OnToOff");
+
                 UpdateState();
             }
         }
@@ -76,7 +78,9 @@ namespace Puzzled
         {
             base.OnAwake();
 
-            if(_usable)
+            _animator = GetComponentInChildren<Animator>();
+
+            if (_usable)
                 RegisterHandler<UseEvent>();
         }
 
@@ -84,6 +88,8 @@ namespace Puzzled
         private void OnStart(StartEvent evt)
         {
             _default = isOn;
+            _animator.SetTrigger(isOn ? "On" : "Off");
+
             UpdateState();
         }
 
@@ -112,12 +118,6 @@ namespace Puzzled
                 return;
 
             powerOutPort.SetPowered(isOn);
-
-            if(visualOn != null)
-                visualOn.SetActive(isOn);
-
-            if(visualOff != null)
-                visualOff.SetActive(!isOn);
         }
     }
 }
