@@ -74,6 +74,7 @@ namespace Puzzled
             set {
                 _instance._cameraEditor.gameObject.SetActive(value);
                 _instance._cameraPlayer.gameObject.SetActive(!value);
+                _instance._cameraCurrent = value ? _instance._cameraEditor : _instance._cameraPlayer;
             }
         }
 
@@ -93,10 +94,11 @@ namespace Puzzled
                 editor = isEditor
             };
             set {
+                // Make sure we set editor first so we alter the correct camera position
+                isEditor = value.editor;
                 _instance._cameraCurrent.transform.position = value.position;
                 _instance._cameraCurrent.orthographicSize = value.orthographicSize;
                 TransitionToBackground(value.background, 0);
-                isEditor = value.editor;
             }
         }
 
@@ -140,6 +142,9 @@ namespace Puzzled
 
         public static void JumpToCell(Cell cell, int zoomLevel=-1)
         {
+            _instance.FrameCamera(_instance._cameraCurrent, Puzzle.current.grid.CellToWorld(cell), zoomLevel);
+
+#if false
             _instance._cameraCurrent.transform.position = Puzzle.current.grid.CellToWorld(cell) + Vector3.forward * _instance._z;
 
             if (zoomLevel >= 0)
@@ -147,6 +152,7 @@ namespace Puzzled
                 _instance._cameraCurrent.orthographicSize = zoomLevel / 2;
                 _instance._zoomLevel = zoomLevel;
             }
+#endif
 
             _instance._cell = cell;
         }
@@ -194,11 +200,15 @@ namespace Puzzled
 
             var tweenGroup = Tween.Group();
 
-            if (zoomLevel != _instance._zoomLevel)
-                tweenGroup.Child(Tween.Custom(_instance.CameraZoomUpdate, new Vector4(_instance._zoomLevel, zoomLevel, 0), Vector4.zero));
+            // Orthographic camera zoom?
+            if (zoomLevel != _instance._zoomLevel && _instance._cameraCurrent.orthographic)
+                tweenGroup.Child(Tween.Custom(_instance.CameraZoomUpdateOrthographic, new Vector4(_instance._zoomLevel, zoomLevel, 0), Vector4.zero));
 
             if (cell != _instance._cell)
-                tweenGroup.Child(Tween.Move(Puzzle.current.grid.CellToWorld(_instance._cell) + Vector3.forward * _instance._z, Puzzle.current.grid.CellToWorld(cell) + Vector3.forward * _instance._z, false));
+                tweenGroup.Child(Tween.Move(
+                    Frame(_instance._cameraCurrent, Puzzle.current.grid.CellToWorld(_instance._cell), _instance._zoomLevel),
+                    Frame(_instance._cameraCurrent, Puzzle.current.grid.CellToWorld(cell), zoomLevel), 
+                    false));
 
             float duration = transitionTime * GameManager.tick;
 
@@ -220,10 +230,9 @@ namespace Puzzled
             _instance._cell = Puzzle.current.grid.WorldToCell(_instance._cameraCurrent.transform.position);
         }
 
-        private bool CameraZoomUpdate(Tween tween, float t)
+        private bool CameraZoomUpdateOrthographic (Tween tween, float t)
         {
             _cameraCurrent.orthographicSize = Mathf.Lerp(tween.Param1.x, tween.Param1.y, t) / 2;
-
             return true;
         }
 
@@ -286,6 +295,26 @@ namespace Puzzled
                 _instance._cameraCurrent.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else
                 _instance._cameraCurrent.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
+        }
+
+        private static Vector3 Frame (Camera camera, Vector3 position, float zoom)
+        {
+            var foreshorten = camera.orthographic ? 0.0f : (0.5f * ((0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f))));
+            var distance = (zoom * 0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f));
+            return 
+                // Target position
+                position
+
+                // Zoom to frame entire target
+                + (distance * -Vector3.Normalize(camera.transform.forward))
+                
+                // Adjust for foreshortening 
+                - (foreshorten * Vector3.Dot(-Vector3.Normalize(camera.transform.forward), Vector3.forward) * Vector3.forward);
+        }
+
+        private void FrameCamera(Camera camera, Vector3 position, float zoom)
+        {
+            camera.transform.position = Frame(camera, position, zoom);
         }
     }
 }

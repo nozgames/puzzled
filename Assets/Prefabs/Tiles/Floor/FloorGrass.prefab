@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5480386470126576066}
   - component: {fileID: 6860454226933937099}
   - component: {fileID: 6868080960101938933}
+  - component: {fileID: 8749673068507387460}
   m_Layer: 10
   m_Name: FloorGrass
   m_TagString: Untagged
@@ -58,6 +59,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: e8f42e0fa067f294b8d42f6550ecd865, type: 2}
+--- !u!114 &8749673068507387460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5227713672087370718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 963c396d425fb9b49b4857627f0f8a40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _visual: {fileID: 3008442023772743801}
 --- !u!1001 &3335649352330350482
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -95,23 +109,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7071068
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
-      propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -90
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
@@ -121,10 +127,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -7511558181221131132, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: d9e4c6751c7cdb84385936487461bdbe, type: 2}
     - target: {fileID: 919132149155446097, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
       propertyPath: m_Name
       value: FloorGrass

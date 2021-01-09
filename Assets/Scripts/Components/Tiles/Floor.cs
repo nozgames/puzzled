@@ -5,9 +5,7 @@ namespace Puzzled
 {
     public class Floor : TileComponent
     {
-        [SerializeField] private GameObject visualDk;
-        [SerializeField] private GameObject visualLt;
-        [SerializeField] private SpriteRenderer _gradient = null;
+        [SerializeField] private Transform _visual = null;
 
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => UpdateVisuals();
@@ -20,11 +18,7 @@ namespace Puzzled
             if (tile.cell == Cell.invalid)
                 return;
 
-            _gradient.sharedMaterial = CameraManager.floorGradientMaterial;
-
-            var dark = (tile.cell.y + tile.cell.x) % 2 == 0;
-            visualDk.SetActive(dark);
-            visualLt.SetActive(!dark);
+            _visual.localRotation = Quaternion.Euler(0, 90.0f * Random.Range(0, 4), 0.0f);
         }
     }
 }

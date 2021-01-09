@@ -7,10 +7,12 @@ namespace Puzzled
     {
         [Header("General")]
         [SerializeField] private bool _usable = true;
+        [SerializeField] private Animator _animator = null;
+        [SerializeField] private AudioClip _onSound = null;
+        [SerializeField] private AudioClip _offSound = null;
 
         private bool _default = false;
         private bool _on = false;
-        private Animator _animator = null;
 
         /// <summary>
         /// Input power port that is used to disable the switch if power is off
@@ -70,6 +72,8 @@ namespace Puzzled
                 else
                     _animator.SetTrigger(isLoading ? "Off" : "OnToOff");
 
+                PlaySound(value ? _onSound : _offSound);
+
                 UpdateState();
             }
         }
@@ -77,8 +81,6 @@ namespace Puzzled
         protected override void OnAwake ()
         {
             base.OnAwake();
-
-            _animator = GetComponentInChildren<Animator>();
 
             if (_usable)
                 RegisterHandler<UseEvent>();

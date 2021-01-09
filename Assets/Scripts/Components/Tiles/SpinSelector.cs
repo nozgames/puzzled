@@ -7,6 +7,7 @@ namespace Puzzled
     {
         [Header("Visuals")]
         [SerializeField] private GameObject[] visualValues;
+        [SerializeField] private Transform _rotator = null;
 
         private int _target = 1;
         private int _value = 1;
@@ -36,10 +37,24 @@ namespace Puzzled
         public int value {
             get => _value;
             set {
+                if (value == _value)
+                    return;
+
+                var old = _value;
+
                 if (visualValues == null || visualValues.Length == 0)
                     _value = 1;
                 else
                     _value = Mathf.Clamp(1 + ((value - 1) % visualValues.Length), 1, visualValues.Length);
+
+
+                var step = (360.0f / 10.0f);
+                if (!isLoading && !isEditing)
+                    Tween.Rotate(
+                        new Vector3(0, -90, 90 + step * (_value - 2) - 180),
+                        new Vector3(0, -90, 90 + step * (_value - 1) - 180))
+                        .Duration(0.25f)
+                        .Start(_rotator.gameObject);
 
                 OnUpdateValue();
             }
@@ -66,8 +81,8 @@ namespace Puzzled
             valueOutPort.SendValue(value, true);
             powerOutPort.SetPowered(value == _target);
 
-            for (int i = 0; i < visualValues.Length; ++i)
-                visualValues[i].SetActive(value - 1 == i);
+            //for (int i = 0; i < visualValues.Length; ++i)
+            //   visualValues[i].GetComponent<SpriteRenderer>().color = (value-1) == i ? Color.white : Color.grey;
         }
     }
 }

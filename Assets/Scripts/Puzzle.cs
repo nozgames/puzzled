@@ -108,8 +108,11 @@ namespace Puzzled
             if (puzzle != this)
                 return;
 
+            // Start the puzzle if it has not yet been started
             if(!_started)
             {
+                CameraManager.isEditor = puzzle.isEditing;
+
                 // Find the player
                 _player = _tiles.GetComponentInChildren<Player>();
                 if (_player != null)

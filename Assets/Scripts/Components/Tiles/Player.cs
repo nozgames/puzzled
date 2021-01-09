@@ -513,13 +513,13 @@ namespace Puzzled
             //visualsUp.SetActive(cell.y > 0);
 
             if(cell.x == -1)
-                visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, 90);
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, 90, 0);
             else if (cell.x == 1)
-                visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, -90);
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, -90, 0);
             else if (cell.y == 1)
                 visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, 0);
             else if (cell.y == -1)
-                visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, 180);
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, 180, 0);
         }
     }
 }
