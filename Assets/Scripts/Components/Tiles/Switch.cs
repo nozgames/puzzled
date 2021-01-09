@@ -67,10 +67,13 @@ namespace Puzzled
 
                 _on = value;
 
-                if (value)
-                    _animator.SetTrigger(isLoading ? "On" : "OffToOn");
-                else
-                    _animator.SetTrigger(isLoading ? "Off" : "OnToOff");
+                if(_animator != null)
+                {
+                    if (value)
+                        _animator.SetTrigger(isLoading ? "On" : "OffToOn");
+                    else
+                        _animator.SetTrigger(isLoading ? "Off" : "OnToOff");
+                }
 
                 PlaySound(value ? _onSound : _offSound);
 
@@ -90,7 +93,9 @@ namespace Puzzled
         private void OnStart(StartEvent evt)
         {
             _default = isOn;
-            _animator.SetTrigger(isOn ? "On" : "Off");
+
+            if(_animator != null)
+                _animator.SetTrigger(isOn ? "On" : "Off");
 
             UpdateState();
         }

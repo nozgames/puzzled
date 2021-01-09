@@ -24,6 +24,8 @@ namespace Puzzled
         [SerializeField] private UICanvas canvas = null;
         [SerializeField] private RectTransform _canvasCenter = null;
         [SerializeField] private RectTransform selectionRect = null;
+        [SerializeField] private SelectionGizmo selectionGizmo = null;
+        [SerializeField] private SelectionGizmo _cursorGizmo = null;
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
@@ -83,6 +85,7 @@ namespace Puzzled
                     return;
 
                 selectionRect.gameObject.SetActive(false);
+                selectionGizmo.gameObject.SetActive(false);
 
                 _mode = value;
 
@@ -198,6 +201,7 @@ namespace Puzzled
             inspector.SetActive(false);
 
             selectionRect.gameObject.SetActive(false);
+            selectionGizmo.gameObject.SetActive(false);
 
             // Start off with an empty puzzle
             NewPuzzle();
@@ -266,10 +270,14 @@ namespace Puzzled
             _selectionMax = Cell.Max(min, max);
             _selectionSize = _selectionMax - _selectionMin;
 
-            selectionRect.anchorMin = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMin) - new Vector3(0.5f, 0.5f, 0));
-            selectionRect.anchorMax = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMax) + new Vector3(0.5f, 0.5f, 0));
+            selectionRect.anchorMin = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMin) - new Vector3(0.5f, 0, 0.5f));
+            selectionRect.anchorMax = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMax) + new Vector3(0.5f, 0, 0.5f));
 
             selectionRect.gameObject.SetActive(true);
+
+            selectionGizmo.gameObject.SetActive(true);
+            selectionGizmo.min = _puzzle.grid.CellToWorld(_selectionMin) - new Vector3(0.5f, 0, 0.5f);
+            selectionGizmo.max = _puzzle.grid.CellToWorld(_selectionMax) + new Vector3(0.5f, 0, 0.5f);
         }
 
         private void OnPan(Vector2 position, Vector2 delta)
@@ -335,6 +343,7 @@ namespace Puzzled
             puzzleName.text = "Unnamed";
 
             selectionRect.gameObject.SetActive(false);
+            selectionGizmo.gameObject.SetActive(false);
 
             // Reset the camera back to zero,zero
             CameraManager.isEditor = true;
@@ -411,6 +420,7 @@ namespace Puzzled
 
             // Clear selection
             selectionRect.gameObject.SetActive(false);
+            selectionGizmo.gameObject.SetActive(false);
 
             // Load the puzzle and play
             GameManager.LoadPuzzle(_puzzle.path);
@@ -519,8 +529,8 @@ namespace Puzzled
         public void ChoosePort(Tile tileFrom, Tile tileTo, Action<Port, Port> callback)
         {
             ShowPopup(_choosePortPopup.gameObject);
-            _choosePortPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tileTo.transform.position - new Vector3(0.5f, 0.5f, 0));
-            _choosePortPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tileTo.transform.position + new Vector3(0.5f, 0.5f, 0));
+            _choosePortPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tileTo.transform.position - new Vector3(0.5f, 0, 0.5f));
+            _choosePortPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tileTo.transform.position + new Vector3(0.5f, 0, 0.5f));
             _choosePortPopup.Open(tileFrom, tileTo, (from, to) => {
                 HidePopup();
                 callback?.Invoke(from, to);
@@ -530,8 +540,8 @@ namespace Puzzled
         public void ChooseTileConnection (Tile[] tilesTo, Action<Tile> callback)
         {
             ShowPopup(_chooseTileConnectionPopup.gameObject);
-            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position - new Vector3(0.5f, 0.5f, 0));
-            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position + new Vector3(0.5f, 0.5f, 0));
+            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position - new Vector3(0.5f, 0, 0.5f));
+            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position + new Vector3(0.5f, 0, 0.5f));
             _chooseTileConnectionPopup.Open(tilesTo, (target) => {
                 HidePopup();
                 callback?.Invoke(target);

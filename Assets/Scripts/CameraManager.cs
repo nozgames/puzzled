@@ -206,6 +206,7 @@ namespace Puzzled
 
             tweenGroup
                 .Duration(transitionTime * GameManager.tick)
+                .EaseInOutCubic()
                 .OnStop(_instance.OnTransitionComplete)
                 .Start(_instance.gameObject);
 
@@ -226,6 +227,7 @@ namespace Puzzled
         /// <param name="pan"></param>
         public static void Pan (Vector3 pan)
         {
+            Debug.Log(pan);
             activeCamera.transform.position += Vector3.Scale(pan, new Vector3(1, 0, 1));
         }
 
@@ -291,8 +293,8 @@ namespace Puzzled
         /// <returns></returns>
         private static Vector3 Frame (Camera camera, Vector3 position, float zoom)
         {
-            var foreshorten = camera.orthographic ? 0.0f : (0.5f * ((0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f))));
-            var distance = (zoom * 0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f));
+            var foreshorten = 0; // camera.orthographic ? 0.0f : (0.5f * ((0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f))));
+            var distance = ((zoom - 1) * 0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f));
             return 
                 // Target position
                 position
