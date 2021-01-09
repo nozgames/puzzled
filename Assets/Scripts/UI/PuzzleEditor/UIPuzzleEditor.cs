@@ -338,7 +338,7 @@ namespace Puzzled
 
             // Reset the camera back to zero,zero
             CameraManager.isEditor = true;
-            CameraManager.TransitionToBackground(null, 0);
+            CameraManager.Transition(CameraManager.defaultBackground, 0);
             Center(new Cell(0, 0), CameraManager.DefaultZoomLevel);
             ClearUndo();
             HidePopup();
@@ -420,7 +420,7 @@ namespace Puzzled
         private void Center(Cell cell, int zoomLevel = -1)
         {
             // Cente around the tile first
-            CameraManager.JumpToCell(cell, zoomLevel);
+            CameraManager.Transition(puzzle.grid.CellToWorld(cell), zoomLevel, puzzle.activeBackground, 0);
 
             // Offset the camera by the center of the canvas
             var state = CameraManager.state;
@@ -439,7 +439,7 @@ namespace Puzzled
                 _puzzle.showGrid = true;
 
                 // Center the camera on the player
-                Center(CameraManager.cell, CameraManager.DefaultZoomLevel);
+                Center(Cell.zero, CameraManager.DefaultZoomLevel);
 
                 puzzleName.text = _puzzle.filename;
             } catch (Exception e)

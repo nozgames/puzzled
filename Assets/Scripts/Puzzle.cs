@@ -98,6 +98,27 @@ namespace Puzzled
         /// </summary>
         public bool isModified { get; set; }
 
+        /// <summary>
+        /// Returns the active camera in the puzzle.  Note that this may be null if there are no cameras in the level
+        /// </summary>
+        public StaticCamera activeCamera { get; private set; }
+
+        /// <summary>
+        /// Returns the active background in the puzzle.  Note that this may be null if there is no active camera
+        /// </summary>
+        public Background activeBackground => activeCamera == null ? null : activeCamera.background;
+
+        public void SetActiveCamera (StaticCamera value, int transitionTime)
+        {
+            if (activeCamera == value)
+                return;
+
+            activeCamera = value;
+
+            // Tell the camera manager to transition
+            CameraManager.Transition(grid.CellToWorld(value.tile.cell), value.zoomLevel, value.background, transitionTime);
+        }
+
         private void Awake()
         {
             GameManager.onPuzzleChanged += OnPuzzleChanged;
@@ -118,7 +139,7 @@ namespace Puzzled
                 if (_player != null)
                 {
                     // Default the camera to the player, if there is an initial camera it will be set when the start event is sent out
-                    CameraManager.JumpToCell(_player.tile.cell, CameraManager.DefaultZoomLevel);
+                    CameraManager.Transition(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultZoomLevel, null, 0);
                 }
 
                 // Send a start event to all tiles
@@ -128,6 +149,7 @@ namespace Puzzled
 
                 _started = true;
             }
+
         }
 
         private void OnEnable()
