@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class Keypad : TileComponent
+    class DecalKeypad : TileComponent
     {
         [Header("Visuals")]
         [SerializeField] private GameObject _visualLocked;
