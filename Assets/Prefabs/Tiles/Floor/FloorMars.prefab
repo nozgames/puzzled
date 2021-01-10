@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6868080960101938933}
   - component: {fileID: 749585826969229620}
   m_Layer: 10
-  m_Name: FloorDirtDark
+  m_Name: FloorMars
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -124,7 +124,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 7ea54ca43a34fe14a9b02f9690086acc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -145,15 +145,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 0}
-  m_Color: {r: 0.4509804, g: 0.6745098, b: 0.24705882, a: 1}
+  m_Sprite: {fileID: 21300000, guid: dabd0dd129d7bba42b781734225697b6, type: 3}
+  m_Color: {r: 0.72156864, g: 0.2784314, b: 0.16078432, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &6335634864379398688
@@ -223,6 +223,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 79163053ba2190247bc1c08d6a21dc09, type: 2}
     - target: {fileID: 919132149155446097, guid: 90124c9ea31ff904d89463fe0a41fa6a, type: 3}
       propertyPath: m_Name
       value: FloorGrass
