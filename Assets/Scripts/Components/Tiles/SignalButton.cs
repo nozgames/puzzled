@@ -5,6 +5,9 @@ namespace Puzzled
 {
     class SignalButton : TileComponent
     {
+        [SerializeField] private Animator _animator = null;
+        [SerializeField] private AudioClip _useSound = null;
+
         [Editable]
         [Port(PortFlow.Output, PortType.Signal, legacy = true)]
         private Port signalOutPort { get; set; }
@@ -14,6 +17,10 @@ namespace Puzzled
         {
             evt.IsHandled = true;
             signalOutPort.SendSignal();
+
+            _animator.SetTrigger("Use");
+
+            PlaySound(_useSound);
         }
     }
 }
