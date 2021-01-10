@@ -227,7 +227,6 @@ namespace Puzzled
         /// <param name="pan"></param>
         public static void Pan (Vector3 pan)
         {
-            Debug.Log(pan);
             activeCamera.transform.position += Vector3.Scale(pan, new Vector3(1, 0, 1));
         }
 
