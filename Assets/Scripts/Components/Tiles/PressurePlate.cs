@@ -5,36 +5,41 @@ namespace Puzzled
 {
     class PressurePlate : TileComponent
     {
+        private bool _pressed = false;
+
         [Header("Visuals")]
-        [SerializeField] private GameObject visualPressed = null;
-        [SerializeField] private GameObject visualUnpressed = null;
-        [SerializeField] private DecalSurface decalSurface = null;
-        [SerializeField] private Vector3 decalOffsetPressed;
-        [SerializeField] private Vector3 decalOffsetUnpressed;
+        [SerializeField] private Animator _animator = null;
+        [SerializeField] private AudioClip _upSound = null;
+        [SerializeField] private AudioClip _downSound = null;
 
         [Editable]
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
         public Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnStart(StartEvent evt) => UpdateState();
+        private void OnStart(StartEvent evt) => UpdateState(true, false);
 
         [ActorEventHandler]
-        private void OnEnter(EnterCellEvent evt) => UpdateState();
+        private void OnEnter(EnterCellEvent evt) => UpdateState(false, true);
 
         [ActorEventHandler]
-        private void OnExit(LeaveCellEvent evt) => UpdateState();
+        private void OnExit(LeaveCellEvent evt) => UpdateState(false, true);
 
-        private void UpdateState()
+        private void UpdateState(bool force=false, bool playSound = false)
         {
             // The pressure plate is switched if anything in the dynamic layer is on the same tile
             var pressed = puzzle.grid.CellToTile(tile.cell, TileLayer.Dynamic) != null;
-            
-            visualPressed.SetActive(pressed);
-            visualUnpressed.SetActive(!pressed);
-            powerOutPort.SetPowered(pressed);
+            if (!force && pressed == _pressed)
+                return;
 
-            decalSurface.transform.localPosition = pressed ? decalOffsetPressed : decalOffsetUnpressed;
+            _pressed = pressed;
+
+            if (playSound)
+                PlaySound(_pressed ? _downSound : _upSound, 1.0f, _pressed ? 1.0f : 1.2f);
+
+            _animator.SetTrigger(pressed ? "Down" : "Up");
+
+            powerOutPort.SetPowered(pressed);
         }
     }
 }

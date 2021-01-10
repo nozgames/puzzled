@@ -5,6 +5,8 @@ namespace Puzzled
 {
     class Pushable : TileComponent
     {
+        [SerializeField] private AudioClip _moveSound = null;
+
         private Cell moveToCell;
         private Cell moveFromCell;
 
@@ -57,6 +59,8 @@ namespace Puzzled
 
             // Immediately change our cell
             tile.cell = queryMove.targetCell;
+
+            PlaySound(_moveSound);
 
             Tween.Move(puzzle.grid.CellToWorld(moveFromCell), puzzle.grid.CellToWorld(moveToCell), false)
                 .Duration(duration)
