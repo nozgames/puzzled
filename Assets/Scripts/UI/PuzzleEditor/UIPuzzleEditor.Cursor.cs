@@ -54,10 +54,20 @@ namespace Puzzled
                 return;
             }
 
-            if(updatePosition && canvas.isMouseOver)
-                _cursorCell = canvas.CanvasToCell(_pointerAction.action.ReadValue<Vector2>());                
+            if (updatePosition && canvas.isMouseOver)
+            {
+                var cell = canvas.CanvasToCell(_pointerAction.action.ReadValue<Vector2>());
+                if (cell == Cell.invalid)
+                    return;
+
+                _cursorCell = cell;
+            }
 
             UIManager.cursor = _getCursor?.Invoke(_cursorCell) ?? CursorType.Arrow;
+
+            _cursorGizmo.gameObject.SetActive(true);
+            _cursorGizmo.min = puzzle.grid.CellToWorld(_cursorCell) - new Vector3(0.5f, 0.0f, 0.5f);
+            _cursorGizmo.max = puzzle.grid.CellToWorld(_cursorCell) + new Vector3(0.5f, 0.0f, 0.5f);
         }
     }
 }

@@ -19,37 +19,34 @@ namespace Puzzled
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
         public Port powerOutPort { get; set; }
 
-
-        [Header("Visuals")]
-        [SerializeField] private GameObject openedVisual;
-        [SerializeField] private GameObject closedVisual;
+        [SerializeField] private Animator _animator = null;
+        [SerializeField] private AudioClip _openSound = null;
+        [SerializeField] private AudioClip _closeSound = null;
 
         [Editable]
         public bool isOpen {
             get => _open;
             set {
                 _open = value;
-                UpdateVisuals();
+
+                if (value)
+                    _animator.SetTrigger((isLoading || isEditing) ? "Open" : "ClosedToOpen");
+                else
+                    _animator.SetTrigger((isLoading || isEditing) ? "Closed" : "OpenToClosed");
+
+                if (value)
+                    PlaySound(_openSound);
+                else
+                    PlaySound(_closeSound);
             }
         }
 
         private bool requiresKey => keyItem != System.Guid.Empty;
 
-        private void Start()
-        {
-            UpdateVisuals();
-        }
-
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
         {
             _locked = requiresKey;
-        }
-
-        private void UpdateVisuals()
-        {
-            openedVisual.SetActive(_open);
-            closedVisual.SetActive(!_open);
         }
 
         [ActorEventHandler(priority=1)]

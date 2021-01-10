@@ -42,19 +42,21 @@ namespace Puzzled.Editor
             onLButtonDragEnd = null;
         }
 
-        public Vector3 CanvasToWorld (Vector2 position) => Camera.main.ScreenToWorldPoint(position);
+        public Vector3 CanvasToWorld(Vector2 position)
+        {
+            var ray = CameraManager.activeCamera.ScreenPointToRay(position);
+            if ((new Plane(Vector3.up, Vector3.zero)).Raycast(ray, out float enter))
+            {
+                return ray.origin + ray.direction * enter;
+            }
+
+            return Vector3.zero;
+        }
 
         public Cell CanvasToCell(Vector2 position)
         {
-#if false
-            var ray = Camera.main.ScreenPointToRay(position);
-            if ((new Plane(Vector3.forward, Vector3.zero)).Raycast(ray, out float enter))
-            {
-                var world = ray.origin + ray.direction * enter;
-                return UIPuzzleEditor.instance.puzzle.grid.WorldToCell(world + new Vector3(0.5f, 0.5f, 0));
-            }
-
-            return Cell.invalid;
+#if true
+            return UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0, 0.5f));
 #else
             return UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0.5f, 0));
 #endif
