@@ -344,6 +344,10 @@ namespace Puzzled
                                 writer.Write((int)value);
                                 break;
 
+                            case TilePropertyType.Sound:
+                                writer.Write(((Sound)value).guid);
+                                break;
+
                             case TilePropertyType.IntArray:
                             {
                                 var intArray = (int[])value;
@@ -747,6 +751,13 @@ namespace Puzzled
                         case TilePropertyType.Int:
                             value = reader.ReadInt32();
                             break;
+
+                        case TilePropertyType.Sound:
+                        {
+                            var sound = SFXDatabase.GetSound(reader.ReadGuid());
+                            value = sound;
+                            break;
+                        }
 
                         case TilePropertyType.IntArray:
                         {

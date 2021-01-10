@@ -58,6 +58,8 @@ namespace Puzzled
         [SerializeField] private UIDecalPalette _chooseDecalPalette = null;
         [SerializeField] private GameObject _chooseBackgroundPopup = null;
         [SerializeField] private UIBackgroundPalette _chooseBackgroundPalette = null;
+        [SerializeField] private GameObject _chooseSoundPopup = null;
+        [SerializeField] private UISoundPalette _chooseSoundPalette= null;
         [SerializeField] private UIPortSelector _choosePortPopup = null;
         [SerializeField] private UITileSelector _chooseTileConnectionPopup = null;
 
@@ -68,6 +70,7 @@ namespace Puzzled
         private Action<Tile> _chooseTileCallback;
         private Action<Decal> _chooseDecalCallback;
         private Action<Background> _chooseBackgroundCallback;
+        private Action<Sound> _chooseSoundCallback;
         private Mode savedMode;
         private Cell _selectionMin;
         private Cell _selectionMax;
@@ -162,6 +165,11 @@ namespace Puzzled
             };
             _chooseFilePopup.onSaveFile += (filename) => {
                 SaveAs(filename);
+                HidePopup();
+            };
+
+            _chooseSoundPalette.onDoubleClickSound += (background) => {
+                _chooseSoundCallback?.Invoke(background);
                 HidePopup();
             };
 
@@ -546,6 +554,13 @@ namespace Puzzled
                 HidePopup();
                 callback?.Invoke(target);
             });
+        }
+
+        public void ChooseSound(Action<Sound> callback, Sound current)
+        {
+            _chooseSoundCallback = callback;
+            _chooseSoundPalette.selected = current;
+            ShowPopup(_chooseSoundPopup);
         }
 
         public void ChooseBackground(Action<Background> callback, Background current = null)

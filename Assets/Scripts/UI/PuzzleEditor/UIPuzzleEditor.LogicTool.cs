@@ -22,6 +22,7 @@ namespace Puzzled
         [SerializeField] private UIPropertyEditor portEmptyEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringMultilineEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
 
@@ -372,6 +373,7 @@ namespace Puzzled
                     case TilePropertyType.Bool: prefab = boolEditorPrefab; break;
                     case TilePropertyType.Background: prefab = backgroundEditorPrefab; break;
                     case TilePropertyType.Guid: prefab = tileEditorPrefab; break;
+                    case TilePropertyType.Sound: prefab = soundEditorPrefab; break;
                     case TilePropertyType.Decal: prefab = decalEditorPrefab; break;
                     case TilePropertyType.DecalArray: prefab = decalArrayEditorPrefab; break;
                     case TilePropertyType.Port:
