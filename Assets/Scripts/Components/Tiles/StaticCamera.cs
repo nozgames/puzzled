@@ -43,6 +43,8 @@ namespace Puzzled
 
         [SerializeField] private bool isInitialLocation = false;
 
+        public bool isStartingCamera => isInitialLocation;
+
         [ActorEventHandler]
         private void OnSignal (SignalEvent evt)
         {

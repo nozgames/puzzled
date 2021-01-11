@@ -455,8 +455,17 @@ namespace Puzzled
                 _puzzle = GameManager.LoadPuzzle(path, true);
                 _puzzle.showGrid = true;
 
+                var startingCamera = _puzzle.GetComponentsInChildren<StaticCamera>().Where(c => c.isStartingCamera).FirstOrDefault();
+                var startingCell = Cell.zero;
+                if (startingCamera != null)
+                    startingCell = startingCamera.tile.cell;
+                else if (_puzzle.player != null)
+                    startingCell = _puzzle.player.tile.cell;
+
                 // Center the camera on the player
-                Center(Cell.zero, CameraManager.DefaultZoomLevel);
+                Center(startingCell, CameraManager.DefaultZoomLevel);
+
+                mode = Mode.Move;
 
                 puzzleName.text = _puzzle.filename;
             } catch (Exception e)
