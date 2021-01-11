@@ -24,6 +24,7 @@ namespace Puzzled
         {
             UIManager.cursor = CursorType.Arrow;
             _cursorCell = Cell.invalid;
+            UpdateCursor();
         }
 
         private void OnPointerEnterCanvas()
@@ -65,7 +66,7 @@ namespace Puzzled
 
             UIManager.cursor = _getCursor?.Invoke(_cursorCell) ?? CursorType.Arrow;
 
-            _cursorGizmo.gameObject.SetActive(true);
+            _cursorGizmo.gameObject.SetActive(canvas.isMouseOver);
             _cursorGizmo.min = puzzle.grid.CellToWorld(_cursorCell) - new Vector3(0.5f, 0.0f, 0.5f);
             _cursorGizmo.max = puzzle.grid.CellToWorld(_cursorCell) + new Vector3(0.5f, 0.0f, 0.5f);
         }
