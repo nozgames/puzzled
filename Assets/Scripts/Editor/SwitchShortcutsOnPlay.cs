@@ -25,10 +25,6 @@ public class SwitchShortcutsProfileOnPlay
             _gameViewFocused = EditorWindow.focusedWindow != null && EditorWindow.focusedWindow.GetType().FullName == "UnityEditor.GameView";
             _lastFocused = EditorWindow.focusedWindow;
             UpdateProfile();
-
-
-            if (EditorWindow.focusedWindow != null)
-                Debug.Log($"{EditorWindow.focusedWindow.GetType()} / {_gameViewFocused}");
         }
     }
 
