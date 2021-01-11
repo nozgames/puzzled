@@ -22,9 +22,9 @@ namespace Puzzled
 
         private void OnPointerExitCanvas()
         {
+            _cursorGizmo.gameObject.SetActive(false);
             UIManager.cursor = CursorType.Arrow;
             _cursorCell = Cell.invalid;
-            UpdateCursor();
         }
 
         private void OnPointerEnterCanvas()

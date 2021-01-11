@@ -22,10 +22,7 @@ namespace Puzzled
         [SerializeField] private float queuedInputThreshold = 0.25f;
         [SerializeField] private float moveDuration = 0.4f;
 
-        [SerializeField] private GameObject visualsUp = null;
         [SerializeField] private GameObject visualsLeft = null;
-        [SerializeField] private GameObject visualsRight = null;
-        [SerializeField] private GameObject visualsDown = null;
 
         [SerializeField] private InputActionReference leftAction = null;
         [SerializeField] private InputActionReference rightAction = null;

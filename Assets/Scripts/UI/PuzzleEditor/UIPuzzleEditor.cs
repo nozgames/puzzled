@@ -30,8 +30,6 @@ namespace Puzzled
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
-        [SerializeField] private int minZoom = 1;
-        [SerializeField] private int maxZoom = 10;
 
         [SerializeField] private Transform options = null;
         [SerializeField] private GameObject inspector = null;
