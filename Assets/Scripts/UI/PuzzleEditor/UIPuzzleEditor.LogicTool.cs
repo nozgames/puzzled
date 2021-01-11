@@ -150,7 +150,7 @@ namespace Puzzled
             if (_selectedTile == null || !_selectedTile.hasOutputs)
                 return;
 
-            dragWire = Instantiate(dragWirePrefab).GetComponent<WireMesh>();
+            dragWire = Instantiate(dragWirePrefab, puzzle.transform).GetComponent<WireMesh>();
             dragWire.state = WireVisualState.Selected;
             dragWire.transform.position = puzzle.grid.CellToWorld(_selectedTile.cell);
             dragWire.target = _selectedTile.cell;
