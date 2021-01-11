@@ -437,7 +437,7 @@ namespace Puzzled
         private void Center(Cell cell, int zoomLevel = -1)
         {
             // Cente around the tile first
-            CameraManager.Transition(puzzle.grid.CellToWorld(cell), zoomLevel, puzzle.activeBackground, 0);
+            CameraManager.Transition(puzzle.grid.CellToWorld(cell), zoomLevel, CameraManager.state.background, 0);
 
             // Offset the camera by the center of the canvas
             var state = CameraManager.state;
@@ -458,8 +458,10 @@ namespace Puzzled
                 var startingCamera = _puzzle.GetComponentsInChildren<StaticCamera>().Where(c => c.isStartingCamera).FirstOrDefault();
                 var startingCell = Cell.zero;
                 if (startingCamera != null)
+                {
                     startingCell = startingCamera.tile.cell;
-                else if (_puzzle.player != null)
+                    CameraManager.Transition(startingCamera.background, 0);                
+                } else if (_puzzle.player != null)
                     startingCell = _puzzle.player.tile.cell;
 
                 // Center the camera on the player
