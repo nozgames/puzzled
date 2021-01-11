@@ -202,8 +202,6 @@ namespace Puzzled
                         .Where(ep => ep.editable != null)
                         .ToArray();
 
-                GeneratePreview(tile);
-
                 // Ensure there is only one signal/power output
                 if (properties.Count(p => p.port != null && p.port.flow == PortFlow.Output && p.port.type != PortType.Number) > 1)
                     throw new InvalidOperationException($"{tile.name}: Multiple signal/power outputs are not allowed");

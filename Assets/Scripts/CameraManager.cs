@@ -125,6 +125,8 @@ namespace Puzzled
 
         public void Initialize ()
         {
+            _instance = this;
+
             // Set default camera mask layers
             _cameraEditor.cullingMask = defaultLayers;
             _cameraPlayer.cullingMask = defaultLayers;
