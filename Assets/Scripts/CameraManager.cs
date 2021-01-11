@@ -179,7 +179,6 @@ namespace Puzzled
 
             // Clamp zoom
             zoomLevel = Mathf.Clamp(zoomLevel, MinZoomLevel, MaxZoomLevel);
-            Debug.Log(zoomLevel);
 
             // Change grid color
             _instance._gridMaterialInstance.color = targetBackground.gridColor;
