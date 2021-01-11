@@ -10,8 +10,7 @@ namespace Puzzled
     {
         public Vector3 position;
         public float orthographicSize;
-        public Color fogColor;
-        public Color gridColor;
+        public Background background;
         public bool editor;
     }
 
@@ -28,7 +27,7 @@ namespace Puzzled
         /// <summary>
         /// Minimum zoom level
         /// </summary>
-        public const int MinZoomLevel = 2;
+        public const int MinZoomLevel = 5;
 
         /// <summary>
         /// Maximum zoom level
@@ -61,6 +60,16 @@ namespace Puzzled
         /// Current zoom level
         /// </summary>
         private int _zoomLevel = DefaultZoomLevel;
+
+        /// <summary>
+        /// Target position
+        /// </summary>
+        private Vector3 _targetPosition;
+
+        /// <summary>
+        /// Current background
+        /// </summary>
+        private Background _background = null;
 
         private static CameraManager _instance = null;
 
@@ -97,8 +106,7 @@ namespace Puzzled
             get => new CameraState {
                 position = activeCamera.transform.position,
                 orthographicSize = activeCamera.orthographicSize,
-                fogColor = _instance._fog.material.color,
-                gridColor = _instance._gridMaterialInstance.color,
+                background = _instance._background,
                 editor = isEditor
             };
             set {
@@ -109,8 +117,9 @@ namespace Puzzled
                 if (activeCamera.orthographic)
                     activeCamera.orthographicSize = value.orthographicSize;
 
-                _instance._fog.material.color = value.fogColor;
-                _instance._gridMaterialInstance.color = value.gridColor;
+                var background = state.background ?? _instance._defaultBackground;
+                _instance._fog.material.color = background.color;
+                _instance._gridMaterialInstance.color = background.gridColor;
             }
         }
 
@@ -168,6 +177,10 @@ namespace Puzzled
             var camera = activeCamera;
             var targetBackground = background ?? _instance._defaultBackground;
 
+            // Clamp zoom
+            zoomLevel = Mathf.Clamp(zoomLevel, MinZoomLevel, MaxZoomLevel);
+            Debug.Log(zoomLevel);
+
             // Change grid color
             _instance._gridMaterialInstance.color = targetBackground.gridColor;
 
@@ -183,6 +196,8 @@ namespace Puzzled
                 camera.transform.position = Frame(camera, position, zoomLevel);
 
                 _instance._zoomLevel = zoomLevel;
+                _instance._background = targetBackground;
+                _instance._targetPosition = position;
                 return;
             }
 
@@ -211,6 +226,8 @@ namespace Puzzled
                 .Start(_instance.gameObject);
 
             _instance._zoomLevel = zoomLevel;
+            _instance._background = targetBackground;
+            _instance._targetPosition = position;
         }
 
         /// <summary>
@@ -219,16 +236,21 @@ namespace Puzzled
         /// <param name="background">New background</param>
         /// <param name="transitionTime">Time to transition</param>
         public static void Transition (Background background, int transitionTime) =>
-            Transition(activeCamera.transform.position, _instance._zoomLevel, background, transitionTime);
+            Transition(_instance._targetPosition, _instance._zoomLevel, background, transitionTime);
+
+        /// <summary>
+        /// Adjust the active camera zoom by the given amount
+        /// </summary>
+        /// <param name="delta">delta zoom level</param>
+        public static void AdjustZoom (int delta) =>
+            Transition(_instance._targetPosition, _instance._zoomLevel + delta, _instance._background, 0);
 
         /// <summary>
         /// Pan the camera by the given amount in world coordinates
         /// </summary>
         /// <param name="pan"></param>
-        public static void Pan (Vector3 pan)
-        {
-            activeCamera.transform.position += Vector3.Scale(pan, new Vector3(1, 0, 1));
-        }
+        public static void Pan (Vector3 pan) =>
+            Transition(_instance._targetPosition + pan, _instance._zoomLevel, _instance._background, 0);
 
         /// <summary>
         /// Called when a transition is complete to disable the busy state

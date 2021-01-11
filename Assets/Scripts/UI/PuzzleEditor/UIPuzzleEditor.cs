@@ -230,7 +230,8 @@ namespace Puzzled
             if (playing || delta.y == 0)
                 return;
 
-            Camera.main.orthographicSize = Mathf.Clamp(Camera.main.orthographicSize + (delta.y > 0 ? -1 : 1), minZoom, maxZoom);
+            if(canvas.isMouseOver)
+            CameraManager.AdjustZoom(delta.y > 0 ? -1 : 1);
 
             if (selectionRect.gameObject.activeSelf)
                 SetSelectionRect(_selectionMin, _selectionMax);
