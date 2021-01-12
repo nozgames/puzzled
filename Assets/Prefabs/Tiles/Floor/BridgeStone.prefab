@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6868080960101938933}
   - component: {fileID: 4627989769863120493}
   m_Layer: 10
-  m_Name: BridgeWood
+  m_Name: BridgeStone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30,7 +30,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 1764035467226746827}
+  - {fileID: 2957842143794066023}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -71,65 +71,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ab130ebf49553541a9a64f7822f96db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1001 &2301802940668635168
+--- !u!1001 &3352618483026957708
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 5480386470126576066}
     m_Modifications:
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
+    - target: {fileID: -8679921383154817045, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
+    - target: {fileID: -8679921383154817045, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.7071068
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
+    - target: {fileID: -8679921383154817045, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.7071068
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
+    - target: {fileID: -8679921383154817045, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
       propertyPath: m_LocalRotation.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
+    - target: {fileID: -8679921383154817045, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
+    - target: {fileID: -8679921383154817045, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
+    - target: {fileID: -8679921383154817045, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
+    - target: {fileID: -8679921383154817045, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 919132149155446097, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
+    - target: {fileID: 919132149155446097, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
       propertyPath: m_Name
-      value: BridgeWood
+      value: BridgeStone
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
---- !u!4 &1764035467226746827 stripped
+  m_SourcePrefab: {fileID: 100100000, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
+--- !u!4 &2957842143794066023 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7b354dad154788c4bae25c9497adc85e, type: 3}
-  m_PrefabInstance: {fileID: 2301802940668635168}
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ee0cb65a3ba0f2542b4b8f62a10c3369, type: 3}
+  m_PrefabInstance: {fileID: 3352618483026957708}
   m_PrefabAsset: {fileID: 0}
