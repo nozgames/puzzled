@@ -8,9 +8,10 @@ namespace Puzzled
     /// </summary>
     public struct CameraState
     {
+        public bool valid;
         public Vector3 position;
-        public float orthographicSize;
         public Background background;
+        public int zoomLevel;
         public bool editor;
     }
 
@@ -103,22 +104,17 @@ namespace Puzzled
         /// </summary>
         public static CameraState state {
             get => new CameraState {
-                position = activeCamera.transform.position,
-                orthographicSize = activeCamera.orthographicSize,
+                valid = true,
+                position = _instance._targetPosition,
                 background = _instance._background,
-                editor = isEditor
+                editor = isEditor,
+                zoomLevel = _instance._zoomLevel
             };
             set {
                 // Make sure we set editor first so we alter the correct camera 
                 isEditor = value.editor;
 
-                activeCamera.transform.position = value.position;
-                if (activeCamera.orthographic)
-                    activeCamera.orthographicSize = value.orthographicSize;
-
-                var background = state.background ?? _instance._defaultBackground;
-                _instance._fog.material.color = background.color;
-                _instance._gridMaterialInstance.color = background.gridColor;
+                Transition(value.position, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
             }
         }
 

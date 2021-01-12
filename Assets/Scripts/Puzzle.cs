@@ -154,7 +154,7 @@ namespace Puzzled
 
         private void OnEnable()
         {
-            if (_savedCameraState.orthographicSize > 0)
+            if (_savedCameraState.valid)
                 CameraManager.state = _savedCameraState;
 
             CameraManager.isEditor = isEditing;

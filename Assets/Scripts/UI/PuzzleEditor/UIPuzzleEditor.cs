@@ -438,11 +438,6 @@ namespace Puzzled
         {
             // Cente around the tile first
             CameraManager.Transition(puzzle.grid.CellToWorld(cell), zoomLevel, CameraManager.state.background, 0);
-
-            // Offset the camera by the center of the canvas
-            var state = CameraManager.state;
-            state.position -= (CameraManager.ScreenToWorld(_canvasCenter.TransformPoint(Vector3.zero)) - state.position);
-            CameraManager.state = state;
         }
 
         public void Load(string path)
