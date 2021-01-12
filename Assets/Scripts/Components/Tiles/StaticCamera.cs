@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class StaticCamera : TileComponent
+    public class StaticCamera : TileComponent
     {
         [Editable]
         public int zoomLevel 
@@ -29,7 +29,7 @@ namespace Puzzled
                 _background = value;
 
                 if(isInitialLocation)
-                    CameraManager.TransitionToBackground(_background, 0);
+                    CameraManager.Transition(_background, 0);
             }
         }
 
@@ -43,26 +43,22 @@ namespace Puzzled
 
         [SerializeField] private bool isInitialLocation = false;
 
+        public bool isStartingCamera => isInitialLocation;
+
         [ActorEventHandler]
         private void OnSignal (SignalEvent evt)
-        { 
+        {
             if (isEditing)
-                CameraManager.JumpToCell(tile.cell, zoomLevel);
-            else
-            {
-                CameraManager.TransitionToCell(tile.cell, zoomLevel, transitionTime);
-                CameraManager.TransitionToBackground(_background, transitionTime);
-            }
+                return;
+
+            puzzle.SetActiveCamera(this, transitionTime);
         }
 
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
         {
-            if (isInitialLocation && !isEditing)
-                CameraManager.JumpToCell(tile.cell, zoomLevel);
-
-            if(isInitialLocation)
-                CameraManager.TransitionToBackground(_background, 0);
+            if (isInitialLocation && (!isEditing || isLoading))
+                puzzle.SetActiveCamera(this, 0);
         }
     }
 }

@@ -98,6 +98,27 @@ namespace Puzzled
         /// </summary>
         public bool isModified { get; set; }
 
+        /// <summary>
+        /// Returns the active camera in the puzzle.  Note that this may be null if there are no cameras in the level
+        /// </summary>
+        public StaticCamera activeCamera { get; private set; }
+
+        /// <summary>
+        /// Returns the active background in the puzzle.  Note that this may be null if there is no active camera
+        /// </summary>
+        public Background activeBackground => activeCamera == null ? null : activeCamera.background;
+
+        public void SetActiveCamera (StaticCamera value, int transitionTime)
+        {
+            if (activeCamera == value)
+                return;
+
+            activeCamera = value;
+
+            // Tell the camera manager to transition
+            CameraManager.Transition(grid.CellToWorld(value.tile.cell), value.zoomLevel, value.background, transitionTime);
+        }
+
         private void Awake()
         {
             GameManager.onPuzzleChanged += OnPuzzleChanged;
@@ -108,14 +129,17 @@ namespace Puzzled
             if (puzzle != this)
                 return;
 
+            // Start the puzzle if it has not yet been started
             if(!_started)
             {
+                CameraManager.isEditor = puzzle.isEditing;
+
                 // Find the player
                 _player = _tiles.GetComponentInChildren<Player>();
                 if (_player != null)
                 {
                     // Default the camera to the player, if there is an initial camera it will be set when the start event is sent out
-                    CameraManager.JumpToCell(_player.tile.cell, CameraManager.DefaultZoomLevel);
+                    CameraManager.Transition(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultZoomLevel, null, 0);
                 }
 
                 // Send a start event to all tiles
@@ -125,12 +149,15 @@ namespace Puzzled
 
                 _started = true;
             }
+
         }
 
         private void OnEnable()
         {
             if (_savedCameraState.orthographicSize > 0)
                 CameraManager.state = _savedCameraState;
+
+            CameraManager.isEditor = isEditing;
         }
 
         private void OnDisable()
@@ -317,6 +344,10 @@ namespace Puzzled
                                 writer.Write((int)value);
                                 break;
 
+                            case TilePropertyType.Sound:
+                                writer.Write(((Sound)value).guid);
+                                break;
+
                             case TilePropertyType.IntArray:
                             {
                                 var intArray = (int[])value;
@@ -432,7 +463,7 @@ namespace Puzzled
                 {
                     Debug.LogException(e);
                     puzzle.LoadJson(path);
-                }
+                }                
 
                 puzzle._path = path;
                 puzzle.isLoading = false;
@@ -720,6 +751,13 @@ namespace Puzzled
                         case TilePropertyType.Int:
                             value = reader.ReadInt32();
                             break;
+
+                        case TilePropertyType.Sound:
+                        {
+                            var sound = SFXDatabase.GetSound(reader.ReadGuid());
+                            value = sound;
+                            break;
+                        }
 
                         case TilePropertyType.IntArray:
                         {

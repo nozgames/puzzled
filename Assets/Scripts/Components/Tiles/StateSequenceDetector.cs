@@ -74,7 +74,7 @@ namespace Puzzled
         private void SetSequenceIndex(int index)
         {
             sequenceIndex = index;
-            if (sequenceIndex >= steps.Length)
+            if (steps != null && sequenceIndex >= steps.Length)
                 HandleSequenceComplete();
 
             valueOutPort.SendValue(sequenceIndex + 1, true);

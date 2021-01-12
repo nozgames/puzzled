@@ -14,7 +14,6 @@ namespace Puzzled
 
         private Cell moveFromCell;
         private Cell moveToCell;
-        private Animator animator;
         private float queuedMoveTime = float.MinValue;
 
         public Tile inventory { get; private set; }
@@ -22,16 +21,15 @@ namespace Puzzled
         [SerializeField] private float queuedInputThreshold = 0.25f;
         [SerializeField] private float moveDuration = 0.4f;
 
-        [SerializeField] private GameObject visualsUp = null;
         [SerializeField] private GameObject visualsLeft = null;
-        [SerializeField] private GameObject visualsRight = null;
-        [SerializeField] private GameObject visualsDown = null;
 
         [SerializeField] private InputActionReference leftAction = null;
         [SerializeField] private InputActionReference rightAction = null;
         [SerializeField] private InputActionReference upAction = null;
         [SerializeField] private InputActionReference downAction = null;
         [SerializeField] private InputActionReference useAction = null;
+
+        [SerializeField] private Animator _animator = null;
 
         private bool isGrabbing = false;
 
@@ -45,11 +43,6 @@ namespace Puzzled
         private Cell desiredMovement; // this is the currently held input
         private Cell queuedMovement;  // this is the last desired movement (if within input threshold it will be treated as desired)
         private Cell lastMovement;  // this is the last continuous movement made (cleared when desired is cleared)
-
-        private void Awake()
-        {
-            animator = GetComponentInChildren<Animator>();
-        }
 
         protected override void OnEnable()
         {
@@ -114,9 +107,9 @@ namespace Puzzled
 
             // TODO: option for intial facing
             visualsLeft.SetActive(true);
-            visualsRight.SetActive(false);
-            visualsUp.SetActive(false);
-            visualsDown.SetActive(false);
+            //visualsRight.SetActive(false);
+            //visualsUp.SetActive(false);
+            //visualsDown.SetActive(false);            
         }
 
         [ActorEventHandler]
@@ -163,6 +156,8 @@ namespace Puzzled
             UpdateVisuals(targetDirection);
 
             isGrabbing = true;
+
+            _animator.SetBool("Grabbing", isGrabbing);
         }
 
         private void OnLeftActionStarted(InputAction.CallbackContext ctx)
@@ -243,7 +238,11 @@ namespace Puzzled
         }
 
         private void OnUseActionStarted(InputAction.CallbackContext ctx) => isUseHeld = true;
-        private void OnUseActionEnded(InputAction.CallbackContext ctx) => isUseHeld = isGrabbing = false; 
+        private void OnUseActionEnded(InputAction.CallbackContext ctx)
+        {
+            isUseHeld = isGrabbing = false;
+            _animator.SetBool("Grabbing", false);
+        }
 
         private void OnUseAction(InputAction.CallbackContext ctx)
         {
@@ -432,7 +431,7 @@ namespace Puzzled
 
         private void PlayAnimation (string name)
         {
-            animator.SetTrigger(name);
+            //animator.SetTrigger(name);
         }
 
         [ActorEventHandler]
@@ -507,10 +506,19 @@ namespace Puzzled
         {
             facingDirection = cell;
 
-            visualsLeft.SetActive(cell.x < 0);
-            visualsRight.SetActive(cell.x > 0);
-            visualsDown.SetActive(cell.y < 0);
-            visualsUp.SetActive(cell.y > 0);
+            //visualsLeft.SetActive(cell.x < 0);
+            //visualsRight.SetActive(cell.x > 0);
+            //visualsDown.SetActive(cell.y < 0);
+            //visualsUp.SetActive(cell.y > 0);
+
+            if(cell.x == -1)
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, -90, 0);
+            else if (cell.x == 1)
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, 90, 0);
+            else if (cell.y == 1)
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, 0);
+            else if (cell.y == -1)
+                visualsLeft.transform.localRotation = Quaternion.Euler(0, 180, 0);
         }
     }
 }

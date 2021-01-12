@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEditor.ShortcutManagement;
+using UnityEngine;
 using System.Linq;
 
 [InitializeOnLoad]
@@ -11,6 +12,20 @@ public class SwitchShortcutsProfileOnPlay
     static SwitchShortcutsProfileOnPlay()
     {
         EditorApplication.playModeStateChanged += DetectPlayModeState;
+        EditorApplication.update += Update;
+    }
+
+    private static bool _gameViewFocused = false;
+    private static EditorWindow _lastFocused = null;
+
+    private static void Update()
+    {
+        if(EditorWindow.focusedWindow != _lastFocused)
+        {
+            _gameViewFocused = EditorWindow.focusedWindow != null && EditorWindow.focusedWindow.GetType().FullName == "UnityEditor.GameView";
+            _lastFocused = EditorWindow.focusedWindow;
+            UpdateProfile();
+        }
     }
 
     private static void DetectPlayModeState(PlayModeStateChange state)
@@ -26,29 +41,35 @@ public class SwitchShortcutsProfileOnPlay
         }
     }
 
-    private static void OnExitingPlayMode()
+    private static void OnExitingPlayMode() => UpdateProfile();
+
+    private static void OnEnteredPlayMode() => UpdateProfile();
+
+    private static void UpdateProfile()
     {
-        if(ShortcutManager.instance.activeProfileId != PlayingProfileId)
-            return;
+        if(EditorApplication.isPlaying && _gameViewFocused)
+        {
+            var activeProfileId = ShortcutManager.instance.activeProfileId;
+            if (activeProfileId.Equals(PlayingProfileId))
+                return;
 
-        ShortcutManager.instance.activeProfileId = _activeProfileId;
-    }
+            _activeProfileId = activeProfileId;
 
-    private static void OnEnteredPlayMode()
-    {
-        _activeProfileId = ShortcutManager.instance.activeProfileId;
-        if (_activeProfileId.Equals(PlayingProfileId))
-            return; 
+            if (!ShortcutManager.instance.GetAvailableProfileIds().Any(p => p == PlayingProfileId))
+                ShortcutManager.instance.CreateProfile(PlayingProfileId);
 
-        if (!ShortcutManager.instance.GetAvailableProfileIds().Any(p => p == PlayingProfileId))
-            ShortcutManager.instance.CreateProfile(PlayingProfileId);
+            ShortcutManager.instance.activeProfileId = PlayingProfileId;
 
-        ShortcutManager.instance.activeProfileId = PlayingProfileId;
-        ShortcutManager.instance.RebindShortcut("Main Menu/Edit/Undo", ShortcutBinding.empty);
-        ShortcutManager.instance.RebindShortcut("Main Menu/Edit/Redo", ShortcutBinding.empty);
+            if (ShortcutManager.instance.GetShortcutBinding("Animation/Play Animation").keyCombinationSequence != ShortcutBinding.empty.keyCombinationSequence)
+                foreach (var shortcut in ShortcutManager.instance.GetAvailableShortcutIds())
+                    ShortcutManager.instance.RebindShortcut(shortcut, ShortcutBinding.empty);
+        }
+        else
+        {
+            if (ShortcutManager.instance.activeProfileId != PlayingProfileId)
+                return;
 
-        if(ShortcutManager.instance.GetShortcutBinding("Animation/Play Animation").keyCombinationSequence != ShortcutBinding.empty.keyCombinationSequence)
-            foreach (var shortcut in ShortcutManager.instance.GetAvailableShortcutIds())
-                ShortcutManager.instance.RebindShortcut(shortcut, ShortcutBinding.empty);
+            ShortcutManager.instance.activeProfileId = _activeProfileId;
+        }
     }
 }

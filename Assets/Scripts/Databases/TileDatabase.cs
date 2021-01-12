@@ -9,8 +9,8 @@ namespace Puzzled
     public class TileDatabase : AddressableDatabase<GameObject>
     {
         [Header("Preview")]
+        [SerializeField] private Puzzle previewPuzzle = null;
         [SerializeField] private Camera previewCamera = null;
-        [SerializeField] private Transform previewParent = null;
 
         [Header("Ports")]
         [SerializeField] private Sprite _powerPortIcon = null;
@@ -108,15 +108,44 @@ namespace Puzzled
         /// </summary>
         private Texture2D GeneratePreview(Tile prefab)
         {
-            previewParent.gameObject.SetActive(true);
+            var puzzle = GameManager.puzzle;
 
-            var tile = Instantiate(prefab.gameObject, previewParent).GetComponent<Tile>();
-            tile.gameObject.SetChildLayers(LayerMask.NameToLayer("Preview"));
+            GameManager.puzzle = previewPuzzle;
+            var tile = previewPuzzle.InstantiateTile(prefab, Cell.zero);
+            tile.Send(new StartEvent());
+
+
+            var yscale = 1.0f / Vector3.Dot(-previewCamera.transform.forward.normalized, Vector3.up);
+            var renderers = tile.GetComponentsInChildren<Renderer>();
+            var max = tile.transform.position;
+            var min = tile.transform.position;
+            foreach (var renderer in renderers)
+            {
+                max = Vector3.Max(max, renderer.bounds.max);
+                min = Vector3.Min(min, renderer.bounds.min);
+            }
+
+            // Position camera to frame the content
+            var extents = ((max - min));
+            var size = Mathf.Max(extents.x, Mathf.Max(extents.y, extents.z));
+            var foreshorten = 0.0f; // 0.5f * ((0.5f) / Mathf.Abs(Mathf.Sin(previewCamera.fieldOfView * Mathf.Deg2Rad * 0.5f)));
+            var distance = (size) / Mathf.Abs(Mathf.Sin(previewCamera.fieldOfView * Mathf.Deg2Rad * 0.5f));
+            
+            previewCamera.transform.position =
+                // Target position
+                tile.transform.position + new Vector3(0, (max.y + min.y) * 0.5f, 0)
+
+                // Zoom to frame entire target
+                + (distance * -Vector3.Normalize(previewCamera.transform.forward))
+
+                // Adjust for foreshortening 
+                - (foreshorten * Vector3.Dot(-Vector3.Normalize(previewCamera.transform.forward), Vector3.forward) * Vector3.forward);
 
             previewCamera.Render();
 
-            var t = new Texture2D(previewCamera.targetTexture.width, previewCamera.targetTexture.height, TextureFormat.ARGB32, false);
+            var t = new Texture2D(previewCamera.targetTexture.width, previewCamera.targetTexture.height, TextureFormat.ARGB32, false, true);
             t.filterMode = FilterMode.Bilinear;
+            t.wrapMode = TextureWrapMode.Clamp;
 
             RenderTexture.active = previewCamera.targetTexture;
             t.ReadPixels(new Rect(0, 0, t.width, t.height), 0, 0);
@@ -124,7 +153,7 @@ namespace Puzzled
 
             tile.Destroy();
 
-            previewParent.gameObject.SetActive(false);
+            GameManager.puzzle = puzzle;
 
             return t;
         }

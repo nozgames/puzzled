@@ -99,10 +99,10 @@ namespace Puzzled
                 return;
 
             var targetPosition = Puzzle.current.grid.CellToWorld(_target) - gameObject.transform.position;
-            targetPosition.z = 0.0f;
+            targetPosition.y = 0.0f;
             var hwidth = _width * 0.5f;
             var dir = targetPosition.normalized;
-            var normal = Vector3.Cross(dir, Vector3.forward);
+            var normal = Vector3.Cross(dir, -Vector3.up);
             var left = -normal * _width;
             var right = normal * _width;
 

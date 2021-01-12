@@ -22,7 +22,8 @@ namespace Puzzled
         Tile,
         Background,
         IntArray,
-        Port
+        Port,
+        Sound
     }
 
     public class TileProperty
@@ -85,6 +86,8 @@ namespace Puzzled
                 type = TilePropertyType.Int;
             else if (info.PropertyType == typeof(int[]))
                 type = TilePropertyType.IntArray;
+            else if (info.PropertyType == typeof(int[]))
+                type = TilePropertyType.Sound;
             else if (info.PropertyType == typeof(bool))
                 type = TilePropertyType.Bool;
             else if (info.PropertyType == typeof(string))
@@ -103,6 +106,8 @@ namespace Puzzled
                 type = TilePropertyType.Background;
             else if (info.PropertyType == typeof(Port))
                 type = TilePropertyType.Port;
+            else if (info.PropertyType == typeof(Sound))
+                type = TilePropertyType.Sound;
             else
                 throw new NotImplementedException();
         }

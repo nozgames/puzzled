@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NoZ;
+using UnityEngine;
 
 namespace Puzzled
 {
@@ -86,6 +87,14 @@ namespace Puzzled
 
         protected virtual void OnAwake ()
         {
+        }
+
+        protected void PlaySound (AudioClip clip, float volume = 1.0f, float pitch = 1.0f)
+        {
+            if (isLoading || isEditing || clip == null || volume <= 0.0f)
+                return;
+
+            AudioManager.Instance.Play(clip, volume, pitch);
         }
     }
 }

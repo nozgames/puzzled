@@ -7,10 +7,9 @@ namespace Puzzled
     {
         [Header("General")]
         [SerializeField] private bool _usable = true;
-
-        [Header("Visuals")]
-        [SerializeField] private GameObject visualOn = null;
-        [SerializeField] private GameObject visualOff = null;
+        [SerializeField] private Animator _animator = null;
+        [SerializeField] private AudioClip _onSound = null;
+        [SerializeField] private AudioClip _offSound = null;
 
         private bool _default = false;
         private bool _on = false;
@@ -68,6 +67,16 @@ namespace Puzzled
 
                 _on = value;
 
+                if(_animator != null)
+                {
+                    if (value)
+                        _animator.SetTrigger(isLoading ? "On" : "OffToOn");
+                    else
+                        _animator.SetTrigger(isLoading ? "Off" : "OnToOff");
+                }
+
+                PlaySound(value ? _onSound : _offSound);
+
                 UpdateState();
             }
         }
@@ -76,7 +85,7 @@ namespace Puzzled
         {
             base.OnAwake();
 
-            if(_usable)
+            if (_usable)
                 RegisterHandler<UseEvent>();
         }
 
@@ -84,6 +93,10 @@ namespace Puzzled
         private void OnStart(StartEvent evt)
         {
             _default = isOn;
+
+            if(_animator != null)
+                _animator.SetTrigger(isOn ? "On" : "Off");
+
             UpdateState();
         }
 
@@ -112,12 +125,6 @@ namespace Puzzled
                 return;
 
             powerOutPort.SetPowered(isOn);
-
-            if(visualOn != null)
-                visualOn.SetActive(isOn);
-
-            if(visualOff != null)
-                visualOff.SetActive(!isOn);
         }
     }
 }

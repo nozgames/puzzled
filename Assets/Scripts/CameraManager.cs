@@ -11,6 +11,7 @@ namespace Puzzled
         public Vector3 position;
         public float orthographicSize;
         public Background background;
+        public bool editor;
     }
 
     /// <summary>
@@ -26,7 +27,7 @@ namespace Puzzled
         /// <summary>
         /// Minimum zoom level
         /// </summary>
-        public const int MinZoomLevel = 2;
+        public const int MinZoomLevel = 5;
 
         /// <summary>
         /// Maximum zoom level
@@ -34,7 +35,8 @@ namespace Puzzled
         public const int MaxZoomLevel = 20;
 
         [Header("General")]
-        [SerializeField] private Camera _camera = null;
+        [SerializeField] private Camera _cameraPlayer = null;
+        [SerializeField] private Camera _cameraEditor = null;
 
         [Header("Layers")]
         [SerializeField] [Layer] private int floorLayer = 0;
@@ -45,61 +47,94 @@ namespace Puzzled
         [SerializeField] private LayerMask defaultLayers = 0;
 
         [Header("Background")]
-        [SerializeField] private Material _floorGradientMaterial = null;
+        [SerializeField] private Background _defaultBackground = null;
+        [SerializeField] private MeshRenderer _fog = null;
         [SerializeField] private Material _gridMaterial = null;
 
-        private Cell _cell = Cell.invalid;
-        private int _zoomLevel;
-        private Background _background;
-        private Material _floorGradientMaterialInstance;
+        /// <summary>
+        /// Current background (needed?)
+        /// </summary>
         private Material _gridMaterialInstance;
 
-        private static CameraManager _instance = null;
+        /// <summary>
+        /// Current zoom level
+        /// </summary>
+        private int _zoomLevel = DefaultZoomLevel;
 
         /// <summary>
-        /// Cell the camera is centered on
+        /// Target position
         /// </summary>
-        public static Cell cell => _instance._cell;
-
-        public static Material floorGradientMaterial => _instance._floorGradientMaterialInstance;
-
-        public static Material gridMaterial => _instance._gridMaterialInstance;
+        private Vector3 _targetPosition;
 
         /// <summary>
         /// Current background
         /// </summary>
-        public static Background background => _instance._background == null ? _instance._defaultBackground : _instance._background;
+        private Background _background = null;
+
+        private static CameraManager _instance = null;
+
+        /// <summary>
+        /// True if the camera manager is using the editor camera
+        /// </summary>
+        public static bool isEditor {
+            get => _instance._cameraEditor.gameObject.activeSelf;
+            set {
+                _instance._cameraEditor.gameObject.SetActive(value);
+                _instance._cameraPlayer.gameObject.SetActive(!value);
+            }
+        }
+
+        /// <summary>
+        /// Returns the default background 
+        /// </summary>
+        public static Background defaultBackground => _instance._defaultBackground;
+
+        /// <summary>
+        /// Returns the camera that is currently active
+        /// </summary>
+        public static Camera activeCamera => _instance._cameraEditor.gameObject.activeSelf ? _instance._cameraEditor : _instance._cameraPlayer;
+
+        /// <summary>
+        /// Returns the material used for rendering grids
+        /// </summary>
+        public static Material gridMaterial => _instance._gridMaterialInstance;
 
         /// <summary>
         /// Get/Set the camera state
         /// </summary>
         public static CameraState state {
             get => new CameraState {
-                position = _instance._camera.transform.position,
-                orthographicSize = _instance._camera.orthographicSize,
-                background = background
+                position = activeCamera.transform.position,
+                orthographicSize = activeCamera.orthographicSize,
+                background = _instance._background,
+                editor = isEditor
             };
             set {
-                _instance._camera.transform.position = value.position;
-                _instance._camera.orthographicSize = value.orthographicSize;
-                TransitionToBackground(value.background, 0);
+                // Make sure we set editor first so we alter the correct camera 
+                isEditor = value.editor;
+
+                activeCamera.transform.position = value.position;
+                if (activeCamera.orthographic)
+                    activeCamera.orthographicSize = value.orthographicSize;
+
+                var background = state.background ?? _instance._defaultBackground;
+                _instance._fog.material.color = background.color;
+                _instance._gridMaterialInstance.color = background.gridColor;
             }
         }
 
         public void Initialize ()
         {
-            _zoomLevel = (int)_camera.orthographicSize;
+            _instance = this;
 
             // Set default camera mask layers
-            _camera.cullingMask = defaultLayers;
+            _cameraEditor.cullingMask = defaultLayers;
+            _cameraPlayer.cullingMask = defaultLayers;
 
-            _instance._camera.backgroundColor = _instance._defaultBackground.color;
+            _gridMaterialInstance = new Material(_instance._gridMaterial);
+            _gridMaterialInstance.color = _defaultBackground.gridColor;
 
-            _instance._floorGradientMaterialInstance = new Material(_instance._floorGradientMaterial);
-            _instance._floorGradientMaterialInstance.color = _instance._camera.backgroundColor;
-
-            _instance._gridMaterialInstance = new Material(_instance._gridMaterial);
-            _instance._gridMaterialInstance.color = _defaultBackground.gridColor;
+            _fog.material.color = Color.white;
         }
 
         private void OnEnable()
@@ -112,125 +147,125 @@ namespace Puzzled
             _instance = null;
         }
 
-        [SerializeField] private Background _defaultBackground = null;
-
         /// <summary>
         /// Convert the given screen coordinate to a world coordinate
         /// </summary>
         /// <param name="screen">Screen coordinate</param>
         /// <returns>World coordinate</returns>
-        public static Vector3 ScreenToWorld(Vector3 screen) => _instance._camera.ScreenToWorldPoint(screen);
-
-        public static void JumpToCell(Cell cell, int zoomLevel=-1)
-        {
-            _instance._camera.transform.position = Puzzle.current.grid.CellToWorld(cell);
-
-            if (zoomLevel >= 0)
-            {
-                _instance._camera.orthographicSize = zoomLevel / 2;
-                _instance._zoomLevel = zoomLevel;
-            }
-
-            _instance._cell = cell;
-        }
-
-        public static void TransitionToBackground(Background to, int transitionTime = 4)
-        {
-            if (_instance._background == to)
-                return;
-
-            to = to == null ? _instance._defaultBackground : to;
-
-            _instance._gridMaterialInstance.color = to.gridColor;
-
-            var from = background;
-            _instance._background = to;
-
-            if (transitionTime == 0)
-            {
-                _instance._floorGradientMaterialInstance.color = to.color;
-                _instance._camera.backgroundColor = to.color;
-            } 
-            else
-            {
-                Tween.Custom(LerpBackgroundColor, from.color, to.color)
-                    .Duration(transitionTime * GameManager.tick)
-                    .Start(_instance);
-            }
-        }
+        public static Vector3 ScreenToWorld(Vector3 screen) => activeCamera.ScreenToWorldPoint(screen);
 
         private static bool LerpBackgroundColor(Tween tween, float t)
         {
             var lerped = tween.Param1 * (1f - t) + tween.Param2 * t;
-            var color = new Color(lerped.x, lerped.y, lerped.z, 1.0f);
-            _instance._floorGradientMaterialInstance.color = color;
-            _instance._camera.backgroundColor = color;
+            _instance._fog.material.color = new Color(lerped.x, lerped.y, lerped.z, 1.0f);
             return true;
         }
 
-        public static void TransitionToCell(Cell cell, int zoomLevel, int transitionTime)
+        private bool LerpOrthographicSize(Tween tween, float t)
         {
-            if ((cell == _instance._cell) && (zoomLevel == _instance._zoomLevel))
-                return; // nothing to do
+            activeCamera.orthographicSize = Mathf.Lerp(tween.Param1.x, tween.Param1.y, t) / 2;
+            return true;
+        }
 
+        /// <summary>
+        /// Transition camera from one state to another
+        /// </summary>
+        /// <param name="position">Target position of the camera</param>
+        /// <param name="zoomLevel">Zoom level to transition to</param>
+        /// <param name="background">Background</param>
+        /// <param name="transitionTime">Time to transition in ticks (0 for instant)</param>
+        public static void Transition (Vector3 position, int zoomLevel, Background background, int transitionTime)
+        {
+            var camera = activeCamera;
+            var targetBackground = background ?? _instance._defaultBackground;
+
+            // Clamp zoom
+            zoomLevel = Mathf.Clamp(zoomLevel, MinZoomLevel, MaxZoomLevel);
+
+            // Change grid color
+            _instance._gridMaterialInstance.color = targetBackground.gridColor;
+
+            // Handle non-animated transition
+            if (transitionTime == 0)
+            {
+                if (camera.orthographic)
+                    camera.orthographicSize = zoomLevel;
+
+                // Change background color
+                _instance._fog.material.color = targetBackground.color;
+
+                camera.transform.position = Frame(camera, position, zoomLevel);
+
+                _instance._zoomLevel = zoomLevel;
+                _instance._background = targetBackground;
+                _instance._targetPosition = position;
+                return;
+            }
+
+            // Busy during a transition
             GameManager.busy++;
 
             var tweenGroup = Tween.Group();
 
-            if (zoomLevel != _instance._zoomLevel)
-                tweenGroup.Child(Tween.Custom(_instance.CameraZoomUpdate, new Vector4(_instance._zoomLevel, zoomLevel, 0), Vector4.zero));
+            // Orthographic zoom
+            if(camera.orthographic && camera.orthographicSize != zoomLevel)
+                tweenGroup.Child(Tween.Custom(_instance.LerpOrthographicSize, new Vector4(camera.orthographicSize, zoomLevel, 0), Vector4.zero));
 
-            if (cell != _instance._cell)
-                tweenGroup.Child(Tween.Move(Puzzle.current.grid.CellToWorld(_instance._cell), Puzzle.current.grid.CellToWorld(cell), false));
+            // Move the camera if needed
+            var targetPosition = Frame(camera, position, zoomLevel);
+            if (targetPosition != camera.transform.position)
+                tweenGroup
+                    .Child(Tween.Move(camera.transform.position, targetPosition, false).Target(camera.gameObject));
 
-            float duration = transitionTime * GameManager.tick;
+            if (_instance._fog.material.color != targetBackground.color)
+                tweenGroup.Child(Tween.Custom(LerpBackgroundColor, _instance._fog.material.color, targetBackground.color));
 
-            tweenGroup.Duration(duration)
-                .OnStop(_instance.OnCameraTransitionComplete)
-                .Start(_instance._camera.gameObject);
+            tweenGroup
+                .Duration(transitionTime * GameManager.tick)
+                .EaseInOutCubic()
+                .OnStop(_instance.OnTransitionComplete)
+                .Start(_instance.gameObject);
 
-            _instance._cell = cell;
             _instance._zoomLevel = zoomLevel;
+            _instance._background = targetBackground;
+            _instance._targetPosition = position;
         }
+
+        /// <summary>
+        /// Transition to a different background
+        /// </summary>
+        /// <param name="background">New background</param>
+        /// <param name="transitionTime">Time to transition</param>
+        public static void Transition (Background background, int transitionTime) =>
+            Transition(_instance._targetPosition, _instance._zoomLevel, background, transitionTime);
+
+        /// <summary>
+        /// Adjust the active camera zoom by the given amount
+        /// </summary>
+        /// <param name="delta">delta zoom level</param>
+        public static void AdjustZoom (int delta) =>
+            Transition(_instance._targetPosition, _instance._zoomLevel + delta, _instance._background, 0);
 
         /// <summary>
         /// Pan the camera by the given amount in world coordinates
         /// </summary>
         /// <param name="pan"></param>
-        public static void Pan (Vector3 pan)
-        {
-            _instance._camera.transform.position += Vector3.Scale(pan, new Vector3(1, 1, 0));
-            _instance._cell = Puzzle.current.grid.WorldToCell(_instance._camera.transform.position);
-        }
+        public static void Pan (Vector3 pan) =>
+            Transition(_instance._targetPosition + pan, _instance._zoomLevel, _instance._background, 0);
 
-        private bool CameraZoomUpdate(Tween tween, float t)
-        {
-            _camera.orthographicSize = Mathf.Lerp(tween.Param1.x, tween.Param1.y, t) / 2;
-
-            return true;
-        }
-
-        private void OnCameraTransitionComplete()
-        {
-            GameManager.busy--;
-        }
+        /// <summary>
+        /// Called when a transition is complete to disable the busy state
+        /// </summary>
+        private void OnTransitionComplete() => GameManager.busy--;
 
         public static void Play()
         {
-            _instance._camera.cullingMask = _instance.playLayers;
-
-            if (_instance._cell == Cell.invalid)
-            {
-                if (Puzzle.current.playerCell != Cell.invalid)
-                    _instance._cell = Puzzle.current.playerCell;
-                else
-                    _instance._cell = Puzzle.current.grid.WorldToCell(_instance._camera.transform.position);
-            }
+            activeCamera.cullingMask = _instance.playLayers;
         }
 
         public static void Stop()
         {
-            _instance._camera.cullingMask = _instance.defaultLayers;
+            activeCamera.cullingMask = _instance.defaultLayers;
         }
 
         /// <summary>
@@ -266,9 +301,31 @@ namespace Puzzled
         public static void ShowLayer(TileLayer layer, bool show=true)
         {
             if (show)
-                _instance._camera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
+                activeCamera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else
-                _instance._camera.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
+                activeCamera.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
+        }
+
+        /// <summary>
+        /// Frame the camera on the given position using the given zoom level 
+        /// </summary>
+        /// <param name="camera">Camera to frame</param>
+        /// <param name="position">Position to focus on</param>
+        /// <param name="zoom">Zoom level in number of vertical tiles that should be visible</param>
+        /// <returns></returns>
+        private static Vector3 Frame (Camera camera, Vector3 position, float zoom)
+        {
+            var foreshorten = 0; // camera.orthographic ? 0.0f : (0.5f * ((0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f))));
+            var distance = ((zoom - 1) * 0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f));
+            return 
+                // Target position
+                position
+
+                // Zoom to frame entire target
+                + (distance * -Vector3.Normalize(camera.transform.forward))
+                
+                // Adjust for foreshortening 
+                - (foreshorten * Vector3.Dot(-Vector3.Normalize(camera.transform.forward), Vector3.forward) * Vector3.forward);
         }
     }
 }
