@@ -53,7 +53,7 @@ namespace Puzzled
                     var cell = tile.cell;
 
                     // Destroy ourself first or the new item cannot spawn 
-                    //tile.Destroy();
+                    tile.Destroy();
 
                     // Spawn the prize at the same spot
                     puzzle.InstantiateTile(TileDatabase.GetTile(prizeItem), cell);
