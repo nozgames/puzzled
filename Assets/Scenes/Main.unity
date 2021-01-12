@@ -277,6 +277,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cameraPlayer: {fileID: 519420031}
   _cameraEditor: {fileID: 14753213}
+  _cameraEditorLogic: {fileID: 1697704405}
   floorLayer: 10
   staticLayer: 11
   dynamicLayer: 12
@@ -765,7 +766,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1737696697}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 55, y: 0, z: 0}
 --- !u!1 &573457855
 GameObject:
@@ -795,7 +796,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1737696697}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &575329655 stripped
 MonoBehaviour:
@@ -976,7 +977,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1737696697}
-  m_RootOrder: 5
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!114 &773674673
 MonoBehaviour:
@@ -1482,7 +1483,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1737696697}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 45, y: -30, z: 0}
 --- !u!108 &1451784389
 Light:
@@ -1772,10 +1773,10 @@ Transform:
   m_Children:
   - {fileID: 470939221}
   - {fileID: 14753210}
+  - {fileID: 773674672}
   - {fileID: 519420032}
   - {fileID: 573457856}
   - {fileID: 1451784388}
-  - {fileID: 773674672}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

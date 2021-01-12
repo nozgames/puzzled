@@ -37,14 +37,13 @@ namespace Puzzled
         [Header("General")]
         [SerializeField] private Camera _cameraPlayer = null;
         [SerializeField] private Camera _cameraEditor = null;
+        [SerializeField] private Camera _cameraEditorLogic = null;
 
         [Header("Layers")]
         [SerializeField] [Layer] private int floorLayer = 0;
         [SerializeField] [Layer] private int staticLayer = 0;
         [SerializeField] [Layer] private int dynamicLayer = 0;
         [SerializeField] [Layer] private int logicLayer = 0;
-        [SerializeField] private LayerMask playLayers = 0;
-        [SerializeField] private LayerMask defaultLayers = 0;
 
         [Header("Background")]
         [SerializeField] private Background _defaultBackground = null;
@@ -126,10 +125,6 @@ namespace Puzzled
         public void Initialize ()
         {
             _instance = this;
-
-            // Set default camera mask layers
-            _cameraEditor.cullingMask = defaultLayers;
-            _cameraPlayer.cullingMask = defaultLayers;
 
             _gridMaterialInstance = new Material(_instance._gridMaterial);
             _gridMaterialInstance.color = _defaultBackground.gridColor;
@@ -260,12 +255,10 @@ namespace Puzzled
 
         public static void Play()
         {
-            activeCamera.cullingMask = _instance.playLayers;
         }
 
         public static void Stop()
         {
-            activeCamera.cullingMask = _instance.defaultLayers;
         }
 
         /// <summary>
@@ -300,10 +293,14 @@ namespace Puzzled
         /// <param name="show">True to show the layer, false to hide it</param>
         public static void ShowLayer(TileLayer layer, bool show=true)
         {
+            var camera = activeCamera;
+            if (layer == TileLayer.Logic && isEditor)
+                camera = _instance._cameraEditorLogic;
+
             if (show)
-                activeCamera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
+                camera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else
-                activeCamera.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
+                camera.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
         }
 
         /// <summary>
