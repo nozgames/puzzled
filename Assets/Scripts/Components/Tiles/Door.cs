@@ -6,10 +6,10 @@ namespace Puzzled
     public class Door : TileComponent
     {
         private bool _open = false;
-        private bool _locked = false;
 
         [Editable]
-        public System.Guid keyItem { get; private set; } = System.Guid.Empty;
+        [SerializeField] private Tile keyItem = null;
+        [SerializeField] private AudioClip _unlockSound = null;
 
         [Editable]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]
@@ -41,13 +41,7 @@ namespace Puzzled
             }
         }
 
-        private bool requiresKey => keyItem != System.Guid.Empty;
-
-        [ActorEventHandler]
-        private void OnStart(StartEvent evt)
-        {
-            _locked = requiresKey;
-        }
+        private bool requiresKey => keyItem != null;
 
         [ActorEventHandler(priority=1)]
         private void OnQueryMove(QueryMoveEvent evt)
@@ -61,35 +55,33 @@ namespace Puzzled
             // Always report we were used, even if the use fails
             evt.IsHandled = true;
 
+            if (_open)
+                return;
+
             if (!requiresKey)
                 return;
 
-            if (_locked)
-            {
-                // check if the using actor has the keyItem
-                _locked = evt.user.Send(new QueryHasItemEvent(keyItem));
-            }
+            // Check to see if the user has the item to unlock the chest
+            bool shouldOpen = evt.user.Send(new QueryHasItemEvent(keyItem.guid));
+            if (!shouldOpen)
+                return;
 
-            // Open if no longer locked
-            if (!_locked)
-                isOpen = true;            
+            PlaySound(_unlockSound);
+
+            isOpen = true;            
         }
 
         [ActorEventHandler]
         private void OnWirePower (WirePowerChangedEvent evt)
         {
-            if(powerInPort.hasPower && !isOpen)
-            {
-                // Do not let wires open locked doors
-                if (_locked)
-                    return;
+            // Do not let wires open/close locked doors
+            if (requiresKey)
+                return;
 
+            if (powerInPort.hasPower && !isOpen)
                 isOpen = true;
-            }
-            else if(!powerInPort.hasPower && isOpen)
-            {
+            else if (!powerInPort.hasPower && isOpen)
                 isOpen = false;
-            }
         }
     }
 }
