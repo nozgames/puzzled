@@ -95,6 +95,22 @@ namespace Puzzled
         public Tile CellToTile(Cell cell, TileLayer layer) => _tiles[CellToIndex(cell, layer)];
 
         /// <summary>
+        /// Return the component of th given type from the given cell and layer
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="cell"></param>
+        /// <param name="layer"></param>
+        /// <returns></returns>
+        public T CellToComponent<T> (Cell cell, TileLayer layer) where T : TileComponent
+        {
+            var tile = CellToTile(cell, layer);
+            if (null == tile)
+                return null;
+
+            return tile.GetComponentInChildren<T>();
+        }
+
+        /// <summary>
         /// Returns the top most tile in the given cell
         /// </summary>
         /// <param name="cell">Cell coordinate</param>

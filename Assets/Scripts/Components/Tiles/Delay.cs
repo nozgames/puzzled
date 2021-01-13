@@ -47,7 +47,7 @@ namespace Puzzled
             if (wasDelaying)
                 ++tickCount;
 
-            wasDelaying = isDelaying;
+            wasDelaying = true;
 
             if (tickCount >= delayTicks)
             {
