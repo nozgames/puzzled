@@ -326,11 +326,15 @@ namespace Puzzled
             // Move to that cell immediately 
             tile.cell = moveToCell;
 
+            // HACK: the tile.cell call moved the players position but we use root animation to move the player so move him back
+            tile.transform.position = puzzle.grid.CellToWorld(moveFromCell);
+
             BeginBusy();
 
-            PlayAnimation("Walk");
+            _animator.SetBool("Walking", true);
 
             Tween.Move(puzzle.grid.CellToWorld(moveFromCell), puzzle.grid.CellToWorld(moveToCell), false)
+            //Tween.Wait(moveDuration)
                 .Duration(moveDuration)
                 .OnStop(OnMoveComplete)
                 .Start(gameObject);
@@ -424,7 +428,7 @@ namespace Puzzled
             SendToCell(new LeaveCellEvent(actor, moveToCell), moveFromCell);
             SendToCell(new EnterCellEvent(actor, moveFromCell), moveToCell);
 
-            PlayAnimation("Idle");
+            _animator.SetBool("Walking", false);
 
             EndBusy();
         }
