@@ -5,6 +5,8 @@ namespace Puzzled
 {
     public class Sign : TileComponent
     {
+        public bool isUsable = true;
+
         [SerializeField] private UIPopup _popupPrefab = null;
 
         private string _text = "";
@@ -36,6 +38,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
+            if (!isUsable)
+                return;
+
             evt.IsHandled = true;
             HandleUse();
         }
