@@ -77,6 +77,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30596c8681ea2a847af667ef69cc410d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  keyItem: {fileID: 0}
+  _unlockSound: {fileID: 0}
   _animator: {fileID: 1584892065696366000}
   _openSound: {fileID: 0}
   _closeSound: {fileID: 0}
@@ -130,6 +132,18 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: b1881257e649a054a81d24c5d6b19ccf, type: 3}
       propertyPath: m_Name
       value: Door02
+      objectReference: {fileID: 0}
+    - target: {fileID: 6654606342528888028, guid: b1881257e649a054a81d24c5d6b19ccf, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: f316328743077eb4e8faf5ffeb131aa6, type: 2}
+    - target: {fileID: 6654606342528888028, guid: b1881257e649a054a81d24c5d6b19ccf, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 09319b73fb131994792f61d932f7a81d, type: 2}
+    - target: {fileID: 7928903900714327252, guid: b1881257e649a054a81d24c5d6b19ccf, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b1881257e649a054a81d24c5d6b19ccf, type: 3}
