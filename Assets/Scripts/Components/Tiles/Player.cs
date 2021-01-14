@@ -144,7 +144,8 @@ namespace Puzzled
                 // if there is no desired movement anymore, clear the queued movement too
                 if (desiredMovement == Cell.zero)
                     queuedMovement = Cell.zero;
-            }
+            } else 
+                _animator.SetBool("Walking", false);
         }
 
         [ActorEventHandler]
@@ -428,7 +429,7 @@ namespace Puzzled
             SendToCell(new LeaveCellEvent(actor, moveToCell), moveFromCell);
             SendToCell(new EnterCellEvent(actor, moveFromCell), moveToCell);
 
-            _animator.SetBool("Walking", false);
+            //_animator.SetBool("Walking", false);
 
             EndBusy();
         }
