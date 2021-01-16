@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Puzzled.UI;
 
 namespace Puzzled.Editor
 {
@@ -21,11 +22,11 @@ namespace Puzzled.Editor
         [SerializeField] private Button _searchClearButton = null;
         [SerializeField] private bool allowNone = false;
 
-        [SerializeField] private Toggle _filterAll = null;
-        [SerializeField] private Toggle _filterLetter = null;
-        [SerializeField] private Toggle _filterRune = null;
-        [SerializeField] private Toggle _filterNumber = null;
-        [SerializeField] private Toggle _filterLine = null;
+        [SerializeField] private UIRadio _filterAll = null;
+        [SerializeField] private UIRadio _filterLetter = null;
+        [SerializeField] private UIRadio _filterRune = null;
+        [SerializeField] private UIRadio _filterNumber = null;
+        [SerializeField] private UIRadio _filterLine = null;
 
         private Decal _selected;
 

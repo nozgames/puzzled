@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Puzzled.Editor;
+using Puzzled.UI;
 
 namespace Puzzled
 {
@@ -36,11 +37,11 @@ namespace Puzzled
 
         [Header("Toolbar")]
         [SerializeField] private GameObject tools = null;
-        [SerializeField] private Toggle moveTool = null;
-        [SerializeField] private Toggle drawTool = null;
-        [SerializeField] private Toggle eraseTool = null;
-        [SerializeField] private Toggle wireTool = null;
-        [SerializeField] private Toggle decalTool = null;
+        [SerializeField] private UIRadio moveTool = null;
+        [SerializeField] private UIRadio drawTool = null;
+        [SerializeField] private UIRadio eraseTool = null;
+        [SerializeField] private UIRadio wireTool = null;
+        [SerializeField] private UIRadio decalTool = null;
         [SerializeField] private GameObject moveToolOptions = null;
         [SerializeField] private GameObject eraseToolOptions = null;
         [SerializeField] private Toggle eraseToolAllLayers = null;

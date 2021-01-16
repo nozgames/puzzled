@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Puzzled.UI;
 
 namespace Puzzled.Editor
 {
@@ -16,11 +17,11 @@ namespace Puzzled.Editor
         [SerializeField] private TMPro.TMP_InputField _searchInput = null;
         [SerializeField] private Button _searchClearButton = null;
 
-        [SerializeField] private Toggle _filterAll = null;
-        [SerializeField] private Toggle _filterLogic = null;
-        [SerializeField] private Toggle _filterDynamic = null;
-        [SerializeField] private Toggle _filterFloor = null;
-        [SerializeField] private Toggle _filterStatic = null;
+        [SerializeField] private UIRadio _filterAll = null;
+        [SerializeField] private UIRadio _filterLogic = null;
+        [SerializeField] private UIRadio _filterDynamic = null;
+        [SerializeField] private UIRadio _filterFloor = null;
+        [SerializeField] private UIRadio _filterStatic = null;
 
         private Type _componentFilter;
         private Tile _selected;
