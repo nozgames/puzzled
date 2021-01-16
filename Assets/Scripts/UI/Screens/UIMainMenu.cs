@@ -24,7 +24,7 @@ namespace Puzzled
 
         public void OnEditorButton()
         {
-            UIManager.instance.EditPuzzle();
+            UIPuzzleEditor.Initialize();
         }
     }
 }

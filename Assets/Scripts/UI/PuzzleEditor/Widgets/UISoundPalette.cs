@@ -10,7 +10,7 @@ namespace Puzzled.Editor
         [SerializeField] private UISoundPaletteItem _itemPrefab = null;
         [SerializeField] private UIList _list = null;
         [SerializeField] private ScrollRect _scrollRect = null;
-        [SerializeField] private Image _selectedPreview = null;
+        //[SerializeField] private Image _selectedPreview = null;
         [SerializeField] private TMPro.TMP_InputField _searchInput = null;
         [SerializeField] private Button _searchClearButton = null;
         [SerializeField] private bool allowNone = false;

@@ -132,8 +132,6 @@ namespace Puzzled
             // Start the puzzle if it has not yet been started
             if(!_started)
             {
-                CameraManager.isEditor = puzzle.isEditing;
-
                 // Find the player
                 _player = _tiles.GetComponentInChildren<Player>();
                 if (_player != null)
@@ -155,9 +153,7 @@ namespace Puzzled
         private void OnEnable()
         {
             if (_savedCameraState.valid)
-                CameraManager.state = _savedCameraState;
-
-            CameraManager.isEditor = isEditing;
+                CameraManager.state = _savedCameraState;            
         }
 
         private void OnDisable()

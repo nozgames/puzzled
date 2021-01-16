@@ -16,12 +16,12 @@ namespace Puzzled
         [SerializeField] private UIScreen startScreen = null;
         [SerializeField] private Transform popups = null;
         [SerializeField] private Transform popupCentered = null;
+        [SerializeField] private GameObject _loading = null;
 
         [Header("Screens")]
         [SerializeField] private UIScreen mainMenu = null;
         [SerializeField] private UIScreen ingameScreen = null;
         [SerializeField] private UIScreen puzzleComplete = null;
-        [SerializeField] private UIPuzzleEditor puzzleEditor = null;
 
         [Header("Cursors")]
         [SerializeField] private CursorInfo[] _cursors = null;
@@ -29,38 +29,50 @@ namespace Puzzled
         private CursorType _cursor = CursorType.Arrow;
 
         public static CursorType cursor {
-            get => instance._cursor;
+            get => _instance._cursor;
             set {
-                if (value == instance._cursor)
+                if (value == _instance._cursor)
                     return;
 
-                instance._cursor = value;
-                var info = instance._cursors[(int)value];
+                _instance._cursor = value;
+                var info = _instance._cursors[(int)value];
                 Cursor.SetCursor(info.cursor, info.hotspot, CursorMode.Auto);
             }
         }
 
-        public static UIManager instance { get; private set; }
+        public static UIManager _instance { get; private set; }
 
         public UIScreen activeScreen { get; private set; }
 
+        public static bool loading {
+            get => _instance._loading.activeSelf;
+            set => _instance._loading.SetActive(value);
+        }
+
         private void Awake()
         {
-            instance = this;
+            _instance = this;
+        }
 
-            foreach (var screen in GetComponentsInChildren<UIScreen>(true))
+        public static void Initialize ()
+        {
+            foreach (var screen in _instance.GetComponentsInChildren<UIScreen>(true))
                 screen.gameObject.SetActive(false);
 
-            startScreen.gameObject.SetActive(true);
-            activeScreen = startScreen;
+            _instance.startScreen.gameObject.SetActive(true);
+            _instance.activeScreen = _instance.startScreen;
 
-            _cursor = CursorType.ArrowWithMinus;
+            _instance._cursor = CursorType.ArrowWithMinus;
             cursor = CursorType.Arrow;
+        }
+
+        public static void Shutdown ()
+        {
         }
 
         private void OnDestroy()
         {
-            instance = null;
+            _instance = null;
         }
 
         public void ShowMainMenu()
@@ -83,9 +95,10 @@ namespace Puzzled
 
         public void ShowPuzzleComplete()
         {
-            if(activeScreen == puzzleEditor)
+            // Special case for finishing a puzzle when the editor is open
+            if(UIPuzzleEditor.isOpen)
             {
-                puzzleEditor.OnStopButton();
+                UIPuzzleEditor.Stop ();
                 return;
             }
 
@@ -96,33 +109,24 @@ namespace Puzzled
             activeScreen.gameObject.SetActive(true);            
         }
         
-        public void HideMenu ()
+        public static void HideMenu ()
         {
-            if (null == activeScreen)
+            if (null == _instance.activeScreen)
                 return;
 
-            activeScreen.gameObject.SetActive(false);
-        }
-
-        public void EditPuzzle ()
-        {
-            if (activeScreen != null)
-                activeScreen.gameObject.SetActive(false);
-
-            activeScreen = puzzleEditor;
-            activeScreen.gameObject.SetActive(true);
+            _instance.activeScreen.gameObject.SetActive(false);
         }
 
         public static UIPopup ShowPopup(UIPopup popupPrefab)
         {
-            instance.popups.gameObject.SetActive(true);
-            return Instantiate(popupPrefab, instance.popupCentered).GetComponent<UIPopup>();
+            _instance.popups.gameObject.SetActive(true);
+            return Instantiate(popupPrefab, _instance.popupCentered).GetComponent<UIPopup>();
         }
 
         public static void ClosePopup()
         {
-            instance.popups.gameObject.SetActive(false);
-            instance.popupCentered.DetachAndDestroyChildren();
+            _instance.popups.gameObject.SetActive(false);
+            _instance.popupCentered.DetachAndDestroyChildren();
         }
     }
 }

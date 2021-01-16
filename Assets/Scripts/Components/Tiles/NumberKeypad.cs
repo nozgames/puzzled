@@ -6,8 +6,8 @@ namespace Puzzled
     class NumberKeypad : TileComponent
     {
         [Header("Visuals")]
-        [SerializeField] private GameObject _visualLocked = null;
-        [SerializeField] private GameObject _visualUnlocked = null;
+        //[SerializeField] private GameObject _visualLocked = null;
+        //[SerializeField] private GameObject _visualUnlocked = null;
         [SerializeField] private UIKeypadPopup _popupPrefab = null;
 
         [SerializeField] private Sprite[] _numbers = null;

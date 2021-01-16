@@ -6,18 +6,18 @@ namespace Puzzled
     {
         public void OnResumeButton()
         {
-            UIManager.instance.HideMenu();
+            UIManager.HideMenu();
         }
 
         public void OnRestartButton()
         {
             //GameManager._instance.LoadPuzzle(GameManager._instance.puzzle);
-            UIManager.instance.HideMenu();
+            UIManager.HideMenu();
         }
 
         public void OnQuitButton()
         {
-            UIManager.instance.ShowMainMenu();
+            UIManager._instance.ShowMainMenu();
         }
     }
 }

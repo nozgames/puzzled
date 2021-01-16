@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -23,7 +24,6 @@ namespace Puzzled
 
         [Header("General")]
         [SerializeField] private UICanvas canvas = null;
-        [SerializeField] private RectTransform _canvasCenter = null;
         [SerializeField] private RectTransform selectionRect = null;
         [SerializeField] private SelectionGizmo selectionGizmo = null;
         [SerializeField] private SelectionGizmo _cursorGizmo = null;
@@ -34,6 +34,10 @@ namespace Puzzled
 
         [SerializeField] private Transform options = null;
         [SerializeField] private GameObject inspector = null;
+
+        [Header("Cameras")]
+        [SerializeField] private Camera _cameraMain = null;
+        [SerializeField] private Camera _cameraLogic = null;
 
         [Header("Toolbar")]
         [SerializeField] private GameObject tools = null;
@@ -80,6 +84,8 @@ namespace Puzzled
 
         public Puzzle puzzle => _puzzle;
 
+        public static bool isOpen => instance != null;
+
         public Mode mode {
             get => _mode;
             set {
@@ -112,6 +118,24 @@ namespace Puzzled
 
                 UpdateMode();
             }
+        }
+
+        public static void Initialize()
+        {
+            UIManager.loading = true;
+            UIManager.HideMenu();
+            SceneManager.LoadSceneAsync("Editor", LoadSceneMode.Additive).completed += (handle) => {
+                UIManager.loading = false;
+            };
+        }
+
+        public static void Shutdown()
+        {
+            if (instance == null)
+                return;
+
+            instance.gameObject.SetActive(false);
+            SceneManager.UnloadSceneAsync("Editor");
         }
 
         private void UpdateMode()
@@ -360,7 +384,7 @@ namespace Puzzled
             selectionGizmo.gameObject.SetActive(false);
 
             // Reset the camera back to zero,zero
-            CameraManager.isEditor = true;
+            CameraManager.camera = _cameraMain;
             CameraManager.Transition(CameraManager.defaultBackground, 0);
             Center(new Cell(0, 0), CameraManager.DefaultZoomLevel);
             ClearUndo();
@@ -377,6 +401,8 @@ namespace Puzzled
             ShowPopup(_chooseFilePopup.gameObject);
             _chooseFilePopup.OpenPuzzle();            
         }
+
+        public static void Stop() => instance.OnStopButton();
 
         public void OnStopButton()
         {
@@ -610,7 +636,18 @@ namespace Puzzled
         private void UpdateLayers()
         {
             for (int i = 0; i < layerToggles.Length; i++)
-                CameraManager.ShowLayer((TileLayer)i, layerToggles[i].isOn);
+            {
+                switch ((TileLayer)i)
+                {
+                    case TileLayer.Logic:
+                        CameraManager.ShowLayer(_cameraLogic, (TileLayer)i, layerToggles[i].isOn);
+                        break;
+
+                    default:
+                        CameraManager.ShowLayer(_cameraMain, (TileLayer)i, layerToggles[i].isOn);
+                        break;
+                }
+            }
         }
 
         void KeyboardManager.IKeyboardHandler.OnKey(KeyCode keyCode)

@@ -5,7 +5,7 @@ namespace Puzzled.Editor
 {
     public class UISoundEditor : UIPropertyEditor
     {
-        [SerializeField] private Image _preview = null;
+        //[SerializeField] private Image _preview = null;
         [SerializeField] private UIDoubleClick _doubleClick = null;
         [SerializeField] private TMPro.TextMeshProUGUI _previewText = null;
 

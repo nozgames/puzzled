@@ -13,6 +13,7 @@ namespace Puzzled
         public Background background;
         public int zoomLevel;
         public bool editor;
+        public Camera camera;
     }
 
     /// <summary>
@@ -34,11 +35,6 @@ namespace Puzzled
         /// Maximum zoom level
         /// </summary>
         public const int MaxZoomLevel = 20;
-
-        [Header("General")]
-        [SerializeField] private Camera _cameraPlayer = null;
-        [SerializeField] private Camera _cameraEditor = null;
-        [SerializeField] private Camera _cameraEditorLogic = null;
 
         [Header("Layers")]
         [SerializeField] [Layer] private int floorLayer = 0;
@@ -71,16 +67,24 @@ namespace Puzzled
         /// </summary>
         private Background _background = null;
 
+        /// <summary>
+        /// Active camera
+        /// </summary>
+        private Camera _camera = null;
+
         private static CameraManager _instance = null;
 
-        /// <summary>
-        /// True if the camera manager is using the editor camera
-        /// </summary>
-        public static bool isEditor {
-            get => _instance._cameraEditor.gameObject.activeSelf;
+        public static new Camera camera {
+            get => _instance._camera;
             set {
-                _instance._cameraEditor.gameObject.SetActive(value);
-                _instance._cameraPlayer.gameObject.SetActive(!value);
+                if (_instance._camera == value)
+                    return;
+
+                if (_instance._camera != null)
+                    _instance._camera.gameObject.SetActive(false);
+
+                _instance._camera = value;
+                _instance._camera.gameObject.SetActive(true);
             }
         }
 
@@ -88,11 +92,6 @@ namespace Puzzled
         /// Returns the default background 
         /// </summary>
         public static Background defaultBackground => _instance._defaultBackground;
-
-        /// <summary>
-        /// Returns the camera that is currently active
-        /// </summary>
-        public static Camera activeCamera => _instance._cameraEditor.gameObject.activeSelf ? _instance._cameraEditor : _instance._cameraPlayer;
 
         /// <summary>
         /// Returns the material used for rendering grids
@@ -104,16 +103,20 @@ namespace Puzzled
         /// </summary>
         public static CameraState state {
             get => new CameraState {
+                camera = _instance._camera,
                 valid = true,
                 position = _instance._targetPosition,
                 background = _instance._background,
-                editor = isEditor,
                 zoomLevel = _instance._zoomLevel
             };
             set {
-                // Make sure we set editor first so we alter the correct camera 
-                isEditor = value.editor;
+                // Disable old camera if needed
+                if (_instance._camera != null && _instance._camera != value.camera)
+                    _instance._camera.gameObject.SetActive(false);
 
+                // Make sure we have the correct camera first
+                _instance._camera = value.camera;
+                
                 Transition(value.position, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
             }
         }
@@ -143,7 +146,7 @@ namespace Puzzled
         /// </summary>
         /// <param name="screen">Screen coordinate</param>
         /// <returns>World coordinate</returns>
-        public static Vector3 ScreenToWorld(Vector3 screen) => activeCamera.ScreenToWorldPoint(screen);
+        public static Vector3 ScreenToWorld(Vector3 screen) => camera.ScreenToWorldPoint(screen);
 
         private static bool LerpBackgroundColor(Tween tween, float t)
         {
@@ -154,7 +157,7 @@ namespace Puzzled
 
         private bool LerpOrthographicSize(Tween tween, float t)
         {
-            activeCamera.orthographicSize = Mathf.Lerp(tween.Param1.x, tween.Param1.y, t) / 2;
+            camera.orthographicSize = Mathf.Lerp(tween.Param1.x, tween.Param1.y, t) / 2;
             return true;
         }
 
@@ -167,7 +170,6 @@ namespace Puzzled
         /// <param name="transitionTime">Time to transition in ticks (0 for instant)</param>
         public static void Transition (Vector3 position, int zoomLevel, Background background, int transitionTime)
         {
-            var camera = activeCamera;
             var targetBackground = background ?? _instance._defaultBackground;
 
             // Clamp zoom
@@ -249,14 +251,6 @@ namespace Puzzled
         /// </summary>
         private void OnTransitionComplete() => GameManager.busy--;
 
-        public static void Play()
-        {
-        }
-
-        public static void Stop()
-        {
-        }
-
         /// <summary>
         /// Return the object layer that matches the given tile layer
         /// </summary>
@@ -287,12 +281,8 @@ namespace Puzzled
         /// </summary>
         /// <param name="layer">Tile layer to show/hide</param>
         /// <param name="show">True to show the layer, false to hide it</param>
-        public static void ShowLayer(TileLayer layer, bool show=true)
+        public static void ShowLayer(Camera camera, TileLayer layer, bool show=true)
         {
-            var camera = activeCamera;
-            if (layer == TileLayer.Logic && isEditor)
-                camera = _instance._cameraEditorLogic;
-
             if (show)
                 camera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else

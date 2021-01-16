@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 namespace Puzzled
 {
@@ -12,6 +14,7 @@ namespace Puzzled
         [SerializeField] private Puzzle _puzzlePrefab = null;
         [SerializeField] private Transform _puzzles = null;
         [SerializeField] private CameraManager _cameraManager = null;
+        [SerializeField] private Camera _camera = null;
 
         /// <summary>
         /// Event fired when the current puzzle changes
@@ -80,36 +83,43 @@ namespace Puzzled
             return null;
         }
 
-        private void OnEnable()
+        private void Awake()
         {
-            _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
-            InputSystem.onDeviceChange += OnDeviceChanged;
+            if(null != _instance)
+            {
+                Debug.Log("Multiple instances of GameManager in scene");
+                return;
+            }
 
-            if (_instance == null)
-                _instance = this;
-
-            // Initialize the camera manager
-            _cameraManager.Initialize();
+            _instance = this;
         }
 
-        private void OnApplicationQuit()
+        public static void Initialize ()
         {
-            _quitting = true;
+            Debug.Assert(_instance != null);
+
+            _instance._gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
+            InputSystem.onDeviceChange += _instance.OnDeviceChanged;
+
+            // Initialize the camera manager
+            _instance._cameraManager.Initialize();
+        }
+
+        public static void Shutdown()
+        {
+            _instance._quitting = true;
 
             // Destroy the UI first
-            UIManager.instance.gameObject.SetActive(false);
-            Destroy(UIManager.instance.gameObject);
+            UIManager._instance.gameObject.SetActive(false);
+            Destroy(UIManager._instance.gameObject);
 
             puzzle = null;
 
             // Destroy all remaining puzzles
-            for (int i = _puzzles.childCount - 1; i >= 0; i--)
-                _puzzles.GetChild(i).GetComponent<Puzzle>().Destroy();
+            for (int i = _instance._puzzles.childCount - 1; i >= 0; i--)
+                _instance._puzzles.GetChild(i).GetComponent<Puzzle>().Destroy();
 
-            if (_instance == this)
-                _instance = null;
-
-            InputSystem.onDeviceChange -= OnDeviceChanged;
+            InputSystem.onDeviceChange -= _instance.OnDeviceChanged;
         }
 
         private int _busy = 0;
@@ -177,7 +187,7 @@ namespace Puzzled
 
         public static void PuzzleComplete ()
         {
-            UIManager.instance.ShowPuzzleComplete();
+            UIManager._instance.ShowPuzzleComplete();
         }
 
         private void Update()
@@ -200,14 +210,12 @@ namespace Puzzled
         {            
             paused = false;
 
-            CameraManager.Play();
+            CameraManager.camera = _instance._camera;
         }
 
         public static void Stop ()
         {
             UIManager.ClosePopup();
-
-            CameraManager.Stop();
             
             paused = true;
         }
