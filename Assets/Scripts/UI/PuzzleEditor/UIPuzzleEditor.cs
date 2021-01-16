@@ -34,6 +34,8 @@ namespace Puzzled
 
         [SerializeField] private Transform options = null;
         [SerializeField] private GameObject inspector = null;
+        [SerializeField] private UIRadio[] layerToggles = null;
+        [SerializeField] private UIRadio _gridToggle = null;
 
         [Header("Cameras")]
         [SerializeField] private Camera _cameraMain = null;
@@ -48,8 +50,8 @@ namespace Puzzled
         [SerializeField] private UIRadio decalTool = null;
         [SerializeField] private GameObject moveToolOptions = null;
         [SerializeField] private GameObject eraseToolOptions = null;
-        [SerializeField] private Toggle eraseToolAllLayers = null;
-        [SerializeField] private Toggle[] layerToggles = null;
+        [SerializeField] private Toggle eraseToolAllLayers = null;        
+
 
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
@@ -180,6 +182,10 @@ namespace Puzzled
             instance = this;
 
             inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
+
+            _gridToggle.onValueChanged.AddListener((v) => {
+                _puzzle.showGrid = v;
+            });
 
             _inspectorRotate.onValueChanged.AddListener((v) => {
                 if (_selectedTile == null)
@@ -385,7 +391,7 @@ namespace Puzzled
 
             _puzzle = GameManager.InstantiatePuzzle();
             _puzzle.isEditing = true;
-            _puzzle.showGrid = true;
+            _puzzle.showGrid = _gridToggle.isOn;
             Puzzle.current = _puzzle;
 
             // Default puzzle name to unnamed
@@ -492,7 +498,7 @@ namespace Puzzled
                     _puzzle.Destroy();
 
                 _puzzle = GameManager.LoadPuzzle(path, true);
-                _puzzle.showGrid = true;
+                _puzzle.showGrid = _gridToggle.isOn;
 
                 var startingCamera = _puzzle.GetComponentsInChildren<StaticCamera>().Where(c => c.isStartingCamera).FirstOrDefault();
                 var startingCell = Cell.zero;
