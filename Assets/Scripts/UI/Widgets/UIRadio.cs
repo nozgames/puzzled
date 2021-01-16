@@ -19,11 +19,7 @@ namespace Puzzled.UI
                 if (_on == value)
                     return;
 
-                _on = value;
-                UpdateState();
-
-                if (_on && _group != null && IsActive())
-                    _group.NotifyToggleOn(this);
+                SetIsOnWithoutNotify(value);
 
                 onValueChanged?.Invoke(_on);
             }
@@ -31,7 +27,19 @@ namespace Puzzled.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            isOn = true;
+            if (_group == null)
+                isOn = !isOn;
+            else
+                isOn = true;
+        }
+
+        public void SetIsOnWithoutNotify (bool value)
+        {
+            _on = value;
+            UpdateState();
+
+            if (_on && _group != null && IsActive())
+                _group.NotifyToggleOn(this);            
         }
 
         protected override void UpdateState()

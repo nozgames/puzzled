@@ -16,17 +16,43 @@ namespace Puzzled
     {
         public static readonly Decal none = new Decal(Guid.Empty, null);
 
+        public string name => sprite == null ? "None" : sprite.name;
+
         public Guid guid { get; private set; }
 
         public Sprite sprite { get; private set; }
 
         public DecalFlags flags { get; set; }
 
-        public bool flipHorizontal => (flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal;
+        public bool flipHorizontal {
+            get => (flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal;
+            set {
+                if (value)
+                    flags |= DecalFlags.FlipHorizontal;
+                else
+                    flags &= ~DecalFlags.FlipHorizontal;
+            }
+        }
 
-        public bool flipVertical => (flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical;
+        public bool flipVertical {
+            get => (flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical;
+            set {
+                if (value)
+                    flags |= DecalFlags.FlipVertical;
+                else
+                    flags &= ~DecalFlags.FlipVertical;
+            }
+        }
 
-        public bool rotate => (flags & DecalFlags.Rotate) == DecalFlags.Rotate;
+        public bool rotate {
+            get => (flags & DecalFlags.Rotate) == DecalFlags.Rotate;
+            set {
+                if (value)
+                    flags |= DecalFlags.Rotate;
+                else
+                    flags &= ~DecalFlags.Rotate;
+            }
+        }
 
         public static bool operator ==(Decal lhs, Decal rhs) => lhs.guid == rhs.guid;
 

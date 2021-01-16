@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
+using Puzzled.UI;
 
 namespace Puzzled.Editor
 {
@@ -9,9 +9,9 @@ namespace Puzzled.Editor
     {        
         [SerializeField] private Image _preview = null;
         [SerializeField] private UIDoubleClick _button = null;
-        [SerializeField] private Toggle _toggleFlipX = null;
-        [SerializeField] private Toggle _toggleFlipY = null;
-        [SerializeField] private Toggle _toggleRotate = null;
+        [SerializeField] private UIRadio _toggleFlipX = null;
+        [SerializeField] private UIRadio _toggleFlipY = null;
+        [SerializeField] private UIRadio _toggleRotate = null;
         [SerializeField] private TMPro.TextMeshProUGUI _nameText = null;
 
         private Decal _decal;

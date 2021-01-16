@@ -196,6 +196,12 @@ namespace Puzzled
 
         private void OnEnable()
         {
+            if(!TileDatabase.isLoaded || !DecalDatabase.isLoaded || !SFXDatabase.isLoaded || !BackgroundDatabase.isLoaded)
+            {
+                gameObject.SetActive(false);
+                return;
+            }
+
             KeyboardManager.Push(this);
 
             canvas.onScroll = OnScroll;
