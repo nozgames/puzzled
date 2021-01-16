@@ -15,6 +15,8 @@ namespace Puzzled.Editor
 
         public event Action<int> onDoubleClickItem;
 
+        public event Action<int,int> onReorderItem;
+
         private void OnTransformChildrenChanged()
         {
             if (selected >= transform.childCount)
@@ -53,6 +55,11 @@ namespace Puzzled.Editor
         public void OnDoubleClickItem(int index)
         {
             onDoubleClickItem?.Invoke(index);
+        }
+
+        public void OnReorderItem(int from, int to)
+        {
+            onReorderItem?.Invoke(from, to);
         }
     }
 }

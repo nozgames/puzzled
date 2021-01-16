@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,9 +11,6 @@ namespace Puzzled.Editor
         [SerializeField] private Transform _wires = null;
         [SerializeField] private GameObject _wirePrefab = null;
         [SerializeField] private bool _reorderable = false;
-        [SerializeField] private Button _moveUpButton = null;
-        [SerializeField] private Button _moveDownButton = null;
-        [SerializeField] private Button _deleteButton = null;
         [SerializeField] private UIList _list = null;
         [SerializeField] private Image _portIcon = null;
 
@@ -30,14 +28,15 @@ namespace Puzzled.Editor
 
         private void Awake()
         {
-            _list.onSelectionChanged += OnSelectionChanged;
-
-            _deleteButton.onClick.AddListener(OnDeleteButton);
-            _moveUpButton.onClick.AddListener(OnMoveUpButton);
-            _moveDownButton.onClick.AddListener(OnMoveDownButton);
+            _list.onReorderItem += OnReorderItem;
 
             if(_sequence != null)
                 _sequence.onSelectionChanged += OnSequenceSelectionChanged;
+        }
+
+        private void OnReorderItem(int from, int to)
+        {
+            UIPuzzleEditor.ExecuteCommand(new Commands.WireReorderCommand(_port.wires, from, to));
         }
 
         private void OnSequenceSelectionChanged(int selection)
@@ -57,11 +56,6 @@ namespace Puzzled.Editor
                 label = target.name;
         }
 
-        private void OnSelectionChanged(int obj)
-        {
-            UpdateButtons();
-        }
-
         protected override void OnTargetChanged()
         {
             _port = target.tileProperty.GetValue<Port>(target.tile);
@@ -76,7 +70,6 @@ namespace Puzzled.Editor
 
             UpdateLabel();
             UpdateWires();
-            UpdateButtons();
 
             _portIcon.sprite = TileDatabase.GetPortIcon(_port);
 
@@ -99,37 +92,8 @@ namespace Puzzled.Editor
             _wires.GetChild(Mathf.Clamp(index, 0, _wires.childCount - 1)).GetComponent<UIWireEditor>().Select();
         }
 
-        public void OnMoveUpButton()
-        {
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(_port.wires, _list.selected, _list.selected - 1));
-        }
-
-        public void OnMoveDownButton()
-        {
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireReorderCommand(_port.wires, _list.selected, _list.selected + 1));
-        }
-
         private UIWireEditor GetWireEditor(int index) =>
             _wires.GetChild(index).GetComponent<UIWireEditor>();
-
-        public void OnDeleteButton()
-        {
-            var wireEditor = GetWireEditor(_list.selected);
-            var wire = wireEditor.wire;
-            if (_list.selected + 1 < _list.itemCount)
-                GetWireEditor(_list.selected + 1).wire.selected = true;
-            else if (_list.selected > 0)
-                GetWireEditor(_list.selected - 1).wire.selected = true;
-
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.WireDestroyCommand(wire));
-        }
-
-        private void UpdateButtons()
-        {
-            _deleteButton.interactable = _list.selected != -1 && _wires.childCount > 0;
-            _moveUpButton.interactable = _list.selected > 0;
-            _moveDownButton.interactable = _list.selected >= 0 && _list.selected < _list.itemCount - 1;
-        }
 
         /// <summary>
         /// Saves the state of the wires editor for the next tile the tile is selected

@@ -9,6 +9,7 @@ namespace Puzzled.Editor
         [SerializeField] private TMPro.TextMeshProUGUI _tileName = null;
         [SerializeField] private TMPro.TextMeshProUGUI _indexText = null;
         [SerializeField] private UIListItem _item = null;
+        [SerializeField] private Button _deleteButton = null;
 
         [Header("Parameters")]
         [SerializeField] private Toggle _param1Toggle = null;
@@ -39,6 +40,10 @@ namespace Puzzled.Editor
             wiresEditor = GetComponentInParent<UIPortEditor>();
             _item.onDoubleClick.AddListener(() => {
                 UIPuzzleEditor.selectedTile = _wire.GetOppositeConnection(wiresEditor.port).tile;
+            });
+
+            _deleteButton.onClick.AddListener(() => {
+                UIPuzzleEditor.ExecuteCommand(new Commands.WireDestroyCommand(_wire));
             });
         }
 

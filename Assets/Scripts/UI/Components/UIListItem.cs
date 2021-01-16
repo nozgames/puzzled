@@ -4,16 +4,24 @@ using UnityEngine.EventSystems;
 
 namespace Puzzled.Editor
 {
-    public class UIListItem : MonoBehaviour, IPointerDownHandler, IPointerClickHandler
+    public class UIListItem : MonoBehaviour, IPointerDownHandler, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
     {
         [Tooltip("Object to enable when the item is selected")]
         [SerializeField] private GameObject _selectedVisuals = null;
 
+        [Tooltip("Object to enable when the item is dragging")]
+        [SerializeField] private GameObject _dragVisuals = null;
+
+        [Tooltip("True if the item can be reordered")]
+        [SerializeField] private bool _reoder = false;
+
+
         private UIList list = null;
         private bool _selected = false;
+        private int _dragStart = -1;
 
         public UnityEvent<bool> onSelectionChanged = new UnityEvent<bool>();
-
+        
         public UnityEvent onDoubleClick = new UnityEvent();
 
         protected virtual void Awake()
@@ -84,6 +92,62 @@ namespace Puzzled.Editor
                 onDoubleClick?.Invoke();
                 list.OnDoubleClickItem(transform.GetSiblingIndex());
             }
+        }
+
+        private int PositionToItemIndex (PointerEventData eventData)
+        {
+            for (int i=0; i < list.transform.childCount; i++)
+            {
+                var rectTransform = list.transform.GetChild(i).GetComponent<RectTransform>();
+                var rect = rectTransform.rect;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, eventData.position, eventData.enterEventCamera, out var point);
+                if (point.x >= rect.min.x && point.x <= rect.max.x && point.y >= rect.min.y)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            if (!_reoder)
+                return;
+
+            if(_dragVisuals != null)
+                _dragVisuals.SetActive(true);
+
+            _dragStart = transform.GetSiblingIndex();
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (!_reoder)
+                return;
+
+            if (_dragVisuals != null)
+                _dragVisuals.SetActive(false);
+
+            int index = PositionToItemIndex(eventData);
+            if (index == -1)
+                index = _dragStart;
+
+            transform.SetSiblingIndex(index);
+
+            if(index != _dragStart)
+                list.OnReorderItem(_dragStart, index);
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (!_reoder)
+                return;
+
+            int index = PositionToItemIndex(eventData);
+            if (index == -1)
+                index = _dragStart;
+
+            if (transform.GetSiblingIndex() != index)
+                transform.SetSiblingIndex(index);
         }
     }
 }
