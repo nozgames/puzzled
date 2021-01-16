@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using Puzzled.UI;
 
 namespace Puzzled
 {
@@ -11,7 +11,8 @@ namespace Puzzled
         [Header("Inspector")]
         [SerializeField] private GameObject inspectorContent = null;
         [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
-        [SerializeField] private RawImage inspectorTilePreview = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _inspectorTileType = null;
+        [SerializeField] private RawImage _inspectorTilePreview = null;
         [SerializeField] private UIPropertyEditor backgroundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor boolEditorPrefab = null;
         [SerializeField] private UIPropertyEditor decalEditorPrefab = null;
@@ -25,6 +26,9 @@ namespace Puzzled
         [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
+        [SerializeField] private UIRadio _inspectorFlipX = null;
+        [SerializeField] private UIRadio _inspectorFlipY = null;
+        [SerializeField] private UIRadio _inspectorRotate = null;
 
         private WireMesh dragWire = null;
         private bool logicCycleSelection = false;
@@ -273,7 +277,14 @@ namespace Puzzled
             {
                 inspectorContent.SetActive(true);
                 inspectorTileName.SetTextWithoutNotify(tile.name);
-                inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
+                _inspectorTileType.text = $"<{_selectedTile.info.displayName}>";
+                _inspectorFlipX.gameObject.SetActive(false);
+                _inspectorFlipY.gameObject.SetActive(false);
+
+                var rotatable = _selectedTile.GetComponentInChildren<Rotatable>();
+                _inspectorRotate.gameObject.SetActive(rotatable != null);
+                _inspectorRotate.isOn = (rotatable != null && rotatable.rotated);
+                _inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);
 
                 // Hide all wires in case they were all visible previously and show the selected tiles wires

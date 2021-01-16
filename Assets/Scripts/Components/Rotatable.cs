@@ -7,7 +7,7 @@ namespace Puzzled
     {
         private bool _rotated = false;
 
-        [Editable]
+        [Editable(hidden = true)]
         public bool rotated {
             get => _rotated;
             set {

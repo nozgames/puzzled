@@ -181,6 +181,17 @@ namespace Puzzled
 
             inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
 
+            _inspectorRotate.onValueChanged.AddListener((v) => {
+                if (_selectedTile == null)
+                    return;
+
+                var rotated = _selectedTile.GetProperty("rotated");
+                if (null == rotated)
+                    return;
+
+                ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(_selectedTile, "rotated", v));
+            });
+
             _chooseFilePopup.onCancel += () => HidePopup();
             _chooseFilePopup.onOpenPuzzle += (filename) => {
                 Load(filename);

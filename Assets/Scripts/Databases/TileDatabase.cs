@@ -114,8 +114,6 @@ namespace Puzzled
             var tile = previewPuzzle.InstantiateTile(prefab, Cell.zero);
             tile.Send(new StartEvent());
 
-
-            var yscale = 1.0f / Vector3.Dot(-previewCamera.transform.forward.normalized, Vector3.up);
             var renderers = tile.GetComponentsInChildren<Renderer>();
             var max = tile.transform.position;
             var min = tile.transform.position;
@@ -128,18 +126,14 @@ namespace Puzzled
             // Position camera to frame the content
             var extents = ((max - min));
             var size = Mathf.Max(extents.x, Mathf.Max(extents.y, extents.z));
-            var foreshorten = 0.0f; // 0.5f * ((0.5f) / Mathf.Abs(Mathf.Sin(previewCamera.fieldOfView * Mathf.Deg2Rad * 0.5f)));
-            var distance = (size) / Mathf.Abs(Mathf.Sin(previewCamera.fieldOfView * Mathf.Deg2Rad * 0.5f));
-            
+            var distance = (size * 0.75f) / Mathf.Abs(Mathf.Sin(previewCamera.fieldOfView * Mathf.Deg2Rad * 0.5f));
+
             previewCamera.transform.position =
                 // Target position
                 tile.transform.position + new Vector3(0, (max.y + min.y) * 0.5f, 0)
 
                 // Zoom to frame entire target
-                + (distance * -Vector3.Normalize(previewCamera.transform.forward))
-
-                // Adjust for foreshortening 
-                - (foreshorten * Vector3.Dot(-Vector3.Normalize(previewCamera.transform.forward), Vector3.forward) * Vector3.forward);
+                + (distance * -Vector3.Normalize(previewCamera.transform.forward));
 
             previewCamera.Render();
 
