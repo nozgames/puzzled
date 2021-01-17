@@ -15,13 +15,26 @@ namespace Puzzled
         {
             UpdateVisuals();
 
-            var east = GetWall(tile.cell + Cell.right);
+            UpdateNeighbors(tile.cell);
+        }
+
+        private void UpdateNeighbors (Cell cell)
+        {
+            var east = GetWall(cell + Cell.right);
             if (east != null)
                 east.UpdateVisuals();
 
-            var south = GetWall(tile.cell + Cell.down);
+            var south = GetWall(cell + Cell.down);
             if (south != null)
                 south.UpdateVisuals();
+        }
+
+        [ActorEventHandler]
+        private void CellChangedEvent (CellChangedEvent evt)
+        {
+            UpdateNeighbors(evt.old);
+            UpdateNeighbors(tile.cell);
+            UpdateVisuals();
         }
 
         private void UpdateVisuals()

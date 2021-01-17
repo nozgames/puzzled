@@ -36,6 +36,7 @@ namespace Puzzled
         [SerializeField] private GameObject inspector = null;
         [SerializeField] private UIRadio[] layerToggles = null;
         [SerializeField] private UIRadio _gridToggle = null;
+        [SerializeField] private GameObject _canvasControls = null;
 
         [Header("Cameras")]
         [SerializeField] private Camera _cameraMain = null;
@@ -432,6 +433,7 @@ namespace Puzzled
             playing = false;
             playButton.gameObject.SetActive(true);
             stopButton.gameObject.SetActive(false);
+            _canvasControls.SetActive(true);
 
             // Set our editing puzzle as active
             Puzzle.current = _puzzle;
@@ -462,6 +464,7 @@ namespace Puzzled
             savedMode = mode;
             mode = Mode.Unknown;
             inspector.SetActive(false);
+            _canvasControls.SetActive(false);
 
             GameManager.busy = 0;
 

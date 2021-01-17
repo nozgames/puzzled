@@ -18,16 +18,19 @@
         {
             undoValue = tile.GetProperty(propertyName).GetValue(tile);
             tile.GetProperty(propertyName).SetValue(tile, propertyValue);
+            tile.Send(new StartEvent());
         }
 
         protected override void OnUndo()
         {
             tile.GetProperty(propertyName).SetValue(tile, undoValue);
+            tile.Send(new StartEvent());
         }
 
         protected override void OnRedo()
         {
             tile.GetProperty(propertyName).SetValue(tile, propertyValue);
+            tile.Send(new StartEvent());
         }
     }
 }

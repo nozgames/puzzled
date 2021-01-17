@@ -114,7 +114,11 @@ namespace Puzzled
                 _cell = value;
 
                 if (_cell == Cell.invalid)
+                {
+                    // Give our own components a chance to react to the cell change
+                    Send(new CellChangedEvent(this, old));
                     return;
+                }
 
                 transform.position = puzzle.grid.CellToWorld(_cell);
 

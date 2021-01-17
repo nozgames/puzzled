@@ -49,8 +49,8 @@
 
         private void MoveToTrash()
         {
-            UIPuzzleEditor.MoveToTrash(tile.gameObject);
             tile.cell = Cell.invalid;
+            UIPuzzleEditor.MoveToTrash(tile.gameObject);
         }
 
         protected override void OnDestroy()
