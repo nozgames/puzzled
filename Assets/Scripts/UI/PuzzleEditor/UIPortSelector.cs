@@ -1,10 +1,12 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Puzzled.Editor
 {
     public class UIPortSelector : MonoBehaviour
     {
+        [SerializeField] private RawImage _tilePreview = null; 
         [SerializeField] private UIPortSelectorPort[] _ports = null;
 
         private Action<Port,Port> _callback;
@@ -25,6 +27,8 @@ namespace Puzzled.Editor
         public void Open(Tile tileFrom, Tile tileTo, Action<Port, Port> callback)
         {
             _callback = callback;
+
+            _tilePreview.texture = TileDatabase.GetPreview(tileTo);
 
             foreach (var port in _ports)
                 port.gameObject.SetActive(false);

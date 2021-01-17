@@ -266,7 +266,7 @@ namespace Puzzled
 
             if (tile == null)
             {
-                selectionRect.gameObject.SetActive(false);
+                selectionGizmo.gameObject.SetActive(false);
                 options.DetachAndDestroyChildren();
                 inspectorContent.SetActive(false);
 

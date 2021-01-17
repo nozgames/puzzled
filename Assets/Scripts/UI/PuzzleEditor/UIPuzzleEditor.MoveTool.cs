@@ -124,7 +124,7 @@ namespace Puzzled
                     ExecuteCommand(new Editor.Commands.TileMoveCommand(_movingTiles, _moveDragMin, _selectionMin, _selectionSize));
             }
             else
-                selectionRect.gameObject.SetActive(false);
+                selectionGizmo.gameObject.SetActive(false);
 
             _movingTiles = null;
             _moveDragState = MoveDragState.None;
@@ -137,12 +137,12 @@ namespace Puzzled
         /// </summary>
         private void FitSelectionRect()
         {
-            if (!selectionRect.gameObject.activeSelf)
+            if (!hasSelection)
                 return;
 
             var tiles = puzzle.grid.GetLinkedTiles(_selectionMin, _selectionMax).Where(t => layerToggles[(int)t.info.layer].isOn).ToArray();
             if (tiles.Length == 0)
-                selectionRect.gameObject.SetActive(false);
+                selectionGizmo.gameObject.SetActive(false);
             else
             {
                 _selectionMin = _selectionMax = tiles[0].cell;
@@ -156,7 +156,7 @@ namespace Puzzled
         }
 
         private bool isCellInSelection(Cell cell) =>
-            selectionRect.gameObject.activeSelf && (cell.x >= _selectionMin.x && cell.x <= _selectionMax.x && cell.y >= _selectionMin.y && cell.y <= _selectionMax.y);
+            hasSelection && (cell.x >= _selectionMin.x && cell.x <= _selectionMax.x && cell.y >= _selectionMin.y && cell.y <= _selectionMax.y);
 
         private CursorType OnMoveGetCursor(Cell cell)
         {
@@ -198,7 +198,7 @@ namespace Puzzled
         /// Return and array of all selected tiles
         /// </summary>
         private Tile[] GetSelectedTiles() =>
-            selectionRect.gameObject.activeSelf ?
+            hasSelection ?
                 puzzle.grid.GetLinkedTiles(_selectionMin, _selectionMax).Where(t => layerToggles[(int)t.info.layer].isOn).ToArray() :
                 null;
 

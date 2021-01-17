@@ -24,7 +24,6 @@ namespace Puzzled
 
         [Header("General")]
         [SerializeField] private UICanvas canvas = null;
-        [SerializeField] private RectTransform selectionRect = null;
         [SerializeField] private SelectionGizmo selectionGizmo = null;
         [SerializeField] private SelectionGizmo _cursorGizmo = null;
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
@@ -87,6 +86,8 @@ namespace Puzzled
 
         public Puzzle puzzle => _puzzle;
 
+        public bool hasSelection => selectionGizmo.gameObject.activeSelf;
+
         public static bool isOpen => instance != null;
 
         public Mode mode {
@@ -95,7 +96,6 @@ namespace Puzzled
                 if (_mode == value)
                     return;
 
-                selectionRect.gameObject.SetActive(false);
                 selectionGizmo.gameObject.SetActive(false);
 
                 _mode = value;
@@ -256,7 +256,6 @@ namespace Puzzled
 
             inspector.SetActive(false);
 
-            selectionRect.gameObject.SetActive(false);
             selectionGizmo.gameObject.SetActive(false);
 
             // Start off with an empty puzzle
@@ -281,7 +280,7 @@ namespace Puzzled
             if(canvas.isMouseOver)
             CameraManager.AdjustZoom(delta.y > 0 ? -1 : 1);
 
-            if (selectionRect.gameObject.activeSelf)
+            if (hasSelection)
                 SetSelectionRect(_selectionMin, _selectionMax);
 
             UpdateCursor(true);
@@ -327,11 +326,6 @@ namespace Puzzled
             _selectionMax = Cell.Max(min, max);
             _selectionSize = _selectionMax - _selectionMin;
 
-            selectionRect.anchorMin = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMin) - new Vector3(0.5f, 0, 0.5f));
-            selectionRect.anchorMax = Camera.main.WorldToViewportPoint(_puzzle.grid.CellToWorld(_selectionMax) + new Vector3(0.5f, 0, 0.5f));
-
-            selectionRect.gameObject.SetActive(true);
-
             selectionGizmo.gameObject.SetActive(true);
             selectionGizmo.min = _puzzle.grid.CellToWorld(_selectionMin) - new Vector3(0.5f, 0, 0.5f);
             selectionGizmo.max = _puzzle.grid.CellToWorld(_selectionMax) + new Vector3(0.5f, 0, 0.5f);
@@ -344,7 +338,7 @@ namespace Puzzled
 
             CameraManager.Pan(-(canvas.CanvasToWorld(position + delta) - canvas.CanvasToWorld(position)));
 
-            if (selectionRect.gameObject.activeSelf)
+            if (hasSelection)
                 SetSelectionRect(_selectionMin, _selectionMax);
 
             UpdateCursor();
@@ -399,7 +393,6 @@ namespace Puzzled
             // Default puzzle name to unnamed
             puzzleName.text = "Unnamed";
 
-            selectionRect.gameObject.SetActive(false);
             selectionGizmo.gameObject.SetActive(false);
 
             // Reset the camera back to zero,zero
@@ -478,7 +471,6 @@ namespace Puzzled
             playing = true;
 
             // Clear selection
-            selectionRect.gameObject.SetActive(false);
             selectionGizmo.gameObject.SetActive(false);
 
             // Load the puzzle and play
@@ -592,16 +584,12 @@ namespace Puzzled
             return null;
         }
 
-        private void RemoveWire(Wire wire)
-        {
-            Destroy(wire.gameObject);
-        }
-
         public void ChoosePort(Tile tileFrom, Tile tileTo, Action<Port, Port> callback)
         {
             ShowPopup(_choosePortPopup.gameObject);
-            _choosePortPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tileTo.transform.position - new Vector3(0.5f, 0, 0.5f));
-            _choosePortPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tileTo.transform.position + new Vector3(0.5f, 0, 0.5f));
+            _choosePortPopup.GetComponent<RectTransform>().anchorMin =
+            _choosePortPopup.GetComponent<RectTransform>().anchorMax = 
+                CameraManager.camera.WorldToViewportPoint(tileTo.transform.position);
             _choosePortPopup.Open(tileFrom, tileTo, (from, to) => {
                 HidePopup();
                 callback?.Invoke(from, to);
@@ -611,8 +599,9 @@ namespace Puzzled
         public void ChooseTileConnection (Tile[] tilesTo, Action<Tile> callback)
         {
             ShowPopup(_chooseTileConnectionPopup.gameObject);
-            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMin = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position - new Vector3(0.5f, 0, 0.5f));
-            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMax = Camera.main.WorldToViewportPoint(tilesTo[0].transform.position + new Vector3(0.5f, 0, 0.5f));
+            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMin =
+            _chooseTileConnectionPopup.GetComponent<RectTransform>().anchorMax =
+                CameraManager.camera.WorldToViewportPoint(tilesTo[0].transform.position);
             _chooseTileConnectionPopup.Open(tilesTo, (target) => {
                 HidePopup();
                 callback?.Invoke(target);
