@@ -432,6 +432,11 @@ namespace Puzzled
             //_animator.SetBool("Walking", false);
 
             EndBusy();
+
+            // If the game manager is busy then we need to return to idle 
+            // because we will not be able to move anyway
+            if(GameManager.isBusy)
+                _animator.SetBool("Walking", false);
         }
 
         private void PlayAnimation (string name)

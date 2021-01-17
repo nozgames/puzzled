@@ -12,6 +12,12 @@ namespace Puzzled
 
         private bool _locked = true;
 
+        [Editable]
+        private Decal[] solution { get; set; }
+
+        [Editable]
+        private Decal[] buttons { get; set; }
+
         /// <summary>
         /// Powered when keypad is unlocked
         /// </summary>
@@ -28,12 +34,6 @@ namespace Puzzled
 
         [Editable]
         private int columnCount { get; set; } = 3;
-
-        [Editable]
-        private Decal[] solution { get; set; }
-
-        [Editable]
-        private Decal[] buttons { get; set; }
 
         [ActorEventHandler]
         private void OnUseSignal(UseSignal evt) => HandleUse();
