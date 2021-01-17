@@ -152,6 +152,9 @@ namespace Puzzled
             var oldPuzzle = Puzzle.current;
             Puzzle.current = null;
 
+            if(!editing)
+                CameraManager.camera = _instance._camera;
+
             // Load and set the new puzzle
             var puzzle = Puzzle.Load(path);
             puzzle.isEditing = editing;

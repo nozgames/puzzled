@@ -105,7 +105,7 @@ namespace Puzzled
 
         private void OnUpdateValue()
         {
-            if (tile == null)
+            if (tile == null || isLoading)
                 return;
 
             valueOutPort.SendValue(value, true);

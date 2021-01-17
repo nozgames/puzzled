@@ -92,7 +92,14 @@ namespace Puzzled
         /// <param name="cell">Cell coordinate</param>
         /// <param name="layer">Tile layer</param>
         /// <returns>Tile at the given cell and layer or null if none</returns>
-        public Tile CellToTile(Cell cell, TileLayer layer) => _tiles[CellToIndex(cell, layer)];
+        public Tile CellToTile(Cell cell, TileLayer layer)
+        {
+            var index = CellToIndex(cell, layer);
+            if (index < 0 || index >= _tiles.Length)
+                return null;
+            
+            return _tiles[index];
+        }
 
         /// <summary>
         /// Return the component of th given type from the given cell and layer

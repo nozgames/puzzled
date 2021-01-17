@@ -243,6 +243,8 @@ namespace Puzzled
                 return;
             }
 
+            popups.SetActive(false);
+
             KeyboardManager.Push(this);
 
             canvas.onScroll = OnScroll;
@@ -251,7 +253,6 @@ namespace Puzzled
             GameManager.Stop();
             GameManager.busy++;
 
-            popups.SetActive(false);
             inspector.SetActive(false);
 
             selectionRect.gameObject.SetActive(false);

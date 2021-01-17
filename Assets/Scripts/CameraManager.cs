@@ -116,7 +116,8 @@ namespace Puzzled
 
                 // Make sure we have the correct camera first
                 _instance._camera = value.camera;
-                
+                _instance._camera.gameObject.SetActive(true);
+
                 Transition(value.position, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
             }
         }
