@@ -12,11 +12,6 @@ namespace Puzzled
         [SerializeField] private UIList _list = null;
         [SerializeField] private GameObject _stepPrefab = null;
 
-        [SerializeField] private Button _moveUpButton = null;
-        [SerializeField] private Button _moveDownButton = null;
-        [SerializeField] private Button _removeButton = null;
-        [SerializeField] private Button _addButton = null;
-
         public event Action<int> onSelectionChanged;
         public event Action<int,Editor.Commands.GroupCommand> onStepRemoved;
         public event Action<int,int,Editor.Commands.GroupCommand> onStepMoved;
@@ -48,11 +43,10 @@ namespace Puzzled
                     var step = Instantiate(_stepPrefab, _list.transform).GetComponent<UISequenceStep>();
                     step.text = stepText;
                     step.onNameChanged += OnStepNameChanged;
+                    step.onDeleted += RemoveState;
                 }
 
                 _list.Select(0);
-
-                UpdateButtons();
             }
         }
 
@@ -61,6 +55,22 @@ namespace Puzzled
         private void Awake()
         {
             _list.onSelectionChanged += OnSelectionChanged;
+            _list.onReorderItem += OnReorderState;
+        }
+
+        private void OnReorderState(int from, int to)
+        {
+            var group = new Editor.Commands.GroupCommand();
+            var step = _steps[from];
+            _steps.RemoveAt(from);
+            _steps.Insert(to, step);
+            group.Add(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
+
+            onStepMoved?.Invoke(from, to, group);
+
+            UIPuzzleEditor.ExecuteCommand(group, false, (c) => {
+                _list.Select(to);
+            });
         }
 
         private void OnEnable()
@@ -70,46 +80,6 @@ namespace Puzzled
         private void OnSelectionChanged(int selection)
         {
             onSelectionChanged?.Invoke(selection);
-            UpdateButtons();
-        }
-
-        public void OnMoveUpButton()
-        {
-            if (_list.selected <= 0)
-                return;
-
-            var selection = _list.selected;
-            var group = new Editor.Commands.GroupCommand();
-            var step = _steps[selection];
-            _steps.RemoveAt(selection);
-            _steps.Insert(selection - 1, step);
-            group.Add(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
-
-            onStepMoved?.Invoke(selection, selection + 1, group);
-
-            UIPuzzleEditor.ExecuteCommand(group, false, (c) => {
-                _list.Select(_list.selected - 1);
-            });
-
-        }
-
-        public void OnMoveDownButton()
-        {
-            if (_list.selected >= _list.itemCount - 1)
-                return;
-
-            var selection = _list.selected;
-            var group = new Editor.Commands.GroupCommand();
-            var step = _steps[selection];
-            _steps.RemoveAt(selection);
-            _steps.Insert(selection + 1, step);
-            group.Add(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
-
-            onStepMoved?.Invoke(selection, selection + 1, group);
-
-            UIPuzzleEditor.ExecuteCommand(group, false, (c) => {
-                _list.Select(_list.selected + 1);
-            });
         }
 
         public void OnAddButton()
@@ -119,55 +89,29 @@ namespace Puzzled
                 return;
             
             _steps.Add("New Step");
-            _tile.SetPropertyValue("steps", _steps.ToArray());
-
             var step = Instantiate(_stepPrefab, _list.transform).GetComponent<UISequenceStep>();
-            step.text = "New Step";
-            step.onNameChanged += OnStepNameChanged;
-
             _list.Select(_list.itemCount - 1);
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
         }
 
         private void OnStepNameChanged(UISequenceStep step)
         {
             _steps[step.transform.GetSiblingIndex()] = step.text;
-            _tile.SetPropertyValue("steps", _steps.ToArray());
+            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
         }
 
-        public void OnRemoveButton()
+        private void RemoveState(UISequenceStep state)
         {
             var group = new Editor.Commands.GroupCommand();
-            _steps.RemoveAt(_list.selected);
+            var index = state.transform.GetSiblingIndex();
+            _steps.RemoveAt(index);
             group.Add(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
 
-            onStepRemoved?.Invoke(_list.selected, group);
+            onStepRemoved?.Invoke(index, group);
 
             UIPuzzleEditor.ExecuteCommand(group, false, (c) => {
-                _list.Select(Mathf.Min(_list.selected, _steps.Count - 1));
+                _list.Select(Mathf.Min(index, _steps.Count - 1));
             });
-
-#if false
-            _steps.RemoveAt(_list.selected);
-            _tile.SetPropertyValue("steps", _steps.ToArray());
-
-            var selected = _list.selected;
-            onStepRemoved?.Invoke(selected);
-
-            var itemObject = _list.GetItem(_list.selected).gameObject;
-            itemObject.transform.SetParent(null);
-            Destroy(itemObject);
-
-            _list.ClearSelection();
-            _list.Select(Mathf.Min(selected,_list.itemCount-1));
-#endif
-        }
-
-        private void UpdateButtons()
-        {
-            _moveDownButton.interactable = _list.selected >= 0 && _list.selected < _list.itemCount - 1;
-            _moveUpButton.interactable = _list.selected > 0;
-            _addButton.interactable = _list.itemCount < 32;
-            _removeButton.interactable = _list.selected != -1;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Puzzled
 {
@@ -9,8 +10,10 @@ namespace Puzzled
         [SerializeField] private TMPro.TMP_InputField _input = null;
         [SerializeField] private TMPro.TextMeshProUGUI _text = null;
         [SerializeField] private TMPro.TextMeshProUGUI _index = null;
+        [SerializeField] private Button _deleteButton = null;
 
         public event Action<UISequenceStep> onNameChanged;
+        public event Action<UISequenceStep> onDeleted;
 
         public string text {
             get => _text.text;
@@ -23,6 +26,10 @@ namespace Puzzled
         {
             _input.onEndEdit.AddListener(OnEndEdit);
             _input.onDeselect.AddListener(OnEndEdit);
+
+            _deleteButton.onClick.AddListener(() => {
+                onDeleted?.Invoke(this);
+            });
         }
 
         private void OnEnable()
