@@ -10,6 +10,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIBackgroundPaletteItem _itemPrefab = null;
         [SerializeField] private UIList _list = null;
         [SerializeField] private Image _selectedPreview = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _selectedName = null;
         [SerializeField] private TMPro.TMP_InputField _searchInput = null;
         [SerializeField] private Button _searchClearButton = null;
         [SerializeField] private ScrollRect _scrollRect = null;
@@ -39,9 +40,7 @@ namespace Puzzled.Editor
                         }
                     }
 
-                _selectedPreview.gameObject.SetActive(_selected != null);
-                if(_selected != null)
-                    _selectedPreview.color = _selected.color;
+                UpdatePreview();
             }
         }
 
@@ -94,6 +93,15 @@ namespace Puzzled.Editor
 
                 _list.GetItem(i).gameObject.SetActive(active);
             }
+        }
+
+        private void UpdatePreview()
+        {
+            _selectedPreview.gameObject.SetActive(_selected != null);
+            if (_selected != null)
+                _selectedPreview.color = _selected.color;
+
+            _selectedName.text = _selected == null ? "None" : _selected.name;
         }
     }
 }

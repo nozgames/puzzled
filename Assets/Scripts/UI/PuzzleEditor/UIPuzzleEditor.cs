@@ -636,11 +636,14 @@ namespace Puzzled
                 _chooseDecalPalette.selected = decal;
         }
 
-        public void ChooseTile(Type componentType, Action<Tile> callback)
+        public void ChooseTile(Type componentType, Tile selected, Action<Tile> callback)
         {
             _chooseTileCallback = callback;
             _chooseTilePalette.componentFilter = componentType;
             ShowPopup(_chooseTilePopup);
+
+            if (selected != null)
+                _chooseTilePalette.selected = selected;
         }
 
         public void CloseTileSelector(Tile tile)

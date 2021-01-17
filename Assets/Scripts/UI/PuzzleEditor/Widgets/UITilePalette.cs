@@ -13,6 +13,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIList _list = null;
         [SerializeField] private ScrollRect _scrollRect = null;
         [SerializeField] private RawImage _selectedPreview = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _selectedName = null;
         [SerializeField] private bool allowNone = false;
         [SerializeField] private TMPro.TMP_InputField _searchInput = null;
         [SerializeField] private Button _searchClearButton = null;
@@ -49,7 +50,7 @@ namespace Puzzled.Editor
                         }
                     }
 
-                _selectedPreview.texture = TileDatabase.GetPreview(selected);
+                UpdatePreview();
             }
         }
 
@@ -69,7 +70,7 @@ namespace Puzzled.Editor
 
             _list.onSelectionChanged += (index) => {
                 _selected = _list.selectedItem?.GetComponent<UITilePaletteItem>().tile;
-                _selectedPreview.texture = TileDatabase.GetPreview(selected);
+                UpdatePreview();
             };
 
             _searchClearButton.onClick.AddListener(() => {
@@ -157,5 +158,11 @@ namespace Puzzled.Editor
         }
 
         private UITilePaletteItem GetItem(int index) => _list.transform.GetChild(index).GetComponent<UITilePaletteItem>();
+
+        private void UpdatePreview()
+        {
+            _selectedPreview.texture = TileDatabase.GetPreview(selected);
+            _selectedName.text = _selected.name;
+        }
     }
 }
