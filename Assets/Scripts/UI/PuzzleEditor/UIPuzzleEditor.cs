@@ -31,6 +31,7 @@ namespace Puzzled
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
+        [SerializeField] private RectTransform _canvasCenter = null;
 
         [SerializeField] private Transform options = null;
         [SerializeField] private GameObject inspector = null;
@@ -489,6 +490,12 @@ namespace Puzzled
         {
             // Cente around the tile first
             CameraManager.Transition(puzzle.grid.CellToWorld(cell), zoomLevel, CameraManager.state.background, 0);
+
+            // Now center around the actual center of the canvas
+            var state = CameraManager.state;
+            var center = canvas.CanvasToWorld(_canvasCenter.TransformPoint(Vector3.zero));
+            var position = state.position - (center - state.position);
+            CameraManager.Transition(position, zoomLevel, CameraManager.state.background, 0);
         }
 
         public void Load(string path)

@@ -20,6 +20,7 @@ namespace Puzzled
         [SerializeField] private InputAction keyB = null;
         [SerializeField] private InputAction keyD = null;
         [SerializeField] private InputAction keyE = null;
+        [SerializeField] private InputAction keyF = null;
         [SerializeField] private InputAction keyV = null;
         [SerializeField] private InputAction keyW = null;
         [SerializeField] private InputAction keyY = null;
@@ -75,6 +76,7 @@ namespace Puzzled
             key4.performed += (ctx) => SendKey(KeyCode.Alpha4);
             keyW.performed += (ctx) => SendKey(KeyCode.W);
             keyE.performed += (ctx) => SendKey(KeyCode.E);
+            keyF.performed += (ctx) => SendKey(KeyCode.F);
             keyB.performed += (ctx) => SendKey(KeyCode.B);
             keyD.performed += (ctx) => SendKey(KeyCode.D);
             keyV.performed += (ctx) => SendKey(KeyCode.V);
@@ -100,6 +102,7 @@ namespace Puzzled
             key4.Enable();
             keyW.Enable();
             keyE.Enable();
+            keyF.Enable();
             keyB.Enable();
             keyD.Enable();
             keyV.Enable();

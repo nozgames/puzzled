@@ -409,6 +409,11 @@ namespace Puzzled
                     if(selectedTile != null)
                         ExecuteCommand(new Editor.Commands.TileDestroyCommand(selectedTile));
                     break;
+
+                case KeyCode.F:
+                    if(_selectedTile != null)
+                        Center(_selectedTile.cell, CameraManager.state.zoomLevel);
+                    break;
             }
         }
 

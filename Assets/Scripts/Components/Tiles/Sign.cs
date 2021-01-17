@@ -11,13 +11,6 @@ namespace Puzzled
 
         private string _text = "";
 
-        /// <summary>
-        /// Import use port to activate sign
-        /// </summary>
-        [Editable]
-        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(UseSignal))]
-        private Port usePort { get; set; }
-
         [Editable(multiline = true)]
         public string text {
             get => _text;
@@ -26,6 +19,12 @@ namespace Puzzled
                 UpdateVisuals();
             }
         }
+        /// <summary>
+        /// Import use port to activate sign
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(UseSignal))]
+        private Port usePort { get; set; }
 
         private void UpdateVisuals()
         {

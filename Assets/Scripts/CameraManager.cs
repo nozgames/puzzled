@@ -173,6 +173,9 @@ namespace Puzzled
         {
             var targetBackground = background ?? _instance._defaultBackground;
 
+            // Clear out the Y component
+            position = Vector3.Scale(position, new Vector3(1, 0, 1));
+
             // Clamp zoom
             zoomLevel = Mathf.Clamp(zoomLevel, MinZoomLevel, MaxZoomLevel);
 

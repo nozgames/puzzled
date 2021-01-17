@@ -31,8 +31,10 @@ namespace Puzzled
 
         private void UpdatePreview()
         {
-            preview.texture = TileDatabase.GetPreview(((TilePropertyEditorTarget)target).GetValue<System.Guid>());
+            var tile = TileDatabase.GetTile(target.GetValue<System.Guid>());
+            preview.texture = TileDatabase.GetPreview(tile);
             preview.gameObject.SetActive(preview.texture != null);
+            _previewText.name = tile == null ? "None" : tile.name;
         }
     }
 }
