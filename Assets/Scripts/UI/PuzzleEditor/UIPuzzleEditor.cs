@@ -32,7 +32,6 @@ namespace Puzzled
         [SerializeField] private GameObject dragWirePrefab = null;
         [SerializeField] private RectTransform _canvasCenter = null;
 
-        [SerializeField] private Transform options = null;
         [SerializeField] private GameObject inspector = null;
         [SerializeField] private UIRadio[] layerToggles = null;
         [SerializeField] private UIRadio _gridToggle = null;
