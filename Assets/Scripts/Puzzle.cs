@@ -27,6 +27,8 @@ namespace Puzzled
         /// </summary>
         private CameraState _savedCameraState;
 
+        public event Action<string> onWirelessSignal;
+
         /// <summary>
         /// Helper function for getting/setting the current puzzle
         /// </summary>
@@ -193,7 +195,11 @@ namespace Puzzled
             tile.guid = prefab.guid;
             tile.name = prefab.name;
             tile.gameObject.SetChildLayers(CameraManager.TileLayerToObjectLayer(tile.info.layer));
+
+            // Send awake event before the tile is linked into the grid
             tile.Send(new AwakeEvent());
+
+            // Link the tile into the grid
             tile.cell = cell;
             return tile;
         }
@@ -750,58 +756,9 @@ namespace Puzzled
             GameManager.onPuzzleChanged -= OnPuzzleChanged;
         }
 
-#if false
-        /// <summary>
-        /// Return the wire that collides with the given world position
-        /// </summary>
-        /// <param name="position">World poisition to hit test</param>
-        /// <returns>Wire that collides with the world position or null if none found</returns>
-        public static Wire HitTestWire(Vector3 position)
+        public void SendWirelessSignal (string signal)
         {
-            var cell = TileGrid.WorldToCell(position + new Vector3(0.5f, 0.5f, 0));
-            var threshold = _instance.wireHitThreshold * _instance.wireHitThreshold;
-
-            for (int i = 0; i < _instance.wires.childCount; i++)
-            {
-                var wire = _instance.wires.GetChild(i).GetComponent<Wire>();
-                var min = Cell.Min(wire.from.cell, wire.to.cell);
-                var max = Cell.Max(wire.from.cell, wire.to.cell);
-                if (cell.x < min.x || cell.y < min.y || cell.x > max.x || cell.y > max.y)
-                    continue;
-
-                var pt0 = wire.from.position;
-                var pt1 = wire.to.position;
-                var dir = (pt1 - pt0).normalized;
-                var mag = (pt1 - pt0).magnitude;
-                var delta = position - pt0;
-                var dot = Mathf.Clamp(Vector2.Dot(dir, delta) / mag, 0, 1);
-                var dist = (position - (pt0 + dir * dot * mag)).sqrMagnitude;
-                if (dist > threshold)
-                    continue;
-
-                return wire;
-            }
-
-            return null;
+            onWirelessSignal?.Invoke(signal);
         }
-#endif
     }
 }
-
-
-
-#if false
-
-    how to serialize ports
-
-    - when reading in ports from v1 we need to connect any to wires to some port
-        - find the port marked legacy and connect to that
-        - if output is from a tile with no outputs but is a value tile then connect to the legacy number port instead
-
-    - when loading a v3 file
-        - load all wires into an array
-        - when loading a port property look up the wires by index and send array to port
-
-
-
-#endif

@@ -12,17 +12,36 @@ namespace Puzzled
         private Cell moveToCell;
         private Cell moveFromCell;
 
+        private void Awake()
+        {
+            _vfx.gameObject.SetActive(false);
+        }
+
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
         {
             SendToCell(new EnterCellEvent(tile, tile.cell), tile.cell);
         }
 
+        [ActorEventHandler]
+        private void OnCellChanged(CellChangedEvent evt)
+        {
+            if (isEditing)
+            {
+                SendToCell(new LeaveCellEvent(tile, tile.cell), evt.old);
+                SendToCell(new EnterCellEvent(tile, evt.old), tile.cell);
+            }
+        }
+
         protected override void OnEnable()
         {
             base.OnEnable();
 
-            _vfx.Stop();
+            if(_vfx != null)
+            {
+                _vfx.Stop();
+                _vfx.gameObject.SetActive(false);
+            }
         }
 
         protected override void OnDisable()
@@ -74,6 +93,7 @@ namespace Puzzled
             if (_vfx != null)
             {
                 _vfx.transform.localRotation = Quaternion.LookRotation((puzzle.grid.CellToWorld(moveFromCell) - puzzle.grid.CellToWorld(moveToCell)).normalized, Vector3.up);
+                _vfx.gameObject.SetActive(true);
                 _vfx.Play();
             }
 
@@ -89,20 +109,13 @@ namespace Puzzled
         private void OnMoveComplete()
         {
             if (_vfx != null)
+            {
                 _vfx.Stop();
+                _vfx.gameObject.SetActive(false);
+            }
 
             SendToCell(new LeaveCellEvent(tile, moveToCell), moveFromCell);
             SendToCell(new EnterCellEvent(tile, moveFromCell), moveToCell);
-        }
-
-        [ActorEventHandler]
-        private void OnCellChanged(CellChangedEvent evt)
-        {
-            if(isEditing)
-            {
-                SendToCell(new LeaveCellEvent(tile, tile.cell), evt.old);
-                SendToCell(new EnterCellEvent(tile, evt.old), tile.cell);
-            }
         }
     }
 }

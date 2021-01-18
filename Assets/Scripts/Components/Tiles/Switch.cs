@@ -81,10 +81,9 @@ namespace Puzzled
             }
         }
 
-        protected override void OnAwake ()
+        [ActorEventHandler()]
+        private void OnAwake (AwakeEvent evt)
         {
-            base.OnAwake();
-
             if (_usable)
                 RegisterHandler<UseEvent>();
         }

@@ -173,6 +173,9 @@ namespace Puzzled
 
             _pendingDestroy = true;
 
+            // Let all the components know
+            Send(new DestroyEvent());
+
             // Remove us from tick management
             _tick.Remove(this);
 

@@ -343,6 +343,25 @@ namespace Puzzled
             return true;
         }
 
+        public bool Teleport (Cell cell)
+        {
+            if (cell == tile.cell)
+                return true;
+
+            if (puzzle.grid.CellToTile(tile.cell, TileLayer.Dynamic) == null)
+                return false;
+
+            var old = tile.cell;
+
+            tile.cell = cell;
+
+            // Send events to cells to let them know move is finished
+            SendToCell(new LeaveCellEvent(actor, cell), old);
+            SendToCell(new EnterCellEvent(actor, old), cell);
+
+            return true;
+        }
+
         private bool PushMove (Cell offset)
         {
             Debug.Assert(isGrabbing);

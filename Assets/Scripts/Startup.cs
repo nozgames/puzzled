@@ -14,6 +14,7 @@ namespace Puzzled
         {
             UIPuzzleEditor.Shutdown();
             UIManager.Shutdown();
+            TileDatabase.Shutdown();
             GameManager.Shutdown();
         }
 
