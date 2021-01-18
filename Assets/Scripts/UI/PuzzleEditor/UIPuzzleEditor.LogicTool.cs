@@ -340,6 +340,20 @@ namespace Puzzled
                 if (tileProperty.editable.hidden)
                     continue;
 
+                if(!string.IsNullOrEmpty(tileProperty.editable.hiddenIfFalse))
+                {
+                    var hiddenIfFalse = tile.GetProperty(tileProperty.editable.hiddenIfFalse);
+                    if (null != hiddenIfFalse && !hiddenIfFalse.GetValue<bool>(tile))
+                        continue;
+                }
+
+                if (!string.IsNullOrEmpty(tileProperty.editable.hiddenIfTrue))
+                {
+                    var hiddenIfTrue = tile.GetProperty(tileProperty.editable.hiddenIfTrue);
+                    if (null != hiddenIfTrue && hiddenIfTrue.GetValue<bool>(tile))
+                        continue;
+                }
+
                 var optionEditor = InstantiatePropertyEditor(tile, tileProperty, _inspectorContent.transform);
                 if (null == optionEditor)
                     continue;

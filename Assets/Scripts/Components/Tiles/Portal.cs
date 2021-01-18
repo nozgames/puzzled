@@ -1,4 +1,6 @@
-﻿using NoZ;
+﻿using UnityEngine;
+using NoZ;
+using System;
 
 namespace Puzzled
 {
@@ -16,11 +18,21 @@ namespace Puzzled
             if (!saveState)
                 GameManager.UnloadPuzzle();
 
-            var p = GameManager.GetPuzzle(puzzleName);
+            var path = System.IO.Path.Combine(UnityEngine.Application.dataPath, $"Puzzles/{puzzle.worldName}/{puzzleName}.puzzle");
+            var p = GameManager.GetPuzzleFromPath(path);
             if (null != p)
                 GameManager.puzzle = p;
-            else
-                GameManager.LoadPuzzle(System.IO.Path.Combine(UnityEngine.Application.dataPath, $"Puzzles/{puzzleName}.puzzle"));
+            else if (System.IO.File.Exists(path))
+            {
+                try
+                {
+                    GameManager.LoadPuzzle(path);
+                }
+                catch(Exception e)
+                {
+                    Debug.LogException(e);
+                }                
+            }
         }
     }
 }

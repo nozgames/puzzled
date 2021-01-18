@@ -12,11 +12,6 @@ namespace Puzzled
         private Cell moveToCell;
         private Cell moveFromCell;
 
-        private void Awake()
-        {
-            _vfx.gameObject.SetActive(false);
-        }
-
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
         {
@@ -39,14 +34,20 @@ namespace Puzzled
 
             if(_vfx != null)
             {
+                _vfx.gameObject.SetActive(true);
                 _vfx.Stop();
-                _vfx.gameObject.SetActive(false);
             }
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
+
+            if (_vfx != null)
+            {
+                _vfx.Stop();
+                _vfx.gameObject.SetActive(false);
+            }
 
             var cell = tile.cell;
             if(cell != Cell.invalid)
@@ -93,7 +94,6 @@ namespace Puzzled
             if (_vfx != null)
             {
                 _vfx.transform.localRotation = Quaternion.LookRotation((puzzle.grid.CellToWorld(moveFromCell) - puzzle.grid.CellToWorld(moveToCell)).normalized, Vector3.up);
-                _vfx.gameObject.SetActive(true);
                 _vfx.Play();
             }
 
@@ -109,10 +109,7 @@ namespace Puzzled
         private void OnMoveComplete()
         {
             if (_vfx != null)
-            {
                 _vfx.Stop();
-                _vfx.gameObject.SetActive(false);
-            }
 
             SendToCell(new LeaveCellEvent(tile, moveToCell), moveFromCell);
             SendToCell(new EnterCellEvent(tile, moveFromCell), moveToCell);

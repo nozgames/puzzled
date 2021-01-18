@@ -71,12 +71,12 @@ namespace Puzzled
             }
         }
 
-        public static Puzzle GetPuzzle (string name)
+        public static Puzzle GetPuzzleFromPath (string path)
         {
             for(int i=0; i<_instance._puzzles.childCount; i++)
             {
                 var puzzle = _instance._puzzles.GetChild(i).GetComponent<Puzzle>();
-                if (!puzzle.isEditing && puzzle.filename == name)
+                if (!puzzle.isEditing && puzzle.path == path)
                     return puzzle;                
             }
 

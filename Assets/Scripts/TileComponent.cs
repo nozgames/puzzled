@@ -88,5 +88,17 @@ namespace Puzzled
 
             AudioManager.Instance.Play(clip, volume, pitch);
         }
+
+        /// <summary>
+        /// Set the shared data for a given component
+        /// </summary>
+        protected void SetSharedData(object data) => puzzle.SetSharedComponentData(this, data);
+
+        /// <summary>
+        /// Get the shard data for a given component
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        protected T GetSharedData<T>() where T : class => puzzle.GetSharedComponentData<T>(this);
     }
 }

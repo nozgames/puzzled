@@ -1,9 +1,15 @@
+using System.Collections.Generic;
 using NoZ;
 
 namespace Puzzled
 {
     public class WirelessSignal : TileComponent
     {
+        private class SharedData
+        {
+            public List<WirelessSignal> signals = new List<WirelessSignal>();
+        }
+
         [Editable]
         private string signal { get; set; }
 
@@ -18,25 +24,30 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnAwake(AwakeEvent evt)
         {
-            puzzle.onWirelessSignal += OnReceiveSignal;
+            var shared = GetSharedData<SharedData>();
+            if(null == shared)
+            {
+                shared = new SharedData();
+                SetSharedData(shared);
+            }
+
+            shared.signals.Add(this);
         }
 
         [ActorEventHandler]
         private void OnDestroyEvent(DestroyEvent evt)
         {
-            puzzle.onWirelessSignal -= OnReceiveSignal;
+            GetSharedData<SharedData>().signals.Remove(this);
         }
 
         [ActorEventHandler]
         private void OnSignal(SignalEvent evt)
         {
-            puzzle.SendWirelessSignal(signal);
-        }
-
-        private void OnReceiveSignal(string incomingSignal)
-        {
-            if (string.Compare(incomingSignal, signal, false) == 0)
-                receiveSignalPort.SendSignal();
+            foreach (var target in GetSharedData<SharedData>().signals)
+            {
+                if (string.Compare(signal, target.signal, true) == 0)
+                    receiveSignalPort.SendSignal();
+            }
         }
     }
 }

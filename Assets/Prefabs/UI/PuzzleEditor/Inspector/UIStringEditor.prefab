@@ -209,6 +209,7 @@ MonoBehaviour:
   labelText: {fileID: 6735611937700678993}
   _grouped: 0
   input: {fileID: 4535452059084332775}
+  _placeholderText: {fileID: 4249391038631259310}
 --- !u!114 &4274651278205883043
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -321,12 +322,48 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 950155863520229819, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 950155863520229819, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 950155863520229819, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4290427057
       objectReference: {fileID: 0}
     - target: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
       propertyPath: m_text
       value: Text...
+      objectReference: {fileID: 0}
+    - target: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_fontSize
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.7294118
+      objectReference: {fileID: 0}
+    - target: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.72156864
+      objectReference: {fileID: 0}
+    - target: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.69411767
+      objectReference: {fileID: 0}
+    - target: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -352,5 +389,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2da0c512f12947e489f739169773d7ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4249391038631259310 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1566766515468606388, guid: cc3048fbded986a4986e0589cdc2011b, type: 3}
+  m_PrefabInstance: {fileID: 3406581120352106266}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

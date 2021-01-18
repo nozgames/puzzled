@@ -1,10 +1,16 @@
-﻿using NoZ;
+﻿using System.Collections.Generic;
+using NoZ;
 using UnityEngine;
 
 namespace Puzzled
 {
     class Switch : TileComponent
     {
+        private class SharedData
+        {
+            public List<Switch> global = new List<Switch>();
+        }
+
         [Header("General")]
         [SerializeField] private bool _usable = true;
         [SerializeField] private Animator _animator = null;
@@ -13,6 +19,7 @@ namespace Puzzled
 
         private bool _default = false;
         private bool _on = false;
+        private string _globalId;
 
         /// <summary>
         /// Input power port that is used to disable the switch if power is off
@@ -67,6 +74,17 @@ namespace Puzzled
 
                 _on = value;
 
+                // Update the global setting
+                if (isGlobal && !isLoading)
+                {
+                    PlayerPrefs.SetInt(globalKey, _on ? 1 : 0);
+                    var shared = GetSharedData<SharedData>();
+                    if (null != shared)
+                        foreach (var globalSwitch in shared.global)
+                            if (globalSwitch.isOn != _on && 0 == string.Compare(globalSwitch.globalId, globalId, true))
+                                globalSwitch.isOn = _on;
+                }
+
                 if(_animator != null)
                 {
                     if (value)
@@ -81,6 +99,28 @@ namespace Puzzled
             }
         }
 
+        /// <summary>
+        /// Returns true if the switch is a global switch
+        /// </summary>
+        private bool isGlobal => !string.IsNullOrWhiteSpace(globalId);
+
+        /// <summary>
+        /// Returns the global key for the switch
+        /// </summary>
+        private string globalKey => $"{puzzle.worldName}.{puzzle.name}.{globalId}";
+
+        [Editable(placeholder = "None")]
+        private string globalId {
+            get => _globalId;
+            set {
+                // Dont allow a key of none
+                if (value != null && 0 == string.Compare(value, "none", true))
+                    _globalId = null;
+                else
+                    _globalId = value;
+            }
+        }
+
         [ActorEventHandler()]
         private void OnAwake (AwakeEvent evt)
         {
@@ -91,12 +131,39 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
         {
-            _default = isOn;
+            if (!isEditing && isGlobal)
+            {
+                var shared = GetSharedData<SharedData>();
+                if (null == shared)
+                {
+                    shared = new SharedData();
+                    SetSharedData(shared);
+                }
+
+                shared.global.Add(this);
+
+                var saved = PlayerPrefs.GetInt(globalKey, -1);
+                if (saved != -1)
+                    _on = saved == 1;
+            }
+
+            _default = _on;
 
             if(_animator != null)
                 _animator.SetTrigger(isOn ? "On" : "Off");
 
             UpdateState();
+        }
+
+        [ActorEventHandler]
+        private void OnDestroyEvent (DestroyEvent evt)
+        {
+            if(!isEditing)
+            {
+                var shared = GetSharedData<SharedData>();
+                if (null != shared)
+                    shared.global.Remove(this);
+            }
         }
 
         [ActorEventHandler(autoRegister = false)]

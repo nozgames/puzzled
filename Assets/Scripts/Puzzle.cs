@@ -20,14 +20,14 @@ namespace Puzzled
         private Player _player;
         private bool _pendingDestroy;
         private string _path;
+        private string _worldName;
         private bool _started;
+        private Dictionary<Type, object> _sharedComponentData = new Dictionary<Type, object>();
 
         /// <summary>
         /// Saved camera state
         /// </summary>
         private CameraState _savedCameraState;
-
-        public event Action<string> onWirelessSignal;
 
         /// <summary>
         /// Helper function for getting/setting the current puzzle
@@ -84,6 +84,11 @@ namespace Puzzled
         /// Puzzle file path
         /// </summary>
         public string path => _path;
+
+        /// <summary>
+        /// World the puzzle belongs to
+        /// </summary>
+        public string worldName => _worldName;
 
         /// <summary>
         /// Return the puzzle filename 
@@ -273,6 +278,7 @@ namespace Puzzled
                 throw new ArgumentException("path");
 
             _path = path;
+            _worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(_path));
 
             isModified = false;
 
@@ -460,6 +466,7 @@ namespace Puzzled
                     puzzle.Load(reader);
 
                 puzzle._path = path;
+                puzzle._worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(puzzle._path));
                 puzzle.isLoading = false;
 
                 Debug.Log($"Puzzled Loaded: [{puzzle._tiles.transform.childCount} tiles, {puzzle._wires.transform.childCount} wires]");
@@ -756,9 +763,19 @@ namespace Puzzled
             GameManager.onPuzzleChanged -= OnPuzzleChanged;
         }
 
-        public void SendWirelessSignal (string signal)
+        public void SetSharedComponentData (TileComponent component, object data)
         {
-            onWirelessSignal?.Invoke(signal);
+            if (component == null)
+                return;
+
+            _sharedComponentData[component.GetType()] = data;
+        }
+
+        public T GetSharedComponentData<T> (TileComponent component) where T : class 
+        {
+            if (component == null)
+                return null;
+            return _sharedComponentData.TryGetValue(component.GetType(), out var value) ? (value as T) : null;
         }
     }
 }
