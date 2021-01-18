@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using NoZ;
+using UnityEngine.VFX;
 
 namespace Puzzled
 {
     class Pushable : TileComponent
     {
         [SerializeField] private AudioClip _moveSound = null;
+        [SerializeField] private VisualEffect _vfx = null;
 
         private Cell moveToCell;
         private Cell moveFromCell;
@@ -14,6 +16,13 @@ namespace Puzzled
         private void OnStart(StartEvent evt)
         {
             SendToCell(new EnterCellEvent(tile, tile.cell), tile.cell);
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            _vfx.Stop();
         }
 
         protected override void OnDisable()
@@ -62,6 +71,12 @@ namespace Puzzled
 
             PlaySound(_moveSound);
 
+            if (_vfx != null)
+            {
+                _vfx.transform.localRotation = Quaternion.LookRotation((puzzle.grid.CellToWorld(moveFromCell) - puzzle.grid.CellToWorld(moveToCell)).normalized, Vector3.up);
+                _vfx.Play();
+            }
+
             Tween.Move(puzzle.grid.CellToWorld(moveFromCell), puzzle.grid.CellToWorld(moveToCell), false)
                 .Duration(duration)
                 //.EaseOutCubic()
@@ -73,6 +88,9 @@ namespace Puzzled
 
         private void OnMoveComplete()
         {
+            if (_vfx != null)
+                _vfx.Stop();
+
             SendToCell(new LeaveCellEvent(tile, moveToCell), moveFromCell);
             SendToCell(new EnterCellEvent(tile, moveFromCell), moveToCell);
         }
