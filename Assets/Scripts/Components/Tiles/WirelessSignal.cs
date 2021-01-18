@@ -46,7 +46,7 @@ namespace Puzzled
             foreach (var target in GetSharedData<SharedData>().signals)
             {
                 if (string.Compare(signal, target.signal, true) == 0)
-                    receiveSignalPort.SendSignal();
+                    target.receiveSignalPort.SendSignal();
             }
         }
     }
