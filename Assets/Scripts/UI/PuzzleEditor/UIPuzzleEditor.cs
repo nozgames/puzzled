@@ -206,6 +206,17 @@ namespace Puzzled
                 ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(_selectedTile, "rotated", v));
             });
 
+            _inspectorFlip.onValueChanged.AddListener((v) => {
+                if (_selectedTile == null)
+                    return;
+
+                var flip = _selectedTile.GetProperty("flipped");
+                if (null == flip)
+                    return;
+
+                ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(_selectedTile, "flipped", v));
+            });
+
             _chooseFilePopup.onCancel += () => HidePopup();
             _chooseFilePopup.onOpenPuzzle += (filename) => {
                 Load(filename);

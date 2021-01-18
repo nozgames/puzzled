@@ -28,8 +28,7 @@ namespace Puzzled
         [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
-        [SerializeField] private UIRadio _inspectorFlipX = null;
-        [SerializeField] private UIRadio _inspectorFlipY = null;
+        [SerializeField] private UIRadio _inspectorFlip = null;
         [SerializeField] private UIRadio _inspectorRotate = null;
 
         private WireMesh dragWire = null;
@@ -281,12 +280,15 @@ namespace Puzzled
                 _inspectorHeader.SetActive(true);
                 inspectorTileName.SetTextWithoutNotify(tile.name);
                 _inspectorTileType.text = $"<{_selectedTile.info.displayName}>";
-                _inspectorFlipX.gameObject.SetActive(false);
-                _inspectorFlipY.gameObject.SetActive(false);
 
-                var rotatable = _selectedTile.GetComponentInChildren<Rotatable>();
-                _inspectorRotate.gameObject.SetActive(rotatable != null);
-                _inspectorRotate.isOn = (rotatable != null && rotatable.rotated);
+                var rotated = _selectedTile.GetProperty("rotated");
+                _inspectorRotate.gameObject.SetActive(rotated != null);
+                _inspectorRotate.isOn = (rotated != null && rotated.GetValue<bool>(_selectedTile));
+
+                var flipped = _selectedTile.GetProperty("flipped");
+                _inspectorFlip.gameObject.SetActive(flipped != null);
+                _inspectorFlip.isOn = (flipped != null && flipped.GetValue<bool>(_selectedTile));
+
                 _inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);
 
