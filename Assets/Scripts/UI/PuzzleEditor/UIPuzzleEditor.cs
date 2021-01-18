@@ -31,6 +31,7 @@ namespace Puzzled
         [SerializeField] private Button stopButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
         [SerializeField] private RectTransform _canvasCenter = null;
+        [SerializeField] private Slider _zoomSlider = null;
 
         [SerializeField] private GameObject inspector = null;
         [SerializeField] private UIRadio[] layerToggles = null;
@@ -184,6 +185,12 @@ namespace Puzzled
 
             inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
 
+            _zoomSlider.minValue = CameraManager.MinZoomLevel;
+            _zoomSlider.maxValue = CameraManager.MaxZoomLevel;
+            _zoomSlider.onValueChanged.AddListener((v) => {
+                UpdateZoom((int)v);
+;            });
+
             _gridToggle.onValueChanged.AddListener((v) => {
                 _puzzle.showGrid = v;
             });
@@ -274,14 +281,20 @@ namespace Puzzled
 
         private void OnScroll(Vector2 position, Vector2 delta)
         {
-            if (playing || delta.y == 0)
+            if (playing || delta.y == 0 || !canvas.isMouseOver)
                 return;
 
-            if(canvas.isMouseOver)
-            CameraManager.AdjustZoom(delta.y > 0 ? -1 : 1);
+            UpdateZoom(CameraManager.state.zoomLevel + (delta.y > 0 ? -1 : 1));
+        }
+
+        private void UpdateZoom(int zoom)
+        {
+            CameraManager.Transition(zoom, 0);
 
             if (hasSelection)
                 SetSelectionRect(_selectionMin, _selectionMax);
+
+            _zoomSlider.SetValueWithoutNotify(CameraManager.state.zoomLevel);
 
             UpdateCursor(true);
         }
