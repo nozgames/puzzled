@@ -181,7 +181,7 @@ namespace Puzzled
 
         private void OnDisable()
         {
-            if (to?.port.type == PortType.Power)
+            if (to?.port?.type == PortType.Power)
                 to.tile.Send(new WirePowerChangedEvent(this));
 
             bold = false;
