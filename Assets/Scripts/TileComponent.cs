@@ -37,11 +37,9 @@ namespace Puzzled
         /// <summary>
         /// True if the current tick frame has been processed
         /// </summary>
-        public bool isTickFrameProcessed
-        {
+        public bool isTickFrameProcessed {
             get => _processedTickFrame == tile.tickFrame;
-            set
-            {
+            set {
                 if (value)
                     _processedTickFrame = tile.tickFrame;
                 else
@@ -62,8 +60,8 @@ namespace Puzzled
 
         protected void EndBusy() => GameManager.busy--;
 
-        [ActorEventHandler]
-        private void OnAwake (AwakeEvent evt)
+        [ActorEventHandler(priority = int.MinValue)]
+        private void OnAwake(AwakeEvent evt)
         {
             // Automatically create all of the ports for ourself
             var properties = TileDatabase.GetProperties(tile);
@@ -81,20 +79,26 @@ namespace Puzzled
 
                 property.SetValue(tile, new Port(tile, property));
             }
-
-            OnAwake();
         }
 
-        protected virtual void OnAwake ()
-        {
-        }
-
-        protected void PlaySound (AudioClip clip, float volume = 1.0f, float pitch = 1.0f)
+        protected void PlaySound(AudioClip clip, float volume = 1.0f, float pitch = 1.0f)
         {
             if (isLoading || isEditing || clip == null || volume <= 0.0f)
                 return;
 
             AudioManager.Instance.Play(clip, volume, pitch);
         }
+
+        /// <summary>
+        /// Set the shared data for a given component
+        /// </summary>
+        protected void SetSharedData(object data) => puzzle.SetSharedComponentData(this, data);
+
+        /// <summary>
+        /// Get the shard data for a given component
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        protected T GetSharedData<T>() where T : class => puzzle.GetSharedComponentData<T>(this);
     }
 }

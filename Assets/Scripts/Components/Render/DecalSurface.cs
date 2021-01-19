@@ -1,12 +1,30 @@
 ﻿using UnityEngine;
+using NoZ;
 
 namespace Puzzled
 {
     public class DecalSurface : TileComponent
     {
         [SerializeField] private SpriteRenderer _renderer = null;
+        [SerializeField] private Color _lightColor = Color.white;
+        [SerializeField] private Vector3 _lightOffset;
 
         private Decal _decal;
+        private Color _defaultColor;
+
+        public Color color {
+            get => _renderer.color;
+            set => _renderer.color = value;
+        }
+
+        public Color lightColor => _lightColor;
+        public Vector3 lightOffset => _lightOffset;
+
+        [ActorEventHandler]
+        private void OnAwakeEvent(AwakeEvent evt)
+        {
+            _defaultColor = _renderer.color;
+        }
 
         [Editable]
         public Decal decal {
@@ -25,6 +43,8 @@ namespace Puzzled
                 }
             }
         }
+
+        public void ResetColor() => color = _defaultColor;
 
         public static DecalSurface FromCell(Puzzle puzzle, Cell cell, TileLayer layer)
         {

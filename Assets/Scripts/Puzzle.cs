@@ -20,7 +20,9 @@ namespace Puzzled
         private Player _player;
         private bool _pendingDestroy;
         private string _path;
+        private string _worldName;
         private bool _started;
+        private Dictionary<Type, object> _sharedComponentData = new Dictionary<Type, object>();
 
         /// <summary>
         /// Saved camera state
@@ -82,6 +84,11 @@ namespace Puzzled
         /// Puzzle file path
         /// </summary>
         public string path => _path;
+
+        /// <summary>
+        /// World the puzzle belongs to
+        /// </summary>
+        public string worldName => _worldName;
 
         /// <summary>
         /// Return the puzzle filename 
@@ -193,7 +200,11 @@ namespace Puzzled
             tile.guid = prefab.guid;
             tile.name = prefab.name;
             tile.gameObject.SetChildLayers(CameraManager.TileLayerToObjectLayer(tile.info.layer));
+
+            // Send awake event before the tile is linked into the grid
             tile.Send(new AwakeEvent());
+
+            // Link the tile into the grid
             tile.cell = cell;
             return tile;
         }
@@ -267,6 +278,7 @@ namespace Puzzled
                 throw new ArgumentException("path");
 
             _path = path;
+            _worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(_path));
 
             isModified = false;
 
@@ -454,6 +466,7 @@ namespace Puzzled
                     puzzle.Load(reader);
 
                 puzzle._path = path;
+                puzzle._worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(puzzle._path));
                 puzzle.isLoading = false;
 
                 Debug.Log($"Puzzled Loaded: [{puzzle._tiles.transform.childCount} tiles, {puzzle._wires.transform.childCount} wires]");
@@ -750,58 +763,19 @@ namespace Puzzled
             GameManager.onPuzzleChanged -= OnPuzzleChanged;
         }
 
-#if false
-        /// <summary>
-        /// Return the wire that collides with the given world position
-        /// </summary>
-        /// <param name="position">World poisition to hit test</param>
-        /// <returns>Wire that collides with the world position or null if none found</returns>
-        public static Wire HitTestWire(Vector3 position)
+        public void SetSharedComponentData (TileComponent component, object data)
         {
-            var cell = TileGrid.WorldToCell(position + new Vector3(0.5f, 0.5f, 0));
-            var threshold = _instance.wireHitThreshold * _instance.wireHitThreshold;
+            if (component == null)
+                return;
 
-            for (int i = 0; i < _instance.wires.childCount; i++)
-            {
-                var wire = _instance.wires.GetChild(i).GetComponent<Wire>();
-                var min = Cell.Min(wire.from.cell, wire.to.cell);
-                var max = Cell.Max(wire.from.cell, wire.to.cell);
-                if (cell.x < min.x || cell.y < min.y || cell.x > max.x || cell.y > max.y)
-                    continue;
-
-                var pt0 = wire.from.position;
-                var pt1 = wire.to.position;
-                var dir = (pt1 - pt0).normalized;
-                var mag = (pt1 - pt0).magnitude;
-                var delta = position - pt0;
-                var dot = Mathf.Clamp(Vector2.Dot(dir, delta) / mag, 0, 1);
-                var dist = (position - (pt0 + dir * dot * mag)).sqrMagnitude;
-                if (dist > threshold)
-                    continue;
-
-                return wire;
-            }
-
-            return null;
+            _sharedComponentData[component.GetType()] = data;
         }
-#endif
+
+        public T GetSharedComponentData<T> (TileComponent component) where T : class 
+        {
+            if (component == null)
+                return null;
+            return _sharedComponentData.TryGetValue(component.GetType(), out var value) ? (value as T) : null;
+        }
     }
 }
-
-
-
-#if false
-
-    how to serialize ports
-
-    - when reading in ports from v1 we need to connect any to wires to some port
-        - find the port marked legacy and connect to that
-        - if output is from a tile with no outputs but is a value tile then connect to the legacy number port instead
-
-    - when loading a v3 file
-        - load all wires into an array
-        - when loading a port property look up the wires by index and send array to port
-
-
-
-#endif

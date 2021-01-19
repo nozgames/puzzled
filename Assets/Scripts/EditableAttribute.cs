@@ -9,5 +9,8 @@ namespace Puzzled
         public bool multiline = false;
         public Vector2Int range;
         public int order = 0;
+        public string placeholder;
+        public string hiddenIfFalse;
+        public string hiddenIfTrue;
     }
 }

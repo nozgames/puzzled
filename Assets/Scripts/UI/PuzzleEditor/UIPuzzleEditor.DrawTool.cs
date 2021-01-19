@@ -27,6 +27,9 @@ namespace Puzzled
 
         private CursorType OnDrawGetCursor(Cell cell)
         {
+            if (!canvas.isMouseOver)
+                return CursorType.Arrow;
+
             if (KeyboardManager.isAltPressed)
                 return CursorType.EyeDropper;
 

@@ -9,7 +9,9 @@ namespace Puzzled
     public partial class UIPuzzleEditor
     {
         [Header("Inspector")]
-        [SerializeField] private GameObject inspectorContent = null;
+        [SerializeField] private GameObject _inspectorContent = null;
+        [SerializeField] private GameObject _inspectorEmpty = null;
+        [SerializeField] private GameObject _inspectorHeader = null;
         [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
         [SerializeField] private TMPro.TextMeshProUGUI _inspectorTileType = null;
         [SerializeField] private RawImage _inspectorTilePreview = null;
@@ -26,8 +28,7 @@ namespace Puzzled
         [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
-        [SerializeField] private UIRadio _inspectorFlipX = null;
-        [SerializeField] private UIRadio _inspectorFlipY = null;
+        [SerializeField] private UIRadio _inspectorFlip = null;
         [SerializeField] private UIRadio _inspectorRotate = null;
 
         private WireMesh dragWire = null;
@@ -249,9 +250,6 @@ namespace Puzzled
 
         private void SelectTile(Tile tile)
         {
-            if (tile == null && _selectedTile == null)
-                return;
-
             // Save the inspector state
             if (_selectedTile != null)
             {
@@ -267,23 +265,30 @@ namespace Puzzled
             if (tile == null)
             {
                 selectionGizmo.gameObject.SetActive(false);
-                options.DetachAndDestroyChildren();
-                inspectorContent.SetActive(false);
+                _inspectorContent.transform.DetachAndDestroyChildren();
+                _inspectorContent.SetActive(false);
+                _inspectorHeader.SetActive(false);
+                _inspectorEmpty.SetActive(true);
 
                 // Show all wires when no tile is selected
                 _puzzle.ShowWires();
             } 
             else
             {
-                inspectorContent.SetActive(true);
+                _inspectorEmpty.SetActive(false);
+                _inspectorContent.SetActive(true);
+                _inspectorHeader.SetActive(true);
                 inspectorTileName.SetTextWithoutNotify(tile.name);
                 _inspectorTileType.text = $"<{_selectedTile.info.displayName}>";
-                _inspectorFlipX.gameObject.SetActive(false);
-                _inspectorFlipY.gameObject.SetActive(false);
 
-                var rotatable = _selectedTile.GetComponentInChildren<Rotatable>();
-                _inspectorRotate.gameObject.SetActive(rotatable != null);
-                _inspectorRotate.isOn = (rotatable != null && rotatable.rotated);
+                var rotated = _selectedTile.GetProperty("rotated");
+                _inspectorRotate.gameObject.SetActive(rotated != null);
+                _inspectorRotate.isOn = (rotated != null && rotated.GetValue<bool>(_selectedTile));
+
+                var flipped = _selectedTile.GetProperty("flipped");
+                _inspectorFlip.gameObject.SetActive(flipped != null);
+                _inspectorFlip.isOn = (flipped != null && flipped.GetValue<bool>(_selectedTile));
+
                 _inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);
 
@@ -325,7 +330,7 @@ namespace Puzzled
         private void RefreshInspectorInternal()
         {
             var tile = _selectedTile;
-            options.DetachAndDestroyChildren();
+            _inspectorContent.transform.DetachAndDestroyChildren();
 
             GameObject propertiesGroup = null;
             Transform propertiesGroupContent = null;
@@ -335,7 +340,21 @@ namespace Puzzled
                 if (tileProperty.editable.hidden)
                     continue;
 
-                var optionEditor = InstantiatePropertyEditor(tile, tileProperty, options);
+                if(!string.IsNullOrEmpty(tileProperty.editable.hiddenIfFalse))
+                {
+                    var hiddenIfFalse = tile.GetProperty(tileProperty.editable.hiddenIfFalse);
+                    if (null != hiddenIfFalse && !hiddenIfFalse.GetValue<bool>(tile))
+                        continue;
+                }
+
+                if (!string.IsNullOrEmpty(tileProperty.editable.hiddenIfTrue))
+                {
+                    var hiddenIfTrue = tile.GetProperty(tileProperty.editable.hiddenIfTrue);
+                    if (null != hiddenIfTrue && hiddenIfTrue.GetValue<bool>(tile))
+                        continue;
+                }
+
+                var optionEditor = InstantiatePropertyEditor(tile, tileProperty, _inspectorContent.transform);
                 if (null == optionEditor)
                     continue;
 
@@ -343,7 +362,7 @@ namespace Puzzled
                 {
                     if (null == propertiesGroup)
                     {
-                        propertiesGroup = Instantiate(optionPropertiesPrefab, options);
+                        propertiesGroup = Instantiate(optionPropertiesPrefab, _inspectorContent.transform);
                         propertiesGroupContent = propertiesGroup.transform.Find("Content");
                     }
 

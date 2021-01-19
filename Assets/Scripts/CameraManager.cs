@@ -239,9 +239,9 @@ namespace Puzzled
         /// <summary>
         /// Adjust the active camera zoom by the given amount
         /// </summary>
-        /// <param name="delta">delta zoom level</param>
-        public static void AdjustZoom (int delta) =>
-            Transition(_instance._targetPosition, _instance._zoomLevel + delta, _instance._background, 0);
+        /// <param name="zoomLevel">delta zoom level</param>
+        public static void Transition (int zoomLevel, int transitionTime) =>
+            Transition(_instance._targetPosition, zoomLevel, _instance._background, transitionTime);
 
         /// <summary>
         /// Pan the camera by the given amount in world coordinates

@@ -48,6 +48,11 @@ namespace Puzzled
         {
             _instance = this;
         }
+        
+        public static void Shutdown()
+        {
+            _instance.previewPuzzle.Destroy();
+        }
 
         /// <summary>
         /// Return the tile prefab for the given guid

@@ -6,6 +6,7 @@ namespace Puzzled
     public class UIStringEditor : UIPropertyEditor
     {
         [SerializeField] private TMPro.TMP_InputField input = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _placeholderText = null;
 
         private void OnEnable()
         {
@@ -31,6 +32,9 @@ namespace Puzzled
         {
             label = target.name;
             input.SetTextWithoutNotify(target.GetValue<string>());
+
+            if (_placeholderText != null && !string.IsNullOrEmpty(target.tileProperty.editable.placeholder))
+                _placeholderText.text = target.tileProperty.editable.placeholder;
         }
     }
 }

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4872641024044638678}
   - component: {fileID: 2665324356222441418}
   - component: {fileID: 5672770547381660297}
+  - component: {fileID: 300426377426088756}
   m_Layer: 0
   m_Name: FenceGate
   m_TagString: Untagged
@@ -62,8 +63,8 @@ MonoBehaviour:
   keyItem: {fileID: 0}
   _unlockSound: {fileID: 0}
   _animator: {fileID: 5127086794591847231}
-  _openSound: {fileID: 0}
-  _closeSound: {fileID: 0}
+  _openSound: {fileID: 8300000, guid: 2688ea559c64c8b4aae709d4a57109b0, type: 3}
+  _closeSound: {fileID: 8300000, guid: 2688ea559c64c8b4aae709d4a57109b0, type: 3}
   _visualEast: {fileID: 7500496111748313165}
   _visualWest: {fileID: 4122994341526183456}
 --- !u!114 &5672770547381660297
@@ -76,6 +77,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2ab130ebf49553541a9a64f7822f96db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &300426377426088756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1979402765203244668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcbdf47353537d04198ed9f13df7e1d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!95 &5127086794591847231
