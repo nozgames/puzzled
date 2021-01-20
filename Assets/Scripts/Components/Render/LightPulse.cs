@@ -15,6 +15,7 @@ namespace Puzzled
             Tween.Custom(LerpLightIntensity, new Vector4(_intensityMin, _intensityMax, 0, 0), Vector4.zero)
                 .EaseInOutCubic()
                 .PingPong()
+                .Key("pulse")
                 .Loop()
                 .Duration(1.0f / Mathf.Max(0.01f, _speed))
                 .Start(gameObject);
