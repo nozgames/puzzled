@@ -68,7 +68,7 @@ namespace Puzzled
             var type = GetType();
             foreach (var property in properties)
             {
-                if (property.info.DeclaringType != type)
+                if (!property.info.DeclaringType.IsAssignableFrom(type))
                     continue;
 
                 if (property.type != TilePropertyType.Port)

@@ -2,7 +2,7 @@
 
 namespace Puzzled
 {
-    class TriggerBox : TileComponent
+    class TriggerBox : UsableTileComponent
     {
         // TODO: power in to use as a kill switch ? (no wires = self powered, else use power)
 
@@ -15,6 +15,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnEnter(EnterCellEvent evt)
         {
+            if (!isUsable)
+                return;
+
             if (evt.isPlayer)
             {
                 entered = true;
@@ -25,11 +28,19 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnExit(LeaveCellEvent evt)
         {
+            if (!isUsable)
+                return;
+
             if (evt.isPlayer)
             {
                 entered = false;
                 powerOutPort.SetPowered(false);
             }
+        }
+
+        protected override void OnUsableChanged()
+        {
+            powerOutPort.SetPowered(false);
         }
     }
 }

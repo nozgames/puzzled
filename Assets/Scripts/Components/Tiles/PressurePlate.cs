@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class PressurePlate : TileComponent
+    class PressurePlate : UsableTileComponent
     {
         private bool _pressed = false;
 
@@ -39,7 +39,15 @@ namespace Puzzled
 
             _animator.SetTrigger(pressed ? "Down" : "Up");
 
-            powerOutPort.SetPowered(pressed);
+            if (!isUsable)
+                powerOutPort.SetPowered(false);
+            else
+                powerOutPort.SetPowered(pressed);
+        }
+
+        protected override void OnUsableChanged()
+        {
+            powerOutPort.SetPowered(false);
         }
     }
 }

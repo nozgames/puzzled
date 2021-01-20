@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class NumberSpinner : TileComponent
+    class NumberSpinner : UsableTileComponent
     {
         [Header("Visuals")]
         [SerializeField] private SpriteRenderer[] _decalRenderers = null;
@@ -67,6 +67,9 @@ namespace Puzzled
         private void OnUse(UseEvent evt)
         {
             evt.IsHandled = true;
+
+            if (!isUsable)
+                return;
 
             var oldIndex = _rotateIndex;
             _rotateIndex = (_rotateIndex + 1) % _decalRenderers.Length;

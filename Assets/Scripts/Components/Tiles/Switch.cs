@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class Switch : TileComponent
+    class Switch : UsableTileComponent
     {
         private class SharedData
         {
@@ -20,13 +20,6 @@ namespace Puzzled
         private bool _default = false;
         private bool _on = false;
         private string _globalId;
-
-        /// <summary>
-        /// Input power port that is used to disable the switch if power is off
-        /// </summary>
-        [Editable]
-        [Port(PortFlow.Input, PortType.Power)]
-        private Port powerInPort { get; set; }
 
         // TODO: on/off/reset ports?
 
@@ -169,6 +162,9 @@ namespace Puzzled
         [ActorEventHandler(autoRegister = false)]
         private void OnUse(UseEvent evt)
         {
+            if (!isUsable)
+                return;
+
             evt.IsHandled = true;
             isOn = !isOn;
         }
