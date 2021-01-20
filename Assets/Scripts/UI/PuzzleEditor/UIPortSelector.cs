@@ -37,52 +37,54 @@ namespace Puzzled.Editor
             var signalOut = (Port)null;
             var numberOut = (Port)null;
             foreach (var property in tileFrom.properties)
-                if (property.type == TilePropertyType.Port && property.port.flow == PortFlow.Output)
-                {
-                    if (property.port.type == PortType.Number)
-                        numberOut = property.GetValue<Port>(tileFrom);
-                    else if (property.port.type == PortType.Signal)
-                        signalOut = property.GetValue<Port>(tileFrom);
-                    else if (property.port.type == PortType.Power)
-                        powerOut = property.GetValue<Port>(tileFrom);
-                }
+                if(!tileFrom.IsPropertyHidden(property))
+                    if (property.type == TilePropertyType.Port && property.port.flow == PortFlow.Output)
+                    {
+                        if (property.port.type == PortType.Number)
+                            numberOut = property.GetValue<Port>(tileFrom);
+                        else if (property.port.type == PortType.Signal)
+                            signalOut = property.GetValue<Port>(tileFrom);
+                        else if (property.port.type == PortType.Power)
+                            powerOut = property.GetValue<Port>(tileFrom);
+                    }
 
             var portCount = 0;
             foreach (var property in tileTo.properties)
-                if (property.type == TilePropertyType.Port && property.port.flow == PortFlow.Input)
-                {
-                    Port portOut = null;
-
-                    switch (property.port.type)
+                if(!tileTo.IsPropertyHidden(property))
+                    if (property.type == TilePropertyType.Port && property.port.flow == PortFlow.Input)
                     {
-                        case PortType.Number:
-                            portOut = numberOut;
-                            break;
+                        Port portOut = null;
 
-                        case PortType.Power:
-                            portOut = powerOut;
-                            break;
+                        switch (property.port.type)
+                        {
+                            case PortType.Number:
+                                portOut = numberOut;
+                                break;
 
-                        case PortType.Signal:
-                            portOut = signalOut ?? powerOut;
-                            break;
+                            case PortType.Power:
+                                portOut = powerOut;
+                                break;
 
-                        default:
-                            throw new NotImplementedException();
+                            case PortType.Signal:
+                                portOut = signalOut ?? powerOut;
+                                break;
+
+                            default:
+                                throw new NotImplementedException();
+                        }
+
+                        if(null == portOut)
+                            continue;
+
+                        _ports[portCount].from = portOut;
+                        _ports[portCount].to = property.GetValue<Port>(tileTo);
+                        _ports[portCount].gameObject.SetActive(true);
+                        portCount++;
                     }
-
-                    if(null == portOut)
-                        continue;
-
-                    _ports[portCount].from = portOut;
-                    _ports[portCount].to = property.GetValue<Port>(tileTo);
-                    _ports[portCount].gameObject.SetActive(true);
-                    portCount++;
-                }
 
             if(portCount == 0)
             {
-                // TODO: handle error
+                _callback?.Invoke(null, null);
                 return;
             }
 

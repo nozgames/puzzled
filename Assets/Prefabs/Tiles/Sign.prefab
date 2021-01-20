@@ -128,7 +128,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _renderer: {fileID: 341619301312460381}
   _lightColor: {r: 1, g: 1, b: 1, a: 1}
-  _lightOffset: {x: 0, y: 0, z: -0.5}
+  _light: {fileID: 4784787974464826630}
 --- !u!1 &8922302472943703707
 GameObject:
   m_ObjectHideFlags: 0
@@ -160,6 +160,7 @@ Transform:
   m_Children:
   - {fileID: 2889601676151129380}
   - {fileID: 638664271962108704}
+  - {fileID: 7549579747724468981}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -190,6 +191,89 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isUsable: 1
   _popupPrefab: {fileID: 5962282901536273400, guid: dab1954387b55d540afcbfe665644602, type: 3}
+--- !u!1001 &1167820138492454142
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 2819266254877709548}
+    m_Modifications:
+    - target: {fileID: 5685495677039460144, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_Name
+      value: DecalLight
+      objectReference: {fileID: 0}
+    - target: {fileID: 5685495677039460144, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5931827252863601144, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_Intensity
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8241251866173878398, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: _intensityMax
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8241251866173878398, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: _intensityMin
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.692
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.31
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+--- !u!4 &7549579747724468981 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+  m_PrefabInstance: {fileID: 1167820138492454142}
+  m_PrefabAsset: {fileID: 0}
+--- !u!108 &4784787974464826630 stripped
+Light:
+  m_CorrespondingSourceObject: {fileID: 5931827252863601144, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
+  m_PrefabInstance: {fileID: 1167820138492454142}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3428176200594481871
 PrefabInstance:
   m_ObjectHideFlags: 0

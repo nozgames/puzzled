@@ -7,7 +7,11 @@ namespace Puzzled
     {
         [SerializeField] private SpriteRenderer _renderer = null;
         [SerializeField] private Color _lightColor = Color.white;
-        [SerializeField] private Vector3 _lightOffset;
+        [SerializeField] private Light _light = null;
+
+        [Editable(hiddenIfFalse = "decal")]
+        [Port(PortFlow.Input, PortType.Power)]
+        private Port decalPowerPort { get; set; }
 
         private Decal _decal;
         private Color _defaultColor;
@@ -18,12 +22,23 @@ namespace Puzzled
         }
 
         public Color lightColor => _lightColor;
-        public Vector3 lightOffset => _lightOffset;
 
         [ActorEventHandler]
         private void OnAwakeEvent(AwakeEvent evt)
         {
             _defaultColor = _renderer.color;
+        }
+
+        [ActorEventHandler]
+        private void OnStartEvent (StartEvent evt)
+        {
+            UpdateDecalPower();
+        }
+
+        [ActorEventHandler]
+        private void OnWirePowerChangedEvent (WirePowerChangedEvent evt)
+        {
+            UpdateDecalPower();
         }
 
         [Editable]
@@ -42,6 +57,14 @@ namespace Puzzled
                     _renderer.transform.transform.localRotation = Quaternion.Euler(0, 0, ((_decal.flags & DecalFlags.Rotate) == DecalFlags.Rotate) ? -90 : 0);
                 }
             }
+        }
+
+        private void UpdateDecalPower()
+        {
+            if (_light != null)
+                _light.gameObject.SetActive(decalPowerPort.hasPower);
+
+            _renderer.color = decalPowerPort.hasPower ? _lightColor : _defaultColor;
         }
 
         public void ResetColor() => color = _defaultColor;

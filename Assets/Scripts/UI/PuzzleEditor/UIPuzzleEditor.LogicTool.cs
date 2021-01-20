@@ -337,22 +337,8 @@ namespace Puzzled
             foreach (var tileProperty in tile.properties)
             {
                 // Skip hidden properties
-                if (tileProperty.editable.hidden)
+                if (tile.IsPropertyHidden(tileProperty))
                     continue;
-
-                if(!string.IsNullOrEmpty(tileProperty.editable.hiddenIfFalse))
-                {
-                    var hiddenIfFalse = tile.GetProperty(tileProperty.editable.hiddenIfFalse);
-                    if (null != hiddenIfFalse && !hiddenIfFalse.GetValue<bool>(tile))
-                        continue;
-                }
-
-                if (!string.IsNullOrEmpty(tileProperty.editable.hiddenIfTrue))
-                {
-                    var hiddenIfTrue = tile.GetProperty(tileProperty.editable.hiddenIfTrue);
-                    if (null != hiddenIfTrue && hiddenIfTrue.GetValue<bool>(tile))
-                        continue;
-                }
 
                 var optionEditor = InstantiatePropertyEditor(tile, tileProperty, _inspectorContent.transform);
                 if (null == optionEditor)

@@ -50,9 +50,6 @@ namespace Puzzled
         [Port(PortFlow.Output, PortType.Number)]
         private Port valueOutPort { get; set; }
 
-        private Cell _direction = Cell.up;
-        private Wire _wire = null;
-
         [ActorEventHandler]
         private void OnAwakeEvent(AwakeEvent evt)
         {

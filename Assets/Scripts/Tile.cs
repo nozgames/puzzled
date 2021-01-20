@@ -297,6 +297,42 @@ namespace Puzzled
         public TileProperty GetProperty(string name) => properties.Where(p => p.info.Name == name).FirstOrDefault();
 
         /// <summary>
+        /// Return the value of a property with the given name as a boolean regardless of its type.  Note that
+        /// if the property does not exist a value of false will be returned.
+        /// </summary>
+        /// <param name="name">Name of property</param>
+        /// <returns>True if the property's value evaluates to true</returns>
+        public bool GetPropertyAsBool (string name)
+        {
+            var property = GetProperty(name);
+            if (null == property)
+                return false;
+
+            return property.GetValueAsBool(this);
+        }
+
+        /// <summary>
+        /// Returns true if the given property is hidden from the inspector
+        /// </summary>
+        /// <param name="tileProperty">Property</param>
+        /// <returns>True if hidden</returns>
+        public bool IsPropertyHidden(TileProperty tileProperty)
+        {
+            if (tileProperty.editable.hidden)
+                return true;
+
+            if (!string.IsNullOrEmpty(tileProperty.editable.hiddenIfFalse))
+                if (!GetPropertyAsBool(tileProperty.editable.hiddenIfFalse))
+                    return true;
+
+            if (!string.IsNullOrEmpty(tileProperty.editable.hiddenIfTrue))
+                if (GetPropertyAsBool(tileProperty.editable.hiddenIfTrue))
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
         /// Set the tile property with the given name to the given value
         /// </summary>
         /// <param name="name">Name of the property</param>

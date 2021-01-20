@@ -187,6 +187,7 @@ namespace Puzzled
 
             _zoomSlider.minValue = CameraManager.MinZoomLevel;
             _zoomSlider.maxValue = CameraManager.MaxZoomLevel;
+            _zoomSlider.value = CameraManager.state.zoomLevel;
             _zoomSlider.onValueChanged.AddListener((v) => {
                 UpdateZoom((int)v);
 ;            });
@@ -618,7 +619,8 @@ namespace Puzzled
                 CameraManager.camera.WorldToViewportPoint(tileTo.transform.position);
             _choosePortPopup.Open(tileFrom, tileTo, (from, to) => {
                 HidePopup();
-                callback?.Invoke(from, to);
+                if(from != null && to != null)
+                    callback?.Invoke(from, to);
             });
         }
 

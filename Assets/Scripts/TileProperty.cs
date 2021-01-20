@@ -140,5 +140,27 @@ namespace Puzzled
         /// <param name="tile">Tile to get property from</param>
         /// <returns>Value of property</returns>
         public T GetValue<T>(Tile tile) => (T)GetValue(tile);
+
+        /// <summary>
+        /// Return the property as a boolean value 
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <returns></returns>
+        public bool GetValueAsBool (Tile tile)
+        {
+            if (tile == null)
+                return false;
+
+            switch (type)
+            {
+                case TilePropertyType.Bool: return GetValue<bool>(tile);
+                case TilePropertyType.Int:
+                    return GetValue<int>(tile) == 0 ? false : true;
+                case TilePropertyType.Decal:
+                    return GetValue<Decal>(tile).sprite != null;
+            }
+
+            return false;
+        }
     }
 }
