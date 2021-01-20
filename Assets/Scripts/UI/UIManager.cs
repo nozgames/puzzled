@@ -117,10 +117,13 @@ namespace Puzzled
             _instance.activeScreen.gameObject.SetActive(false);
         }
 
-        public static UIPopup ShowPopup(UIPopup popupPrefab)
+        public static UIPopup ShowPopup(UIPopup popupPrefab, Action doneCallback = null)
         {
             _instance.popups.gameObject.SetActive(true);
-            return Instantiate(popupPrefab, _instance.popupCentered).GetComponent<UIPopup>();
+            UIPopup popup = Instantiate(popupPrefab, _instance.popupCentered).GetComponent<UIPopup>();
+            popup.doneCallback = doneCallback;
+
+            return popup;
         }
 
         public static void ClosePopup()
