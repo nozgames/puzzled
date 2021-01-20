@@ -220,6 +220,7 @@ namespace Puzzled
             tweenGroup
                 .Duration(transitionTime * GameManager.tick)
                 .EaseInOutCubic()
+                .Key("Transition")
                 .OnStop(_instance.OnTransitionComplete)
                 .Start(_instance.gameObject);
 
