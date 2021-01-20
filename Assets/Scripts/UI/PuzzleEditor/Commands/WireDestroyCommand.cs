@@ -20,6 +20,7 @@ namespace Puzzled.Editor.Commands
             Debug.Assert(fromIndex >= 0);
             Debug.Assert(toIndex >= 0);
             OnRedo();
+            wire.to.tile.Send(new StartEvent());
         }
 
         protected override void OnRedo()
@@ -29,6 +30,7 @@ namespace Puzzled.Editor.Commands
             wire.from.tile.Send(new StartEvent());
             wire.to.tile.Send(new StartEvent());
             UIPuzzleEditor.MoveToTrash(wire.gameObject);
+            wire.to.tile.Send(new StartEvent());
         }
 
         protected override void OnUndo()

@@ -197,7 +197,9 @@ namespace Puzzled
             if(tiles.Length == 1)
             {
                 ChoosePort(tile, tiles[0], (from, to) => {
-                    ExecuteCommand(new Editor.Commands.WireAddCommand(from, to));
+                    ExecuteCommand(new Editor.Commands.WireAddCommand(from, to), false, (cmd) => {
+                        selectedWire = (cmd as Editor.Commands.WireAddCommand).addedWire;
+                    });
                 });
             }
             else

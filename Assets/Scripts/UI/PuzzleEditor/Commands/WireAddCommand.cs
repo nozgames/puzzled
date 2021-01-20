@@ -10,6 +10,8 @@ namespace Puzzled.Editor.Commands
         private int toIndex;
         private Wire wire;
 
+        public Wire addedWire => wire;
+
         public WireAddCommand(Port from, Port to)
         {
             this.from = from;
@@ -32,7 +34,7 @@ namespace Puzzled.Editor.Commands
             wire.visible = true;
             fromIndex = from.wires.IndexOf(wire);
             toIndex = to.wires.IndexOf(wire);
-            UIPuzzleEditor.selectedWire = wire;
+//            UIPuzzleEditor.selectedWire = wire;
 
             from.tile.Send(new StartEvent());
             to.tile.Send(new StartEvent());

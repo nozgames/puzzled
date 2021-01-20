@@ -11,7 +11,7 @@ namespace Puzzled
 
         [Editable(hiddenIfFalse = "decal")]
         [Port(PortFlow.Input, PortType.Power)]
-        private Port decalPowerPort { get; set; }
+        public Port decalPowerPort { get; private set; }
 
         private Decal _decal;
         private Color _defaultColor;

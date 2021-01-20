@@ -31,18 +31,6 @@ namespace Puzzled.Editor.Commands
             if(null != existing)
                 AddChild(new TileDestroyCommand(existing));
 
-            // If the incoming tile has a surface            
-            var decal = Decal.none;
-            if (prefab.info.layer == TileLayer.Static)
-            {
-                var floorSurface = DecalSurface.FromCell(puzzle, cell, TileLayer.Floor);
-                if (null != floorSurface)
-                {
-                    decal = floorSurface.tile.GetPropertyValue<Decal>("decal");
-                    AddChild(new TileSetPropertyCommand(floorSurface.tile, "decal", Decal.none));
-                }
-            }
-
             // Destroy all other instances of this tile regardless of variant
             if (!prefab.info.allowMultiple)
             {
@@ -51,15 +39,31 @@ namespace Puzzled.Editor.Commands
                     AddChild(new TileDestroyCommand(existing));
             }
 
-            children?.Execute();
-
             // Create the new tile
             tile = puzzle.InstantiateTile(prefab, cell);
             if (null == tile)
                 return;
 
-            if (decal != Decal.none)
-                tile.SetPropertyValue("decal", decal);
+            // If the incoming tile has a decal surface then transfer the decal and decal power to the
+            // new surface
+            var tileSurface = DecalSurface.FromCell(puzzle, cell, TileLayer.Static);
+            if (tileSurface != null)
+            {
+                var floorSurface = DecalSurface.FromCell(puzzle, cell, TileLayer.Floor);
+                if (null != floorSurface && floorSurface.decal != Decal.none)
+                {
+                    tileSurface.decal = floorSurface.decal;
+                    AddChild(new TileSetPropertyCommand(floorSurface.tile, "decal", Decal.none));
+
+                    foreach(var wire in floorSurface.decalPowerPort.wires)
+                    {
+                        AddChild(new WireAddCommand(wire.from.port, tileSurface.decalPowerPort));
+                        AddChild(new WireDestroyCommand(wire));
+                    }
+                }
+            }
+
+            children?.Execute();
 
             // Ensure the tile is started when created
             tile.Send(new StartEvent());
