@@ -190,7 +190,7 @@ namespace Puzzled
                 return;
 
             // Get all in the given cell that we can connect to
-            var tiles = puzzle.grid.GetLinkedTiles(cell, cell).Where(t => tile.CanConnectTo(t)).ToArray();
+            var tiles = puzzle.grid.GetLinkedTiles(cell, cell).Where(t => tile.CanConnectTo(t, false)).ToArray();
             if (tiles.Length == 0)
                 return;
 

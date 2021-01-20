@@ -73,6 +73,11 @@ namespace Puzzled
         public bool isLegacy => _property.port.legacy;
 
         /// <summary>
+        /// Is the port hidden in the editor?
+        /// </summary>
+        public bool isHidden => tile.IsPropertyHidden(_property);
+
+        /// <summary>
         /// Name of the port
         /// </summary>
         public string name => _property.name;

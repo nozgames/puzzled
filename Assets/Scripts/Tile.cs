@@ -401,7 +401,7 @@ namespace Puzzled
         /// </summary>
         /// <param name="tile">Tile to connect to</param>
         /// <returns>True if a connection can be made</returns>
-        public bool CanConnectTo (Tile tile)
+        public bool CanConnectTo (Tile tile, bool allowHidden = true)
         {
             if (tile == null)
                 return false;
@@ -420,8 +420,9 @@ namespace Puzzled
 
                 // Can this output connect to any of the inputs?
                 foreach (var input in inputs)
-                    if (output.CanConnectTo(input))
-                        return true;
+                    if(allowHidden || !input.isHidden)
+                        if (output.CanConnectTo(input))
+                            return true;
             }
 
             return false;
