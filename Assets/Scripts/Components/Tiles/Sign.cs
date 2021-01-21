@@ -53,6 +53,9 @@ namespace Puzzled
 
         private void HandleUse()
         {
+            if (text.Length == 0)
+                return;
+
             var popup = UIManager.ShowPopup(_popupPrefab, DoneCallback);
             popup.GetComponentInChildren<UIPopupText>().text = text;
         }
