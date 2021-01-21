@@ -98,6 +98,13 @@ namespace Puzzled
             UpdateVisuals();
         }
 
+        [ActorEventHandler]
+        private void OnRayCastEvent (RayCastEvent evt)
+        {
+            if (!_open)
+                evt.hit = tile;
+        }
+
         private Wall GetWall(Cell cell) => puzzle.grid.CellToComponent<Wall>(cell, TileLayer.Static);
 
         private void UpdateVisuals()

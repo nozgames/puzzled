@@ -24,18 +24,17 @@ namespace Puzzled
         public Port powerInPort { get; set; }
 
         [ActorEventHandler]
-        private void OnStart(StartEvent evt)
-        {
-            if (powerInPort.wireCount == 0)
-                isUsable = true;
-
-            OnUsableChanged();
-        }
+        private void OnStart(StartEvent evt) => UpdateUsable();
 
         [ActorEventHandler]
-        private void OnWirePowerChanged(WirePowerChangedEvent evt)
+        private void OnWirePowerChanged(WirePowerChangedEvent evt) => UpdateUsable();
+
+        private void UpdateUsable()
         {
-            isUsable = powerInPort.hasPower;
+            var oldUsable = _isUsable;
+            _isUsable = powerInPort.wireCount == 0 || powerInPort.hasPower;
+            if (_isUsable != oldUsable)
+                OnUsableChanged();
         }
 
         protected virtual void OnUsableChanged()

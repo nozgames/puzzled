@@ -13,12 +13,16 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 5000
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - Texture2D_deb8c382b43944bca425be6d30aeecca:
+        m_Texture: {fileID: 2800000, guid: c6a1cb539be80bc42ac2bbf5ca3fa986, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BaseMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -76,6 +80,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - Vector1_0387d0eeaf114151b4c9e3108b828c85: 11.7
     - Vector1_048acb1dfcac48d8a1367cc66d579732: 0
     - Vector1_8413bb2578e94a50aacc68734a84212a: 0
     - Vector1_883e97a1c4444eb792afc027bac4232c: 2
@@ -83,6 +88,8 @@ Material:
     - Vector1_92906bac918e434c8f3c72629c26a1ef: 1
     - Vector1_9903086b32d34ce5b9fc35f820eb5fc0: 2
     - Vector1_aab8827f7c9248ccbd663434edbf32ce: 2
+    - Vector1_e3c6f629f6ae4bb896d8602c66e1b388: 1.62
+    - Vector1_e99a459d6d494244a00197a1f44db5f1: 0.695
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1
@@ -99,6 +106,8 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
+    - _NoiseSize: 4.26
+    - _NoiseSpeed: 0.68
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueOffset: 0
@@ -111,11 +120,12 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - Color_12fdc87bdd74491794e930f53b3aab53: {r: 0.4959569, g: 0.31516472, b: 0.62299997, a: 0}
+    - Color_12fdc87bdd74491794e930f53b3aab53: {r: 0.7175589, g: 0.62543017, b: 0.7830189, a: 0}
     - Color_21f9dc7edbb24248a5a7b550db66898d: {r: 0.25568625, g: 0.3400627, b: 0.65199995, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _NoiseColor: {r: 0.6772762, g: 0.083422266, b: 0.6981132, a: 0.4117647}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &5715896932433122032

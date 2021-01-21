@@ -17,10 +17,7 @@ namespace Puzzled
         private int value {
             get => _value;
             set {
-                if (powerOutPort.wireCount == 0)
-                    _value = 0;
-                else
-                    _value = (value % powerOutPort.wireCount);                
+                _value = (value % _dirs.Length);                
                 UpdateBeam();
             }
         }
@@ -33,6 +30,9 @@ namespace Puzzled
                 UpdateBeam();
             }
         }
+
+        private Port beamInPort { get; set; }
+        private Port beamOutPort { get; set; }
 
         [Editable]
         [Port(PortFlow.Input, PortType.Power)]
@@ -55,6 +55,14 @@ namespace Puzzled
         {
             _line.positionCount = 2;
             _line.gameObject.SetActive(false);
+
+            //beamInPort = new Port(tile);
+        }
+
+        [ActorEventHandler]
+        private void OnStart(StartEvent evt)
+        {
+            UpdateBeam();
         }
 
         [ActorEventHandler]
@@ -89,8 +97,33 @@ namespace Puzzled
             value = evt.value - 1;
         }
 
+        private void RayCast (Cell dir)
+        {
+            var hit = puzzle.RayCast(tile.cell, dir, 10);
+            var target = tile.cell + dir * 10;
+            if (null != hit)
+                target = hit.cell;
+
+            var length = tile.cell.DistanceTo(target);
+
+            _line.gameObject.SetActive(true);
+            _line.positionCount = 1 + length;
+
+            var source = _line.GetPosition(0);
+            for (int i = 0; i < length - 1; i++)
+                _line.SetPosition(i + 1, source + dir.ToVector3() * (i + 1));
+
+            _line.SetPosition(_line.positionCount - 1, puzzle.grid.CellToWorld(target) + Vector3.up * _line.transform.localPosition.y);
+        }
+
+        private Cell[] _dirs = { Cell.up, Cell.right, Cell.down, Cell.left };
+
         private void UpdateBeam ()
         {
+            RayCast(_dirs[_value]);
+
+#if false
+
             _visualsOn.SetActive(powerInPort.hasPower);
             _visualsOff.SetActive(!powerInPort.hasPower);
 
@@ -118,6 +151,8 @@ namespace Puzzled
             valueOutPort.SendValue(_value + 1, true);
 
             _line.gameObject.SetActive(true);
-        }
+#endif
+        }        
     }
 }
+

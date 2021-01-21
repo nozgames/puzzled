@@ -34,6 +34,12 @@ namespace Puzzled
         public static Cell operator + (Cell lhs, Cell rhs) => new Cell(lhs.x + rhs.x, lhs.y + rhs.y);
         public static Cell operator - (Cell lhs, Cell rhs) => new Cell(lhs.x - rhs.x, lhs.y - rhs.y);
 
+        public static Cell operator * (Cell lhs, int rhs) => new Cell(lhs.x * rhs, lhs.y * rhs);
+
+        public Vector2 ToVector2() => new Vector2(x, y);
+
+        public Vector3 ToVector3() => new Vector3(x, 0, y);
+
         public Vector2Int ToVector2Int() => new Vector2Int(x, y);
 
         public Vector3Int ToVector3Int() => new Vector3Int(x, y, 0);
@@ -55,5 +61,9 @@ namespace Puzzled
         public bool IsAdjacentTo(Cell other) => DistanceTo(other) == 1;
 
         public Cell Flipped() => new Cell(-x, -y);
+
+        public Cell Direction (Cell to) => new Cell(Mathf.Clamp(to.x - x, -1, 1), Mathf.Clamp(to.y - y, -1, 1));
+
+        public Cell normalized => zero.Direction(this);
     }
 }

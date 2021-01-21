@@ -777,5 +777,27 @@ namespace Puzzled
                 return null;
             return _sharedComponentData.TryGetValue(component.GetType(), out var value) ? (value as T) : null;
         }
+
+        /// <summary>
+        /// Ray cast through tiles in a cardinal direction and stop at the first tile hit
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="dir"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
+        public Tile RayCast (Cell from, Cell dir, int distance)
+        {
+            dir = dir.normalized;
+            var cell = from + dir;
+            var raycast = new RayCastEvent(dir);
+            for(int i=0; i<distance; i++, cell += dir)
+            {
+                grid.SendToCell(raycast, cell, CellEventRouting.All);
+                if (raycast.hit != null)
+                    return raycast.hit;
+            }
+
+            return null;
+        }
     }
 }
