@@ -771,11 +771,18 @@ namespace Puzzled
             _sharedComponentData[component.GetType()] = data;
         }
 
+        public T GetSharedComponentData<T>(Type componentType) where T : class
+        {
+            if (componentType == null)
+                return null;
+            return _sharedComponentData.TryGetValue(componentType, out var value) ? (value as T) : null;
+        }
+
         public T GetSharedComponentData<T> (TileComponent component) where T : class 
         {
             if (component == null)
                 return null;
-            return _sharedComponentData.TryGetValue(component.GetType(), out var value) ? (value as T) : null;
+            return GetSharedComponentData<T>(component.GetType());
         }
 
         /// <summary>

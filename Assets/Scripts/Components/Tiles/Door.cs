@@ -10,6 +10,7 @@ namespace Puzzled
         [Editable]
         [SerializeField] private Tile keyItem = null;
         [SerializeField] private AudioClip _unlockSound = null;
+        [SerializeField] private BlockRaycast _blockRaycast = null;
 
         [Editable]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]
@@ -40,6 +41,9 @@ namespace Puzzled
                     PlaySound(_openSound);
                 else
                     PlaySound(_closeSound);
+
+                if(null != _blockRaycast)
+                    _blockRaycast.enabled = !_open;
             }
         }
 
@@ -49,6 +53,9 @@ namespace Puzzled
         private void OnStart(StartEvent evt)
         {
             UpdateVisuals();
+
+            if (null != _blockRaycast)
+                _blockRaycast.enabled = !_open;
         }
 
         [ActorEventHandler(priority=1)]
@@ -76,7 +83,7 @@ namespace Puzzled
 
             PlaySound(_unlockSound);
 
-            isOpen = true;            
+            isOpen = true;
         }
 
         [ActorEventHandler]
@@ -96,13 +103,6 @@ namespace Puzzled
         private void CellChangedEvent(CellChangedEvent evt)
         {
             UpdateVisuals();
-        }
-
-        [ActorEventHandler]
-        private void OnRayCastEvent (RayCastEvent evt)
-        {
-            if (!_open)
-                evt.hit = tile;
         }
 
         private Wall GetWall(Cell cell) => puzzle.grid.CellToComponent<Wall>(cell, TileLayer.Static);

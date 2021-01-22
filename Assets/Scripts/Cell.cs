@@ -13,6 +13,16 @@ namespace Puzzled
         public static readonly Cell zero = new Cell(0, 0);
         public static readonly Cell invalid = new Cell(-99999, -99999);
 
+        public static readonly Cell west = new Cell(-1, 0);
+        public static readonly Cell east = new Cell(1, 0);
+        public static readonly Cell north = new Cell(0, 1);
+        public static readonly Cell south = new Cell(0, -1);
+
+        public static readonly Cell northWest = new Cell(-1, 1);
+        public static readonly Cell southWest = new Cell(-1, -1);
+        public static readonly Cell northEast = new Cell(1, 1);
+        public static readonly Cell southEast = new Cell(1, -1);
+
         public int x;
         public int y;
 
