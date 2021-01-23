@@ -118,6 +118,7 @@ namespace Puzzled
             GameManager.puzzle = previewPuzzle;
             var tile = previewPuzzle.InstantiateTile(prefab, Cell.zero);
             tile.Send(new StartEvent());
+            tile.Send(new PreviewStartEvent());
 
             var renderers = tile.GetComponentsInChildren<Renderer>();
             var max = tile.transform.position;

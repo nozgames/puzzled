@@ -43,6 +43,12 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
+        private void OnPreviewStartEvent (PreviewStartEvent evt)
+        {
+            _beam.gameObject.SetActive(false);
+        }
+
+        [ActorEventHandler]
         private void OnValueEvent(ValueEvent evt)
         {
             value = evt.value - 1;

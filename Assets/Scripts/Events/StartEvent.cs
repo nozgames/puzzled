@@ -8,4 +8,9 @@ namespace Puzzled
     public class StartEvent : ActorEvent
     {
     }
+
+    public class PreviewStartEvent : ActorEvent
+    {
+
+    }
 }

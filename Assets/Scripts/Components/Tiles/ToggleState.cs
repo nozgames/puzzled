@@ -5,23 +5,6 @@ namespace Puzzled
 {
     class ToggleState : TileComponent
     {
-        private bool _hasPower = false;
-
-        protected bool hasPower
-        {
-            get => _hasPower;
-            set
-            {
-                bool hadPower = _hasPower;
-                _hasPower = value;
-
-                if (hadPower != _hasPower)
-                    OnPowerChanged();
-            }
-        }
-
-        public bool isOn { get; private set; }
-
         [Header("Visuals")]
         [SerializeField] private GameObject visualOn;
         [SerializeField] private GameObject visualOff;
@@ -35,30 +18,19 @@ namespace Puzzled
         private Port powerOutPort { get; set; }
 
         [ActorEventHandler]
-        private void OnStart(StartEvent evt)
-        {
-            if (powerInPort.wireCount == 0)
-                hasPower = true;
-
-            OnPowerChanged();
-        }
+        private void OnStart(StartEvent evt) => UpdatePower();
 
         [ActorEventHandler]
-        private void OnWirePowerChanged(WirePowerChangedEvent evt)
-        {
-            hasPower = powerInPort.hasPower;
-        }
+        private void OnWirePowerChanged(WirePowerChangedEvent evt) => UpdatePower();
 
-        private void OnPowerChanged()
-        {
-            UpdateVisuals();
-            powerOutPort.SetPowered(hasPower);
-        }
+        private void OnPowerChanged() => UpdatePower();
 
-        private void UpdateVisuals()
+        private void UpdatePower()
         {
+            var hasPower = powerInPort.wireCount == 0 || powerInPort.hasPower;
             visualOn.SetActive(hasPower);
             visualOff.SetActive(!hasPower);
+            powerOutPort.SetPowered(hasPower);
         }
     }
 }
