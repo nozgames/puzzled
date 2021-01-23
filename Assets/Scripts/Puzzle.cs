@@ -792,7 +792,7 @@ namespace Puzzled
         /// <param name="dir"></param>
         /// <param name="distance"></param>
         /// <returns></returns>
-        public Tile RayCast (Cell from, Cell dir, int distance)
+        public RayCastEvent RayCast (Cell from, Cell dir, int distance)
         {
             dir = dir.normalized;
             var cell = from + dir;
@@ -801,10 +801,10 @@ namespace Puzzled
             {
                 grid.SendToCell(raycast, cell, CellEventRouting.All);
                 if (raycast.hit != null)
-                    return raycast.hit;
+                    break;
             }
 
-            return null;
+            return raycast;
         }
     }
 }

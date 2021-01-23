@@ -3,9 +3,10 @@ using NoZ;
 
 namespace Puzzled
 {
-    class RayCastEvent : ActorEvent
+    public class RayCastEvent : ActorEvent
     {
         public Cell direction { get; set; }
+        public float offset { get; set; }
 
         private Tile _hit = null;
 

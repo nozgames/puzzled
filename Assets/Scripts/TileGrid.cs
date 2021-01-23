@@ -272,7 +272,7 @@ namespace Puzzled
                     for (int layer = _layerCount - 1; layer >= 0; layer--)
                     {
                         var tile = tiles[index + layer];
-                        if (null == tile)
+                        if (null == tile || tile.isDestroyed)
                             continue;
 
                         tile.Send(evt);
@@ -287,7 +287,7 @@ namespace Puzzled
                     for (int layer = _layerCount- 1; layer >= 0 && !evt.IsHandled; layer--)
                     {
                         var tile = tiles[index + layer];
-                        if (null == tile)
+                        if (null == tile || tile.isDestroyed)
                             continue;
 
                         tile.Send(evt);
@@ -300,7 +300,7 @@ namespace Puzzled
                     for (int layer = (int)(TileLayer.Logic - 1); layer >= 0; layer--)
                     {
                         var tile = tiles[index + layer];
-                        if (null == tile)
+                        if (null == tile || tile.isDestroyed)
                             continue;
 
                         tile.Send(evt);

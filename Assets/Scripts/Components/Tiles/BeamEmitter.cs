@@ -9,18 +9,19 @@ namespace Puzzled
         [SerializeField] private GameObject _visualsOff = null;
         [SerializeField] private AudioClip _useSound = null;
         [SerializeField] private Beam _beam = null;
+        [SerializeField] private Transform _rotator = null;
 
         private int _value = 0;
 
-        private static readonly Cell[] _dirs = { 
-            Cell.north, 
-            Cell.northEast,
-            Cell.east, 
-            Cell.southEast,
-            Cell.south, 
-            Cell.southWest,
-            Cell.west,
-            Cell.northWest
+        private static readonly BeamDirection[] _dirs = { 
+            BeamDirection.North,
+            BeamDirection.NorthEast,
+            BeamDirection.East,
+            BeamDirection.SouthEast,
+            BeamDirection.South,
+            BeamDirection.SouthWest,
+            BeamDirection.West,
+            BeamDirection.NorthWest
         };
 
         [Editable]
@@ -32,9 +33,12 @@ namespace Puzzled
             }
         }
 
+        public bool isEmitting => isUsable;
+
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
         {
+            _beam.isPowered = true;
             UpdateBeam();
         }
 
@@ -56,9 +60,15 @@ namespace Puzzled
             PlaySound(_useSound);
         }
 
+        [ActorEventHandler]
+        private void OnBeamChangedEvent (BeamChangedEvent evt) => OnUsableChanged();
+
         private void UpdateBeam()
         {
-            if(!isUsable)
+            if (null != _rotator)
+                _rotator.localRotation = Beam.GetRotation((BeamDirection)value);
+
+            if (!isEmitting)
             {
                 _beam.gameObject.SetActive(false);
                 return;
@@ -72,8 +82,9 @@ namespace Puzzled
         protected override void OnUsableChanged()
         {
             base.OnUsableChanged();
-            _visualsOff.gameObject.SetActive(!isUsable);
-            _visualsOn.gameObject.SetActive(isUsable);
+
+            _visualsOff.gameObject.SetActive(!isEmitting);
+            _visualsOn.gameObject.SetActive(isEmitting);
             UpdateBeam();
         }
     }

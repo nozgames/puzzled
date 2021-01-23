@@ -66,7 +66,7 @@ namespace Puzzled
 
         public override string ToString() => $"({x},{y})";
 
-        public int DistanceTo(Cell other) => Mathf.Abs(x - other.x) + Mathf.Abs(y - other.y);
+        public int DistanceTo(Cell other) => Mathf.Max(Mathf.Abs(x - other.x),Mathf.Abs(y - other.y));
 
         public bool IsAdjacentTo(Cell other) => DistanceTo(other) == 1;
 

@@ -5,8 +5,9 @@ namespace Puzzled
 {
     class Floating : MonoBehaviour
     {
+        [SerializeField] private GameObject _target = null;
         [SerializeField] private float minHeight = 0;
-        [SerializeField] private float maxHeight = 4;
+        [SerializeField] private float maxHeight = 4;        
 
         private void OnEnable()
         {
@@ -15,12 +16,14 @@ namespace Puzzled
                 .PingPong()
                 .EaseInOutCubic()
                 .Loop()
-                .Start(gameObject);
+                .Start(_target != null ? _target : gameObject);
         }
 
         private void OnDisable()
         {
-            Tween.Stop(gameObject);
+            var target = _target != null ? _target : gameObject;
+            Tween.Stop(target);
+            target.transform.localPosition = new Vector3(0, minHeight, 0);
         }
     }
 }

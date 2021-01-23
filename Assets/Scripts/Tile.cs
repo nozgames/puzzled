@@ -68,6 +68,11 @@ namespace Puzzled
         public Puzzle puzzle { get; set; }
 
         /// <summary>
+        /// True if the tile has been destroyed
+        /// </summary>
+        public bool isDestroyed => _pendingDestroy;
+
+        /// <summary>
         /// True if the tile has one or more outputs
         /// </summary>
         public bool hasOutputs {
