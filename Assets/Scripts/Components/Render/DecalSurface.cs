@@ -75,7 +75,7 @@ namespace Puzzled
             if (null == tile)
                 return null;
 
-            return tile.GetComponentInChildren<DecalSurface>();
+            return FromTile(tile);            
         }
 
         public static DecalSurface FromCell (Puzzle puzzle, Cell cell)
@@ -86,5 +86,7 @@ namespace Puzzled
 
             return FromCell(puzzle, cell, TileLayer.Floor);
         }
+
+        public static DecalSurface FromTile (Tile tile) => tile.GetComponentInChildren<DecalSurface>();
     }
 }

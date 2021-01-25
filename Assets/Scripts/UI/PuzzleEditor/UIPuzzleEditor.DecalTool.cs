@@ -31,7 +31,7 @@ namespace Puzzled
             if (cell == Cell.invalid)
                 return CursorType.Arrow;
 
-            if(KeyboardManager.isAltPressed)
+            if (KeyboardManager.isAltPressed)
                 return CursorType.EyeDropper;
 
             var tile = GetTile(cell);
@@ -43,7 +43,7 @@ namespace Puzzled
                 return CursorType.ArrowWithNot;
 
             var decal = _decalPalette.selected;
-            if(null == decal || decal.sprite == null || KeyboardManager.isCtrlPressed)
+            if (null == decal || decal.sprite == null || KeyboardManager.isCtrlPressed)
                 return CursorType.ArrowWithMinus;
 
             return CursorType.ArrowWithPlus;
@@ -64,7 +64,7 @@ namespace Puzzled
             var cell = canvas.CanvasToCell(position);
 
             _allowDecalDrag = !KeyboardManager.isAltPressed;
-            if(!_allowDecalDrag)
+            if (!_allowDecalDrag)
             {
                 var surface = DecalSurface.FromCell(puzzle, cell);
                 if (surface != null)
@@ -72,19 +72,29 @@ namespace Puzzled
                 return;
             }
 
-            var tile = GetTile(cell);
-            if (null == tile)
-                return;
+            SetDecal(cell, KeyboardManager.isCtrlPressed ? Decal.none : _decalPalette.selected);
+        }
 
-            var property = tile.GetProperty("decal");
-            if (null == property)
-                return;
+        public static bool SetDecal(Cell cell, Decal decal)
+        {
+            var surface = DecalSurface.FromCell(UIPuzzleEditor.instance.puzzle, cell);
+            if (surface == null)
+                return false;
 
-            var decal = KeyboardManager.isCtrlPressed ? Decal.none : _decalPalette.selected;
-            if (property.GetValue<Decal>(tile) == decal)
-                return;
+            if (surface.decal == decal && surface.decal.flags == decal.flags)
+                return true;
 
-            ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(tile, "decal", decal));
+            var command = new Editor.Commands.GroupCommand();
+            command.Add(new Editor.Commands.TileSetPropertyCommand(surface.tile, "decal", decal));
+
+            // If the decal is being erased then we need to also destroy any wires.
+            if (decal == Decal.none)
+                foreach (var wire in surface.decalPowerPort.wires)
+                    command.Add(new Editor.Commands.WireDestroyCommand(wire));
+
+            ExecuteCommand(command);
+
+            return true;
         }
     }
 }

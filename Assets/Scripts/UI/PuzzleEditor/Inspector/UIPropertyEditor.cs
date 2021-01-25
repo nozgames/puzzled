@@ -13,6 +13,8 @@ namespace Puzzled
             set => labelText.text = value;
         }
 
+        public virtual bool isHidden => false;
+
         public bool isGrouped => _grouped;
 
         public event Action<TilePropertyEditorTarget> onTargetChanged;

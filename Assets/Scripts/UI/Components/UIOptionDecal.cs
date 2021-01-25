@@ -14,7 +14,10 @@ namespace Puzzled
             base.OnTargetChanged();
 
             label = target.name;
-            _decalEditor.interactable = target.tile.info.layer != TileLayer.Floor || target.tile.puzzle.grid.CellToTile(target.tile.cell, TileLayer.Static) == null;
+
+            // Hide the decal option if the decal isnt the top most in the cell
+            gameObject.SetActive(DecalSurface.FromCell(target.tile.puzzle, target.tile.cell) == DecalSurface.FromTile(target.tile));
+
             _decalEditor.decal = target.GetValue<Decal>();
             _decalEditor.onDecalChanged -= OnDecalChanged;
             _decalEditor.onDecalChanged += OnDecalChanged;
@@ -22,8 +25,7 @@ namespace Puzzled
 
         private void OnDecalChanged(Decal decal)
         {
-            var option = ((TilePropertyEditorTarget)target);
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, decal));
+            UIPuzzleEditor.SetDecal(target.tile.cell, decal);
         }
     }
 }
