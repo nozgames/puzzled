@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using NoZ;
+using System;
 
 namespace Puzzled
 {
@@ -9,16 +10,12 @@ namespace Puzzled
 
         [SerializeField] private UIPopup _popupPrefab = null;
 
-        private string _text = "";
+        [Editable(multiline = true, hidden = true)]
+        public string text { get; set; }
 
         [Editable(multiline = true)]
-        public string text {
-            get => _text;
-            set {
-                _text = value;
-                UpdateVisuals();
-            }
-        }
+        public string[] pages { get; set; }
+
         /// <summary>
         /// Import use port to activate sign
         /// </summary>
@@ -33,9 +30,15 @@ namespace Puzzled
         [Port(PortFlow.Output, PortType.Signal, signalEvent = typeof(DoneSignal))]
         private Port donePort { get; set; }
 
-        private void UpdateVisuals()
+        [ActorEventHandler]
+        private void OnStartEvent (StartEvent evt)
         {
-
+            // Automatically convert old signs to use paging system
+            if(!string.IsNullOrWhiteSpace(text) && (pages == null || pages.Length == 0))
+            {
+                pages = new string[] { text };
+                text = "";
+            }
         }
 
         [ActorEventHandler]
@@ -53,11 +56,11 @@ namespace Puzzled
 
         private void HandleUse()
         {
-            if (text.Length == 0)
+            if (pages == null || pages.Length == 0)
                 return;
 
             var popup = UIManager.ShowPopup(_popupPrefab, DoneCallback);
-            popup.GetComponentInChildren<UIPopupText>().text = text;
+            popup.GetComponentInChildren<UIPopupText>().text = pages[0];
         }
 
         private void DoneCallback()

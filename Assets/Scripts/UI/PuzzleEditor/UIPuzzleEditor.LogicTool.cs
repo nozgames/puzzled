@@ -25,6 +25,8 @@ namespace Puzzled
         [SerializeField] private UIPropertyEditor portEmptyEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringMultilineEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor stringArrayEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor multilineStringArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
@@ -384,6 +386,10 @@ namespace Puzzled
                 {
                     case TilePropertyType.String:
                         prefab = property.editable.multiline ? stringMultilineEditorPrefab : stringEditorPrefab;
+                        break;
+
+                    case TilePropertyType.StringArray:
+                        prefab = property.editable.multiline ? multilineStringArrayEditorPrefab : stringArrayEditorPrefab;
                         break;
 
                     case TilePropertyType.Int: prefab = numberEditorPrefab; break;
