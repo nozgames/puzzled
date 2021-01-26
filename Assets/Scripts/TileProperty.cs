@@ -23,7 +23,8 @@ namespace Puzzled
         Background,
         IntArray,
         Port,
-        Sound
+        Sound,
+        Cell
     }
 
     public class TileProperty
@@ -84,6 +85,8 @@ namespace Puzzled
 
             if (info.PropertyType == typeof(int))
                 type = TilePropertyType.Int;
+            else if (info.PropertyType == typeof(Cell))
+                type = TilePropertyType.Cell;
             else if (info.PropertyType == typeof(int[]))
                 type = TilePropertyType.IntArray;
             else if (info.PropertyType == typeof(int[]))

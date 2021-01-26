@@ -24,8 +24,6 @@ namespace Puzzled
 
         [Header("General")]
         [SerializeField] private UICanvas canvas = null;
-        [SerializeField] private SelectionGizmo selectionGizmo = null;
-        [SerializeField] private SelectionGizmo _cursorGizmo = null;
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
@@ -37,6 +35,11 @@ namespace Puzzled
         [SerializeField] private UIRadio[] layerToggles = null;
         [SerializeField] private UIRadio _gridToggle = null;
         [SerializeField] private GameObject _canvasControls = null;
+
+        [Header("Gizmos")]
+        [SerializeField] private SelectionGizmo selectionGizmo = null;
+        [SerializeField] private SelectionGizmo _cursorGizmo = null;
+        [SerializeField] private SelectionGizmo _cameraBoundsGizmo = null;
 
         [Header("Cameras")]
         [SerializeField] private Camera _cameraMain = null;
@@ -797,6 +800,18 @@ namespace Puzzled
                 puzzle.Save();
                 puzzle.Destroy();
             }
+        }
+
+        public static void ShowCameraBounds (StaticCamera camera)
+        {
+            instance._cameraBoundsGizmo.gameObject.SetActive(camera != null);
+            if (camera == null)
+                return;
+
+            var center = instance._puzzle.grid.CellToWorld(camera.tile.cell + camera.offset);
+            var hsize = new Vector3(camera.zoomLevel * 16 / 9, 0, camera.zoomLevel) * 0.5f;
+            instance._cameraBoundsGizmo.min = center + hsize;
+            instance._cameraBoundsGizmo.max = center - hsize;
         }
     }
 }

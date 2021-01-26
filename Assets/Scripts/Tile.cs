@@ -251,50 +251,6 @@ namespace Puzzled
         }
 
         /// <summary>
-        /// Deprecated (Use SetProperty)
-        /// </summary>
-        public void SetPropertyDeprecated (string name, string value)
-        {
-            var property = GetProperty(name);
-            if (null == property)
-                return;
-
-            switch (property.type)
-            {
-                case TilePropertyType.Int:
-                    property.SetValue(this, int.TryParse(value, out var parsedInt) ? parsedInt : 0);
-                    break;
-
-                case TilePropertyType.Bool:
-                    property.SetValue(this, bool.TryParse(value, out var parsedBool) ? parsedBool : false);
-                    break;
-
-                case TilePropertyType.Guid:
-                    property.SetValue(this, Guid.TryParse(value, out var parsedGuid) ? parsedGuid : Guid.Empty);
-                    break;
-
-                case TilePropertyType.String:
-                    property.SetValue(this, value);
-                    break;
-
-                case TilePropertyType.StringArray:
-                    property.SetValue(this, value.Split(','));
-                    break;
-
-                case TilePropertyType.Decal:
-                    property.SetValue(this, DecalDatabase.GetDecal(Guid.TryParse(value, out var decalGuid) ? decalGuid : Guid.Empty));
-                    break;
-
-                case TilePropertyType.Tile:
-                    property.SetValue(this, TileDatabase.GetTile(Guid.TryParse(value, out var tileGuid) ? tileGuid : Guid.Empty));
-                    break;
-
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        /// <summary>
         /// Get the tile property with the given name
         /// </summary>
         /// <param name="name">Name of the property</param>

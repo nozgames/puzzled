@@ -348,6 +348,11 @@ namespace Puzzled
 
                         switch (property.type)
                         {
+                            case TilePropertyType.Cell:
+                                writer.Write(((Cell)value).x);
+                                writer.Write(((Cell)value).y);
+                                break;
+
                             case TilePropertyType.Int:
                                 writer.Write((int)value);
                                 break;
@@ -562,6 +567,10 @@ namespace Puzzled
                     {
                         case TilePropertyType.Int:
                             value = reader.ReadInt32();
+                            break;
+
+                        case TilePropertyType.Cell:
+                            value = new Cell(reader.ReadInt32(), reader.ReadInt32());
                             break;
 
                         case TilePropertyType.Sound:

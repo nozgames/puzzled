@@ -56,7 +56,7 @@ namespace Puzzled
                 return null;
 
             foreach (var editor in _customPropertyEditors)
-                if (string.Compare(editor.name, property.name, false) == 0)
+                if (string.Compare(editor.name, property.name, true) == 0)
                     return editor;
 
             return null;

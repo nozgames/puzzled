@@ -20,6 +20,8 @@ namespace Puzzled
         [SerializeField] private UIPropertyEditor decalEditorPrefab = null;
         [SerializeField] private UIPropertyEditor decalArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor numberEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor numberRangeEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor cellEditorPrefab = null;
         [SerializeField] private UIPropertyEditor numberArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor portEditorPrefab = null;
         [SerializeField] private UIPropertyEditor portEmptyEditorPrefab = null;
@@ -273,6 +275,7 @@ namespace Puzzled
                 _inspectorContent.SetActive(false);
                 _inspectorHeader.SetActive(false);
                 _inspectorEmpty.SetActive(true);
+                _cameraBoundsGizmo.gameObject.SetActive(false);
 
                 // Show all wires when no tile is selected
                 _puzzle.ShowWires();
@@ -292,6 +295,8 @@ namespace Puzzled
                 var flipped = _selectedTile.GetProperty("flipped");
                 _inspectorFlip.gameObject.SetActive(flipped != null);
                 _inspectorFlip.isOn = (flipped != null && flipped.GetValue<bool>(_selectedTile));
+
+                ShowCameraBounds(_selectedTile.GetComponent<StaticCamera>());
 
                 _inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);
@@ -392,7 +397,15 @@ namespace Puzzled
                         prefab = property.editable.multiline ? multilineStringArrayEditorPrefab : stringArrayEditorPrefab;
                         break;
 
-                    case TilePropertyType.Int: prefab = numberEditorPrefab; break;
+                    case TilePropertyType.Int:
+                        if (property.editable.range.x != property.editable.range.y)
+                            prefab = numberRangeEditorPrefab;
+                        else
+                            prefab = numberEditorPrefab; 
+                        break;
+
+
+                    case TilePropertyType.Cell: prefab = cellEditorPrefab; break;
                     case TilePropertyType.IntArray: prefab = numberArrayEditorPrefab; break;
                     case TilePropertyType.Bool: prefab = boolEditorPrefab; break;
                     case TilePropertyType.Background: prefab = backgroundEditorPrefab; break;

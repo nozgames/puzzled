@@ -5,12 +5,21 @@ namespace Puzzled
 {
     public class StaticCamera : TileComponent
     {
-        [Editable]
+        [Editable(rangeMin = CameraManager.MinZoomLevel, rangeMax = CameraManager.MaxZoomLevel)]
         public int zoomLevel 
         { 
-            get => _zoomLevel; 
-            private set => _zoomLevel = Mathf.Clamp(value, CameraManager.MinZoomLevel, CameraManager.MaxZoomLevel); 
+            get => _zoomLevel;
+            private set {
+                _zoomLevel = Mathf.Clamp(value, CameraManager.MinZoomLevel, CameraManager.MaxZoomLevel);
+
+                // Update the editor camera bounds when the zoom changes
+                if(isEditing && UIPuzzleEditor.selectedTile == tile)
+                    UIPuzzleEditor.ShowCameraBounds(this);
+            }
         }
+
+        [Editable(hidden = true)]
+        public Cell offset { get; set; }
 
         [Editable]
         public int transitionTime

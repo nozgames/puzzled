@@ -14,11 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _displayName: Static Camera
   description: 
+  _layer: 3
   _allowMultiple: 1
   _allowDynamic: 0
-  _allowWireInputs: 1
-  _allowWireOuputs: 1
-  _layer: 3
-  _inputsPrefab: {fileID: 0}
-  _outputsPrefab: {fileID: 0}
-  _customEditorPrefabs: []
+  _deprecated: 0
+  _customPropertyEditors:
+  - name: offset
+    prefab: {fileID: 5704630755880734692, guid: 215ec38b1d557ed4986455d15c6d6ec2, type: 3}
