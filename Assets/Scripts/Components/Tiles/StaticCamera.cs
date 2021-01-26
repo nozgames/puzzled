@@ -18,7 +18,7 @@ namespace Puzzled
             }
         }
 
-        [Editable(hidden = true)]
+        [Editable]
         public Cell offset { get; set; }
 
         [Editable]

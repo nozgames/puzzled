@@ -123,7 +123,7 @@ namespace Puzzled
             activeCamera = value;
 
             // Tell the camera manager to transition
-            CameraManager.Transition(grid.CellToWorld(value.tile.cell), value.zoomLevel, value.background, transitionTime);
+            CameraManager.Transition(grid.CellToWorld(value.tile.cell + value.offset), value.zoomLevel, value.background, transitionTime);
         }
 
         private void Awake()
