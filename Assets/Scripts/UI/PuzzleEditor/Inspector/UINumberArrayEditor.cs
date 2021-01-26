@@ -1,15 +1,16 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Puzzled.Editor    
 {
-    class UIStringArrayEditor : UIPropertyEditor, IInspectorStateProvider
+    class UINumberArrayEditor : UIPropertyEditor, IInspectorStateProvider
     {
         [SerializeField] private GameObject _itemPrefab = null;
         [SerializeField] private UIList _items = null;
 
-        private List<string> _values;
+        private List<int> _values;
 
         protected override void OnTargetChanged()
         {
@@ -18,32 +19,13 @@ namespace Puzzled.Editor
             _items.transform.DetachAndDestroyChildren();
             _items.onReorderItem += OnReorderItem;
 
-            _values = target.GetValue<string[]>()?.ToList() ?? new List<string>();
+            _values = target.GetValue<int[]>()?.ToList() ?? new List<int>();
             foreach (var value in _values)
                 AddValue(value);
 
-            _items.gameObject.SetActive(_values.Count > 0);
-
             label = target.name;
-        }
 
-        public void OnAddButton()
-        {
-            _values.Add("");
-            AddValue("");
-            _items.Select(_items.itemCount - 1);
-
-            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _values.ToArray()));
-        }
-
-        private void RemoveItem (UIStringArrayEditorItem item)
-        {
-            var index = item.transform.GetSiblingIndex();
-            _values.RemoveAt(index);
-            UIPuzzleEditor.ExecuteCommand(
-                new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _values.ToArray()), false, (command) => {
-                    _items.Select(Mathf.Min(index, _values.Count - 1));
-                });
+            _items.gameObject.SetActive(_values.Count > 0);
         }
 
         private void OnReorderItem(int from, int to)
@@ -56,18 +38,35 @@ namespace Puzzled.Editor
             });
         }
 
-        private UIStringArrayEditorItem AddValue(string value)
+        public void OnAddButton()
         {
-            var editor = Instantiate(_itemPrefab, _items.transform).GetComponent<UIStringArrayEditorItem>();
+            _values.Add(1);
+            AddValue(1);
+            _items.Select(_items.itemCount - 1);
+            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _values.ToArray()));
+        }
+
+        private void RemoveValue(int index)
+        {
+            _values.RemoveAt(index);
+
+            UIPuzzleEditor.ExecuteCommand(
+                new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _values.ToArray()), false, (command) => {
+                    _items.Select(Mathf.Min(index, _items.itemCount - 1));
+                });
+        }
+
+        private UINumberArrayEditorItem AddValue(int value)
+        {
+            var editor = Instantiate(_itemPrefab, _items.transform).GetComponent<UINumberArrayEditorItem>();
             editor.onValueChanged += (v) => {
-                var option = ((TilePropertyEditorTarget)target);
                 _values[editor.transform.GetSiblingIndex()] = v;
                 UIPuzzleEditor.ExecuteCommand(
-                    new Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _values.ToArray()), false, (command) => {
+                    new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _values.ToArray()), false, (command) => {
                         _items.Select(Mathf.Min(_items.selected, _items.itemCount - 1));
                     });
             };
-            editor.onDeleted += (v) => RemoveItem(v);
+            editor.onDeleted += (item) => RemoveValue(item.transform.GetSiblingIndex());
             editor.value = value;
             return editor;
         }
@@ -81,7 +80,7 @@ namespace Puzzled.Editor
 
             public void Apply(Transform inspector)
             {
-                var editor = inspector.GetComponentsInChildren<UIStringArrayEditor>().FirstOrDefault();
+                var editor = inspector.GetComponentsInChildren<UINumberArrayEditor>().FirstOrDefault();
                 if (null == editor)
                     return;
 

@@ -1,15 +1,19 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 namespace Puzzled.Editor    
 {
-    class UIOptionIntArrayItem : UIListItem
+    class UINumberArrayEditorItem : UIListItem
     {
         [SerializeField] private TMPro.TMP_InputField _input = null;
         [SerializeField] private TMPro.TextMeshProUGUI _text = null;
+        [SerializeField] private Button _deleteButton = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _index = null;
 
         public event Action<int> onValueChanged;
+        public event Action<UINumberArrayEditorItem> onDeleted;
 
         public int value {
             get => int.Parse(_input.text);
@@ -23,6 +27,8 @@ namespace Puzzled.Editor
         {
             base.Awake();
 
+            _deleteButton.onClick.AddListener(() => { onDeleted?.Invoke(this);  });
+
             _input.onEndEdit.AddListener(OnEndEdit);
             _input.onDeselect.AddListener(OnEndEdit);
         }
@@ -33,6 +39,9 @@ namespace Puzzled.Editor
 
             _input.gameObject.SetActive(false);
             _text.gameObject.SetActive(true);
+
+            if (_index != null)
+                _index.text = (transform.GetSiblingIndex() + 1).ToString();
         }
 
         public override void OnPointerClick(PointerEventData eventData)

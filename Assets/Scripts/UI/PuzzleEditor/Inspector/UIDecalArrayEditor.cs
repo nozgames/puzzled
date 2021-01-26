@@ -1,19 +1,13 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Puzzled.Editor    
 {
-    class UIOptionDecalArray : UIPropertyEditor, IInspectorStateProvider
+    class UIDecalArrayEditor : UIPropertyEditor, IInspectorStateProvider
     {
         [SerializeField] private GameObject _itemPrefab = null;
         [SerializeField] private UIList _items = null;
-
-        [SerializeField] private Button _moveUpButton = null;
-        [SerializeField] private Button _moveDownButton = null;
-        [SerializeField] private Button _removeButton = null;
-        [SerializeField] private Button _addButton = null;
 
         private List<Decal> _decals;
 
@@ -24,18 +18,13 @@ namespace Puzzled.Editor
             label = target.name;
 
             _items.transform.DetachAndDestroyChildren();
-            _items.onSelectionChanged += (index) => UpdateButtons();
-
-            _addButton.onClick.AddListener(OnAddButton);
-            _removeButton.onClick.AddListener(OnRemoveButton);
-            _moveUpButton.onClick.AddListener(OnMoveUpButton);
-            _moveDownButton.onClick.AddListener(OnMoveDownButton);
+            _items.onReorderItem += OnReorderItem;            
 
             _decals = target.GetValue<Decal[]>()?.ToList() ?? new List<Decal>();
             foreach (var decal in _decals)
                 AddDecal(decal);
 
-            UpdateButtons();
+            _items.gameObject.SetActive(_decals.Count > 0);
         }
 
         public void OnAddButton()
@@ -49,7 +38,17 @@ namespace Puzzled.Editor
             });
         }
 
-        public void OnRemoveButton()
+        private void OnReorderItem(int from, int to)
+        {
+            var step = _decals[from];
+            _decals.RemoveAt(from);
+            _decals.Insert(to, step);
+            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (command) => {
+                _items.Select(to);
+            });
+        }
+
+        private void RemoveDecal(int index)
         {
             _decals.RemoveAt(_items.selected);
 
@@ -59,43 +58,16 @@ namespace Puzzled.Editor
                 });
         }
 
-        private UIDecalEditor AddDecal(Decal decal)
+        private UIDecalArrayEditorItem AddDecal(Decal decal)
         {
-            var editor = Instantiate(_itemPrefab, _items.transform).GetComponent<UIDecalEditor>();
-            editor.decal = decal;
-            editor.onDecalChanged += (d) => {
+            var editor = Instantiate(_itemPrefab, _items.transform).GetComponent<UIDecalArrayEditorItem>();
+            editor.value = decal;
+            editor.onValueChanged += (d) => {
                 _decals[editor.transform.GetSiblingIndex()] = d;
                 UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()));
             };
+            editor.onDeleted += (item) => RemoveDecal(item.transform.GetSiblingIndex());
             return editor;
-        }
-
-        private void OnMoveUpButton()
-        {
-            var temp = _decals[_items.selected - 1];
-           _decals[_items.selected - 1] = _decals[_items.selected];
-            _decals[_items.selected] = temp;
-            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (cmd) => {
-                _items.Select(_items.selected - 1);
-            });
-        }
-
-        private void OnMoveDownButton()
-        {
-            var temp = _decals[_items.selected + 1];
-            _decals[_items.selected + 1] = _decals[_items.selected];
-            _decals[_items.selected] = temp;
-            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (cmd) => {
-                _items.Select(_items.selected + 1);
-            });
-        }
-
-        private void UpdateButtons()
-        {
-            _moveDownButton.interactable = _items.selected >= 0 && _items.selected < _items.itemCount - 1;
-            _moveUpButton.interactable = _items.selected > 0;
-            _addButton.interactable = _items.itemCount < 64;
-            _removeButton.interactable = _items.selected != -1;
         }
 
         /// <summary>
@@ -108,7 +80,7 @@ namespace Puzzled.Editor
 
             public void Apply(Transform inspector)
             {
-                var editor = inspector.GetComponentsInChildren<UIOptionDecalArray>().Where(e => e.target.tileProperty == property).FirstOrDefault();
+                var editor = inspector.GetComponentsInChildren<UIDecalArrayEditor>().Where(e => e.target.tileProperty == property).FirstOrDefault();
                 if (null == editor)
                     return;
 
