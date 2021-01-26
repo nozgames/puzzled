@@ -418,6 +418,8 @@ namespace Puzzled
             // Default puzzle name to unnamed
             puzzleName.text = "Unnamed";
 
+            SelectWire(null);
+            SelectTile(null);
             selectionGizmo.gameObject.SetActive(false);
 
             // Reset the camera back to zero,zero
@@ -426,6 +428,8 @@ namespace Puzzled
             Center(new Cell(0, 0), CameraManager.DefaultZoomLevel);
             ClearUndo();
             HidePopup();
+
+            mode = Mode.Draw;
         }
 
         public void OnNewButton()

@@ -64,7 +64,7 @@ namespace Puzzled
                     if (null == tile)
                         continue;
 
-                    ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile), _eraseStarted);
+                    ExecuteCommand(Erase(tile), _eraseStarted);
                     _eraseStarted = true;
                 }
             } 
@@ -77,8 +77,24 @@ namespace Puzzled
                 if (_eraseLayerOnly && tile.info.layer != _eraseLayer)
                     return;
 
-                ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile), _eraseStarted);
+                ExecuteCommand(Erase(tile), _eraseStarted);
             }
+        }
+
+        private Editor.Commands.GroupCommand Erase (Tile tile, Editor.Commands.GroupCommand group = null)
+        {
+            if (null == group)
+                group = new Editor.Commands.GroupCommand();
+
+            // Destroy all wires connected to the tile
+            foreach (var property in tile.properties)
+                if (property.type == TilePropertyType.Port)
+                    foreach (var wire in property.GetValue<Port>(tile).wires)
+                        group.Add(new Editor.Commands.WireDestroyCommand(wire));
+
+            group.Add(new Editor.Commands.TileDestroyCommand(tile));
+
+            return group;
         }
 
         private CursorType OnEraseGetCursor(Cell arg) => CursorType.Crosshair;

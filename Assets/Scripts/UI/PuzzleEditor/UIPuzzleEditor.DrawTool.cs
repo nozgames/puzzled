@@ -2,6 +2,7 @@
 
 using Puzzled.Editor;
 using System;
+using System.Collections.Generic;
 
 namespace Puzzled
 {
@@ -88,7 +89,74 @@ namespace Puzzled
             if (existing != null && existing.guid == tile.guid)
                 return;
 
-            ExecuteCommand(new Editor.Commands.TileAddCommand(tile, cell), group);
+            Draw(cell, tile);
+        }
+
+        private void Draw (Cell cell, Tile prefab)
+        {
+            var command = new Editor.Commands.GroupCommand();
+
+            // Remove what is already in that slot
+            // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
+            var existing = puzzle.grid.CellToTile(cell, prefab.info.layer);
+            if (null != existing)
+                Erase(existing, command);
+
+            // Destroy all other instances of this tile regardless of variant
+            if (!prefab.info.allowMultiple)
+            {
+                existing = puzzle.grid.GetLinkedTile(prefab.info);
+                if (null != existing)
+                    Erase(existing, command);
+            }
+
+            List<Port> prefabPowerPorts = null;
+            Decal decal = Decal.none;
+            if (prefab.info.layer == TileLayer.Static)
+            {
+                // If there is a floor with a decal we need to remove it
+                var floorSurface = DecalSurface.FromCell(puzzle, cell, TileLayer.Floor);
+                var tileHasDecal = DecalSurface.FromTile(prefab) != null;
+                if (null != floorSurface && floorSurface.decal != Decal.none)
+                {
+                    if (tileHasDecal)
+                        decal = floorSurface.decal;
+
+                    command.Add(new Editor.Commands.TileSetPropertyCommand(floorSurface.tile, "decal", Decal.none));
+
+                    prefabPowerPorts = new List<Port>();
+                    foreach (var wire in floorSurface.decalPowerPort.wires)
+                    {
+                        prefabPowerPorts.Add(wire.from.port);
+                        command.Add(new Editor.Commands.WireDestroyCommand(wire));
+                    }
+                }
+            }
+
+            command.Add(new Editor.Commands.TileAddCommand(prefab, cell));
+            ExecuteCommand(command);
+
+            // See if we can move an old decal to the new tile
+            if(decal != Decal.none)
+            {
+                // Get the new tile
+                var tile = puzzle.grid.CellToTile(cell, prefab.info.layer);
+                if (null == tile)
+                    return;
+
+                var tileDecalSurface = DecalSurface.FromTile(tile);
+                if (null == tileDecalSurface)
+                    return;
+
+                command = new Editor.Commands.GroupCommand();
+                command.Add(new Editor.Commands.TileSetPropertyCommand(tile, "decal", decal));
+
+                if (prefabPowerPorts != null)
+                    foreach (var port in prefabPowerPorts)
+                        command.Add(new Editor.Commands.WireAddCommand(port, tileDecalSurface.decalPowerPort));
+
+                ExecuteCommand(command, true);
+            }
         }
 
         private void EyeDropper(Cell cell, bool cycle)

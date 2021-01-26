@@ -419,8 +419,8 @@ namespace Puzzled
             switch (keyCode)
             {
                 case KeyCode.Delete:
-                    if(selectedTile != null)
-                        ExecuteCommand(new Editor.Commands.TileDestroyCommand(selectedTile));
+                    if (selectedTile != null)
+                        ExecuteCommand(Erase(selectedTile));
                     break;
 
                 case KeyCode.F:

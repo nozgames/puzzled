@@ -212,15 +212,14 @@ namespace Puzzled
             {
                 case KeyCode.Delete:
                     var tiles = GetSelectedTiles();
-                    if (null == tiles)
+                    if (null == tiles || tiles.Length == 0)
                         return;
 
-                    var combine = false;
+                    var command = new Editor.Commands.GroupCommand();
                     foreach(var tile in tiles)
-                    {
-                        ExecuteCommand(new Editor.Commands.TileDestroyCommand(tile), combine);
-                        combine = true;
-                    }
+                        Erase(tile, command);
+
+                    ExecuteCommand(command);
                     break;
             }
         }
