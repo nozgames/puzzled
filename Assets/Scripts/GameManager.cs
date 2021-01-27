@@ -14,7 +14,6 @@ namespace Puzzled
         [SerializeField] private Puzzle _puzzlePrefab = null;
         [SerializeField] private Transform _puzzles = null;
         [SerializeField] private CameraManager _cameraManager = null;
-        [SerializeField] private Camera _camera = null;
 
         /// <summary>
         /// Event fired when the current puzzle changes
@@ -152,9 +151,6 @@ namespace Puzzled
             var oldPuzzle = Puzzle.current;
             Puzzle.current = null;
 
-            if(!editing)
-                CameraManager.camera = _instance._camera;
-
             // Load and set the new puzzle
             var puzzle = Puzzle.Load(path);
             puzzle.isEditing = editing;
@@ -213,7 +209,10 @@ namespace Puzzled
         {            
             paused = false;
 
-            CameraManager.camera = _instance._camera;
+            CameraManager.ShowLayer(TileLayer.Dynamic, true);
+            CameraManager.ShowLayer(TileLayer.Floor, true);
+            CameraManager.ShowLayer(TileLayer.Static, true);
+            CameraManager.ShowLayer(TileLayer.Logic, false);
         }
 
         public static void Stop ()
