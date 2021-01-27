@@ -13,6 +13,7 @@ namespace Puzzled
         public Background background;
         public int zoomLevel;
         public bool editor;
+        public Player followPlayer;
     }
 
     /// <summary>
@@ -70,6 +71,8 @@ namespace Puzzled
         /// </summary>
         private Background _background = null;
 
+        private Player _followPlayer = null;
+
         private static CameraManager _instance = null;
 
         public static new Camera camera => _instance._camera;
@@ -92,10 +95,15 @@ namespace Puzzled
                 valid = true,
                 position = _instance._targetPosition,
                 background = _instance._background,
-                zoomLevel = _instance._zoomLevel
+                zoomLevel = _instance._zoomLevel,
+                followPlayer = _instance._followPlayer
             };
             set {
-                Transition(value.position, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
+                if (value.followPlayer != null)
+                    Follow(value.followPlayer, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
+                else
+                    Transition(value.position, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
+
             }
         }
 
@@ -117,6 +125,14 @@ namespace Puzzled
         private void OnDisable()
         {
             _instance = null;
+        }
+
+        private void LateUpdate()
+        {
+            if (_followPlayer == null)
+                return;
+
+            camera.transform.position = Frame(camera, _followPlayer.transform.position, _zoomLevel);
         }
 
         /// <summary>
@@ -168,6 +184,8 @@ namespace Puzzled
                 // Change background color
                 _instance._fog.material.color = targetBackground.color;
 
+                Tween.Stop(_instance.gameObject, "Transition");
+
                 camera.transform.position = Frame(camera, position, zoomLevel);
 
                 _instance._zoomLevel = zoomLevel;
@@ -176,30 +194,43 @@ namespace Puzzled
                 return;
             }
 
-            // Busy during a transition
-            GameManager.busy++;
-
             var tweenGroup = Tween.Group();
+
+            bool addedTweenChild = false;
 
             // Orthographic zoom
             if (camera.orthographic && camera.orthographicSize != zoomLevel)
+            {
                 tweenGroup.Child(Tween.Custom(_instance.LerpOrthographicSize, new Vector4(camera.orthographicSize, zoomLevel, 0), Vector4.zero));
+                addedTweenChild = true;
+            }
 
             // Move the camera if needed
             var targetPosition = Frame(camera, position, zoomLevel);
             if (targetPosition != camera.transform.position)
-                tweenGroup
-                    .Child(Tween.Move(camera.transform.position, targetPosition, false).Target(camera.gameObject));
+            {
+                tweenGroup.Child(Tween.Move(camera.transform.position, targetPosition, false).Target(camera.gameObject));
+                addedTweenChild = true;
+            }
 
             if (_instance._fog.material.color != targetBackground.color)
+            {
                 tweenGroup.Child(Tween.Custom(LerpBackgroundColor, _instance._fog.material.color, targetBackground.color));
+                addedTweenChild = true;
+            }
 
-            tweenGroup
-                .Duration(transitionTime * GameManager.tick)
-                .EaseInOutCubic()
-                .Key("Transition")
-                .OnStop(_instance.OnTransitionComplete)
-                .Start(_instance.gameObject);
+            if (addedTweenChild)
+            {
+                // Busy during a transition
+                GameManager.busy++;
+
+                tweenGroup
+                    .Duration(transitionTime * GameManager.tick)
+                    .EaseInOutCubic()
+                    .Key("Transition")
+                    .OnStop(_instance.OnTransitionComplete)
+                    .Start(_instance.gameObject);
+            }
 
             _instance._zoomLevel = zoomLevel;
             _instance._background = targetBackground;
@@ -232,6 +263,20 @@ namespace Puzzled
         /// Called when a transition is complete to disable the busy state
         /// </summary>
         private void OnTransitionComplete() => GameManager.busy--;
+
+        public static void StopFollow()
+        {
+            _instance._followPlayer = null;
+        }
+
+        public static void Follow(Player targetPlayer, int zoomLevel, Background background, int transitionTime)
+        {
+            if (targetPlayer == null)
+                return;
+
+            Transition(_instance._targetPosition, zoomLevel, background, transitionTime);
+            _instance._followPlayer = targetPlayer;
+        }
 
         /// <summary>
         /// Return the object layer that matches the given tile layer

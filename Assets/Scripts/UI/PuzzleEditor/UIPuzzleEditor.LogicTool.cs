@@ -296,7 +296,7 @@ namespace Puzzled
                 _inspectorFlip.gameObject.SetActive(flipped != null);
                 _inspectorFlip.isOn = (flipped != null && flipped.GetValue<bool>(_selectedTile));
 
-                ShowCameraBounds(_selectedTile.GetComponent<StaticCamera>());
+                ShowCameraBounds(_selectedTile.GetComponent<GameCamera>());
 
                 _inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);

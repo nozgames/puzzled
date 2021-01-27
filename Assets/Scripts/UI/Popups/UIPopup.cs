@@ -6,7 +6,11 @@ namespace Puzzled
     public class UIPopup : MonoBehaviour
     {
         public Action doneCallback;
-        
+
+        public virtual void Use()
+        {
+        }
+
         public void Close()
         {
             UIManager.ClosePopup();

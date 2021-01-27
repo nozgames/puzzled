@@ -60,7 +60,7 @@ namespace Puzzled
                 return;
 
             var popup = UIManager.ShowPopup(_popupPrefab, DoneCallback);
-            popup.GetComponentInChildren<UIPopupText>().text = pages[0];
+            popup.GetComponent<UIPopupText>().pages = pages;
         }
 
         private void DoneCallback()

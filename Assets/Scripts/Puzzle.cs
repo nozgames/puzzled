@@ -108,22 +108,25 @@ namespace Puzzled
         /// <summary>
         /// Returns the active camera in the puzzle.  Note that this may be null if there are no cameras in the level
         /// </summary>
-        public StaticCamera activeCamera { get; private set; }
+        public GameCamera activeCamera { get; private set; }
 
         /// <summary>
         /// Returns the active background in the puzzle.  Note that this may be null if there is no active camera
         /// </summary>
         public Background activeBackground => activeCamera == null ? null : activeCamera.background;
 
-        public void SetActiveCamera (StaticCamera value, int transitionTime)
+        public void SetActiveCamera (GameCamera value, int transitionTime)
         {
             if (activeCamera == value)
                 return;
 
+            if (activeCamera != null)
+                activeCamera.OnCameraStop();
+
             activeCamera = value;
 
-            // Tell the camera manager to transition
-            CameraManager.Transition(grid.CellToWorld(value.tile.cell + value.offset), value.zoomLevel, value.background, transitionTime);
+            if (activeCamera != null)
+                activeCamera.OnCameraStart(transitionTime);
         }
 
         private void Awake()
@@ -222,7 +225,7 @@ namespace Puzzled
                 return null;
 
             // Ensure we arent linking to ourself
-            if (from == to || from.tile == to.tile)
+            if (from == to) //  || from.tile == to.tile)
                 return null;
 
 
