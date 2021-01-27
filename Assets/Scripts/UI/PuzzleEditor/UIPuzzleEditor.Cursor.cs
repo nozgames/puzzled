@@ -49,7 +49,7 @@ namespace Puzzled
 
         private void UpdateCursor(bool updatePosition = false)
         {
-            if (popups.activeSelf)
+            if (popups.activeSelf || playing)
             {
                 UIManager.cursor = CursorType.Arrow;
                 return;

@@ -14,6 +14,8 @@ namespace Puzzled
         public int zoomLevel;
         public bool editor;
         public Player followPlayer;
+        public int cullingMask;
+        public bool logicCamera;
     }
 
     /// <summary>
@@ -45,6 +47,7 @@ namespace Puzzled
         [SerializeField] [Layer] private int staticLayer = 0;
         [SerializeField] [Layer] private int dynamicLayer = 0;
         [SerializeField] [Layer] private int logicLayer = 0;
+        [SerializeField] [Layer] private int gizmoLayer = 0;
 
         [Header("Background")]
         [SerializeField] private Background _defaultBackground = null;
@@ -75,7 +78,7 @@ namespace Puzzled
 
         private static CameraManager _instance = null;
 
-        public static new Camera camera => _instance._camera;
+        public static new Camera camera => _instance != null ? _instance._camera : null;
 
         /// <summary>
         /// Returns the default background 
@@ -96,14 +99,21 @@ namespace Puzzled
                 position = _instance._targetPosition,
                 background = _instance._background,
                 zoomLevel = _instance._zoomLevel,
-                followPlayer = _instance._followPlayer
+                followPlayer = _instance._followPlayer,
+                cullingMask = _instance._camera.cullingMask,
+                logicCamera = _instance._logicCamera.gameObject.activeSelf
             };
             set {
+                if (!value.valid || _instance == null)
+                    return;
+
+                camera.cullingMask = value.cullingMask;
+                _instance._logicCamera.gameObject.SetActive(value.logicCamera);
+
                 if (value.followPlayer != null)
                     Follow(value.followPlayer, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
                 else
                     Transition(value.position, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
-
             }
         }
 
@@ -115,11 +125,6 @@ namespace Puzzled
             _gridMaterialInstance.color = _defaultBackground.gridColor;
 
             _fog.material.color = Color.white;
-        }
-
-        private void OnEnable()
-        {
-            _instance = this;
         }
 
         private void OnDisable()
@@ -304,6 +309,17 @@ namespace Puzzled
         }
 
         /// <summary>
+        /// Hide or show gizmos
+        /// </summary>
+        public static void ShowGizmos (bool show = true)
+        {
+            if (show)
+                camera.cullingMask |= (1 << _instance.gizmoLayer);
+            else
+                camera.cullingMask &= ~(1 << _instance.gizmoLayer);
+        }
+
+        /// <summary>
         /// Show/Hide a tile layer
         /// </summary>
         /// <param name="layer">Tile layer to show/hide</param>
@@ -331,6 +347,9 @@ namespace Puzzled
         /// <returns></returns>
         private static Vector3 Frame (Camera camera, Vector3 position, float zoom)
         {
+            if(camera.orthographic)
+                camera.orthographicSize = zoom * 0.5f;
+
             var foreshorten = 0; // camera.orthographic ? 0.0f : (0.5f * ((0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f))));
             var distance = ((zoom - 1) * 0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f));
             return 

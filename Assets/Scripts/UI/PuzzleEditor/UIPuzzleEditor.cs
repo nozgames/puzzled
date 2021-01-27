@@ -41,10 +41,6 @@ namespace Puzzled
         [SerializeField] private SelectionGizmo _cursorGizmo = null;
         [SerializeField] private SelectionGizmo _cameraBoundsGizmo = null;
 
-        [Header("Cameras")]
-        [SerializeField] private Camera _cameraMain = null;
-        [SerializeField] private Camera _cameraLogic = null;
-
         [Header("Toolbar")]
         [SerializeField] private GameObject tools = null;
         [SerializeField] private UIRadio moveTool = null;
@@ -289,6 +285,9 @@ namespace Puzzled
             ClearUndo();
 
             InitializeCursor();
+
+            CameraManager.ShowGizmos();
+            UpdateLayers();
 
             // Uncomment to convert all files
             // UpgradeAllFiles();
