@@ -426,7 +426,6 @@ namespace Puzzled
             selectionGizmo.gameObject.SetActive(false);
 
             // Reset the camera back to zero,zero
-            CameraManager.camera = _cameraMain;
             CameraManager.Transition(CameraManager.defaultBackground, 0);
             Center(new Cell(0, 0), CameraManager.DefaultZoomLevel);
             ClearUndo();
@@ -688,18 +687,7 @@ namespace Puzzled
         private void UpdateLayers()
         {
             for (int i = 0; i < layerToggles.Length; i++)
-            {
-                switch ((TileLayer)i)
-                {
-                    case TileLayer.Logic:
-                        CameraManager.ShowLayer(_cameraLogic, (TileLayer)i, layerToggles[i].isOn);
-                        break;
-
-                    default:
-                        CameraManager.ShowLayer(_cameraMain, (TileLayer)i, layerToggles[i].isOn);
-                        break;
-                }
-            }
+                CameraManager.ShowLayer((TileLayer)i, layerToggles[i].isOn);
         }
 
         void KeyboardManager.IKeyboardHandler.OnKey(KeyCode keyCode)

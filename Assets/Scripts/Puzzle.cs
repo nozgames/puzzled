@@ -222,7 +222,7 @@ namespace Puzzled
                 return null;
 
             // Ensure we arent linking to ourself
-            if (from == to || from.tile == to.tile)
+            if (from == to) //  || from.tile == to.tile)
                 return null;
 
 
