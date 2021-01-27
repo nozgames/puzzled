@@ -533,7 +533,7 @@ namespace Puzzled
                 _puzzle = GameManager.LoadPuzzle(path, true);
                 _puzzle.showGrid = _gridToggle.isOn;
 
-                var startingCamera = _puzzle.GetComponentsInChildren<StaticCamera>().Where(c => c.isStartingCamera).FirstOrDefault();
+                var startingCamera = _puzzle.GetComponentsInChildren<GameCamera>().Where(c => c.isStartingCamera).FirstOrDefault();
                 var startingCell = Cell.zero;
                 if (startingCamera != null)
                 {
@@ -790,7 +790,7 @@ namespace Puzzled
             }
         }
 
-        public static void ShowCameraBounds (StaticCamera camera)
+        public static void ShowCameraBounds (GameCamera camera)
         {
             instance._cameraBoundsGizmo.gameObject.SetActive(camera != null);
             if (camera == null)
