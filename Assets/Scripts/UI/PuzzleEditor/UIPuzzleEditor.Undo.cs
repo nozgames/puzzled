@@ -74,6 +74,12 @@ namespace Puzzled
 
             instance.mode = command.mode;
             selectedTile = command.selectedTile;
+
+            instance.puzzle.isModified = true;
+
+            // Add a star to the end of the puzzle name
+            if (!instance.puzzleName.text.EndsWith("*"))
+                instance.puzzleName.text = instance.puzzleName.text + "*";
         }
 
         /// <summary>

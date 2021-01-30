@@ -144,7 +144,7 @@ namespace Puzzled
         public bool IsConnectedTo(Tile tile)
         { 
             foreach (var wire in wires)
-                if (wire.to.tile == tile || wire.from.tile == tile)
+                if (wire.GetOppositeConnection(this).tile == tile)
                     return true;
 
             return false;

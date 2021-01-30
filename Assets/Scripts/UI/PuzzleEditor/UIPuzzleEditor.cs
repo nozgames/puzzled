@@ -34,6 +34,7 @@ namespace Puzzled
         [SerializeField] private GameObject inspector = null;
         [SerializeField] private UIRadio[] layerToggles = null;
         [SerializeField] private UIRadio _gridToggle = null;
+        [SerializeField] private UIRadio _wireToggle = null;
         [SerializeField] private GameObject _canvasControls = null;
 
         [Header("Gizmos")]
@@ -195,6 +196,8 @@ namespace Puzzled
                 _puzzle.showGrid = v;
             });
 
+            _wireToggle.onValueChanged.AddListener((v) => CameraManager.ShowWires(v));
+
             _inspectorRotate.onValueChanged.AddListener((v) => {
                 if (_selectedTile == null)
                     return;
@@ -287,6 +290,7 @@ namespace Puzzled
             InitializeCursor();
 
             CameraManager.ShowGizmos();
+            CameraManager.ShowWires();
             UpdateLayers();
 
             // Uncomment to convert all files
@@ -318,7 +322,7 @@ namespace Puzzled
             KeyboardManager.Pop();
             ClearUndo();
 
-            if (!playing)
+            if (!playing && puzzle.isModified)
                 Save();
 
             if (_puzzle != null)
@@ -405,10 +409,17 @@ namespace Puzzled
                 return;
 
             _puzzle.Save();
+
+            // Add a star to the end of the puzzle name
+            if (instance.puzzleName.text.EndsWith("*"))
+                instance.puzzleName.text = instance.puzzleName.text.Substring(0, instance.puzzleName.text.Length - 1);
         }
 
         private void NewPuzzle()
         {
+            if (_puzzle != null && _puzzle.isModified)
+                Save();
+
             if (_puzzle != null)
                 _puzzle.Destroy();
 
@@ -487,7 +498,8 @@ namespace Puzzled
 
             // We have to save the puzzle before we can play because
             // play will load the puzzle
-            Save();
+            if(puzzle.isModified)
+                Save();
 
             tools.SetActive(false);
             savedMode = mode;

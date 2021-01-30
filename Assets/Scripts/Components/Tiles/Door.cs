@@ -6,6 +6,10 @@ namespace Puzzled
     public class Door : TileComponent
     {
         private bool _open = false;
+        private int _animationOpen;
+        private int _animationClosed;
+        private int _animationOpenToClosed;
+        private int _animationClosedToOpen;
 
         [Editable]
         [SerializeField] private Tile keyItem = null;
@@ -32,10 +36,19 @@ namespace Puzzled
             set {
                 _open = value;
 
-                if (value)
-                    _animator.SetTrigger((isLoading || isEditing) ? "Open" : "ClosedToOpen");
-                else
-                    _animator.SetTrigger((isLoading || isEditing) ? "Closed" : "OpenToClosed");
+                if(_animator != null)
+                {
+                    _animator.enabled = true;
+
+                    int animation;
+                    if (value)
+                        animation = (isLoading || isEditing) ? _animationOpen : _animationClosedToOpen;
+                    else
+                        animation = (isLoading || isEditing) ? _animationClosed : _animationOpenToClosed;
+
+                    if(animation != 0)
+                        _animator.SetTrigger(animation);
+                }
 
                 if (value)
                     PlaySound(_openSound);
@@ -48,6 +61,17 @@ namespace Puzzled
         }
 
         private bool requiresKey => keyItem != null;
+
+        private void Start()
+        {
+            if(null != _animator)
+            {
+                _animationOpen = Animator.StringToHash("Open");
+                _animationClosed = Animator.StringToHash("Closed");
+                _animationOpenToClosed = Animator.StringToHash("OpenToClosed");
+                _animationClosedToOpen = Animator.StringToHash("ClosedToOpen");
+            }
+        }
 
         [ActorEventHandler]
         private void OnStart(StartEvent evt)

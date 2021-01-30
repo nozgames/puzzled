@@ -35,7 +35,7 @@ namespace Puzzled
         [SerializeField] private UIRadio _inspectorFlip = null;
         [SerializeField] private UIRadio _inspectorRotate = null;
 
-        private WireMesh dragWire = null;
+        private WireVisuals dragWire = null;
         private bool logicCycleSelection = false;
         private Tile _selectedTile = null;
         private Wire _selectedWire = null;
@@ -159,10 +159,14 @@ namespace Puzzled
             if (_selectedTile == null || !_selectedTile.hasOutputs)
                 return;
 
-            dragWire = Instantiate(dragWirePrefab, puzzle.transform).GetComponent<WireMesh>();
-            dragWire.state = WireVisualState.Selected;
+            dragWire = Instantiate(dragWirePrefab, puzzle.transform).GetComponent<WireVisuals>();
+            dragWire.portTypeFrom = PortType.Power;
+            dragWire.portTypeTo = PortType.Power;
+            dragWire.selected = true;
             dragWire.transform.position = puzzle.grid.CellToWorld(_selectedTile.cell);
-            dragWire.target = _selectedTile.cell;
+            dragWire.target = puzzle.grid.CellToWorld(_selectedTile.cell);
+
+            UpdateCursor();
         }
 
         private void OnLogicLButtonDrag(Vector2 position, Vector2 delta)
@@ -170,7 +174,7 @@ namespace Puzzled
             if (null == dragWire)
                 return;
 
-            dragWire.target = canvas.CanvasToCell(position);
+            dragWire.target = puzzle.grid.CellToWorld(canvas.CanvasToCell(position));
         }
 
         private void OnLogicLButtonDragEnd(Vector2 position)
@@ -184,6 +188,8 @@ namespace Puzzled
 
             // Connect to the cell
             Connect(_selectedTile, canvas.CanvasToCell(position));
+
+            UpdateCursor();
         }
 
         private void Connect(Tile tile, Cell cell)
@@ -251,7 +257,7 @@ namespace Puzzled
             foreach (var property in tile.properties)
                 if (property.type == TilePropertyType.Port)
                     foreach (var wire in property.GetValue<Port>(tile).wires)
-                        wire.dark = dark;
+                        wire.visuals.highlight = !dark;
         }
 
         private void SelectTile(Tile tile)
@@ -323,12 +329,12 @@ namespace Puzzled
                 SelectTile(wire.from.tile);
 
             if (_selectedWire != null)
-                _selectedWire.selected = false;
+                _selectedWire.visuals.selected = false;
 
             _selectedWire = wire;
 
             if (_selectedWire != null)
-                _selectedWire.selected = true;
+                _selectedWire.visuals.selected = true;
 
             onSelectedWireChanged?.Invoke(_selectedWire);
         }
@@ -446,8 +452,14 @@ namespace Puzzled
         private CursorType OnLogicGetCursor(Cell cell)
         {
             // When shift is pressed it means "QuickConnect" mode
-            if (KeyboardManager.isShiftPressed && selectedTile != null)
-                return selectedTile.CanConnectTo(cell) ? CursorType.ArrowWithPlus : CursorType.ArrowWithNot;
+            if ((KeyboardManager.isShiftPressed && selectedTile != null) || dragWire != null)
+            {
+                var canConnect = selectedTile.CanConnectTo(cell, false);
+                if (dragWire)
+                    dragWire.highlight = canConnect;
+
+                return canConnect ? CursorType.ArrowWithPlus : CursorType.ArrowWithNot;
+            }
 
             // When ctrl is pressed it means "QuickDisconnect" mode
             if (KeyboardManager.isCtrlPressed && selectedTile != null)

@@ -79,7 +79,7 @@ namespace Puzzled
             public int GetOption(int index) => options?[index] ?? 0;
         }
 
-        [SerializeField] private WireMesh _visuals = null;
+        [SerializeField] private WireVisuals _visuals = null;
 
         public Connection from { get; private set; } = new Connection();
         public Connection to { get; private set; } = new Connection();
@@ -112,54 +112,12 @@ namespace Puzzled
         /// <summary>
         /// Control the wire visual state
         /// </summary>
-        public WireVisualState visualState {
-            get => _visuals.state;
-            set => _visuals.state = value;
-        }
-
-        /// <summary>
-        /// Set the selected visual state of the wire
-        /// </summary>
-        public bool selected {
-            get => (visualState & WireVisualState.Selected) == WireVisualState.Selected;
-            set {
-                if (value)
-                    visualState |= WireVisualState.Selected;
-                else
-                    visualState &= ~WireVisualState.Selected;
-            }
-        }
-
-        /// <summary>
-        /// Set the dark visual state of the wire
-        /// </summary>
-        public bool dark {
-            get => (visualState & WireVisualState.Dark) == WireVisualState.Dark;
-            set {
-                if (value)
-                    visualState |= WireVisualState.Dark;
-                else
-                    visualState &= ~WireVisualState.Dark;
-            }
-        }
-
-        /// <summary>
-        /// Set the bold visual state of the wire
-        /// </summary>
-        public bool bold {
-            get => (visualState & WireVisualState.Bold) == WireVisualState.Bold;
-            set {
-                if (value)
-                    visualState |= WireVisualState.Bold;
-                else
-                    visualState &= ~WireVisualState.Bold;
-            }
-        }
+        public WireVisuals visuals => _visuals;
 
         public bool visible {
             get => _visuals.gameObject.activeSelf;
             set {
-                _visuals.target = to.cell;
+               UpdatePositions();
                 _visuals.gameObject.SetActive(value);
             }
         }
@@ -174,9 +132,9 @@ namespace Puzzled
             else if (to.port.type == PortType.Signal)
                 SendSignalInternal();
 
-            _visuals.target = to.tile.cell;
+            UpdatePositions();
 
-            bold = true;
+            _visuals.flowing = true;
         }
 
         private void OnDisable()
@@ -184,7 +142,7 @@ namespace Puzzled
             if (to?.port?.type == PortType.Power)
                 to.tile.Send(new WirePowerChangedEvent(this));
 
-            bold = false;
+            _visuals.flowing = false;
         }
 
         private void OnDestroy()
@@ -235,7 +193,9 @@ namespace Puzzled
         public void UpdatePositions()
         {
             transform.position = from.tile.transform.position;
-            _visuals.UpdateMesh();
+            _visuals.target = to.tile.transform.position;
+            _visuals.portTypeFrom = from.port.type;
+            _visuals.portTypeTo = to.port.type;
         }
 
         /// <summary>

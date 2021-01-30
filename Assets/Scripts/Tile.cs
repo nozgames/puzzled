@@ -395,10 +395,10 @@ namespace Puzzled
         /// </summary>
         /// <param name="cell">Cell to connect to</param>
         /// <returns>True if a connection can be made</returns>
-        public bool CanConnectTo(Cell cell)
+        public bool CanConnectTo(Cell cell, bool allowHidden = true)
         {
             for (int i = (int)TileLayer.Logic; i >= 0; i--)
-                if (CanConnectTo(puzzle.grid.CellToTile(cell, (TileLayer)i)))
+                if (CanConnectTo(puzzle.grid.CellToTile(cell, (TileLayer)i), allowHidden))
                     return true;
 
             return false;

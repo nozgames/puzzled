@@ -23,6 +23,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnIncrement (IncrementSignal evt)
         {
+            if (valueCount == 0)
+                return;
+
             _value = (_value + 1) % valueCount;
             SendValue();
         }

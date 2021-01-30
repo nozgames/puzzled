@@ -63,6 +63,11 @@ namespace Puzzled
         public bool isLoading { get; private set; }
 
         /// <summary>
+        /// True if the puzzle has been modified
+        /// </summary>
+        public bool isModified { get; set; }
+
+        /// <summary>
         /// True if the grid lines should be visible for this puzzle
         /// </summary>
         public bool showGrid {
@@ -99,11 +104,6 @@ namespace Puzzled
         /// True if the puzzle has a valid path
         /// </summary>
         public bool hasPath => !string.IsNullOrEmpty(_path);
-
-        /// <summary>
-        /// True if the puzzle has been modified since the last time it was saved
-        /// </summary>
-        public bool isModified { get; set; }
 
         /// <summary>
         /// Returns the active camera in the puzzle.  Note that this may be null if there are no cameras in the level
@@ -263,6 +263,7 @@ namespace Puzzled
             from.wires.Add(wire);
             to.wires.Add(wire);
             wire.transform.position = _tiles.CellToWorld(wire.from.tile.cell);
+            wire.puzzle = this;
             return wire;
         }
 
@@ -523,10 +524,13 @@ namespace Puzzled
             // Instantiate all the wires
             var wires = new Wire[reader.ReadInt32()];
             for (int wireIndex = 0; wireIndex < wires.Length; wireIndex++)
+            {
                 wires[wireIndex] = Instantiate(_wirePrefab, _wires).GetComponent<Wire>();
+                wires[wireIndex].puzzle = this;
+            }
 
             // Instantiate the tiles
-            for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
+                for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
             {
                 var guid = reader.ReadGuid();
                 var size = reader.ReadInt32();

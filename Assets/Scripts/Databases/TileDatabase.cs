@@ -196,8 +196,7 @@ namespace Puzzled
             {
                 var properties = _tileProperties[tile.guid] =
                     tile.GetComponentsInChildren<TileComponent>()
-                        .SelectMany(tc =>
-                            tc.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.FlattenHierarchy),
+                        .SelectMany(tc => tc.GetType().GetFlattenedProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance),
                             (tc, p) => new TileProperty (p, p.GetCustomAttribute<EditableAttribute>(), p.GetCustomAttribute<PortAttribute>()))
                         .Where(ep => ep.editable != null)
                         .ToArray();

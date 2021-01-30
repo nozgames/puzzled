@@ -210,6 +210,7 @@ namespace Puzzled
             paused = false;
 
             CameraManager.ShowGizmos(false);
+            CameraManager.ShowWires(false);
             CameraManager.ShowLayer(TileLayer.Dynamic, true);
             CameraManager.ShowLayer(TileLayer.Floor, true);
             CameraManager.ShowLayer(TileLayer.Static, true);

@@ -34,17 +34,20 @@ namespace Puzzled
             if (KeyboardManager.isAltPressed)
                 return CursorType.EyeDropper;
 
-            var tile = GetTile(cell);
-            if (null == tile)
+            var decalSurface = DecalSurface.FromCell(instance._puzzle, cell);
+            if (null == decalSurface)
                 return CursorType.ArrowWithNot;
 
-            var property = tile.GetProperty("decal");
-            if (null == property)
-                return CursorType.ArrowWithNot;
+            if(KeyboardManager.isCtrlPressed)
+            {
+                if (decalSurface.decal == Decal.none)
+                    return CursorType.ArrowWithNot;
 
-            var decal = _decalPalette.selected;
-            if (null == decal || decal.sprite == null || KeyboardManager.isCtrlPressed)
                 return CursorType.ArrowWithMinus;
+            }
+
+            if (decalSurface.tile.info.layer == TileLayer.Floor && instance._puzzle.grid.CellToTile(cell, TileLayer.Static) != null)
+                return CursorType.ArrowWithNot;
 
             return CursorType.ArrowWithPlus;
         }
@@ -77,8 +80,11 @@ namespace Puzzled
 
         public static bool SetDecal(Cell cell, Decal decal)
         {
-            var surface = DecalSurface.FromCell(UIPuzzleEditor.instance.puzzle, cell);
+            var surface = DecalSurface.FromCell(instance.puzzle, cell);
             if (surface == null)
+                return false;
+
+            if (surface.tile.info.layer == TileLayer.Floor && instance._puzzle.grid.CellToTile(cell, TileLayer.Static) != null)
                 return false;
 
             if (surface.decal == decal && surface.decal.flags == decal.flags)

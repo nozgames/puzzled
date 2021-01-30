@@ -16,6 +16,7 @@ namespace Puzzled
         public Player followPlayer;
         public int cullingMask;
         public bool logicCamera;
+        public bool wireCamera;
     }
 
     /// <summary>
@@ -41,6 +42,7 @@ namespace Puzzled
         [Header("General")]
         [SerializeField] private Camera _camera = null;
         [SerializeField] private Camera _logicCamera = null;
+        [SerializeField] private Camera _wireCamera = null;
 
         [Header("Layers")]
         [SerializeField] [Layer] private int floorLayer = 0;
@@ -101,7 +103,8 @@ namespace Puzzled
                 zoomLevel = _instance._zoomLevel,
                 followPlayer = _instance._followPlayer,
                 cullingMask = _instance._camera.cullingMask,
-                logicCamera = _instance._logicCamera.gameObject.activeSelf
+                logicCamera = _instance._logicCamera.gameObject.activeSelf,
+                wireCamera = _instance._wireCamera.gameObject.activeSelf
             };
             set {
                 if (!value.valid || _instance == null)
@@ -109,6 +112,7 @@ namespace Puzzled
 
                 camera.cullingMask = value.cullingMask;
                 _instance._logicCamera.gameObject.SetActive(value.logicCamera);
+                _instance._wireCamera.gameObject.SetActive(value.wireCamera);
 
                 if (value.followPlayer != null)
                     Follow(value.followPlayer, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
@@ -309,6 +313,14 @@ namespace Puzzled
         }
 
         /// <summary>
+        /// Hide or show wires
+        /// </summary>
+        public static void ShowWires (bool show = true)
+        {
+            _instance._wireCamera.gameObject.SetActive(show);
+        }
+
+        /// <summary>
         /// Hide or show gizmos
         /// </summary>
         public static void ShowGizmos (bool show = true)
@@ -350,17 +362,15 @@ namespace Puzzled
             if(camera.orthographic)
                 camera.orthographicSize = zoom * 0.5f;
 
-            var foreshorten = 0; // camera.orthographic ? 0.0f : (0.5f * ((0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f))));
-            var distance = ((zoom - 1) * 0.5f) / Mathf.Abs(Mathf.Sin(camera.fieldOfView * Mathf.Deg2Rad * 0.5f));
-            return 
+            var frustumHeight = zoom;
+            var cameraFov = camera.fieldOfView;
+            var distance = (frustumHeight * 0.5f) / Mathf.Tan(cameraFov * 0.5f * Mathf.Deg2Rad);
+            return
                 // Target position
                 position
 
                 // Zoom to frame entire target
-                + (distance * -Vector3.Normalize(camera.transform.forward))
-                
-                // Adjust for foreshortening 
-                - (foreshorten * Vector3.Dot(-Vector3.Normalize(camera.transform.forward), Vector3.forward) * Vector3.forward);
+                + (distance * -Vector3.Normalize(camera.transform.forward));
         }
     }
 }
