@@ -43,6 +43,8 @@ namespace Puzzled.Editor
 
         private void UpdateTransforms()
         {
+            var min = Vector3.Min(this.max, this.min);
+            var max = Vector3.Max(this.max, this.min);
             var size = max - min;
             var hsize = size * 0.5f;
             var center = min + hsize;

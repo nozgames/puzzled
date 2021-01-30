@@ -30,6 +30,7 @@ namespace Puzzled
         [SerializeField] private GameObject dragWirePrefab = null;
         [SerializeField] private RectTransform _canvasCenter = null;
         [SerializeField] private Slider _zoomSlider = null;
+        [SerializeField] private UICameraEditor _cameraEditor = null;
 
         [SerializeField] private GameObject inspector = null;
         [SerializeField] private UIRadio[] layerToggles = null;
@@ -40,7 +41,6 @@ namespace Puzzled
         [Header("Gizmos")]
         [SerializeField] private SelectionGizmo selectionGizmo = null;
         [SerializeField] private SelectionGizmo _cursorGizmo = null;
-        [SerializeField] private SelectionGizmo _cameraBoundsGizmo = null;
 
         [Header("Toolbar")]
         [SerializeField] private GameObject tools = null;
@@ -291,6 +291,7 @@ namespace Puzzled
 
             CameraManager.ShowGizmos();
             CameraManager.ShowWires();
+            CameraManager.ShowFog(false);
             UpdateLayers();
 
             // Uncomment to convert all files
@@ -801,16 +802,15 @@ namespace Puzzled
             }
         }
 
-        public static void ShowCameraBounds (GameCamera camera)
+        private void ShowCameraEditor(GameCamera gameCamera)
         {
-            instance._cameraBoundsGizmo.gameObject.SetActive(camera != null);
-            if (camera == null)
-                return;
+            _cameraEditor.gameCamera = gameCamera;
+            _cameraEditor.gameObject.SetActive(true);
+        }
 
-            var center = instance._puzzle.grid.CellToWorld(camera.tile.cell + camera.offset);
-            var hsize = new Vector3(camera.zoomLevel * 16 / 9, 0, camera.zoomLevel) * 0.5f;
-            instance._cameraBoundsGizmo.min = center + hsize;
-            instance._cameraBoundsGizmo.max = center - hsize;
+        private void HideCameraEditor()
+        {
+            _cameraEditor.gameObject.SetActive(false);
         }
     }
 }

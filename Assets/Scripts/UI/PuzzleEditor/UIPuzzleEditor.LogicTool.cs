@@ -269,10 +269,12 @@ namespace Puzzled
                 if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == inspectorTileName)
                     UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
                 SetWiresDark(_selectedTile, false);
-                UpdateInspectorState(_selectedTile);
+                UpdateInspectorState(_selectedTile);                
             }
 
             _selectedTile = tile;
+
+            HideCameraEditor();
 
             if (tile == null)
             {
@@ -281,7 +283,6 @@ namespace Puzzled
                 _inspectorContent.SetActive(false);
                 _inspectorHeader.SetActive(false);
                 _inspectorEmpty.SetActive(true);
-                _cameraBoundsGizmo.gameObject.SetActive(false);
 
                 // Show all wires when no tile is selected
                 _puzzle.ShowWires();
@@ -302,8 +303,6 @@ namespace Puzzled
                 _inspectorFlip.gameObject.SetActive(flipped != null);
                 _inspectorFlip.isOn = (flipped != null && flipped.GetValue<bool>(_selectedTile));
 
-                ShowCameraBounds(_selectedTile.GetComponent<GameCamera>());
-
                 _inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);
 
@@ -311,6 +310,11 @@ namespace Puzzled
                 _puzzle.HideWires();
                 _puzzle.ShowWires(tile);
                 RefreshInspectorInternal();
+
+                // If the tile is a camera then open the camera editor as well
+                var gameCamera = tile.GetComponent<GameCamera>();
+                if (gameCamera != null)
+                    ShowCameraEditor(gameCamera);
             }
 
             // Clear wire selection if the selected wire does not connect to the newly selected tile

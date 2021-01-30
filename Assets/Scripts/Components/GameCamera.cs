@@ -9,14 +9,13 @@ namespace Puzzled
         public int zoomLevel
         {
             get => _zoomLevel;
-            set
-            {
-                _zoomLevel = Mathf.Clamp(value, CameraManager.MinZoomLevel, CameraManager.MaxZoomLevel);
+            set => _zoomLevel = Mathf.Clamp(value, CameraManager.MinZoomLevel, CameraManager.MaxZoomLevel);
+        }
 
-                // Update the editor camera bounds when the zoom changes
-                if (isEditing && UIPuzzleEditor.selectedTile == tile)
-                    UIPuzzleEditor.ShowCameraBounds(this);
-            }
+        [Editable(rangeMin = 25, rangeMax = 90)]
+        public int pitch {
+            get => _pitch;
+            set => _pitch = Mathf.Clamp(value, 25, 90);
         }
 
         [Editable]
@@ -52,6 +51,7 @@ namespace Puzzled
         private Background _background;
         private int _zoomLevel = CameraManager.DefaultZoomLevel;
         private int _transitionTime = 4;
+        private int _pitch = 55;
 
         [SerializeField] private bool isInitialLocation = false;
 

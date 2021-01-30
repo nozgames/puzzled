@@ -211,6 +211,7 @@ namespace Puzzled
 
             CameraManager.ShowGizmos(false);
             CameraManager.ShowWires(false);
+            CameraManager.ShowFog();
             CameraManager.ShowLayer(TileLayer.Dynamic, true);
             CameraManager.ShowLayer(TileLayer.Floor, true);
             CameraManager.ShowLayer(TileLayer.Static, true);

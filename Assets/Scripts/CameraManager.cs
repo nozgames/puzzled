@@ -15,8 +15,9 @@ namespace Puzzled
         public bool editor;
         public Player followPlayer;
         public int cullingMask;
-        public bool logicCamera;
-        public bool wireCamera;
+        public bool showLogicTiles;
+        public bool showWires;
+        public bool showFog;
     }
 
     /// <summary>
@@ -27,12 +28,12 @@ namespace Puzzled
         /// <summary>
         /// Default zoom level
         /// </summary>
-        public const int DefaultZoomLevel = 12;
+        public const int DefaultZoomLevel = 8;
 
         /// <summary>
         /// Minimum zoom level
         /// </summary>
-        public const int MinZoomLevel = 5;
+        public const int MinZoomLevel = 1;
 
         /// <summary>
         /// Maximum zoom level
@@ -50,16 +51,11 @@ namespace Puzzled
         [SerializeField] [Layer] private int dynamicLayer = 0;
         [SerializeField] [Layer] private int logicLayer = 0;
         [SerializeField] [Layer] private int gizmoLayer = 0;
+        [SerializeField] [Layer] private int fogLayer = 0;
 
         [Header("Background")]
         [SerializeField] private Background _defaultBackground = null;
         [SerializeField] private MeshRenderer _fog = null;
-        [SerializeField] private Material _gridMaterial = null;
-
-        /// <summary>
-        /// Current background (needed?)
-        /// </summary>
-        private Material _gridMaterialInstance;
 
         /// <summary>
         /// Current zoom level
@@ -88,11 +84,6 @@ namespace Puzzled
         public static Background defaultBackground => _instance._defaultBackground;
 
         /// <summary>
-        /// Returns the material used for rendering grids
-        /// </summary>
-        public static Material gridMaterial => _instance._gridMaterialInstance;
-
-        /// <summary>
         /// Get/Set the camera state
         /// </summary>
         public static CameraState state {
@@ -103,16 +94,19 @@ namespace Puzzled
                 zoomLevel = _instance._zoomLevel,
                 followPlayer = _instance._followPlayer,
                 cullingMask = _instance._camera.cullingMask,
-                logicCamera = _instance._logicCamera.gameObject.activeSelf,
-                wireCamera = _instance._wireCamera.gameObject.activeSelf
+                showLogicTiles = _instance._logicCamera.gameObject.activeSelf,
+                showWires = _instance._wireCamera.gameObject.activeSelf,
+                showFog = _instance._fog.gameObject.activeSelf
             };
             set {
                 if (!value.valid || _instance == null)
                     return;
 
                 camera.cullingMask = value.cullingMask;
-                _instance._logicCamera.gameObject.SetActive(value.logicCamera);
-                _instance._wireCamera.gameObject.SetActive(value.wireCamera);
+                _instance._logicCamera.gameObject.SetActive(value.showLogicTiles);
+                _instance._wireCamera.gameObject.SetActive(value.showWires);
+
+                _instance._fog.gameObject.SetActive(value.showFog);
 
                 if (value.followPlayer != null)
                     Follow(value.followPlayer, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
@@ -124,10 +118,6 @@ namespace Puzzled
         public void Initialize()
         {
             _instance = this;
-
-            _gridMaterialInstance = new Material(_instance._gridMaterial);
-            _gridMaterialInstance.color = _defaultBackground.gridColor;
-
             _fog.material.color = Color.white;
         }
 
@@ -141,7 +131,7 @@ namespace Puzzled
             if (_followPlayer == null)
                 return;
 
-            camera.transform.position = Frame(camera, _followPlayer.transform.position, _zoomLevel);
+            camera.transform.position = Frame(_followPlayer.transform.position, camera.transform.localEulerAngles.x, _zoomLevel);
         }
 
         /// <summary>
@@ -181,9 +171,6 @@ namespace Puzzled
             // Clamp zoom
             zoomLevel = Mathf.Clamp(zoomLevel, MinZoomLevel, MaxZoomLevel);
 
-            // Change grid color
-            _instance._gridMaterialInstance.color = targetBackground.gridColor;
-
             // Handle non-animated transition
             if (transitionTime == 0)
             {
@@ -195,7 +182,7 @@ namespace Puzzled
 
                 Tween.Stop(_instance.gameObject, "Transition");
 
-                camera.transform.position = Frame(camera, position, zoomLevel);
+                camera.transform.position = Frame(position, camera.transform.localEulerAngles.x, zoomLevel);
 
                 _instance._zoomLevel = zoomLevel;
                 _instance._background = targetBackground;
@@ -215,7 +202,7 @@ namespace Puzzled
             }
 
             // Move the camera if needed
-            var targetPosition = Frame(camera, position, zoomLevel);
+            var targetPosition = Frame(position, camera.transform.localEulerAngles.x, zoomLevel);
             if (targetPosition != camera.transform.position)
             {
                 tweenGroup.Child(Tween.Move(camera.transform.position, targetPosition, false).Target(camera.gameObject));
@@ -313,6 +300,17 @@ namespace Puzzled
         }
 
         /// <summary>
+        /// Hide or show fog
+        /// </summary>
+        public static void ShowFog(bool show = true)
+        {
+            if (show)
+                camera.cullingMask |= (1 << _instance.fogLayer);
+            else
+                camera.cullingMask &= ~(1 << _instance.fogLayer);
+        }
+
+        /// <summary>
         /// Hide or show wires
         /// </summary>
         public static void ShowWires (bool show = true)
@@ -353,24 +351,21 @@ namespace Puzzled
         /// <summary>
         /// Frame the camera on the given position using the given zoom level 
         /// </summary>
-        /// <param name="camera">Camera to frame</param>
-        /// <param name="position">Position to focus on</param>
+        /// <param name="pitch">Pitch of the camera</param>
+        /// <param name="target">Target for the camera to focus on</param>
         /// <param name="zoom">Zoom level in number of vertical tiles that should be visible</param>
         /// <returns></returns>
-        private static Vector3 Frame (Camera camera, Vector3 position, float zoom)
+        public static Vector3 Frame (Vector3 target, float pitch, float zoom)
         {
-            if(camera.orthographic)
-                camera.orthographicSize = zoom * 0.5f;
-
             var frustumHeight = zoom;
             var cameraFov = camera.fieldOfView;
             var distance = (frustumHeight * 0.5f) / Mathf.Tan(cameraFov * 0.5f * Mathf.Deg2Rad);
             return
                 // Target position
-                position
+                target
 
                 // Zoom to frame entire target
-                + (distance * -Vector3.Normalize(camera.transform.forward));
+                + (distance *- (Quaternion.Euler(pitch, 0, 0) * Vector3.forward));
         }
     }
 }

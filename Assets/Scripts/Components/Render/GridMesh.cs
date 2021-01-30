@@ -36,8 +36,6 @@
             mesh.vertices = verticies.ToArray();
             mesh.SetIndices(indicies.ToArray(), MeshTopology.Lines, 0);
             filter.mesh = mesh;
-
-            gameObject.GetComponent<MeshRenderer>().sharedMaterial = CameraManager.gridMaterial;
         }
     }
 }
