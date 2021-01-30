@@ -20,7 +20,6 @@ namespace Puzzled.Editor
         private int _pitchStart;
         private Cell _offsetStart;
         private RectTransform _rectTransform;
-        private bool _expanded = false;
 
         public GameCamera gameCamera {
             get => _gameCamera;
@@ -62,7 +61,7 @@ namespace Puzzled.Editor
             _camera.transform.localEulerAngles = new Vector3(_gameCamera.pitch, 0, 0);
             _camera.transform.position = 
                 CameraManager.Frame(
-                    _gameCamera.puzzle.grid.CellToWorld(_gameCamera.tile.cell) + new Vector3(_gameCamera.offset.x, 0, _gameCamera.offset.y) * 0.25f, 
+                    _gameCamera.puzzle.grid.CellToWorld(_gameCamera.target) + new Vector3(_gameCamera.offset.x, 0, _gameCamera.offset.y) * 0.25f, 
                     _gameCamera.pitch, 
                     _gameCamera.zoomLevel);
 

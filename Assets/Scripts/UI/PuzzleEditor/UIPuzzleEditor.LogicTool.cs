@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Puzzled.UI;
+using Puzzled.Editor;
 
 namespace Puzzled
 {
@@ -350,6 +351,11 @@ namespace Puzzled
         {
             var tile = _selectedTile;
             _inspectorContent.transform.DetachAndDestroyChildren();
+
+            // Create the custom editos
+            if(tile.info.customEditors != null)
+                foreach (var customEditorPrefab in tile.info.customEditors)
+                    Instantiate(customEditorPrefab, _inspectorContent.transform).GetComponent<UIInspectorEditor>().tile = tile;
 
             GameObject propertiesGroup = null;
             Transform propertiesGroupContent = null;

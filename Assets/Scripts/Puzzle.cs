@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 4;
+        private const int FileVersion = 5;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -16,12 +16,14 @@ namespace Puzzled
         [SerializeField] private GridMesh _grid = null;
         [SerializeField] private Transform _trash = null;
         [SerializeField] private GameObject _wirePrefab = null;
+        [SerializeField] private PuzzleProperties _propertiesPrefab = null;
 
         private Player _player;
         private bool _pendingDestroy;
         private string _path;
         private string _worldName;
         private bool _started;
+        private PuzzleProperties _properties;
         private Dictionary<Type, object> _sharedComponentData = new Dictionary<Type, object>();
 
         /// <summary>
@@ -36,6 +38,15 @@ namespace Puzzled
             get => GameManager.puzzle;
             set => GameManager.puzzle = value;
         }
+
+        public PuzzleProperties properties {
+            get {
+                if (_properties == null)
+                    _properties = InstantiateTile(_propertiesPrefab.GetComponent<Tile>(), grid.minCell).GetComponent<PuzzleProperties>();
+
+                return _properties;
+            }
+        }            
 
         /// <summary>
         /// Active player in this puzzle
@@ -142,13 +153,15 @@ namespace Puzzled
             // Start the puzzle if it has not yet been started
             if(!_started)
             {
-                // Find the player
-                _player = _tiles.GetComponentInChildren<Player>();
-                if (_player != null)
+                // Center on starting camera if there is one
+                if (properties.startingCamera != null)
                 {
-                    // Default the camera to the player, if there is an initial camera it will be set when the start event is sent out
-                    CameraManager.Transition(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultZoomLevel, null, 0);
+                    CameraManager.Transition(properties.startingCamera, 0);
+                    activeCamera = properties.startingCamera;
                 }
+                // Otherwise center on the player
+                else if (_player != null)
+                    CameraManager.Transition(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultZoomLevel, null, 0);               
 
                 // Send a start event to all tiles
                 var start = new StartEvent();
@@ -209,6 +222,12 @@ namespace Puzzled
 
             // Link the tile into the grid
             tile.cell = cell;
+
+            // Keep track of the player
+            var playerComponent = tile.GetComponent<Player>();
+            if (null != playerComponent)
+                _player = playerComponent;
+
             return tile;
         }
 
@@ -318,16 +337,11 @@ namespace Puzzled
             // Write the wire count
             writer.Write(wires.Count);
 
+            // Write all of the tile guids and cell positions
             for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
             {
                 var tile = tiles[tileIndex];
-
                 writer.Write(tile.guid);
-
-                // Write placeholder for tile size
-                var sizePosition = writer.BaseStream.Position;
-                writer.Write(0);
-
                 writer.Write(tile.cell);
 
                 // Optionally write the tile name
@@ -335,104 +349,138 @@ namespace Puzzled
                 {
                     writer.Write(true);
                     writer.Write(tile.name);
-                } 
-                else
+                } else
                     writer.Write(false);
+            }
+
+            // Write tile properties
+            for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
+            {
+                var tile = tiles[tileIndex];
+
+                if (tile.properties == null || tile.properties.Length == 0)
+                    continue;
+
+                writer.Write(tileIndex + 1);
+
+                // Write placeholder for tile size
+                var sizePosition = writer.BaseStream.Position;
+                writer.Write(0);
 
                 // Write the tile properties
-                if (tile.properties != null)
-                    foreach (var property in tile.properties)
+                foreach (var property in tile.properties)
+                {
+                    if (!property.editable.serialized)
+                        continue;
+
+                    var value = property.GetValue(tile);
+                    if (value == null)
+                        continue;
+
+                    writer.Write((byte)property.type);
+                    writer.Write(property.name);
+
+                    switch (property.type)
                     {
-                        var value = property.GetValue(tile);
-                        if (value == null)
-                            continue;
-
-                        writer.Write((byte)property.type);
-                        writer.Write(property.name);
-
-                        switch (property.type)
+                        case TilePropertyType.TileComponent:
                         {
-                            case TilePropertyType.Cell:
-                                writer.Write(((Cell)value).x);
-                                writer.Write(((Cell)value).y);
-                                break;
-
-                            case TilePropertyType.Int:
-                                writer.Write((int)value);
-                                break;
-
-                            case TilePropertyType.Sound:
-                                writer.Write(((Sound)value).guid);
-                                break;
-
-                            case TilePropertyType.IntArray:
+                            var tileComponent = (TileComponent)value;
+                            if (tileComponent == null)
+                                writer.Write(0);
+                            else
                             {
-                                var intArray = (int[])value;
-                                writer.Write(intArray.Length);
-                                foreach (var intValue in intArray)
-                                    writer.Write(intValue);
-                                break;
+                                var tileRef = tileComponent.tile;
+                                int tileRefIndex = 0;
+                                for (; tileRefIndex < tiles.Length; tileRefIndex++)
+                                    if (tiles[tileRefIndex] == tileRef)
+                                        break;
+
+                                writer.Write(tileRefIndex < tiles.Length ? tileRefIndex + 1 : 0);
                             }
-
-                            case TilePropertyType.Bool:
-                                writer.Write((bool)value);
-                                break;
-
-                            case TilePropertyType.String:
-                                writer.Write((string)value);
-                                break;
-
-                            case TilePropertyType.Guid:
-                                writer.Write((Guid)value);
-                                break;
-
-                            case TilePropertyType.Background:
-                                writer.Write(((Background)value)?.guid ?? Guid.Empty);
-                                break;
-
-                            case TilePropertyType.Decal:
-                                writer.Write(((Decal)value).guid);
-                                writer.Write((int)((Decal)value).flags);
-                                break;
-
-                            case TilePropertyType.DecalArray:
-                            {
-                                var darray = (Decal[])value;
-                                writer.Write(darray.Length);
-                                foreach (var decal in darray)
-                                {
-                                    writer.Write(decal.guid);
-                                    writer.Write((int)decal.flags);
-                                }
-                                break;
-                            }
-
-                            case TilePropertyType.StringArray:
-                            {
-                                var sarray = (string[])value;
-                                writer.Write(sarray.Length);
-                                foreach (var s in sarray)
-                                    writer.Write(s);
-                                break;
-                            }
-
-                            case TilePropertyType.Tile:
-                                writer.Write(((Tile)value).guid);
-                                break;
-
-                            case TilePropertyType.Port:
-                            {
-                                var portWires = ((Port)value).wires;
-                                writer.Write(portWires.Count);
-                                foreach(var wire in portWires)
-                                    writer.Write(wires.IndexOf(wire));
-                                break;
-                            }
-
-                            default:
-                                throw new NotImplementedException();
+                            break;
                         }
+
+                        case TilePropertyType.Cell:
+                            writer.Write(((Cell)value).x);
+                            writer.Write(((Cell)value).y);
+                            break;
+
+                        case TilePropertyType.Int:
+                            writer.Write((int)value);
+                            break;
+
+                        case TilePropertyType.Sound:
+                            writer.Write(((Sound)value).guid);
+                            break;
+
+                        case TilePropertyType.IntArray:
+                        {
+                            var intArray = (int[])value;
+                            writer.Write(intArray.Length);
+                            foreach (var intValue in intArray)
+                                writer.Write(intValue);
+                            break;
+                        }
+
+                        case TilePropertyType.Bool:
+                            writer.Write((bool)value);
+                            break;
+
+                        case TilePropertyType.String:
+                            writer.Write((string)value);
+                            break;
+
+                        case TilePropertyType.Guid:
+                            writer.Write((Guid)value);
+                            break;
+
+                        case TilePropertyType.Background:
+                            writer.Write(((Background)value)?.guid ?? Guid.Empty);
+                            break;
+
+                        case TilePropertyType.Decal:
+                            writer.Write(((Decal)value).guid);
+                            writer.Write((int)((Decal)value).flags);
+                            break;
+
+                        case TilePropertyType.DecalArray:
+                        {
+                            var darray = (Decal[])value;
+                            writer.Write(darray.Length);
+                            foreach (var decal in darray)
+                            {
+                                writer.Write(decal.guid);
+                                writer.Write((int)decal.flags);
+                            }
+                            break;
+                        }
+
+                        case TilePropertyType.StringArray:
+                        {
+                            var sarray = (string[])value;
+                            writer.Write(sarray.Length);
+                            foreach (var s in sarray)
+                                writer.Write(s);
+                            break;
+                        }
+
+                        case TilePropertyType.Tile:
+                            writer.Write(((Tile)value).guid);
+                            break;
+
+                        case TilePropertyType.Port:
+                        {
+                            var portWires = ((Port)value).wires;
+                            writer.Write(portWires.Count);
+                            foreach(var wire in portWires)
+                                writer.Write(wires.IndexOf(wire));
+                            break;
+                        }
+
+                        default:
+                            throw new NotImplementedException();
                     }
+                }
 
                 // Unknown type means end of properties
                 writer.Write((byte)TilePropertyType.Unknown);
@@ -443,6 +491,8 @@ namespace Puzzled
                 writer.Write((int)(returnPosition - sizePosition - sizeof(int)));
                 writer.BaseStream.Seek(returnPosition, SeekOrigin.Begin);
             }
+
+            writer.Write(0);
 
             // Write all the wire options
             foreach(var wire in wires)
@@ -511,6 +561,10 @@ namespace Puzzled
                     LoadV3(reader, version);
                     break;
 
+                case 5:
+                    LoadV5(reader, version);
+                    break;
+
                 default:
                     throw new NotImplementedException();
             }
@@ -530,7 +584,7 @@ namespace Puzzled
             }
 
             // Instantiate the tiles
-                for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
+            for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
             {
                 var guid = reader.ReadGuid();
                 var size = reader.ReadInt32();
@@ -557,6 +611,11 @@ namespace Puzzled
                     tile.name = reader.ReadString();
 
                 tiles[tileIndex] = tile;
+
+                // Fish for the puzzle properties
+                var puzzleProperties = tile.GetComponent<PuzzleProperties>();
+                if (null != puzzleProperties)
+                    _properties = puzzleProperties;
 
                 // Read the tile properties
                 while (true)
@@ -715,6 +774,229 @@ namespace Puzzled
             }
         }
 
+        private void LoadV5(BinaryReader reader, int version)
+        {
+            // Create the tile array
+            var tiles = new Tile[reader.ReadInt32()];
+
+            // Instantiate all the wires
+            var wires = new Wire[reader.ReadInt32()];
+            for (int wireIndex = 0; wireIndex < wires.Length; wireIndex++)
+            {
+                wires[wireIndex] = Instantiate(_wirePrefab, _wires).GetComponent<Wire>();
+                wires[wireIndex].puzzle = this;
+            }
+
+            // Read all tiles and instantiate them
+            for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
+            {
+                var guid = reader.ReadGuid();
+                var cell = reader.ReadCell();
+                var name = reader.ReadBoolean() ? reader.ReadString() : null;
+
+                var prefab = TileDatabase.GetTile(guid);
+                if (null == prefab)
+                    continue;
+
+                tiles[tileIndex] = InstantiateTile(prefab, cell);
+
+                if (name != null)
+                    tiles[tileIndex].name = name;
+
+                // Fish for the puzzle properties
+                var puzzleProperties = tiles[tileIndex].GetComponent<PuzzleProperties>();
+                if (null != puzzleProperties)
+                    _properties = puzzleProperties;
+            }
+
+            // Instantiate the tiles
+            while (true)
+            {
+                var tileIndex = reader.ReadInt32();
+                if (tileIndex == 0)
+                    break;
+
+                tileIndex--;
+
+                var tile = tiles[tileIndex];
+
+                // If the tile failed to load then just skip its properties
+                var size = reader.ReadInt32();
+                if (tiles[tileIndex] == null)
+                {
+                    reader.BaseStream.Position += size;
+                    continue;
+                }
+
+                // Read the tile properties
+                while (true)
+                {
+                    // Last property should be an Unknown
+                    var type = (TilePropertyType)reader.ReadByte();
+                    if (type == TilePropertyType.Unknown)
+                        break;
+
+                    // Read the property value
+                    var name = reader.ReadString();
+                    var value = (object)null;
+
+                    switch (type)
+                    {
+                        case TilePropertyType.Int:
+                            value = reader.ReadInt32();
+                            break;
+
+                        case TilePropertyType.Cell:
+                            value = new Cell(reader.ReadInt32(), reader.ReadInt32());
+                            break;
+
+                        case TilePropertyType.TileComponent:
+                        {
+                            var tileRefIndex = reader.ReadInt32();
+                            if (tileRefIndex > 0)
+                            { 
+                                var tileRef = tiles[tileRefIndex - 1];
+                                if (tileRef != null)
+                                    value = tileRef.GetComponent(tile.GetProperty(name).info.PropertyType);
+                            }
+                            break;
+                        }
+
+                        case TilePropertyType.Sound:
+                        {
+                            var sound = SFXDatabase.GetSound(reader.ReadGuid());
+                            value = sound;
+                            break;
+                        }
+
+                        case TilePropertyType.IntArray:
+                        {
+                            var intArray = new int[reader.ReadInt32()];
+                            for (int i = 0; i < intArray.Length; i++)
+                                intArray[i] = reader.ReadInt32();
+                            value = intArray;
+                            break;
+                        }
+
+                        case TilePropertyType.Bool:
+                            value = reader.ReadBoolean();
+                            break;
+
+                        case TilePropertyType.String:
+                            value = reader.ReadString();
+                            break;
+
+                        case TilePropertyType.StringArray:
+                        {
+                            var sarray = new string[reader.ReadInt32()];
+                            for (int i = 0; i < sarray.Length; i++)
+                                sarray[i] = reader.ReadString();
+                            value = sarray;
+                            break;
+                        }
+
+                        case TilePropertyType.Guid:
+                            value = reader.ReadGuid();
+                            break;
+
+                        case TilePropertyType.Background:
+                        {
+                            var background = BackgroundDatabase.GetBackground(reader.ReadGuid());
+                            value = background;
+                            break;
+                        }
+
+                        case TilePropertyType.Decal:
+                        {
+                            var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                            if (version > 1)
+                                decal.flags = (DecalFlags)reader.ReadInt32();
+                            value = decal;
+                            break;
+                        }
+
+                        case TilePropertyType.DecalArray:
+                        {
+                            var decals = new Decal[reader.ReadInt32()];
+                            for (int i = 0; i < decals.Length; i++)
+                            {
+                                var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                                var flags = (DecalFlags)reader.ReadInt32();
+
+                                decal.flags = flags;
+                                decals[i] = decal;
+                            }
+
+                            value = decals;
+                            break;
+                        }
+
+                        case TilePropertyType.Tile:
+                            value = TileDatabase.GetTile(reader.ReadGuid());
+                            break;
+
+                        case TilePropertyType.Port:
+                        {
+                            var port = tile.GetPropertyValue<Port>(name);
+                            var portWireCount = reader.ReadInt32();
+                            if (null == port)
+                            {
+                                for (int i = 0; i < portWireCount; i++)
+                                    reader.ReadInt32();
+                                continue;
+                            }
+
+                            var portWires = new List<Wire>(portWireCount);
+                            for (int i = 0; i < portWireCount; i++)
+                            {
+                                var wireIndex = reader.ReadInt32();
+                                var wire = wires[wireIndex];
+                                if (port.flow == PortFlow.Input)
+                                    wire.to.port = port;
+                                else
+                                    wire.from.port = port;
+
+                                portWires.Add(wire);
+                            }
+                            port.wires.AddRange(portWires);
+                            continue;
+                        }
+
+                        default:
+                            throw new NotImplementedException();
+                    }
+
+                    tile.SetPropertyValue(name, value);
+                }
+            }
+
+            foreach (var wire in wires)
+            {
+                var fromOptionCount = (int)reader.ReadByte();
+                var fromOptions = fromOptionCount == 0 ? null : new int[fromOptionCount];
+                if (fromOptions != null)
+                    for (int i = 0; i < fromOptionCount; i++)
+                        fromOptions[i] = reader.ReadInt32();
+
+                var toOptionCount = (int)reader.ReadByte();
+                var toOptions = toOptionCount == 0 ? null : new int[toOptionCount];
+                if (toOptions != null)
+                    for (int i = 0; i < toOptionCount; i++)
+                        toOptions[i] = reader.ReadInt32();
+
+                // If the wire isnt valid then just remove it
+                if (wire.from.port == null || wire.to.port == null)
+                {
+                    wire.Destroy();
+                    continue;
+                }
+
+                wire.from.SetOptions(fromOptions);
+                wire.to.SetOptions(toOptions);
+                wire.UpdatePositions();
+            }
+        }
+
         /// <summary>
         /// Hide all wires
         /// </summary>
@@ -821,6 +1103,6 @@ namespace Puzzled
             }
 
             return raycast;
-        }
+        }        
     }
 }

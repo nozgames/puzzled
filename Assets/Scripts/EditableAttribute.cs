@@ -13,6 +13,7 @@ namespace Puzzled
         public string placeholder;
         public string hiddenIfFalse;
         public string hiddenIfTrue;
+        public bool serialized = true;
 
         public Vector2Int range => new Vector2Int(rangeMin, rangeMax);
     }

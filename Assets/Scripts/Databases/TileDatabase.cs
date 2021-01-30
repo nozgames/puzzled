@@ -8,6 +8,13 @@ namespace Puzzled
 {
     public class TileDatabase : AddressableDatabase<GameObject>
     {
+        [Serializable]
+        private struct TileMigration
+        {
+            public Tile from;
+            public Tile to;
+        }
+
         [Header("Preview")]
         [SerializeField] private Puzzle previewPuzzle = null;
         [SerializeField] private Camera previewCamera = null;
@@ -16,6 +23,9 @@ namespace Puzzled
         [SerializeField] private Sprite _powerPortIcon = null;
         [SerializeField] private Sprite _signalPortIcon = null;
         [SerializeField] private Sprite _numberPortIcon = null;
+
+        [Header("Migrations")]
+        [SerializeField] private TileMigration[] _migrations = null;
 
         /// <summary>
         /// Singleton instance of the tile database
@@ -181,6 +191,7 @@ namespace Puzzled
         protected override void OnLoaded()
         {
             base.OnLoaded();
+
             _tiles = _instance._cache.Select(kv => {
                 var tile = kv.Value.GetComponent<Tile>();
                 tile.guid = kv.Key;
@@ -191,8 +202,13 @@ namespace Puzzled
                 .ThenBy(t => t.name)
                 .ToArray();
 
+            // Handle migrations
+            if (_migrations != null)
+                foreach (var migration in _migrations)
+                    _cache[migration.from.guid] = migration.to.gameObject;
+
             // Build the tile properties array for each tile 
-            foreach(var tile in _tiles)
+            foreach (var tile in _tiles)
             {
                 var properties = _tileProperties[tile.guid] =
                     tile.GetComponentsInChildren<TileComponent>()

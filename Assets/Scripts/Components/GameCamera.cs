@@ -5,6 +5,29 @@ namespace Puzzled
 {
     public class GameCamera : TileComponent
     {
+        [SerializeField] private GameObject _visualStartingCamera = null;
+
+        /// <summary>
+        /// Non-Serialized property that sets the starting camera in the attached puzzle
+        /// </summary>
+        [Editable(serialized = false)]
+        private bool startingCamera {
+            get => puzzle.properties.startingCamera == this;
+            set {
+                if (value)
+                {
+                    if (puzzle.properties.startingCamera != null)
+                        puzzle.properties.startingCamera._visualStartingCamera.gameObject.SetActive(false);
+
+                    puzzle.properties.startingCamera = this;
+                }
+                else if (puzzle.properties.startingCamera == this)
+                    puzzle.properties.startingCamera = null;
+
+                _visualStartingCamera.gameObject.SetActive(value);
+            }
+        }
+
         [Editable(rangeMin = CameraManager.MinZoomLevel, rangeMax = CameraManager.MaxZoomLevel)]
         public int zoomLevel
         {
@@ -29,33 +52,17 @@ namespace Puzzled
         }
 
         [Editable]
-        public Background background
-        {
-            get => _background;
-            set
-            {
-                if (_background == value)
-                    return;
+        public Background background { get; set; }
 
-                _background = value;
-
-                if (isInitialLocation)
-                    CameraManager.Transition(_background, 0);
-            }
-        }
+        public virtual Cell target => tile.cell;
 
         [Editable]
         [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(SignalEvent))]
         public Port signalInPort { get; set; }
 
-        private Background _background;
         private int _zoomLevel = CameraManager.DefaultZoomLevel;
         private int _transitionTime = 4;
         private int _pitch = 55;
-
-        [SerializeField] private bool isInitialLocation = false;
-
-        public bool isStartingCamera => isInitialLocation;
 
         [ActorEventHandler]
         private void OnSignal(SignalEvent evt)
@@ -69,8 +76,14 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
         {
-            if (isInitialLocation && (!isEditing || isLoading))
-                puzzle.SetActiveCamera(this, 0);
+            _visualStartingCamera.gameObject.SetActive(startingCamera);
+        }
+
+        [ActorEventHandler]
+        private void OnDestroyEvent (DestroyEvent evt)
+        {
+            if (startingCamera)
+                startingCamera = false;
         }
 
         public virtual void OnCameraStop()

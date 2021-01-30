@@ -115,7 +115,7 @@ namespace Puzzled.Editor
         public void SavePuzzle (string filename)
         {
             _save.gameObject.SetActive(true);
-            _saveFilename.text = filename;
+            _saveFilename.text = !string.IsNullOrEmpty(filename) ? Path.GetFileNameWithoutExtension(filename) : "";
             _title.text = string.IsNullOrWhiteSpace(filename) ? 
                 "Save Puzzle" : "Save Puzzle As";
 

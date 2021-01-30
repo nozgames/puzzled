@@ -20,6 +20,9 @@ namespace Puzzled
         /// </summary>
         internal bool isLinking => _linking;
 
+        internal Cell minCell => new Cell(-_size / 2, -_size / 2);
+        internal Cell maxCell => new Cell(_size / 2, _size / 2);
+
         private Tile[] _tiles;
         private int _layerCount;
         private int _stride;

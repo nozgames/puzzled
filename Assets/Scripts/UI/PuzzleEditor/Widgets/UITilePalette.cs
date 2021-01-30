@@ -89,7 +89,7 @@ namespace Puzzled.Editor
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UITilePaletteItem>().tile = null;
 
             // Add all tiles to the palette
-            foreach (var tile in TileDatabase.GetTiles().Where(t => !t.info.isDeprecated))
+            foreach (var tile in TileDatabase.GetTiles().Where(t => !t.info.isHidden))
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UITilePaletteItem>().tile = tile;
 
             _list.Select(0);

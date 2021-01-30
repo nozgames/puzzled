@@ -24,7 +24,12 @@ namespace Puzzled
         IntArray,
         Port,
         Sound,
-        Cell
+        Cell,
+
+        /// <summary>
+        /// Reference to a tile component within the puzzle
+        /// </summary>
+        TileComponent
     }
 
     public class TileProperty
@@ -111,6 +116,8 @@ namespace Puzzled
                 type = TilePropertyType.Port;
             else if (info.PropertyType == typeof(Sound))
                 type = TilePropertyType.Sound;
+            else if (typeof(TileComponent).IsAssignableFrom(info.PropertyType))
+                type = TilePropertyType.TileComponent;
             else
                 throw new NotImplementedException();
         }

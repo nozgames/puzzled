@@ -1,5 +1,8 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
+
+using Puzzled.Editor;
 
 namespace Puzzled
 {
@@ -25,9 +28,11 @@ namespace Puzzled
 
         [Tooltip("True if a dynamic tile can be placed on top on top of this tile")]
         [SerializeField] private bool _allowDynamic = false;
-        [Tooltip("True if the the tile should no longer be used")]
-        [SerializeField] private bool _deprecated = false;
+        [Tooltip("True if the the tile should no not be visible in the tile palette")]
+        [FormerlySerializedAs("_deprecated")]
+        [SerializeField] private bool _hidden = false;
 
+        [SerializeField] private UIInspectorEditor[] _customEditors = null;
         [SerializeField] private CustomPropertyEditor[] _customPropertyEditors = null;
 
         public bool allowMultiple => _allowMultiple;
@@ -37,12 +42,14 @@ namespace Puzzled
         /// </summary>
         public bool allowDynamic => _allowDynamic;
 
-        public bool isDeprecated => _deprecated;
+        public bool isHidden => _hidden;
 
         public string displayName => string.IsNullOrEmpty(_displayName) ? name : _displayName;
 
-        public CustomPropertyEditor[] customOptionEditors => _customPropertyEditors;
+        public UIInspectorEditor[] customEditors => _customEditors;
 
+        public CustomPropertyEditor[] customPropertyEditors => _customPropertyEditors;
+        
         public TileLayer layer => _layer;        
 
         /// <summary>

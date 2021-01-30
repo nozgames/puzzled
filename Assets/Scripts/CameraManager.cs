@@ -234,6 +234,14 @@ namespace Puzzled
         }
 
         /// <summary>
+        /// Transition to a game camera
+        /// </summary>
+        /// <param name="gameCamera"></param>
+        /// <param name="transitionTime"></param>
+        public static void Transition(GameCamera gameCamera, int transitionTime = -1) =>
+            Transition(gameCamera.puzzle.grid.CellToWorld(gameCamera.target), gameCamera.zoomLevel, gameCamera.background, transitionTime == -1 ? gameCamera.transitionTime : transitionTime);
+
+        /// <summary>
         /// Transition to a different background
         /// </summary>
         /// <param name="background">New background</param>

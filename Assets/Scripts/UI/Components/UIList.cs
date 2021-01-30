@@ -36,6 +36,9 @@ namespace Puzzled.Editor
 
         private void SetSelection(int index)
         {
+            if (selected == index)
+                return;
+
             var old = selected;
             selected = index;
 
