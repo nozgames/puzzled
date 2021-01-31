@@ -18,9 +18,9 @@ namespace Puzzled.Editor
             set {
                 _tile = value;
                 _nameText.text = _tile.name;
-                var texture = TileDatabase.GetPreview(_tile);
+                var texture = DatabaseManager.GetPreview(_tile);
                 if (texture != null)
-                    _preview.sprite = Sprite.Create(TileDatabase.GetPreview(_tile), new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                    _preview.sprite = Sprite.Create(DatabaseManager.GetPreview(_tile), new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
                 else
                     _preview.sprite = null;
             }

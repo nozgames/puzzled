@@ -178,7 +178,7 @@ namespace Puzzled
                     return;
             }
 
-            _tilePalette.selected = TileDatabase.GetTile(existing.guid);
+            _tilePalette.selected = DatabaseManager.GetTile(existing.guid);
         }
     }
 }

@@ -490,7 +490,7 @@ namespace Puzzled
             itemVisuals.transform.localPosition = new Vector3(0, 1.1f, 0);
 
             var dropCell = evt.item.tile.cell;
-            inventory = TileDatabase.GetTile(evt.item.tile.guid);
+            inventory = DatabaseManager.GetTile(evt.item.tile.guid);
 
             // Drop the item in our inventory
             if (drop != null)

@@ -14,7 +14,7 @@ namespace Puzzled
             _doubleClick.onDoubleClick.AddListener(() => {
                 UIPuzzleEditor.instance.ChooseTile(
                     typeof(Item),
-                    TileDatabase.GetTile(target.GetValue<System.Guid>()),
+                    DatabaseManager.GetTile(target.GetValue<System.Guid>()),
                     (tile) => {
                         UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, tile.guid));
                         UpdatePreview();
@@ -31,8 +31,8 @@ namespace Puzzled
 
         private void UpdatePreview()
         {
-            var tile = TileDatabase.GetTile(target.GetValue<System.Guid>());
-            preview.texture = TileDatabase.GetPreview(tile);
+            var tile = DatabaseManager.GetTile(target.GetValue<System.Guid>());
+            preview.texture = DatabaseManager.GetPreview(tile);
             preview.gameObject.SetActive(preview.texture != null);
             _previewText.name = tile == null ? "None" : tile.name;
         }

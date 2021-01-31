@@ -28,7 +28,7 @@ namespace Puzzled.Editor
         {
             _callback = callback;
 
-            _tilePreview.texture = TileDatabase.GetPreview(tileTo);
+            _tilePreview.texture = DatabaseManager.GetPreview(tileTo);
 
             foreach (var port in _ports)
                 port.gameObject.SetActive(false);

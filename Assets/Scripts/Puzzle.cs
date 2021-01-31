@@ -215,7 +215,7 @@ namespace Puzzled
         /// <param name="cell">Cell to create tile in</param>
         /// <returns>Instantiated tile</returns>
         public Tile InstantiateTile(Guid guid, Cell cell) =>
-            InstantiateTile(TileDatabase.GetTile(guid), cell);
+            InstantiateTile(DatabaseManager.GetTile(guid), cell);
 
         /// <summary>
         /// Instantiate a new tile in the puzzle
@@ -369,7 +369,7 @@ namespace Puzzled
                 writer.Write(tile.cell);
 
                 // Optionally write the tile name
-                if (tile.name != TileDatabase.GetTile(tile.guid).name)
+                if (tile.name != DatabaseManager.GetTile(tile.guid).name)
                 {
                     writer.Write(true);
                     writer.Write(tile.name);
@@ -615,7 +615,7 @@ namespace Puzzled
                 var start = reader.BaseStream.Position;
 
                 // Find the tile prefab and if it doesnt exist skip the tile
-                var prefab = TileDatabase.GetTile(guid);
+                var prefab = DatabaseManager.GetTile(guid);
                 if (null == prefab)
                 {
                     reader.BaseStream.Position = start + size;
@@ -665,7 +665,7 @@ namespace Puzzled
 
                         case TilePropertyType.Sound:
                         {
-                            var sound = SFXDatabase.GetSound(reader.ReadGuid());
+                            var sound = DatabaseManager.GetSound(reader.ReadGuid());
                             value = sound;
                             break;
                         }
@@ -702,14 +702,14 @@ namespace Puzzled
 
                         case TilePropertyType.Background:
                         {
-                            var background = BackgroundDatabase.GetBackground(reader.ReadGuid());
+                            var background = DatabaseManager.GetBackground(reader.ReadGuid());
                             value = background;
                             break;
                         }
 
                         case TilePropertyType.Decal:
                         {
-                            var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                            var decal = DatabaseManager.GetDecal(reader.ReadGuid());
                             if (version > 1)
                                 decal.flags = (DecalFlags)reader.ReadInt32();
                             value = decal;
@@ -721,7 +721,7 @@ namespace Puzzled
                             var decals = new Decal[reader.ReadInt32()];
                             for (int i = 0; i < decals.Length; i++)
                             {
-                                var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                                var decal = DatabaseManager.GetDecal(reader.ReadGuid());
                                 var flags = (DecalFlags)reader.ReadInt32();
 
                                 decal.flags = flags;
@@ -733,7 +733,7 @@ namespace Puzzled
                         }
 
                         case TilePropertyType.Tile:
-                            value = TileDatabase.GetTile(reader.ReadGuid());
+                            value = DatabaseManager.GetTile(reader.ReadGuid());
                             break;
 
                         case TilePropertyType.Port:
@@ -818,7 +818,7 @@ namespace Puzzled
                 var cell = reader.ReadCell();
                 var name = reader.ReadBoolean() ? reader.ReadString() : null;
 
-                var prefab = TileDatabase.GetTile(guid);
+                var prefab = DatabaseManager.GetTile(guid);
                 if (null == prefab)
                     continue;
 
@@ -888,7 +888,7 @@ namespace Puzzled
 
                         case TilePropertyType.Sound:
                         {
-                            var sound = SFXDatabase.GetSound(reader.ReadGuid());
+                            var sound = DatabaseManager.GetSound(reader.ReadGuid());
                             value = sound;
                             break;
                         }
@@ -925,14 +925,14 @@ namespace Puzzled
 
                         case TilePropertyType.Background:
                         {
-                            var background = BackgroundDatabase.GetBackground(reader.ReadGuid());
+                            var background = DatabaseManager.GetBackground(reader.ReadGuid());
                             value = background;
                             break;
                         }
 
                         case TilePropertyType.Decal:
                         {
-                            var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                            var decal = DatabaseManager.GetDecal(reader.ReadGuid());
                             if (version > 1)
                                 decal.flags = (DecalFlags)reader.ReadInt32();
                             value = decal;
@@ -944,7 +944,7 @@ namespace Puzzled
                             var decals = new Decal[reader.ReadInt32()];
                             for (int i = 0; i < decals.Length; i++)
                             {
-                                var decal = DecalDatabase.GetDecal(reader.ReadGuid());
+                                var decal = DatabaseManager.GetDecal(reader.ReadGuid());
                                 var flags = (DecalFlags)reader.ReadInt32();
 
                                 decal.flags = flags;
@@ -956,7 +956,7 @@ namespace Puzzled
                         }
 
                         case TilePropertyType.Tile:
-                            value = TileDatabase.GetTile(reader.ReadGuid());
+                            value = DatabaseManager.GetTile(reader.ReadGuid());
                             break;
 
                         case TilePropertyType.Port:

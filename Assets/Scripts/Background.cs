@@ -19,7 +19,5 @@ namespace Puzzled
         /// Background color
         /// </summary>
         public Color gridColor = Color.black;
-       
-        public Material gradient { get; set; }
     }
 }

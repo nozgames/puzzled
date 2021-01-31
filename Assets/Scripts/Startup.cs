@@ -7,26 +7,29 @@ namespace Puzzled
     {
         void Start()
         {
-            StartCoroutine(Initialize());
+            //StartCoroutine(Initialize());
+            DatabaseManager.Initialize();
+            GameManager.Initialize();
+            UIManager.Initialize();
+            UIManager.loading = false;
         }
 
         private void OnApplicationQuit()
         {
             UIPuzzleEditor.Shutdown();
             UIManager.Shutdown();
-            TileDatabase.Shutdown();
+            DatabaseManager.Shutdown();
             GameManager.Shutdown();
         }
 
+#if false
         private IEnumerator Initialize()
         {
-            // Wait for the databases to load
-            while (!TileDatabase.isLoaded || !DecalDatabase.isLoaded || !BackgroundDatabase.isLoaded || !SFXDatabase.isLoaded)
-                yield return null;
-
+            DatabaseManager.Initialize();
             GameManager.Initialize();
             UIManager.Initialize();
             UIManager.loading = false;
         }
+#endif
     }
 }

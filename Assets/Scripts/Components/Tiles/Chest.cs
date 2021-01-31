@@ -56,7 +56,7 @@ namespace Puzzled
                     //tile.Destroy();
 
                     // Spawn the prize at the same spot
-                    puzzle.InstantiateTile(TileDatabase.GetTile(prizeItem), cell);
+                    puzzle.InstantiateTile(DatabaseManager.GetTile(prizeItem), cell);
 
                     GameManager.busy--;
                 })

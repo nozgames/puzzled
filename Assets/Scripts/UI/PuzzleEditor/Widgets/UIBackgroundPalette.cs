@@ -71,7 +71,7 @@ namespace Puzzled.Editor
             Instantiate(_itemPrefab, _list.transform).GetComponent<UIBackgroundPaletteItem>().background = null;
 
             // Add all decals to the palette
-            foreach (var background in BackgroundDatabase.GetBackgrounds())
+            foreach (var background in DatabaseManager.GetBackgrounds())
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UIBackgroundPaletteItem>().background = background;
 
             _list.Select(0);

@@ -68,7 +68,7 @@ namespace Puzzled.Editor
             Instantiate(_itemPrefab, _list.transform).GetComponent<UISoundPaletteItem>().sound = Sound.none;
 
             // Add all sounds to the palette
-            foreach (var sound in SFXDatabase.GetSounds())
+            foreach (var sound in DatabaseManager.GetSounds())
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UISoundPaletteItem>().sound = sound;
 
             _list.Select(0);

@@ -21,7 +21,7 @@ namespace Puzzled.Editor
             set {
                 _to = value;
                 _nameText.text = _to.displayName;
-                _icon.sprite = TileDatabase.GetPortIcon(_to);
+                _icon.sprite = DatabaseManager.GetPortIcon(_to);
             }
         }
     }

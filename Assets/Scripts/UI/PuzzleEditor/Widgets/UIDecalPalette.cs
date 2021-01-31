@@ -73,7 +73,7 @@ namespace Puzzled.Editor
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = Decal.none;
 
             // Add all decals to the palette
-            foreach (var decal in DecalDatabase.GetDecals())
+            foreach (var decal in DatabaseManager.GetDecals())
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = decal;
 
             _filterAll.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
@@ -132,7 +132,7 @@ namespace Puzzled.Editor
             {
                 var item = _list.GetItem(i).GetComponent<UIDecalPaletteItem>();
                 var decal = item.decal;
-                var spriteName = decal.sprite != null ? decal.sprite.name : "None";
+                var spriteName = decal.name;
 
                 var active = true;
                 active &= !checkText || (spriteName.ToLower().Contains(text));

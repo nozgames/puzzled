@@ -16,7 +16,7 @@ namespace Puzzled
     {
         public static readonly Decal none = new Decal(Guid.Empty, null);
 
-        public string name => sprite == null ? "None" : sprite.name;
+        public string name => sprite == null ? "None" : sprite.name.Substring(5);
 
         public Guid guid { get; private set; }
 

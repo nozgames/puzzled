@@ -261,12 +261,6 @@ namespace Puzzled
 
         private void OnEnable()
         {
-            if(!TileDatabase.isLoaded || !DecalDatabase.isLoaded || !SFXDatabase.isLoaded || !BackgroundDatabase.isLoaded)
-            {
-                gameObject.SetActive(false);
-                return;
-            }
-
             popups.SetActive(false);
 
             KeyboardManager.Push(this);

@@ -50,7 +50,7 @@ namespace Puzzled
         /// <summary>
         /// Return the tile properties array for this tile
         /// </summary>
-        public TileProperty[] properties => _properties == null ? _properties = TileDatabase.GetProperties(this) : _properties;
+        public TileProperty[] properties => _properties == null ? _properties = DatabaseManager.GetProperties(this) : _properties;
 
         /// <summary>
         /// Current cell

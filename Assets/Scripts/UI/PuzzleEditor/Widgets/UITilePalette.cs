@@ -89,7 +89,7 @@ namespace Puzzled.Editor
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UITilePaletteItem>().tile = null;
 
             // Add all tiles to the palette
-            foreach (var tile in TileDatabase.GetTiles().Where(t => !t.info.isHidden))
+            foreach (var tile in DatabaseManager.GetTiles().Where(t => !t.info.isHidden))
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UITilePaletteItem>().tile = tile;
 
             _list.Select(0);
@@ -161,7 +161,7 @@ namespace Puzzled.Editor
 
         private void UpdatePreview()
         {
-            _selectedPreview.texture = TileDatabase.GetPreview(selected);
+            _selectedPreview.texture = DatabaseManager.GetPreview(selected);
             _selectedName.text = _selected.name;
         }
     }

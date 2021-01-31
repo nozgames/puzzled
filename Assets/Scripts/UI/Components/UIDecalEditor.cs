@@ -26,7 +26,7 @@ namespace Puzzled.Editor
                 _decal = value;
                 _preview.gameObject.SetActive(_decal != Decal.none);
                 _preview.sprite = _decal.sprite;
-                _nameText.text = _decal.sprite == null ? "None" : _decal.sprite.name;
+                _nameText.text = _decal.name;
 
                 _toggleFlipX.SetIsOnWithoutNotify((_decal.flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal);
                 _toggleFlipY.SetIsOnWithoutNotify((_decal.flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical);

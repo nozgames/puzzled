@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 namespace Puzzled
 {

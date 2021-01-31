@@ -64,7 +64,7 @@ namespace Puzzled
         private void OnAwake(AwakeEvent evt)
         {
             // Automatically create all of the ports for ourself
-            var properties = TileDatabase.GetProperties(tile);
+            var properties = DatabaseManager.GetProperties(tile);
             var type = GetType();
             foreach (var property in properties)
             {

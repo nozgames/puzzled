@@ -22,7 +22,7 @@ namespace Puzzled.Editor
                 } else
                 {
                     _nameText.text = _tile.gameObject.name;
-                    _previewImage.texture = TileDatabase.GetPreview(_tile);
+                    _previewImage.texture = DatabaseManager.GetPreview(_tile);
                     _previewImage.gameObject.SetActive(true);
                 }
             }

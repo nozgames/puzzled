@@ -304,7 +304,7 @@ namespace Puzzled
                 _inspectorFlip.gameObject.SetActive(flipped != null);
                 _inspectorFlip.isOn = (flipped != null && flipped.GetValue<bool>(_selectedTile));
 
-                _inspectorTilePreview.texture = TileDatabase.GetPreview(tile.guid);
+                _inspectorTilePreview.texture = DatabaseManager.GetPreview(tile.guid);
                 SetSelectionRect(tile.cell, tile.cell);
 
                 // Hide all wires in case they were all visible previously and show the selected tiles wires

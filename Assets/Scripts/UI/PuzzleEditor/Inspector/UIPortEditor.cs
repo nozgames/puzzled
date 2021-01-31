@@ -71,7 +71,7 @@ namespace Puzzled.Editor
             UpdateLabel();
             UpdateWires();
 
-            _portIcon.sprite = TileDatabase.GetPortIcon(_port);
+            _portIcon.sprite = DatabaseManager.GetPortIcon(_port);
 
             base.OnTargetChanged();
         }
