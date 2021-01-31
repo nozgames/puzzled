@@ -9,11 +9,12 @@ namespace Puzzled
     public struct CameraState
     {
         public bool valid;
-        public Vector3 position;
-        public Background background;
-        public int zoomLevel;
+        public Vector3 target;
+        public int pitch;
+        public int zoom;
         public bool editor;
-        public Player followPlayer;
+        public Background background;
+        public Transform followTarget;
         public int cullingMask;
         public bool showLogicTiles;
         public bool showWires;
@@ -26,19 +27,29 @@ namespace Puzzled
     public class CameraManager : MonoBehaviour
     {
         /// <summary>
+        /// Time to smooth follow camera
+        /// </summary>
+        public const float FollowSmoothTime = 0.25f;
+
+        /// <summary>
+        /// Default camera pitch
+        /// </summary>
+        public const int DefaultPitch = 55;
+
+        /// <summary>
         /// Default zoom level
         /// </summary>
-        public const int DefaultZoomLevel = 8;
+        public const int DefaultZoom = 8;
 
         /// <summary>
         /// Minimum zoom level
         /// </summary>
-        public const int MinZoomLevel = 1;
+        public const int MinZoom = 1;
 
         /// <summary>
         /// Maximum zoom level
         /// </summary>
-        public const int MaxZoomLevel = 20;
+        public const int MaxZoom = 20;
 
         [Header("General")]
         [SerializeField] private Camera _camera = null;
@@ -57,24 +68,18 @@ namespace Puzzled
         [SerializeField] private Background _defaultBackground = null;
         [SerializeField] private MeshRenderer _fog = null;
 
-        /// <summary>
-        /// Current zoom level
-        /// </summary>
-        private int _zoomLevel = DefaultZoomLevel;
-
-        /// <summary>
-        /// Target position
-        /// </summary>
-        private Vector3 _targetPosition;
-
-        /// <summary>
-        /// Current background
-        /// </summary>
-        private Background _background = null;
-
-        private Player _followPlayer = null;
-
         private static CameraManager _instance = null;
+
+        private Busy _busy = new Busy();
+        private Background _background = null;
+        private Transform _followTarget = null;
+        private float _transitionElapsed = 0.0f;
+        private float _transitionDuration = 0.0f;
+        private AnimatedValue<float> _animatedPitch = new AnimatedValue<float>();
+        private AnimatedValue<float> _animatedZoom = new AnimatedValue<float>();
+        private AnimatedValue<Color> _animatedBackground = new AnimatedValue<Color>();
+        private AnimatedValue<Vector3> _animatedTarget = new AnimatedValue<Vector3>();
+
 
         public static new Camera camera => _instance != null ? _instance._camera : null;
 
@@ -89,10 +94,11 @@ namespace Puzzled
         public static CameraState state {
             get => new CameraState {
                 valid = true,
-                position = _instance._targetPosition,
+                target = _instance._animatedTarget.to,
+                pitch = (int)_instance._animatedPitch.to,
                 background = _instance._background,
-                zoomLevel = _instance._zoomLevel,
-                followPlayer = _instance._followPlayer,
+                zoom = (int)_instance._animatedZoom.to,
+                followTarget = _instance._followTarget,
                 cullingMask = _instance._camera.cullingMask,
                 showLogicTiles = _instance._logicCamera.gameObject.activeSelf,
                 showWires = _instance._wireCamera.gameObject.activeSelf,
@@ -105,13 +111,12 @@ namespace Puzzled
                 camera.cullingMask = value.cullingMask;
                 _instance._logicCamera.gameObject.SetActive(value.showLogicTiles);
                 _instance._wireCamera.gameObject.SetActive(value.showWires);
-
                 _instance._fog.gameObject.SetActive(value.showFog);
 
-                if (value.followPlayer != null)
-                    Follow(value.followPlayer, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
+                if (value.followTarget != null)
+                    Follow(value.followTarget, value.pitch, value.zoom, value.background ?? _instance._defaultBackground, 0);
                 else
-                    Transition(value.position, value.zoomLevel, value.background ?? _instance._defaultBackground, 0);
+                    Transition(value.target, value.pitch, value.zoom, value.background ?? _instance._defaultBackground, 0);
             }
         }
 
@@ -128,10 +133,64 @@ namespace Puzzled
 
         private void LateUpdate()
         {
-            if (_followPlayer == null)
+            if (_instance == null)
                 return;
 
-            camera.transform.position = Frame(_followPlayer.transform.position, camera.transform.localEulerAngles.x, _zoomLevel);
+            // Transition animations?
+            if (_transitionDuration > 0.0f)
+            {
+                float t;
+                _transitionElapsed += Time.deltaTime;
+                if (_transitionElapsed >= _transitionDuration)
+                {
+                    _transitionElapsed = _transitionDuration;
+                    _transitionDuration = 0.0f;
+                    t = 1.0f;
+                    _busy.enabled = false;
+
+                    // Clear the from field of the animated target when we have a follow target
+                    // because it represents the velocity of the dampen
+                    if(_followTarget != null)
+                        _instance._animatedTarget.from = Vector3.zero;
+
+                } else
+                    t = _transitionElapsed / _transitionDuration;
+
+                t = Tween.EaseInOutCubic(t);
+
+                // If we have a follow target then keep adjusting the animated destination
+                if (_followTarget != null)
+                    _animatedTarget.to = _followTarget.transform.position;
+
+                _animatedBackground.Animate(t);
+                _animatedPitch.Animate(t);
+                _animatedTarget.Animate(t);
+                _animatedZoom.Animate(t);
+            }
+            
+            // Smooth follow
+            if (_transitionDuration <= 0.0f && _followTarget != null)
+            {
+                _animatedTarget.to = _followTarget.position;
+                _animatedTarget.value = Vector3.SmoothDamp(
+                    _animatedTarget.value,
+                    _animatedTarget.to,
+                    ref _animatedTarget.from,
+                    FollowSmoothTime);
+            }
+
+            UpdateState();
+        }
+
+        private void UpdateState()
+        {
+            // Change background color
+            _instance._fog.material.color = _animatedBackground.value;
+
+            // Update camera
+            camera.orthographicSize = _animatedZoom.value;
+            camera.transform.localEulerAngles = new Vector3(_animatedPitch.value, 0, 0);
+            camera.transform.position = Frame(_animatedTarget.value, _animatedPitch.value, _animatedZoom.value);
         }
 
         /// <summary>
@@ -141,145 +200,179 @@ namespace Puzzled
         /// <returns>World coordinate</returns>
         public static Vector3 ScreenToWorld(Vector3 screen) => camera.ScreenToWorldPoint(screen);
 
-        private static bool LerpBackgroundColor(Tween tween, float t)
-        {
-            var lerped = tween.Param1 * (1f - t) + tween.Param2 * t;
-            _instance._fog.material.color = new Color(lerped.x, lerped.y, lerped.z, 1.0f);
-            return true;
-        }
 
-        private bool LerpOrthographicSize(Tween tween, float t)
+        private void TransitionInternal(Vector3 target, float pitch, int zoom, Background background, int transitionTime)
         {
-            camera.orthographicSize = Mathf.Lerp(tween.Param1.x, tween.Param1.y, t) / 2;
-            return true;
+            var targetBackground = background ?? _defaultBackground;
+
+            // Clear out the Y component
+            target = target.ToXZ();
+
+            // Clamp zoom
+            zoom = Mathf.Clamp(zoom, MinZoom, MaxZoom);
+
+            _background = targetBackground;
+
+            _transitionDuration = transitionTime * GameManager.tick;
+            _transitionElapsed = 0.0f;
+
+            // No animation
+            if (transitionTime == 0)
+            {
+                _animatedBackground.Set(targetBackground.color);
+                _animatedPitch.Set(pitch);
+                _animatedTarget.Set(target);
+                _animatedZoom.Set(zoom);
+
+                // Update state immediately to ensure camera transforms are correct
+                UpdateState();
+            } 
+            // Animation
+            else
+            {
+#if false
+                // Dont blow movement during follow camera transition?  
+                // Disabled this for now because it forced you to make quick transisions or you lost control of your character
+                _busy.enabled = _followTarget == null;
+#else
+                _busy.enabled = true;
+#endif
+                _animatedTarget.Set(_animatedTarget.value, target);
+                _animatedPitch.Set(_animatedPitch.value, pitch);
+                _animatedZoom.Set(_animatedZoom.value, zoom);
+                _animatedBackground.Set(_animatedBackground.value, targetBackground.color);
+            }
         }
 
         /// <summary>
         /// Transition camera from one state to another
         /// </summary>
-        /// <param name="position">Target position of the camera</param>
+        /// <param name="target">Target position of the camera</param>
+        /// <param name="pitch">Pitch of the camera in degrees</param>
         /// <param name="zoomLevel">Zoom level to transition to</param>
         /// <param name="background">Background</param>
         /// <param name="transitionTime">Time to transition in ticks (0 for instant)</param>
-        public static void Transition(Vector3 position, int zoomLevel, Background background, int transitionTime)
-        {
-            var targetBackground = background ?? _instance._defaultBackground;
-
-            // Clear out the Y component
-            position = Vector3.Scale(position, new Vector3(1, 0, 1));
-
-            // Clamp zoom
-            zoomLevel = Mathf.Clamp(zoomLevel, MinZoomLevel, MaxZoomLevel);
-
-            // Handle non-animated transition
-            if (transitionTime == 0)
-            {
-                if (camera.orthographic)
-                    camera.orthographicSize = zoomLevel;
-
-                // Change background color
-                _instance._fog.material.color = targetBackground.color;
-
-                Tween.Stop(_instance.gameObject, "Transition");
-
-                camera.transform.position = Frame(position, camera.transform.localEulerAngles.x, zoomLevel);
-
-                _instance._zoomLevel = zoomLevel;
-                _instance._background = targetBackground;
-                _instance._targetPosition = position;
-                return;
-            }
-
-            var tweenGroup = Tween.Group();
-
-            bool addedTweenChild = false;
-
-            // Orthographic zoom
-            if (camera.orthographic && camera.orthographicSize != zoomLevel)
-            {
-                tweenGroup.Child(Tween.Custom(_instance.LerpOrthographicSize, new Vector4(camera.orthographicSize, zoomLevel, 0), Vector4.zero));
-                addedTweenChild = true;
-            }
-
-            // Move the camera if needed
-            var targetPosition = Frame(position, camera.transform.localEulerAngles.x, zoomLevel);
-            if (targetPosition != camera.transform.position)
-            {
-                tweenGroup.Child(Tween.Move(camera.transform.position, targetPosition, false).Target(camera.gameObject));
-                addedTweenChild = true;
-            }
-
-            if (_instance._fog.material.color != targetBackground.color)
-            {
-                tweenGroup.Child(Tween.Custom(LerpBackgroundColor, _instance._fog.material.color, targetBackground.color));
-                addedTweenChild = true;
-            }
-
-            if (addedTweenChild)
-            {
-                // Busy during a transition
-                GameManager.busy++;
-
-                tweenGroup
-                    .Duration(transitionTime * GameManager.tick)
-                    .EaseInOutCubic()
-                    .Key("Transition")
-                    .OnStop(_instance.OnTransitionComplete)
-                    .Start(_instance.gameObject);
-            }
-
-            _instance._zoomLevel = zoomLevel;
-            _instance._background = targetBackground;
-            _instance._targetPosition = position;
-        }
+        public static void Transition(Vector3 target, int pitch, int zoomLevel, Background background, int transitionTime) => 
+            _instance.TransitionInternal(target, pitch, zoomLevel, background, transitionTime);
 
         /// <summary>
         /// Transition to a game camera
         /// </summary>
-        /// <param name="gameCamera"></param>
-        /// <param name="transitionTime"></param>
+        /// <param name="gameCamera">Game camera to transition to</param>
+        /// <param name="transitionTime">Optional transition time overload (-1 means use game camera transition time)</param>
         public static void Transition(GameCamera gameCamera, int transitionTime = -1) =>
-            Transition(gameCamera.puzzle.grid.CellToWorld(gameCamera.target), gameCamera.zoomLevel, gameCamera.background, transitionTime == -1 ? gameCamera.transitionTime : transitionTime);
+            _instance.TransitionInternal (
+                gameCamera.target, 
+                gameCamera.pitch,
+                gameCamera.zoomLevel, 
+                gameCamera.background, 
+                transitionTime == -1 ? gameCamera.transitionTime : transitionTime);
 
+        public static void SetBackground (Background background)
+        {
+            _instance._animatedBackground.Set(background?.color ?? defaultBackground.color);
+            _instance.UpdateState();
+        }
+
+#if false
         /// <summary>
         /// Transition to a different background
         /// </summary>
         /// <param name="background">New background</param>
         /// <param name="transitionTime">Time to transition</param>
         public static void Transition(Background background, int transitionTime) =>
-            Transition(_instance._targetPosition, _instance._zoomLevel, background, transitionTime);
+            Transition(_instance._animatedTarget.value, _instance._zoomLevel, background, transitionTime);
 
         /// <summary>
         /// Adjust the active camera zoom by the given amount
         /// </summary>
         /// <param name="zoomLevel">delta zoom level</param>
         public static void Transition(int zoomLevel, int transitionTime) =>
-            Transition(_instance._targetPosition, zoomLevel, _instance._background, transitionTime);
+            Transition(_instance._animatedTarget.value, zoomLevel, _instance._background, transitionTime);
+#endif
 
         /// <summary>
         /// Pan the camera by the given amount in world coordinates
         /// </summary>
         /// <param name="pan"></param>
         public static void Pan(Vector3 pan) =>
-            Transition(_instance._targetPosition + pan, _instance._zoomLevel, _instance._background, 0);
+            Transition(
+                _instance._animatedTarget.value + pan, 
+                (int)_instance._animatedPitch.value, 
+                (int)_instance._animatedZoom.value, 
+                _instance._background, 
+                0);
 
         /// <summary>
-        /// Called when a transition is complete to disable the busy state
+        /// Pan the camera by the given amount in world coordinates
         /// </summary>
-        private void OnTransitionComplete() => GameManager.busy--;
+        /// <param name="pan"></param>
+        public static void Zoom(int zoom) =>
+            Transition(
+                _instance._animatedTarget.value,
+                (int)_instance._animatedPitch.value,
+                zoom,
+                _instance._background,
+                0);
 
-        public static void StopFollow()
+        /// <summary>
+        /// Follow the given transform
+        /// </summary>
+        /// <param name="followTarget">Target transform to follow</param>
+        /// <param name="pitch">Camera pitch</param>
+        /// <param name="zoom">Camera zoom</param>
+        /// <param name="background">Camera background</param>
+        /// <param name="transitionTime">Time in game ticks to transition the camera values</param>
+        public static void Follow(Transform followTarget, int pitch, int zoom, Background background, int transitionTime)
         {
-            _instance._followPlayer = null;
-        }
-
-        public static void Follow(Player targetPlayer, int zoomLevel, Background background, int transitionTime)
-        {
-            if (targetPlayer == null)
+            if (followTarget == null)
                 return;
 
-            Transition(_instance._targetPosition, zoomLevel, background, transitionTime);
-            _instance._followPlayer = targetPlayer;
+            // Set the follow target first to ensure we dont get put into a busy state when we do the transition
+            _instance._followTarget = followTarget;
+
+            // Start a normal transition for all properties 
+            Transition(_instance._animatedTarget.value, pitch, zoom, background, transitionTime);
+
+            // Reset the animated target for smoothing
+            if(transitionTime == 0)
+            {
+                _instance._animatedTarget.from = Vector3.zero;
+                _instance._animatedTarget.value = followTarget.position;
+                _instance._animatedTarget.to = followTarget.position;
+            }
+        }
+
+        /// <summary>
+        /// Stop following a target
+        /// </summary>
+        public static void StopFollow()
+        {
+            if (_instance._followTarget == null)
+                return;
+
+            _instance._animatedTarget.Set(_instance._animatedTarget.value);
+            _instance._followTarget = null;
+        }
+
+        /// <summary>
+        /// Frame the camera on the given position using the given zoom level 
+        /// </summary>
+        /// <param name="pitch">Pitch of the camera</param>
+        /// <param name="target">Target for the camera to focus on</param>
+        /// <param name="zoom">Zoom level in number of vertical tiles that should be visible</param>
+        /// <returns></returns>
+        public static Vector3 Frame(Vector3 target, float pitch, float zoom)
+        {
+            var frustumHeight = zoom;
+            var cameraFov = camera.fieldOfView;
+            var distance = (frustumHeight * 0.5f) / Mathf.Tan(cameraFov * 0.5f * Mathf.Deg2Rad);
+            return
+                // Target position
+                target
+
+                // Zoom to frame entire target
+                + (distance * -(Quaternion.Euler(pitch, 0, 0) * Vector3.forward));
         }
 
         /// <summary>
@@ -354,26 +447,6 @@ namespace Puzzled
                 camera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else
                 camera.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
-        }
-
-        /// <summary>
-        /// Frame the camera on the given position using the given zoom level 
-        /// </summary>
-        /// <param name="pitch">Pitch of the camera</param>
-        /// <param name="target">Target for the camera to focus on</param>
-        /// <param name="zoom">Zoom level in number of vertical tiles that should be visible</param>
-        /// <returns></returns>
-        public static Vector3 Frame (Vector3 target, float pitch, float zoom)
-        {
-            var frustumHeight = zoom;
-            var cameraFov = camera.fieldOfView;
-            var distance = (frustumHeight * 0.5f) / Mathf.Tan(cameraFov * 0.5f * Mathf.Deg2Rad);
-            return
-                // Target position
-                target
-
-                // Zoom to frame entire target
-                + (distance *- (Quaternion.Euler(pitch, 0, 0) * Vector3.forward));
         }
     }
 }

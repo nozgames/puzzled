@@ -126,18 +126,23 @@ namespace Puzzled
         /// </summary>
         public Background activeBackground => activeCamera == null ? null : activeCamera.background;
 
-        public void SetActiveCamera (GameCamera value, int transitionTime)
+        /// <summary>
+        /// Set the active camera in the puzzle
+        /// </summary>
+        /// <param name="gameCamera">Game camera to be active</param>
+        /// <param name="transitionTime">Time in game ticks to transition (-1 to use game cameras transition time)</param>
+        public void SetActiveCamera (GameCamera gameCamera, int transitionTime = -1)
         {
-            if (activeCamera == value)
+            if (activeCamera == gameCamera || null == gameCamera)
                 return;
 
             if (activeCamera != null)
                 activeCamera.OnCameraStop();
 
-            activeCamera = value;
+            activeCamera = gameCamera;
 
             if (activeCamera != null)
-                activeCamera.OnCameraStart(transitionTime);
+                activeCamera.OnCameraStart(transitionTime == -1 ? gameCamera.transitionTime : transitionTime);
         }
 
         private void Awake()
@@ -155,13 +160,32 @@ namespace Puzzled
             {
                 // Center on starting camera if there is one
                 if (properties.startingCamera != null)
-                {
-                    CameraManager.Transition(properties.startingCamera, 0);
-                    activeCamera = properties.startingCamera;
-                }
-                // Otherwise center on the player
+                    SetActiveCamera(properties.startingCamera, 0);
+                // If we have a player center on the player
                 else if (_player != null)
-                    CameraManager.Transition(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultZoomLevel, null, 0);               
+                    CameraManager.Transition(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultPitch, CameraManager.DefaultZoom, null, 0);               
+                // Otherwise center on the middle of all tiles
+                else
+                {
+                    var min = grid.maxCell;
+                    var max = grid.minCell;
+                    foreach(var tile in puzzle.grid.GetLinkedTiles())
+                    {
+                        // Special case to skip the puzzle properties
+                        if (tile.cell == grid.minCell)
+                            continue;
+
+                        min = Cell.Min(min, tile.cell);
+                        max = Cell.Max(max, tile.cell);
+                    }
+
+                    CameraManager.Transition(
+                        grid.CellToWorld(new Cell((max.x + min.x)/2, (max.y + min.y)/2)), 
+                        CameraManager.DefaultPitch, 
+                        CameraManager.DefaultZoom, 
+                        null, 
+                        0);
+                }
 
                 // Send a start event to all tiles
                 var start = new StartEvent();

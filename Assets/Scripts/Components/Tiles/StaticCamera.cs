@@ -8,7 +8,7 @@ namespace Puzzled
         public override void OnCameraStart(int transitionTime)
         {
             // Tell the camera manager to transition
-            CameraManager.Transition(puzzle.grid.CellToWorld(tile.cell + offset), zoomLevel, background, transitionTime);
+            CameraManager.Transition(this, transitionTime);
         }
     }
 }

@@ -19,6 +19,9 @@ namespace Puzzled.Editor.Commands
         {
             // Create the new tile
             tile = puzzle.InstantiateTile(prefab, cell);
+
+            // Start again
+            tile.Send(new StartEvent());
         }
 
         protected override void OnUndo()
@@ -28,6 +31,7 @@ namespace Puzzled.Editor.Commands
 
             // Unlink the tile
             tile.cell = Cell.invalid;
+
         }
 
         protected override void OnRedo()

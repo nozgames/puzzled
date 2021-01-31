@@ -5,7 +5,10 @@ namespace Puzzled
 {
     public class FollowCamera : GameCamera
     {
-        public override Cell target => puzzle.player != null ? puzzle.player.tile.cell : base.target;
+        public override Vector3 target => 
+            puzzle.player != null ? 
+                puzzle.grid.CellToWorld(puzzle.player.tile.cell) + new Vector3(offset.x * 0.25f, offset.y * 0.25f) : 
+                base.target;
 
         public override void OnCameraStop()
         {
@@ -14,7 +17,10 @@ namespace Puzzled
 
         public override void OnCameraStart(int transitionTime)
         {
-            CameraManager.Follow(puzzle.player, zoomLevel, background, transitionTime);
+            if(isEditing)
+                CameraManager.Transition(puzzle.player.tile.transform.position, pitch, zoomLevel, background, transitionTime);
+            else
+                CameraManager.Follow(puzzle.player.tile.transform, pitch, zoomLevel, background, transitionTime);
         }
     }
 }

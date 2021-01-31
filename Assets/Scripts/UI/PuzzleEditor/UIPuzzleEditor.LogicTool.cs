@@ -454,7 +454,7 @@ namespace Puzzled
 
                 case KeyCode.F:
                     if(_selectedTile != null)
-                        Center(_selectedTile.cell, CameraManager.state.zoomLevel);
+                        Center(_selectedTile.cell, CameraManager.state.zoom);
                     break;
             }
         }

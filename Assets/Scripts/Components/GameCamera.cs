@@ -28,11 +28,11 @@ namespace Puzzled
             }
         }
 
-        [Editable(rangeMin = CameraManager.MinZoomLevel, rangeMax = CameraManager.MaxZoomLevel)]
+        [Editable(rangeMin = CameraManager.MinZoom, rangeMax = CameraManager.MaxZoom)]
         public int zoomLevel
         {
             get => _zoomLevel;
-            set => _zoomLevel = Mathf.Clamp(value, CameraManager.MinZoomLevel, CameraManager.MaxZoomLevel);
+            set => _zoomLevel = Mathf.Clamp(value, CameraManager.MinZoom, CameraManager.MaxZoom);
         }
 
         [Editable(rangeMin = 25, rangeMax = 90)]
@@ -54,13 +54,13 @@ namespace Puzzled
         [Editable]
         public Background background { get; set; }
 
-        public virtual Cell target => tile.cell;
+        public virtual Vector3 target => puzzle.grid.CellToWorld(tile.cell) + new Vector3(offset.x * 0.25f, 0, offset.y * 0.25f);
 
         [Editable]
         [Port(PortFlow.Input, PortType.Signal, legacy = true, signalEvent = typeof(SignalEvent))]
         public Port signalInPort { get; set; }
 
-        private int _zoomLevel = CameraManager.DefaultZoomLevel;
+        private int _zoomLevel = CameraManager.DefaultZoom;
         private int _transitionTime = 4;
         private int _pitch = 55;
 
@@ -70,7 +70,7 @@ namespace Puzzled
             if (isEditing)
                 return;
 
-            puzzle.SetActiveCamera(this, transitionTime);
+            puzzle.SetActiveCamera(this);
         }
 
         [ActorEventHandler]

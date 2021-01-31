@@ -185,9 +185,9 @@ namespace Puzzled
 
             inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
 
-            _zoomSlider.minValue = CameraManager.MinZoomLevel;
-            _zoomSlider.maxValue = CameraManager.MaxZoomLevel;
-            _zoomSlider.value = CameraManager.state.zoomLevel;
+            _zoomSlider.minValue = CameraManager.MinZoom;
+            _zoomSlider.maxValue = CameraManager.MaxZoom;
+            _zoomSlider.value = CameraManager.state.zoom;
             _zoomSlider.onValueChanged.AddListener((v) => {
                 UpdateZoom((int)v);
 ;            });
@@ -303,17 +303,17 @@ namespace Puzzled
             if (playing || delta.y == 0 || !canvas.isMouseOver)
                 return;
 
-            UpdateZoom(CameraManager.state.zoomLevel + (delta.y > 0 ? -1 : 1));
+            UpdateZoom(CameraManager.state.zoom + (delta.y > 0 ? -1 : 1));
         }
 
         private void UpdateZoom(int zoom)
         {
-            CameraManager.Transition(zoom, 0);
+            CameraManager.Zoom(zoom);
 
             if (hasSelection)
                 SetSelectionRect(_selectionMin, _selectionMax);
 
-            _zoomSlider.SetValueWithoutNotify(CameraManager.state.zoomLevel);
+            _zoomSlider.SetValueWithoutNotify(CameraManager.state.zoom);
 
             UpdateCursor(true);
         }
@@ -437,8 +437,7 @@ namespace Puzzled
             selectionGizmo.gameObject.SetActive(false);
 
             // Reset the camera back to zero,zero
-            CameraManager.Transition(CameraManager.defaultBackground, 0);
-            Center(new Cell(0, 0), CameraManager.DefaultZoomLevel);
+            Center(new Cell(0, 0), CameraManager.DefaultZoom);
             ClearUndo();
             HidePopup();
 
@@ -523,16 +522,26 @@ namespace Puzzled
             GameManager.Play();
         }
 
-        private void Center(Cell cell, int zoomLevel = -1)
+        private void Center(Cell cell, int zoom = -1)
         {
-            // Cente around the tile first
-            CameraManager.Transition(puzzle.grid.CellToWorld(cell), zoomLevel, CameraManager.state.background, 0);
+            var state = CameraManager.state;
+
+            // Center around the tile first
+            CameraManager.Transition(
+                puzzle.grid.CellToWorld(cell), 
+                CameraManager.DefaultPitch,
+                zoom == -1 ? state.zoom : zoom,
+                null,
+                0);
 
             // Now center around the actual center of the canvas
-            var state = CameraManager.state;
-            var center = canvas.CanvasToWorld(_canvasCenter.TransformPoint(Vector3.zero));
-            var position = state.position - (center - state.position);
-            CameraManager.Transition(position, zoomLevel, CameraManager.state.background, 0);
+            state = CameraManager.state;
+            CameraManager.Transition(
+                state.target - (canvas.CanvasToWorld(_canvasCenter.TransformPoint(Vector3.zero)) - state.target),
+                CameraManager.DefaultPitch,
+                state.zoom,
+                null,
+                0);
         }
 
         public void Load(string path)
@@ -547,10 +556,11 @@ namespace Puzzled
 
                 mode = Mode.Logic;
 
-                // Center the camera on the player
-                Center(_puzzle.grid.WorldToCell(CameraManager.state.position), CameraManager.DefaultZoomLevel);
-
                 puzzleName.text = _puzzle.filename;
+
+                // Force a center to the current focused tile to take the inspector into account
+                Center(_puzzle.grid.WorldToCell(CameraManager.state.target), CameraManager.DefaultZoom);
+
             } catch (Exception e)
             {
                 Debug.LogException(e);

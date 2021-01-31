@@ -56,12 +56,12 @@ namespace Puzzled.Editor
             if (!_camera.gameObject.activeSelf)
                 return;
 
-            CameraManager.Transition(_gameCamera.background, 0);
+            CameraManager.SetBackground(_gameCamera.background);
 
             _camera.transform.localEulerAngles = new Vector3(_gameCamera.pitch, 0, 0);
             _camera.transform.position = 
                 CameraManager.Frame(
-                    _gameCamera.puzzle.grid.CellToWorld(_gameCamera.target) + new Vector3(_gameCamera.offset.x, 0, _gameCamera.offset.y) * 0.25f, 
+                    _gameCamera.target, 
                     _gameCamera.pitch, 
                     _gameCamera.zoomLevel);
 
@@ -78,7 +78,7 @@ namespace Puzzled.Editor
             if (eventData.scrollDelta.y == 0)
                 return;
 
-            var zoomLevel = Mathf.Clamp(_gameCamera.zoomLevel + (eventData.scrollDelta.y > 0 ? -1 : 1), CameraManager.MinZoomLevel, CameraManager.MaxZoomLevel);
+            var zoomLevel = Mathf.Clamp(_gameCamera.zoomLevel + (eventData.scrollDelta.y > 0 ? -1 : 1), CameraManager.MinZoom, CameraManager.MaxZoom);
             if (zoomLevel == _gameCamera.zoomLevel)
                 return;
 
