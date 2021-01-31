@@ -291,6 +291,7 @@ namespace Puzzled
 
             InitializeCursor();
 
+            CameraManager.ShowLetterbox(false);
             CameraManager.ShowGizmos();
             CameraManager.ShowWires();
             CameraManager.ShowFog(false);

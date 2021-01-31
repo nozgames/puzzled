@@ -209,6 +209,7 @@ namespace Puzzled
         {            
             paused = false;
 
+            CameraManager.ShowLetterbox(true);
             CameraManager.ShowGizmos(false);
             CameraManager.ShowWires(false);
             CameraManager.ShowFog();

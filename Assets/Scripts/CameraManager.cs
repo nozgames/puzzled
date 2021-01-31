@@ -19,6 +19,7 @@ namespace Puzzled
         public bool showLogicTiles;
         public bool showWires;
         public bool showFog;
+        public bool showLetterbox;
     }
 
     /// <summary>
@@ -55,6 +56,7 @@ namespace Puzzled
         [SerializeField] private Camera _camera = null;
         [SerializeField] private Camera _logicCamera = null;
         [SerializeField] private Camera _wireCamera = null;
+        [SerializeField] private GameObject _letterbox = null;
 
         [Header("Layers")]
         [SerializeField] [Layer] private int floorLayer = 0;
@@ -102,7 +104,8 @@ namespace Puzzled
                 cullingMask = _instance._camera.cullingMask,
                 showLogicTiles = _instance._logicCamera.gameObject.activeSelf,
                 showWires = _instance._wireCamera.gameObject.activeSelf,
-                showFog = _instance._fog.gameObject.activeSelf
+                showFog = _instance._fog.gameObject.activeSelf,
+                showLetterbox = _instance._letterbox.gameObject.activeSelf
             };
             set {
                 if (!value.valid || _instance == null)
@@ -112,6 +115,7 @@ namespace Puzzled
                 _instance._logicCamera.gameObject.SetActive(value.showLogicTiles);
                 _instance._wireCamera.gameObject.SetActive(value.showWires);
                 _instance._fog.gameObject.SetActive(value.showFog);
+                _instance._letterbox.gameObject.SetActive(value.showLetterbox);
 
                 if (value.followTarget != null)
                     Follow(value.followTarget, value.pitch, value.zoom, value.background ?? _instance._defaultBackground, 0);
@@ -428,6 +432,14 @@ namespace Puzzled
                 camera.cullingMask |= (1 << _instance.gizmoLayer);
             else
                 camera.cullingMask &= ~(1 << _instance.gizmoLayer);
+        }
+
+        /// <summary>
+        /// Hide or show gizmos
+        /// </summary>
+        public static void ShowLetterbox(bool show = true)
+        {
+            _instance._letterbox.gameObject.SetActive(show);
         }
 
         /// <summary>
