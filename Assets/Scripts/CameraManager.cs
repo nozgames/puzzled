@@ -190,7 +190,7 @@ namespace Puzzled
             // Update camera
             camera.orthographicSize = _animatedZoom.value;
             camera.transform.localEulerAngles = new Vector3(_animatedPitch.value, 0, 0);
-            camera.transform.position = Frame(_animatedTarget.value, _animatedPitch.value, _animatedZoom.value);
+            camera.transform.position = Frame(_animatedTarget.value, _animatedPitch.value, _animatedZoom.value, camera.fieldOfView);
         }
 
         /// <summary>
@@ -361,12 +361,12 @@ namespace Puzzled
         /// <param name="pitch">Pitch of the camera</param>
         /// <param name="target">Target for the camera to focus on</param>
         /// <param name="zoom">Zoom level in number of vertical tiles that should be visible</param>
+        /// <param name="fov">Camera fov</param>
         /// <returns></returns>
-        public static Vector3 Frame(Vector3 target, float pitch, float zoom)
+        public static Vector3 Frame(Vector3 target, float pitch, float zoom, float fov)
         {
             var frustumHeight = zoom;
-            var cameraFov = camera.fieldOfView;
-            var distance = (frustumHeight * 0.5f) / Mathf.Tan(cameraFov * 0.5f * Mathf.Deg2Rad);
+            var distance = (frustumHeight * 0.5f) / Mathf.Tan(fov * 0.5f * Mathf.Deg2Rad);
             return
                 // Target position
                 target

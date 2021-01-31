@@ -63,7 +63,9 @@ namespace Puzzled.Editor
                 CameraManager.Frame(
                     _gameCamera.target, 
                     _gameCamera.pitch, 
-                    _gameCamera.zoomLevel);
+                    _gameCamera.zoomLevel,
+                    CameraManager.camera.fieldOfView
+                    );
 
             _boundsGizmo.UpdateTransforms();
         }

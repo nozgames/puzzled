@@ -142,14 +142,14 @@ namespace Puzzled
             // Position camera to frame the content
             var extents = ((max - min));
             var size = Mathf.Max(extents.x, Mathf.Max(extents.y, extents.z));
-            var distance = (size * 0.75f) / Mathf.Abs(Mathf.Sin(previewCamera.fieldOfView * Mathf.Deg2Rad * 0.5f));
-
-            previewCamera.transform.position =
-                // Target position
-                tile.transform.position + new Vector3(0, (max.y + min.y) * 0.5f, 0)
-
-                // Zoom to frame entire target
-                + (distance * -Vector3.Normalize(previewCamera.transform.forward));
+            var rotation = new Vector3(tile.info.layer == TileLayer.Logic ? 90 : previewCamera.transform.localEulerAngles.x, 0, 0);
+            previewCamera.transform.localEulerAngles = rotation;
+            previewCamera.transform.position = CameraManager.Frame(
+                tile.transform.position + new Vector3(0, (max.y + min.y) * 0.5f, 0), 
+                rotation.x, 
+                size * 1.5f,
+                previewCamera.fieldOfView
+                );
 
             previewCamera.Render();
 

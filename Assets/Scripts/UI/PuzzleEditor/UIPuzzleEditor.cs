@@ -12,6 +12,8 @@ namespace Puzzled
 {
     public partial class UIPuzzleEditor : UIScreen, KeyboardManager.IKeyboardHandler
     {
+        public const int DefaultZoom = 12;
+
         public enum Mode
         {
             Unknown,
@@ -437,7 +439,7 @@ namespace Puzzled
             selectionGizmo.gameObject.SetActive(false);
 
             // Reset the camera back to zero,zero
-            Center(new Cell(0, 0), CameraManager.DefaultZoom);
+            Center(new Cell(0, 0), DefaultZoom);
             ClearUndo();
             HidePopup();
 
@@ -559,7 +561,7 @@ namespace Puzzled
                 puzzleName.text = _puzzle.filename;
 
                 // Force a center to the current focused tile to take the inspector into account
-                Center(_puzzle.grid.WorldToCell(CameraManager.state.target), CameraManager.DefaultZoom);
+                Center(_puzzle.grid.WorldToCell(CameraManager.state.target), DefaultZoom);
 
             } catch (Exception e)
             {
