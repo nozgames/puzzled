@@ -40,6 +40,8 @@ namespace Puzzled
         [SerializeField] private UIRadio _wireToggle = null;
         [SerializeField] private GameObject _canvasControls = null;
 
+        [SerializeField] private UITooltipPopup _tooltip = null;
+
         [Header("Gizmos")]
         [SerializeField] private SelectionGizmo selectionGizmo = null;
         [SerializeField] private SelectionGizmo _cursorGizmo = null;
@@ -809,6 +811,16 @@ namespace Puzzled
         private void HideCameraEditor()
         {
             _cameraEditor.gameObject.SetActive(false);
+        }
+
+        public static void ShowTooltip (RectTransform rectTransform, string text, TooltipDirection direction)
+        {
+            instance._tooltip.Show(rectTransform, text, direction);
+        }
+
+        public static void HideTooltip ()
+        {
+            instance._tooltip.gameObject.SetActive(false);
         }
     }
 }
