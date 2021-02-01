@@ -204,6 +204,8 @@ namespace Puzzled
         /// <returns>World coordinate</returns>
         public static Vector3 ScreenToWorld(Vector3 screen) => camera.ScreenToWorldPoint(screen);
 
+        public static Vector2 WorldToScreen(Vector3 world) => camera.WorldToScreenPoint(world);
+
 
         private void TransitionInternal(Vector3 target, float pitch, int zoom, Background background, int transitionTime)
         {

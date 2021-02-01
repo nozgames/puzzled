@@ -46,6 +46,10 @@ namespace Puzzled
 
             _animator.SetTrigger("Open");
 
+            var tooltip = GetComponent<Tooltip>();
+            if (null != tooltip)
+                tooltip.enabled = false;
+
             GameManager.busy++;
 
             Tween.Wait(0.5f)

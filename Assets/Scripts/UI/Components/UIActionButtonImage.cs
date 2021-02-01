@@ -17,7 +17,8 @@ namespace Puzzled
 
         private void OnEnable()
         {
-            _action.action.performed += OnActionButton;
+            if(_action != null)
+                _action.action.performed += OnActionButton;
 
             _openedTime = Time.time;
 
@@ -29,7 +30,8 @@ namespace Puzzled
 
         private void OnDisable()
         {
-            _action.action.performed -= OnActionButton;
+            if(_action != null)
+                _action.action.performed -= OnActionButton;
         }
 
         private void OnActionButton(InputAction.CallbackContext ctx)

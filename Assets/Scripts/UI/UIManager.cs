@@ -17,6 +17,7 @@ namespace Puzzled
         [SerializeField] private Transform popups = null;
         [SerializeField] private Transform popupCentered = null;
         [SerializeField] private GameObject _loading = null;
+        [SerializeField] private UITooltipPopup _tooltip = null;
 
         [Header("Screens")]
         [SerializeField] private UIScreen mainMenu = null;
@@ -130,6 +131,22 @@ namespace Puzzled
         {
             _instance.popups.gameObject.SetActive(false);
             _instance.popupCentered.DetachAndDestroyChildren();
+        }
+
+        public static void ShowTooltip(Vector3 position, string text, TooltipDirection direction)
+        {
+            var screen = CameraManager.WorldToScreen(position);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                _instance.GetComponent<RectTransform>(),
+                screen,
+                null,
+                out var local);
+            _instance._tooltip.Show(new Rect(local, Vector2.zero), text, direction);
+        }
+
+        public static void HideTooltip()
+        {
+            _instance._tooltip.gameObject.SetActive(false);
         }
     }
 }

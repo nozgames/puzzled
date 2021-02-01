@@ -24,7 +24,6 @@ namespace Puzzled
             base.CalculateLayoutInputHorizontal();
 
             SetLayoutInputForAxis(0.0f, 16.0f * rectTransform.rect.height / 9.0f, -1, 0);
-            Debug.Log(16.0f * rectTransform.rect.height / 9.0f);
         }
 
         public override void SetLayoutHorizontal()

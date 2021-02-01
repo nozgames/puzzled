@@ -7,6 +7,8 @@ namespace Puzzled
 {
     public class Player : TileComponent
     {
+        private const float TooltipDelay = 0.15f;
+
         private readonly Cell leftCell = new Cell(-1, 0);
         private readonly Cell rightCell = new Cell(1, 0);
         private readonly Cell upCell = new Cell(0, 1);
@@ -15,6 +17,9 @@ namespace Puzzled
         private Cell moveFromCell;
         private Cell moveToCell;
         private float queuedMoveTime = float.MinValue;
+        private string _tooltip;
+        private Cell _tooltipCell = Cell.invalid;
+        private float _tooltipElapsed;
 
         public Tile inventory { get; private set; }
 
@@ -113,6 +118,12 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
+        private void OnDestroyEvent(DestroyEvent evt)
+        {
+            UIManager.HideTooltip();
+        }
+
+        [ActorEventHandler]
         private void OnUpdate(NoZ.ActorUpdateEvent evt)
         {
             // update queued movement state
@@ -129,6 +140,8 @@ namespace Puzzled
             if (GameManager.isBusy)
                 return;
 
+            UpdateTooltip();
+
             // handle use? TODO
 
             // handle move
@@ -144,7 +157,8 @@ namespace Puzzled
                 // if there is no desired movement anymore, clear the queued movement too
                 if (desiredMovement == Cell.zero)
                     queuedMovement = Cell.zero;
-            } else 
+            } 
+            else if (_animator.GetBool("Walking"))
                 _animator.SetBool("Walking", false);
         }
 
@@ -159,6 +173,7 @@ namespace Puzzled
             isGrabbing = true;
 
             _animator.SetBool("Grabbing", isGrabbing);
+            UIManager.HideTooltip();
         }
 
         private void OnLeftActionStarted(InputAction.CallbackContext ctx)
@@ -303,11 +318,11 @@ namespace Puzzled
             queuedMoveTime = float.MinValue;
 
             // Change facing direction 
-/*            if (cell.x < 0)
-                visuals.localScale = new Vector3(-1, 1, 1);
-            else if (cell.x > 0)
-                visuals.localScale = Vector3.one;
-*/
+            /*            if (cell.x < 0)
+                            visuals.localScale = new Vector3(-1, 1, 1);
+                        else if (cell.x > 0)
+                            visuals.localScale = Vector3.one;
+            */
             // Try a use move
             if (Use(cell))
                 return;
@@ -333,6 +348,7 @@ namespace Puzzled
             BeginBusy();
 
             _animator.SetBool("Walking", true);
+            UIManager.HideTooltip();
 
             Tween.Move(puzzle.grid.CellToWorld(moveFromCell), puzzle.grid.CellToWorld(moveToCell), false)
             //Tween.Wait(moveDuration)
@@ -458,6 +474,52 @@ namespace Puzzled
                 _animator.SetBool("Walking", false);
         }
 
+        private void HideTooltip()
+        {
+            _tooltip = null;
+            _tooltipCell = Cell.invalid;
+            UIManager.HideTooltip();
+        }
+
+        private void UpdateTooltip()
+        {
+            if(_animator.GetBool("Walking") || isGrabbing)
+            {
+                HideTooltip();
+                return;
+            }
+
+            var cell = tile.cell + facingDirection;
+            var query = new QueryTooltipEvent();
+            SendToCell(query, cell, CellEventRouting.FirstHandled);
+            if (query.tooltip == null)
+            {
+                HideTooltip();
+                return;
+            }
+
+            if (_tooltipCell == cell && query.tooltip == _tooltip)
+            {
+                if (_tooltipElapsed < TooltipDelay)
+                {
+                    _tooltipElapsed += Time.deltaTime;
+                    if (_tooltipElapsed >= TooltipDelay)
+                    {
+                        _tooltipElapsed = TooltipDelay;
+                        var tooltipDirection = TooltipDirection.Top;
+                        var offset = new Vector3(0, 0, 0.25f);
+                        UIManager.ShowTooltip(puzzle.grid.CellToWorld(cell) + offset, query.tooltip, tooltipDirection);
+                    }
+                }
+            } 
+            else
+            {
+                _tooltip = query.tooltip;
+                _tooltipCell = cell;
+                _tooltipElapsed = 0.0f;
+            }
+        }
+
         private void PlayAnimation (string name)
         {
             //animator.SetTrigger(name);
@@ -533,6 +595,7 @@ namespace Puzzled
 
         private void UpdateVisuals(Cell cell)
         {
+            var oldFacing = facingDirection;
             facingDirection = cell;
 
             //visualsLeft.SetActive(cell.x < 0);

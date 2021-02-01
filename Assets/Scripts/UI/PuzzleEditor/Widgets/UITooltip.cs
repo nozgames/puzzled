@@ -9,14 +9,6 @@ using UnityEngine.EventSystems;
 
 namespace Puzzled.Editor
 {
-    public enum TooltipDirection
-    {
-        Top,
-        Bottom,
-        Right,
-        Left
-    }
-
     public class UITooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private TooltipDirection _direction = TooltipDirection.Bottom;

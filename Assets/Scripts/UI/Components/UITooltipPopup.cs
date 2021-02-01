@@ -1,13 +1,15 @@
-﻿using UnityEngine;
+﻿using NoZ;
+using UnityEngine;
 using UnityEngine.UI;
 
-namespace Puzzled.Editor
+namespace Puzzled
 {
     public class UITooltipPopup : MonoBehaviour
     {
         [SerializeField] private RectTransform _arrow = null;
         [SerializeField] private float _arrowMargin = 20.0f;
-        [SerializeField] private TMPro.TextMeshProUGUI _text = null;        
+        [SerializeField] private TMPro.TextMeshProUGUI _text = null;
+        [SerializeField] private float _animationTime = 0.0f;
 
         private RectTransform _rectTransform;
 
@@ -16,8 +18,18 @@ namespace Puzzled.Editor
             _rectTransform = GetComponent<RectTransform>();
         }
 
+        private void OnDisable()
+        {
+            Tween.Stop(gameObject);
+        }
 
-        public void Show (RectTransform sourceRect, string text, TooltipDirection direction)
+        public void Show(RectTransform sourceRect, string text, TooltipDirection direction)
+        {
+            var bounds = sourceRect.TransformBoundsTo(transform.parent);
+            Show(new Rect(bounds.min, bounds.size), text, direction);
+        }
+
+        public void Show (Rect source, string text, TooltipDirection direction)
         {
             var parentRect = transform.parent.GetComponent<RectTransform>().rect;
 
@@ -29,7 +41,6 @@ namespace Puzzled.Editor
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(_rectTransform);
 
-            var source = sourceRect.TransformBoundsTo(transform.parent);
             var size = _rectTransform.rect.size;
 
             switch (direction)
@@ -90,6 +101,9 @@ namespace Puzzled.Editor
             }
 
             _rectTransform.ForceUpdateRectTransforms();
+
+            if (_animationTime > 0.0f)
+                Tween.Scale(0, 1).EaseOutElastic(1,2).Key("Animate").Duration(_animationTime).Start(gameObject);
         }
     }
 }
