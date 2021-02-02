@@ -41,13 +41,14 @@ namespace Puzzled
         [SerializeField] private GameObject _canvasControls = null;
 
         [SerializeField] private UITooltipPopup _tooltip = null;
+        [SerializeField] private GameObject _playControls = null;
 
         [Header("Gizmos")]
         [SerializeField] private SelectionGizmo selectionGizmo = null;
         [SerializeField] private SelectionGizmo _cursorGizmo = null;
 
         [Header("Toolbar")]
-        [SerializeField] private GameObject tools = null;
+        [SerializeField] private GameObject _toolbar = null;
         [SerializeField] private UIRadio moveTool = null;
         [SerializeField] private UIRadio drawTool = null;
         [SerializeField] private UIRadio eraseTool = null;
@@ -466,7 +467,8 @@ namespace Puzzled
             GameManager.UnloadPuzzle();
             GameManager.busy = 1;
 
-            tools.SetActive(true);
+            _toolbar.SetActive(true);
+            _playControls.SetActive(false);
             inspector.SetActive(mode == Mode.Logic);
 
             playing = false;
@@ -500,7 +502,8 @@ namespace Puzzled
             if(puzzle.isModified)
                 Save();
 
-            tools.SetActive(false);
+            _toolbar.SetActive(false);
+            _playControls.SetActive(true);
             savedMode = mode;
             mode = Mode.Unknown;
             inspector.SetActive(false);
