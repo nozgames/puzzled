@@ -5,6 +5,7 @@ namespace Puzzled
     public class UsableTileComponent : TileComponent
     {
         private bool _isUsable = false;
+        private Tooltip _tooltip = null;
 
         protected bool isUsable
         {
@@ -17,6 +18,11 @@ namespace Puzzled
                 if (hadPower != _isUsable)
                     OnUsableChanged();
             }
+        }
+
+        private void Awake()
+        {
+            _tooltip = GetComponent<Tooltip>();
         }
 
         [Editable]
@@ -35,6 +41,9 @@ namespace Puzzled
             _isUsable = powerInPort.wireCount == 0 || powerInPort.hasPower;
             if (_isUsable != oldUsable)
                 OnUsableChanged();
+
+            if (_tooltip != null)
+                _tooltip.enabled = _isUsable;
         }
 
         protected virtual void OnUsableChanged()

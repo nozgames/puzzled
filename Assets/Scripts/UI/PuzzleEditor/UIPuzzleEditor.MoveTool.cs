@@ -189,6 +189,14 @@ namespace Puzzled
                 // Look for any tile on the same layer in the new cell
                 if (null != puzzle.grid.CellToTile(cell, tile.info.layer))
                     return false;
+
+                // Do not allow dynamic tiles to be moved on top of state tiles that do not allow it
+                if(tile.info.layer == TileLayer.Dynamic)
+                {
+                    var staticTile = puzzle.grid.CellToTile(cell, TileLayer.Static);
+                    if (staticTile != null && !staticTile.info.allowDynamic)
+                        return false;
+                }
             }
 
             return true;
