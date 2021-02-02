@@ -1,5 +1,7 @@
 ﻿using System;
+using NoZ;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Puzzled
 {
@@ -18,6 +20,11 @@ namespace Puzzled
         [SerializeField] private Transform popupCentered = null;
         [SerializeField] private GameObject _loading = null;
         [SerializeField] private UITooltipPopup _tooltip = null;
+
+        [Header("HUD")]
+        [SerializeField] private GameObject _hud = null;
+        [SerializeField] private GameObject _hudPlayerItem = null;
+        [SerializeField] private RawImage _hudPlayerItemIcon = null;
 
         [Header("Screens")]
         [SerializeField] private UIScreen mainMenu = null;
@@ -147,6 +154,25 @@ namespace Puzzled
         public static void HideTooltip()
         {
             _instance._tooltip.gameObject.SetActive(false);
+        }
+
+        public static void ShowHud (bool show=true)
+        {
+            _instance._hud.gameObject.SetActive(show);
+        }
+
+        public static void SetPlayerItem (Tile tile)
+        {
+            if(tile == null)
+            {
+                Tween.Scale(1, 0).Key("Item").Duration(0.25f).EaseInOutBack().AutoDeactivate().Start(_instance._hudPlayerItem.gameObject);
+            }
+            else
+            {
+                _instance._hudPlayerItem.gameObject.SetActive(true);
+                Tween.Scale(0, 1).Key("Item").Duration(0.25f).EaseInOutElastic(1, 3).Start(_instance._hudPlayerItem.gameObject);
+                _instance._hudPlayerItemIcon.texture = DatabaseManager.GetPreview(tile.guid);
+            }
         }
     }
 }

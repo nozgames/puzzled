@@ -554,6 +554,8 @@ namespace Puzzled
             var dropCell = evt.item.tile.cell;
             inventory = DatabaseManager.GetTile(evt.item.tile.guid);
 
+            UIManager.SetPlayerItem(inventory);
+
             // Drop the item in our inventory
             if (drop != null)
             {
