@@ -96,28 +96,31 @@ namespace Puzzled
 
         public void OnAfterDeserialize()
         {
-            if (_serializedResources != null)
+            if (_serializedResources == null)
             {
-                foreach (var serializedResource in _serializedResources)
+                _resources.Clear();
+                return;
+            }
+
+            _resources = new Dictionary<Guid, Resource>(_serializedResources.Length);
+
+            foreach (var serializedResource in _serializedResources)
+            {
+                if (serializedResource.asset == null)
                 {
-                    if (serializedResource.asset == null)
-                    {
-                        Debug.LogWarning($"Asset missing for guid {serializedResource.guid}");
-                        continue;
-                    }
-
-                    if (!Guid.TryParse(serializedResource.guid, out var guid))
-                    {
-                        Debug.LogWarning($"Guid failed to parse {serializedResource.guid}");
-                        continue;
-                    }                    
-
-                    var resource = new Resource { guid = guid, asset = serializedResource.asset };
-                    OnDeserializeResource(resource);
-                    _resources[guid] = resource;
+                    Debug.LogWarning($"Asset missing for guid {serializedResource.guid}");
+                    continue;
                 }
 
-                //_serializedResources = null;
+                if (!Guid.TryParse(serializedResource.guid, out var guid))
+                {
+                    Debug.LogWarning($"Guid failed to parse {serializedResource.guid}");
+                    continue;
+                }                    
+
+                var resource = new Resource { guid = guid, asset = serializedResource.asset };
+                OnDeserializeResource(resource);
+                _resources[guid] = resource;
             }
         }
 
