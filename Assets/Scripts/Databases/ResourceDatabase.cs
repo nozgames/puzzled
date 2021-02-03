@@ -101,10 +101,16 @@ namespace Puzzled
                 foreach (var serializedResource in _serializedResources)
                 {
                     if (serializedResource.asset == null)
+                    {
+                        Debug.LogWarning($"Asset missing for guid {serializedResource.guid}");
                         continue;
+                    }
 
                     if (!Guid.TryParse(serializedResource.guid, out var guid))
+                    {
+                        Debug.LogWarning($"Guid failed to parse {serializedResource.guid}");
                         continue;
+                    }                    
 
                     var resource = new Resource { guid = guid, asset = serializedResource.asset };
                     OnDeserializeResource(resource);
