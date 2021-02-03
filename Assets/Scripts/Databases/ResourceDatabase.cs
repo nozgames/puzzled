@@ -117,7 +117,7 @@ namespace Puzzled
                     _resources[guid] = resource;
                 }
 
-                _serializedResources = null;
+                //_serializedResources = null;
             }
         }
 
