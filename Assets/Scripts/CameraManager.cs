@@ -7,17 +7,28 @@ namespace Puzzled
     public class SharedCameraData
     {
         public List<GameCamera> activeCameras = new List<GameCamera>(16);
+        public GameCamera.State baseCameraState;
 
         public void AddCamera(GameCamera cam)
         {
-            int i = 0;
-            for (; i < activeCameras.Count; ++i)
+            int insertionLocation = 0;
+            for (int i = 0; i < activeCameras.Count; ++i)
             {
-                if (activeCameras[i].priority > cam.priority)
+                GameCamera activeCam = activeCameras[i];
+                if (activeCam.priority == cam.priority)
+                {
+                    // deactivate other cameras on this priority
+                    Debug.Assert(cam != activeCam);
+                    activeCam.DeactivateCamera(cam.transitionTime);
+                }
+                else if (activeCameras[i].priority > cam.priority)
+                {
+                    insertionLocation = i;
                     break;
+                }
             }
 
-            activeCameras.Insert(i, cam);
+            activeCameras.Insert(insertionLocation, cam);
         }
 
         public void RemoveCamera(GameCamera cam)
@@ -95,7 +106,6 @@ namespace Puzzled
         /// </summary>
         public static Background defaultBackground => _instance._defaultBackground;
 
-        public static GameCamera.State baseCameraState { get; set; }
         public static GameCamera.State editorCameraState { get; set; }
 
 
@@ -123,31 +133,32 @@ namespace Puzzled
             UpdateState();
         }
 
-        private void UpdateBlendedState(ref GameCamera.State blendedState)
+        private GameCamera.State GetBlendedCameraState()
         {
             if (GameManager.puzzle == null)
-                return;
+                return new GameCamera.State();
 
             if (GameManager.puzzle.isEditing)
-            {
-                blendedState = editorCameraState;
-                return;
-            }
+                return editorCameraState;
 
             SharedCameraData cameraData = GameManager.puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
-            if (cameraData.activeCameras.Count == 0)
+            GameCamera.State blendedState = cameraData.baseCameraState;
+
+            float totalWeight = 1;
+            for (int i = cameraData.activeCameras.Count - 1; i >= 0; --i)
             {
-                blendedState = baseCameraState;
-                return;
+                GameCamera cam = cameraData.activeCameras[i];
+                totalWeight += cam.weight;
+                float lerpValue = cam.weight / totalWeight;
+                blendedState = blendedState.Lerp(cameraData.activeCameras[i].state, lerpValue);
             }
 
-            blendedState = cameraData.activeCameras[0].state;
+            return blendedState;
         }
 
         private void UpdateState()
         {
-            GameCamera.State blendedState = new GameCamera.State();
-            UpdateBlendedState(ref blendedState);
+            GameCamera.State blendedState = GetBlendedCameraState();
 
             // Change background color
             _instance._fog.material.color = blendedState.bgColor;

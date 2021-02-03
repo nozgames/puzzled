@@ -134,13 +134,14 @@ namespace Puzzled
             // Start the puzzle if it has not yet been started
             if(!_started)
             {
-                puzzle.SetSharedComponentData(typeof(GameCamera), new SharedCameraData());
+                SharedCameraData sharedCamData = new SharedCameraData();
+                puzzle.SetSharedComponentData(typeof(GameCamera), sharedCamData);
 
                 if (!isEditing)
                 {
                     if (_player != null)
                     {
-                        CameraManager.baseCameraState = new GameCamera.State
+                        sharedCamData.baseCameraState = new GameCamera.State
                         {
                             position = CameraManager.Frame(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultPitch, CameraManager.DefaultZoom, CameraManager.FieldOfView),
                             rotation = Quaternion.Euler(CameraManager.DefaultPitch, 0, 0),

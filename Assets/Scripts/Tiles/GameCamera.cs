@@ -14,13 +14,13 @@ namespace Puzzled
             public Quaternion rotation;
             public Color bgColor;
 
-            public static State Lerp(State stateA, State stateB, float t)
+            public State Lerp(State stateB, float t)
             {
                 return new State
                 {
-                    position = Vector3.Lerp(stateA.position, stateB.position, t),
-                    rotation = Quaternion.Slerp(stateA.rotation, stateB.rotation, t),
-                    bgColor = Color.Lerp(stateA.bgColor, stateB.bgColor, t)
+                    position = Vector3.Lerp(position, stateB.position, t),
+                    rotation = Quaternion.Slerp(rotation, stateB.rotation, t),
+                    bgColor = Color.Lerp(bgColor, stateB.bgColor, t)
                 };
             }
         }
@@ -120,7 +120,7 @@ namespace Puzzled
             if (isEditing)
                 return;
 
-            DeactivateCamera();
+            DeactivateCamera(transitionTime);
         }
 
         [ActorEventHandler]
@@ -151,15 +151,16 @@ namespace Puzzled
             if (_isInCameraList)
                 return;
 
+            UpdateState();
             puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera)).AddCamera(this);
             _isInCameraList = true;
         }
 
-        public void DeactivateCamera()
+        public void DeactivateCamera(int transitionTicks)
         {
             _isActivated = false;
-            float totalTransitionTime = transitionTime + GameManager.tickTimeRemaining;
-            _blendRate = (totalTransitionTime > 0) ? -(1 / totalTransitionTime) : -float.MaxValue;
+            float totalTransitionTime = transitionTicks * GameManager.tick + GameManager.tickTimeRemaining;
+            _blendRate = weight * ((totalTransitionTime > 0) ? -(1 / totalTransitionTime) : -float.MaxValue);
         }
         
         public void RemoveCamera()
@@ -171,13 +172,17 @@ namespace Puzzled
             _isInCameraList = false;
         }
 
-        public void BlendUpdate()
+        public void UpdateState()
         {
-            _weight += _blendRate * Time.deltaTime;
-
             state.position = CameraManager.Frame(target, pitch, zoomLevel, CameraManager.FieldOfView);
             state.rotation = Quaternion.Euler(pitch, 0, 0);
-            state.bgColor = background.color;
+            state.bgColor = background?.color ?? CameraManager.defaultBackground.color;
+        }
+
+        public void BlendUpdate()
+        {
+            weight += _blendRate * Time.deltaTime;
+            UpdateState();
         }
     }
 }
