@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7133546833785419217}
   - component: {fileID: 716946652501344160}
   - component: {fileID: 4074504661607909055}
+  - component: {fileID: -2612488967639902833}
   m_Layer: 0
   m_Name: GoldKey
   m_TagString: Untagged
@@ -60,6 +61,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _visuals: {fileID: 7469501798020408454}
   _pickupSound: {fileID: 8300000, guid: 10ece2aee9a97fa4f9530f4db4f66392, type: 3}
+--- !u!114 &-2612488967639902833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4547281001109219381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _text: Pickup
 --- !u!114 &3622199133425794443
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72,6 +86,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3bd2ea6581491a4dbd27cea723cb92e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _target: {fileID: 0}
   minHeight: 0.35
   maxHeight: 0.55
 --- !u!1001 &7739552089313434071

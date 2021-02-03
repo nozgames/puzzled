@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2819266254877709548}
   - component: {fileID: -8286699205250075377}
   - component: {fileID: 8052131265172093978}
+  - component: {fileID: 5213486758045515803}
   m_Layer: 0
   m_Name: PushButton
   m_TagString: Untagged
@@ -60,6 +61,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _animator: {fileID: 4429761359786391767}
   _useSound: {fileID: 8300000, guid: 540ede20dd1ef1b40986b2aab697de76, type: 3}
+--- !u!114 &5213486758045515803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _text: Press
 --- !u!95 &4429761359786391767
 Animator:
   serializedVersion: 3

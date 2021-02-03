@@ -62,7 +62,13 @@ namespace Puzzled
                 _instance._puzzle = value;
 
                 if (_instance._puzzle != null)
+                {
                     _instance._puzzle.gameObject.SetActive(true);
+                    UIManager.SetPlayerItem(_instance._puzzle.player != null ? _instance._puzzle.player.inventory : null);
+                    UIManager.ShowHud(!_instance._puzzle.isEditing);
+                }
+                else
+                    UIManager.ShowHud(false);
 
                 onPuzzleChanged?.Invoke(_instance._puzzle);
             }
