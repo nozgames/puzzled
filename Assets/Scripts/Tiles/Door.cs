@@ -34,20 +34,15 @@ namespace Puzzled
         public bool isOpen {
             get => _open;
             set {
+                if (_open == value)
+                    return;
+
                 _open = value;
 
                 if(_animator != null)
                 {
                     _animator.enabled = true;
-
-                    int animation;
-                    if (value)
-                        animation = (isLoading || isEditing) ? _animationOpen : _animationClosedToOpen;
-                    else
-                        animation = (isLoading || isEditing) ? _animationClosed : _animationOpenToClosed;
-
-                    if(animation != 0)
-                        _animator.SetTrigger(animation);
+                    _animator.Play(value ? _animationOpen : _animationClosed, 0, (isEditing||isLoading||isStarting) ? 1.0f : 0.0f);
                 }
 
                 if (value)
@@ -62,7 +57,7 @@ namespace Puzzled
 
         private bool requiresKey => keyItem != null;
 
-        private void Start()
+        private void Awake()
         {
             if(null != _animator)
             {

@@ -30,6 +30,11 @@ namespace Puzzled
         public bool isLoading => puzzle == null || puzzle.isLoading;
 
         /// <summary>
+        /// True if the owning puzzle is starting
+        /// </summary>
+        public bool isStarting => puzzle == null || puzzle.isStarting;
+
+        /// <summary>
         /// True if the current frame is a tick
         /// </summary>
         public bool isTickFrame => tile == null ? false : tile.isTickFrame;
@@ -83,7 +88,7 @@ namespace Puzzled
 
         protected void PlaySound(AudioClip clip, float volume = 1.0f, float pitch = 1.0f)
         {
-            if (isLoading || isEditing || clip == null || volume <= 0.0f)
+            if (isLoading || isEditing || isStarting || clip == null || volume <= 0.0f)
                 return;
 
             AudioManager.Instance.Play(clip, volume, pitch);

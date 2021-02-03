@@ -74,6 +74,11 @@ namespace Puzzled
         public bool isLoading { get; private set; }
 
         /// <summary>
+        /// True if the puzzle is s
+        /// </summary>
+        public bool isStarting { get; private set; }
+
+        /// <summary>
         /// True if the puzzle has been modified
         /// </summary>
         public bool isModified { get; set; }
@@ -187,11 +192,14 @@ namespace Puzzled
                         0);
                 }
 
+                isStarting = true;
+
                 // Send a start event to all tiles
                 var start = new StartEvent();
                 for (int i = 0; i < _tiles.transform.childCount; i++)
                     _tiles.transform.GetChild(i).GetComponent<Tile>().Send(start);
 
+                isStarting = false;
                 _started = true;
             }
 

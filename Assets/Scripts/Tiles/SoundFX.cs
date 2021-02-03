@@ -14,7 +14,8 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnSignal (SignalEvent evt)
         {
-            PlaySound(sfx.clip);
+            if (!isEditing && !isLoading)
+                AudioManager.Instance.Play(sfx.clip);
         }
     }
 }
