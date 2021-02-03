@@ -32,6 +32,8 @@ namespace Puzzled
 
         public static float tick => _instance._tick;
 
+        public static float tickTimeRemaining => (tick - _instance.elapsed);
+
         private float elapsed = 0.0f;
 
         private bool _paused = false;

@@ -95,7 +95,7 @@ namespace Puzzled
         protected void SetSharedData(object data) => puzzle.SetSharedComponentData(this, data);
 
         /// <summary>
-        /// Get the shard data for a given component
+        /// Get the shared data for a given component
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>

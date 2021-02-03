@@ -1,4 +1,5 @@
 ﻿using NoZ;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Puzzled
@@ -20,6 +21,28 @@ namespace Puzzled
         public bool showWires;
         public bool showFog;
         public bool showLetterbox;
+    }
+
+    public class SharedCameraData
+    {
+        public List<GameCamera> activeCameras = new List<GameCamera>(16);
+
+        public void AddCamera(GameCamera cam)
+        {
+            int i = 0;
+            for (; i < activeCameras.Count; ++i)
+            {
+                if (activeCameras[i].priority > cam.priority)
+                    break;
+            }
+
+            activeCameras.Insert(i, cam);
+        }
+
+        public void RemoveCamera(GameCamera cam)
+        {
+            activeCameras.Remove(cam);
+        }
     }
 
     /// <summary>
@@ -52,6 +75,11 @@ namespace Puzzled
         /// </summary>
         public const int MaxZoom = 20;
 
+        /// <summary>
+        /// Field of view
+        /// </summary>
+        public const int FieldOfView = 25;
+
         [Header("General")]
         [SerializeField] private Camera _camera = null;
         [SerializeField] private Camera _logicCamera = null;
@@ -82,13 +110,15 @@ namespace Puzzled
         private AnimatedValue<Color> _animatedBackground = new AnimatedValue<Color>();
         private AnimatedValue<Vector3> _animatedTarget = new AnimatedValue<Vector3>();
 
-
         public static new Camera camera => _instance != null ? _instance._camera : null;
 
         /// <summary>
         /// Returns the default background 
         /// </summary>
         public static Background defaultBackground => _instance._defaultBackground;
+
+        public static GameCamera.State baseCameraState { get; set; }
+        public static GameCamera.State editorCameraState { get; set; }
 
         /// <summary>
         /// Get/Set the camera state
@@ -128,6 +158,7 @@ namespace Puzzled
         {
             _instance = this;
             _fog.material.color = Color.white;
+            camera.fieldOfView = _logicCamera.fieldOfView = _wireCamera.fieldOfView = FieldOfView;
         }
 
         private void OnDisable()
@@ -140,61 +171,45 @@ namespace Puzzled
             if (_instance == null)
                 return;
 
-            // Transition animations?
-            if (_transitionDuration > 0.0f)
-            {
-                float t;
-                _transitionElapsed += Time.deltaTime;
-                if (_transitionElapsed >= _transitionDuration)
-                {
-                    _transitionElapsed = _transitionDuration;
-                    _transitionDuration = 0.0f;
-                    t = 1.0f;
-                    _busy.enabled = false;
+            if (GameManager.puzzle == null)
+                return;
 
-                    // Clear the from field of the animated target when we have a follow target
-                    // because it represents the velocity of the dampen
-                    if(_followTarget != null)
-                        _instance._animatedTarget.from = Vector3.zero;
-
-                } else
-                    t = _transitionElapsed / _transitionDuration;
-
-                t = Tween.EaseInOutCubic(t);
-
-                // If we have a follow target then keep adjusting the animated destination
-                if (_followTarget != null)
-                    _animatedTarget.to = _followTarget.transform.position;
-
-                _animatedBackground.Animate(t);
-                _animatedPitch.Animate(t);
-                _animatedTarget.Animate(t);
-                _animatedZoom.Animate(t);
-            }
-            
-            // Smooth follow
-            if (_transitionDuration <= 0.0f && _followTarget != null)
-            {
-                _animatedTarget.to = _followTarget.position;
-                _animatedTarget.value = Vector3.SmoothDamp(
-                    _animatedTarget.value,
-                    _animatedTarget.to,
-                    ref _animatedTarget.from,
-                    FollowSmoothTime);
-            }
-
+            UpdateCameras();
             UpdateState();
+        }
+
+        private void UpdateBlendedState(ref GameCamera.State blendedState)
+        {
+            if (GameManager.puzzle == null)
+                return;
+
+            if (GameManager.puzzle.isEditing)
+            {
+                blendedState = editorCameraState;
+                return;
+            }
+
+            SharedCameraData cameraData = GameManager.puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
+            if (cameraData.activeCameras.Count == 0)
+            {
+                blendedState = baseCameraState;
+                return;
+            }
+
+            blendedState = cameraData.activeCameras[0].state;
         }
 
         private void UpdateState()
         {
+            GameCamera.State blendedState = new GameCamera.State();
+            UpdateBlendedState(ref blendedState);
+
             // Change background color
-            _instance._fog.material.color = _animatedBackground.value;
+            _instance._fog.material.color = blendedState.bgColor;
 
             // Update camera
-            camera.orthographicSize = _animatedZoom.value;
-            camera.transform.localEulerAngles = new Vector3(_animatedPitch.value, 0, 0);
-            camera.transform.position = Frame(_animatedTarget.value, _animatedPitch.value, _animatedZoom.value, camera.fieldOfView);
+            camera.transform.rotation = blendedState.rotation;
+            camera.transform.position = blendedState.position;
         }
 
         /// <summary>
@@ -205,7 +220,6 @@ namespace Puzzled
         public static Vector3 ScreenToWorld(Vector3 screen) => camera.ScreenToWorldPoint(screen);
 
         public static Vector2 WorldToScreen(Vector3 world) => camera.WorldToScreenPoint(world);
-
 
         private void TransitionInternal(Vector3 target, float pitch, int zoom, Background background, int transitionTime)
         {
@@ -236,7 +250,7 @@ namespace Puzzled
             // Animation
             else
             {
-#if false
+#if true
                 // Dont blow movement during follow camera transition?  
                 // Disabled this for now because it forced you to make quick transisions or you lost control of your character
                 _busy.enabled = _followTarget == null;
@@ -461,6 +475,18 @@ namespace Puzzled
                 camera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else
                 camera.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
+        }
+
+        private void UpdateCameras()
+        {
+            SharedCameraData cameraData = GameManager.puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
+            for (int i = cameraData.activeCameras.Count - 1; i >= 0; --i)
+            {
+                GameCamera gameCam = cameraData.activeCameras[i];
+                gameCam.BlendUpdate();
+                if (gameCam.isDead)
+                    gameCam.RemoveCamera();
+            }
         }
     }
 }
