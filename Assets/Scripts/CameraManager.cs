@@ -4,25 +4,6 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    /// <summary>
-    /// Current state of the camera
-    /// </summary>
-    public struct CameraState
-    {
-        public bool valid;
-        public Vector3 target;
-        public int pitch;
-        public int zoom;
-        public bool editor;
-        public Background background;
-        public Transform followTarget;
-        public int cullingMask;
-        public bool showLogicTiles;
-        public bool showWires;
-        public bool showFog;
-        public bool showLetterbox;
-    }
-
     public class SharedCameraData
     {
         public List<GameCamera> activeCameras = new List<GameCamera>(16);
@@ -82,8 +63,6 @@ namespace Puzzled
 
         [Header("General")]
         [SerializeField] private Camera _camera = null;
-        [SerializeField] private Camera _logicCamera = null;
-        [SerializeField] private Camera _wireCamera = null;
         [SerializeField] private GameObject _letterbox = null;
 
         [Header("Layers")]
@@ -92,6 +71,7 @@ namespace Puzzled
         [SerializeField] [Layer] private int dynamicLayer = 0;
         [SerializeField] [Layer] private int logicLayer = 0;
         [SerializeField] [Layer] private int gizmoLayer = 0;
+        [SerializeField] [Layer] private int wireLayer = 0;
         [SerializeField] [Layer] private int fogLayer = 0;
 
         [Header("Background")]
@@ -118,40 +98,12 @@ namespace Puzzled
         public static GameCamera.State baseCameraState { get; set; }
         public static GameCamera.State editorCameraState { get; set; }
 
-        /// <summary>
-        /// Get/Set the camera state
-        /// </summary>
-        public static CameraState state {
-            get => new CameraState {
-                valid = true,
-                target = _instance._animatedTarget.to,
-                pitch = (int)_instance._animatedPitch.to,
-                background = _instance._background,
-                zoom = (int)_instance._animatedZoom.to,
-                followTarget = _instance._followTarget,
-                cullingMask = _instance._camera.cullingMask,
-                showLogicTiles = _instance._logicCamera.gameObject.activeSelf,
-                showWires = _instance._wireCamera.gameObject.activeSelf,
-                showFog = _instance._fog.gameObject.activeSelf,
-                showLetterbox = _instance._letterbox.gameObject.activeSelf
-            };
-            set {
-                if (!value.valid || _instance == null)
-                    return;
-
-                camera.cullingMask = value.cullingMask;
-                _instance._logicCamera.gameObject.SetActive(value.showLogicTiles);
-                _instance._wireCamera.gameObject.SetActive(value.showWires);
-                _instance._fog.gameObject.SetActive(value.showFog);
-                _instance._letterbox.gameObject.SetActive(value.showLetterbox);
-            }
-        }
 
         public void Initialize()
         {
             _instance = this;
             _fog.material.color = Color.white;
-            camera.fieldOfView = _logicCamera.fieldOfView = _wireCamera.fieldOfView = FieldOfView;
+            camera.fieldOfView = FieldOfView;
         }
 
         private void OnDisable()
@@ -280,7 +232,10 @@ namespace Puzzled
         /// </summary>
         public static void ShowWires (bool show = true)
         {
-            _instance._wireCamera.gameObject.SetActive(show);
+            if (show)
+                camera.cullingMask |= (1 << _instance.wireLayer);
+            else
+                camera.cullingMask &= ~(1 << _instance.wireLayer);
         }
 
         /// <summary>
@@ -309,12 +264,6 @@ namespace Puzzled
         /// <param name="show">True to show the layer, false to hide it</param>
         public static void ShowLayer(TileLayer layer, bool show = true)
         {
-            if(layer == TileLayer.Logic)
-            {
-                _instance._logicCamera.gameObject.SetActive(show);
-                return;
-            }
-
             if (show)
                 camera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else

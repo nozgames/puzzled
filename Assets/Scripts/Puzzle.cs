@@ -27,11 +27,6 @@ namespace Puzzled
         private Dictionary<Type, object> _sharedComponentData = new Dictionary<Type, object>();
 
         /// <summary>
-        /// Saved camera state
-        /// </summary>
-        private CameraState _savedCameraState;
-
-        /// <summary>
         /// Helper function for getting/setting the current puzzle
         /// </summary>
         public static Puzzle current {
@@ -166,17 +161,6 @@ namespace Puzzled
                 _started = true;
             }
 
-        }
-
-        private void OnEnable()
-        {
-            if (_savedCameraState.valid)
-                CameraManager.state = _savedCameraState;            
-        }
-
-        private void OnDisable()
-        {
-            _savedCameraState = CameraManager.state;
         }
 
         /// <summary>
