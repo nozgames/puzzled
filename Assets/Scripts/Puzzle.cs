@@ -27,11 +27,6 @@ namespace Puzzled
         private Dictionary<Type, object> _sharedComponentData = new Dictionary<Type, object>();
 
         /// <summary>
-        /// Saved camera state
-        /// </summary>
-        private CameraState _savedCameraState;
-
-        /// <summary>
         /// Helper function for getting/setting the current puzzle
         /// </summary>
         public static Puzzle current {
@@ -131,25 +126,6 @@ namespace Puzzled
         /// </summary>
         public Background activeBackground => activeCamera == null ? null : activeCamera.background;
 
-        /// <summary>
-        /// Set the active camera in the puzzle
-        /// </summary>
-        /// <param name="gameCamera">Game camera to be active</param>
-        /// <param name="transitionTime">Time in game ticks to transition (-1 to use game cameras transition time)</param>
-        public void SetActiveCamera (GameCamera gameCamera, int transitionTime = -1)
-        {
-            if (activeCamera == gameCamera || null == gameCamera)
-                return;
-
-            if (activeCamera != null)
-                activeCamera.OnCameraStop();
-
-            activeCamera = gameCamera;
-
-            if (activeCamera != null)
-                activeCamera.OnCameraStart(transitionTime == -1 ? gameCamera.transitionTime : transitionTime);
-        }
-
         private void Awake()
         {
             GameManager.onPuzzleChanged += OnPuzzleChanged;
@@ -163,33 +139,24 @@ namespace Puzzled
             // Start the puzzle if it has not yet been started
             if(!_started)
             {
-                // Center on starting camera if there is one
-                if (properties.startingCamera != null)
-                    SetActiveCamera(properties.startingCamera, 0);
-                // If we have a player center on the player
-                else if (_player != null)
-                    CameraManager.Transition(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultPitch, CameraManager.DefaultZoom, null, 0);               
-                // Otherwise center on the middle of all tiles
-                else
-                {
-                    var min = grid.maxCell;
-                    var max = grid.minCell;
-                    foreach(var tile in puzzle.grid.GetLinkedTiles())
-                    {
-                        // Special case to skip the puzzle properties
-                        if (tile.cell == grid.minCell)
-                            continue;
+                SharedCameraData sharedCamData = new SharedCameraData();
+                puzzle.SetSharedComponentData(typeof(GameCamera), sharedCamData);
 
-                        min = Cell.Min(min, tile.cell);
-                        max = Cell.Max(max, tile.cell);
+                if (!isEditing)
+                {
+                    if (_player != null)
+                    {
+                        sharedCamData.baseCameraState = new GameCamera.State
+                        {
+                            position = CameraManager.Frame(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultPitch, CameraManager.DefaultZoom, CameraManager.FieldOfView),
+                            rotation = Quaternion.Euler(CameraManager.DefaultPitch, 0, 0),
+                            bgColor = CameraManager.defaultBackground.color
+                        };
                     }
 
-                    CameraManager.Transition(
-                        grid.CellToWorld(new Cell((max.x + min.x)/2, (max.y + min.y)/2)), 
-                        CameraManager.DefaultPitch, 
-                        CameraManager.DefaultZoom, 
-                        null, 
-                        0);
+                    // Center on starting camera if there is one
+                    if (properties.startingCamera != null)
+                        properties.startingCamera.ActivateCamera(0);
                 }
 
                 isStarting = true;
@@ -203,17 +170,6 @@ namespace Puzzled
                 _started = true;
             }
 
-        }
-
-        private void OnEnable()
-        {
-            if (_savedCameraState.valid)
-                CameraManager.state = _savedCameraState;            
-        }
-
-        private void OnDisable()
-        {
-            _savedCameraState = CameraManager.state;
         }
 
         /// <summary>
@@ -1099,6 +1055,14 @@ namespace Puzzled
                 return;
 
             _sharedComponentData[component.GetType()] = data;
+        }
+
+        public void SetSharedComponentData(Type type, object data)
+        {
+            if (type == null)
+                return;
+
+            _sharedComponentData[type] = data;
         }
 
         public T GetSharedComponentData<T>(Type componentType) where T : class
