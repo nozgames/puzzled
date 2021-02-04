@@ -20,15 +20,15 @@ namespace Puzzled
                 if (activeCam == cam)
                     continue; // skip this camera if it is already in there
 
-                if (activeCam.priority == cam.priority)
+                if (activeCam.layer == cam.layer)
                 {
-                    // deactivate other cameras on this priority
+                    // deactivate other cameras on this layer
                     Debug.Assert(cam != activeCam);
                     activeCam.DeactivateCamera(transitionTime);
                 }
-                else if (activeCam.priority <= cam.priority)
+                else if (activeCam.layer <= cam.layer)
                 {
-                    // this cam is higher priority, put it earlier in list
+                    // the active cam is lower layer, put this cam earlier in list
                     insertionLocation = i;
                     break;
                 }
@@ -151,32 +151,32 @@ namespace Puzzled
             SharedCameraData cameraData = GameManager.puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
             GameCamera.State blendedState = cameraData.baseCameraState; // needs to be initialized to something
 
-            float priorityWeight = 0;
+            float layerWeight = 0;
             float visibleWeight = 1;
-            int currentPriority = int.MaxValue;
+            int currentLayer = int.MaxValue;
             for (int i = 0; i < cameraData.activeCameras.Count; ++i)
             {
                 GameCamera cam = cameraData.activeCameras[i];
 
-                if (cam.priority < currentPriority)
+                if (cam.layer < currentLayer)
                 {
-                    currentPriority = cam.priority;
-                    visibleWeight -= priorityWeight * visibleWeight;
-                    priorityWeight = 0;
+                    currentLayer = cam.layer;
+                    visibleWeight -= layerWeight * visibleWeight;
+                    layerWeight = 0;
 
                     if (visibleWeight <= 0)
                         break; // done, no other priorities are visible
                 }
 
-                priorityWeight = Mathf.Min(1, priorityWeight + cam.weight); // add raw weight into priority weight tracker
-                float lerpValue = (cam.weight / priorityWeight) * visibleWeight;
+                layerWeight = Mathf.Min(1, layerWeight + cam.weight); // add raw weight into layer weight tracker
+                float lerpValue = (cam.weight / layerWeight) * visibleWeight;
                 blendedState = blendedState.Lerp(cam.state, lerpValue);
             }
 
             if (visibleWeight > 0)
             {
-                visibleWeight -= priorityWeight * visibleWeight;
-                if (visibleWeight > 0)
+                visibleWeight -= layerWeight * visibleWeight;
+                if (visibleWeight > float.Epsilon)
                 {
                     // blend in base state to fill visible weight
                     float lerpValue = visibleWeight;

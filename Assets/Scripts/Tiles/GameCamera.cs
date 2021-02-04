@@ -73,7 +73,7 @@ namespace Puzzled
         public Background background { get; set; }
 
         [Editable]
-        public int priority { get; set; }
+        public int layer { get; set; }
 
         public virtual Vector3 target => puzzle.grid.CellToWorld(tile.cell) + new Vector3(offset.x * 0.25f, 0, offset.y * 0.25f);
 
