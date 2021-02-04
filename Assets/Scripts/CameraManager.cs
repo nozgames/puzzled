@@ -1,4 +1,5 @@
 ﻿using NoZ;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,33 +8,47 @@ namespace Puzzled
     public class SharedCameraData
     {
         public List<GameCamera> activeCameras = new List<GameCamera>(16);
+        public HashSet<GameCamera> cameraMap = new HashSet<GameCamera>();
         public GameCamera.State baseCameraState;
 
-        public void AddCamera(GameCamera cam)
+        public void ActivateCamera(GameCamera cam, float transitionTime)
         {
-            int insertionLocation = 0;
+            int insertionLocation = -1;
             for (int i = 0; i < activeCameras.Count; ++i)
             {
                 GameCamera activeCam = activeCameras[i];
+                if (activeCam == cam)
+                    continue; // skip this camera if it is already in there
+
                 if (activeCam.priority == cam.priority)
                 {
                     // deactivate other cameras on this priority
                     Debug.Assert(cam != activeCam);
-                    activeCam.DeactivateCamera(cam.transitionTime);
+                    activeCam.DeactivateCamera(transitionTime);
                 }
-                else if (activeCameras[i].priority > cam.priority)
+                else if (activeCam.priority <= cam.priority)
                 {
+                    // this cam is higher priority, put it earlier in list
                     insertionLocation = i;
                     break;
                 }
             }
 
-            activeCameras.Insert(insertionLocation, cam);
+            if (!cameraMap.Contains(cam))
+            {
+                if (insertionLocation >= 0)
+                    activeCameras.Insert(insertionLocation, cam);
+                else
+                    activeCameras.Add(cam);
+
+                cameraMap.Add(cam);
+            }
         }
 
         public void RemoveCamera(GameCamera cam)
         {
             activeCameras.Remove(cam);
+            cameraMap.Remove(cam);
         }
     }
 
@@ -91,14 +106,6 @@ namespace Puzzled
 
         private static CameraManager _instance = null;
 
-        private Busy _busy = new Busy();
-        private Background _background = null;
-        private Transform _followTarget = null;
-        private AnimatedValue<float> _animatedPitch = new AnimatedValue<float>();
-        private AnimatedValue<float> _animatedZoom = new AnimatedValue<float>();
-        private AnimatedValue<Color> _animatedBackground = new AnimatedValue<Color>();
-        private AnimatedValue<Vector3> _animatedTarget = new AnimatedValue<Vector3>();
-
         public static new Camera camera => _instance != null ? _instance._camera : null;
 
         /// <summary>
@@ -142,15 +149,39 @@ namespace Puzzled
                 return editorCameraState;
 
             SharedCameraData cameraData = GameManager.puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
-            GameCamera.State blendedState = cameraData.baseCameraState;
+            GameCamera.State blendedState = cameraData.baseCameraState; // needs to be initialized to something
 
-            float totalWeight = 1;
-            for (int i = cameraData.activeCameras.Count - 1; i >= 0; --i)
+            float priorityWeight = 0;
+            float visibleWeight = 1;
+            int currentPriority = int.MaxValue;
+            for (int i = 0; i < cameraData.activeCameras.Count; ++i)
             {
                 GameCamera cam = cameraData.activeCameras[i];
-                totalWeight += cam.weight;
-                float lerpValue = cam.weight / totalWeight;
-                blendedState = blendedState.Lerp(cameraData.activeCameras[i].state, lerpValue);
+
+                if (cam.priority < currentPriority)
+                {
+                    currentPriority = cam.priority;
+                    visibleWeight -= priorityWeight * visibleWeight;
+                    priorityWeight = 0;
+
+                    if (visibleWeight <= 0)
+                        break; // done, no other priorities are visible
+                }
+
+                priorityWeight = Mathf.Min(1, priorityWeight + cam.weight); // add raw weight into priority weight tracker
+                float lerpValue = (cam.weight / priorityWeight) * visibleWeight;
+                blendedState = blendedState.Lerp(cam.state, lerpValue);
+            }
+
+            if (visibleWeight > 0)
+            {
+                visibleWeight -= priorityWeight * visibleWeight;
+                if (visibleWeight > 0)
+                {
+                    // blend in base state to fill visible weight
+                    float lerpValue = visibleWeight;
+                    blendedState = blendedState.Lerp(cameraData.baseCameraState, lerpValue);
+                }
             }
 
             return blendedState;

@@ -151,7 +151,7 @@ namespace Puzzled
 
                     // Center on starting camera if there is one
                     if (properties.startingCamera != null)
-                        properties.startingCamera.ActivateCamera();
+                        properties.startingCamera.ActivateCamera(0);
                 }
 
                 // Send a start event to all tiles

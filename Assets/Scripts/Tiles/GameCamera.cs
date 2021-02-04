@@ -91,7 +91,6 @@ namespace Puzzled
         private float _weight = 0;
         private float _blendRate = 0;
         private bool _isActivated = false;
-        private bool _isInCameraList = false;
         public State state;
 
         public float weight 
@@ -111,7 +110,7 @@ namespace Puzzled
             if (isEditing)
                 return;
 
-            ActivateCamera();
+            ActivateCamera(transitionTime);
         }
 
         [ActorEventHandler]
@@ -120,7 +119,8 @@ namespace Puzzled
             if (isEditing)
                 return;
 
-            DeactivateCamera(transitionTime);
+            float totalTransitionTime = (transitionTime > 0) ? transitionTime * GameManager.tick + GameManager.tickTimeRemaining : 0;
+            DeactivateCamera(totalTransitionTime);
         }
 
         [ActorEventHandler]
@@ -138,38 +138,29 @@ namespace Puzzled
             RemoveCamera();
         }
 
-        public void ActivateCamera()
+        public void ActivateCamera(int blendTime)
         {
             if (_isActivated)
                 return;
 
             _isActivated = true;
 
-            float totalTransitionTime = transitionTime * GameManager.tick + GameManager.tickTimeRemaining;
+            float totalTransitionTime = (blendTime > 0) ? blendTime * GameManager.tick + GameManager.tickTimeRemaining : 0;
             _blendRate = (totalTransitionTime > 0) ? (1 / totalTransitionTime) : float.MaxValue;
 
-            if (_isInCameraList)
-                return;
-
             UpdateState();
-            puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera)).AddCamera(this);
-            _isInCameraList = true;
+            puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera)).ActivateCamera(this, totalTransitionTime);
         }
 
-        public void DeactivateCamera(int transitionTicks)
+        public void DeactivateCamera(float transitionTime)
         {
             _isActivated = false;
-            float totalTransitionTime = transitionTicks * GameManager.tick + GameManager.tickTimeRemaining;
-            _blendRate = weight * ((totalTransitionTime > 0) ? -(1 / totalTransitionTime) : -float.MaxValue);
+            _blendRate = weight * ((transitionTime > 0) ? -(1 / transitionTime) : -float.MaxValue);
         }
         
         public void RemoveCamera()
         {
-            if (!_isInCameraList)
-                return;
-
             puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera)).RemoveCamera(this);
-            _isInCameraList = false;
         }
 
         public void UpdateState()
