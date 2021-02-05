@@ -57,13 +57,22 @@ namespace Puzzled
                 return;
 
             // Cache list of all background and update the guid of all backgrounds
-            _instance._backgrounds = _instance._backgroundDatabase.GetResources().Select(r => r.asset).ToArray();
+            _instance._backgrounds = _instance._backgroundDatabase.GetResources()
+                .Select(r => r.asset)
+                .OrderBy(b => b.name)
+                .ToArray();
 
             // Cache list of all sounds
-            _instance._sounds = _instance._soundDatabase.GetResources().Select(r => new Sound { clip = r.asset, guid = r.guid }).ToArray();
+            _instance._sounds = _instance._soundDatabase.GetResources()
+                .Select(r => new Sound { clip = r.asset, guid = r.guid })
+                .OrderBy(s => s.clip.name)
+                .ToArray();
 
             // Cache list of all decals
-            _instance._decals = _instance._decalDatabase.GetResources().Select(r => new Decal (r.guid, r.asset)).ToArray();
+            _instance._decals = _instance._decalDatabase.GetResources()
+                .Select(r => new Decal(r.guid, r.asset))
+                .OrderBy(d => d.name)
+                .ToArray();
 
             // Cache list of tiles and stuff the guid into it
             _instance._tiles = _instance._tileDatabase.GetResources().Select(r => {
