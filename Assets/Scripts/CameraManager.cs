@@ -161,15 +161,16 @@ namespace Puzzled
                 if (cam.layer < currentLayer)
                 {
                     currentLayer = cam.layer;
-                    visibleWeight -= layerWeight * visibleWeight;
+                    visibleWeight -= Math.Min(1, layerWeight) * visibleWeight;
                     layerWeight = 0;
 
                     if (visibleWeight <= 0)
                         break; // done, no other priorities are visible
                 }
 
-                layerWeight = Mathf.Min(1, layerWeight + cam.weight); // add raw weight into layer weight tracker
-                float lerpValue = (cam.weight / layerWeight) * visibleWeight;
+                float invVisibleWeight = 1 - visibleWeight;
+                layerWeight += cam.weight;
+                float lerpValue = (cam.weight * visibleWeight) / (layerWeight * visibleWeight + invVisibleWeight);
                 blendedState = blendedState.Lerp(cam.state, lerpValue);
             }
 
