@@ -150,7 +150,9 @@ namespace Puzzled
 
             SharedCameraData cameraData = GameManager.puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
             GameCamera.State blendedState = cameraData.baseCameraState; // needs to be initialized to something
+            GameCamera.State layerState = cameraData.baseCameraState;
 
+            float totalLayerWeight = 0;
             float layerWeight = 0;
             float visibleWeight = 1;
             int currentLayer = int.MaxValue;
@@ -160,29 +162,50 @@ namespace Puzzled
 
                 if (cam.layer < currentLayer)
                 {
-                    currentLayer = cam.layer;
-                    visibleWeight -= Math.Min(1, layerWeight) * visibleWeight;
-                    layerWeight = 0;
+                    // blend in previous layer
+                    if (layerWeight > 0)
+                    {
+                        float scaledLayerWeight = Math.Min(1, layerWeight) * visibleWeight;
+
+                        totalLayerWeight += scaledLayerWeight;
+                        float layerLerpValue = scaledLayerWeight / totalLayerWeight;
+                        blendedState.Lerp(layerState, layerLerpValue);
+
+                        visibleWeight -= scaledLayerWeight;
+                        layerWeight = 0;
+                    }
 
                     if (visibleWeight <= 0)
                         break; // done, no other priorities are visible
+
+                    currentLayer = cam.layer;
+                    layerState = cam.state;
+                    layerWeight = cam.weight;
+                    continue; // not blending needed
                 }
 
-                float invVisibleWeight = 1 - visibleWeight;
                 layerWeight += cam.weight;
-                float lerpValue = (cam.weight * visibleWeight) / (layerWeight * visibleWeight + invVisibleWeight);
-                blendedState = blendedState.Lerp(cam.state, lerpValue);
+                float lerpValue = cam.weight / layerWeight;
+                layerState.Lerp(cam.state, lerpValue);
             }
 
-            if (visibleWeight > 0)
+            // blend in last layer if there is any weight
+            if (layerWeight > 0)
             {
-                visibleWeight -= layerWeight * visibleWeight;
-                if (visibleWeight > float.Epsilon)
-                {
-                    // blend in base state to fill visible weight
-                    float lerpValue = visibleWeight;
-                    blendedState = blendedState.Lerp(cameraData.baseCameraState, lerpValue);
-                }
+                float scaledLayerWeight = Math.Min(1, layerWeight) * visibleWeight;
+
+                totalLayerWeight += scaledLayerWeight;
+                float layerLerpValue = scaledLayerWeight / totalLayerWeight;
+                blendedState.Lerp(layerState, layerLerpValue);
+
+                visibleWeight -= scaledLayerWeight;
+            }
+
+            if (visibleWeight > float.Epsilon)
+            {
+                // blend in base state to fill visible weight
+                float lerpValue = visibleWeight ;
+                blendedState.Lerp(cameraData.baseCameraState, lerpValue);
             }
 
             return blendedState;

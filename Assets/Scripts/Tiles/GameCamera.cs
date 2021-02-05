@@ -14,14 +14,11 @@ namespace Puzzled
             public Quaternion rotation;
             public Color bgColor;
 
-            public State Lerp(State stateB, float t)
+            public void Lerp(State stateB, float t)
             {
-                return new State
-                {
-                    position = Vector3.Lerp(position, stateB.position, t),
-                    rotation = Quaternion.Slerp(rotation, stateB.rotation, t),
-                    bgColor = Color.Lerp(bgColor, stateB.bgColor, t)
-                };
+                position = Vector3.Lerp(position, stateB.position, t);
+                rotation = Quaternion.Slerp(rotation, stateB.rotation, t);
+                bgColor = Color.Lerp(bgColor, stateB.bgColor, t);
             }
         }
 
