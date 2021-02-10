@@ -5,53 +5,6 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    public class SharedCameraData
-    {
-        public List<GameCamera> activeCameras = new List<GameCamera>(16);
-        public HashSet<GameCamera> cameraMap = new HashSet<GameCamera>();
-        public GameCamera.State baseCameraState;
-
-        public void ActivateCamera(GameCamera cam, float transitionTime)
-        {
-            int insertionLocation = -1;
-            for (int i = 0; i < activeCameras.Count; ++i)
-            {
-                GameCamera activeCam = activeCameras[i];
-                if (activeCam == cam)
-                    continue; // skip this camera if it is already in there
-
-                if (activeCam.layer == cam.layer)
-                {
-                    // deactivate other cameras on this layer
-                    Debug.Assert(cam != activeCam);
-                    activeCam.DeactivateCamera(transitionTime);
-                }
-                else if (activeCam.layer <= cam.layer)
-                {
-                    // the active cam is lower layer, put this cam earlier in list
-                    insertionLocation = i;
-                    break;
-                }
-            }
-
-            if (!cameraMap.Contains(cam))
-            {
-                if (insertionLocation >= 0)
-                    activeCameras.Insert(insertionLocation, cam);
-                else
-                    activeCameras.Add(cam);
-
-                cameraMap.Add(cam);
-            }
-        }
-
-        public void RemoveCamera(GameCamera cam)
-        {
-            activeCameras.Remove(cam);
-            cameraMap.Remove(cam);
-        }
-    }
-
     /// <summary>
     /// Manages the camera
     /// </summary>
@@ -115,6 +68,7 @@ namespace Puzzled
 
         public static GameCamera.State editorCameraState { get; set; }
 
+        private GameCamera.State _blendedState;
 
         public void Initialize()
         {
@@ -136,91 +90,13 @@ namespace Puzzled
             if (GameManager.puzzle == null)
                 return;
 
-            UpdateCameras();
-            UpdateState();
-        }
+            // update blended state
+            _blendedState = (GameManager.puzzle.isEditing) ? editorCameraState : GameCamera.UpdateCameraBlendingState();
 
-        private GameCamera.State GetBlendedCameraState()
-        {
-            if (GameManager.puzzle == null)
-                return new GameCamera.State();
-
-            if (GameManager.puzzle.isEditing)
-                return editorCameraState;
-
-            SharedCameraData cameraData = GameManager.puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
-            GameCamera.State blendedState = cameraData.baseCameraState; // needs to be initialized to something
-            GameCamera.State layerState = cameraData.baseCameraState;
-
-            float totalLayerWeight = 0;
-            float layerWeight = 0;
-            float visibleWeight = 1;
-            int currentLayer = int.MaxValue;
-            for (int i = 0; i < cameraData.activeCameras.Count; ++i)
-            {
-                GameCamera cam = cameraData.activeCameras[i];
-
-                if (cam.layer < currentLayer)
-                {
-                    // blend in previous layer
-                    if (layerWeight > 0)
-                    {
-                        float scaledLayerWeight = Math.Min(1, layerWeight) * visibleWeight;
-
-                        totalLayerWeight += scaledLayerWeight;
-                        float layerLerpValue = scaledLayerWeight / totalLayerWeight;
-                        blendedState.Lerp(layerState, layerLerpValue);
-
-                        visibleWeight -= scaledLayerWeight;
-                        layerWeight = 0;
-                    }
-
-                    if (visibleWeight <= 0)
-                        break; // done, no other priorities are visible
-
-                    currentLayer = cam.layer;
-                    layerState = cam.state;
-                    layerWeight = cam.weight;
-                    continue; // not blending needed
-                }
-
-                layerWeight += cam.weight;
-                float lerpValue = cam.weight / layerWeight;
-                layerState.Lerp(cam.state, lerpValue);
-            }
-
-            // blend in last layer if there is any weight
-            if (layerWeight > 0)
-            {
-                float scaledLayerWeight = Math.Min(1, layerWeight) * visibleWeight;
-
-                totalLayerWeight += scaledLayerWeight;
-                float layerLerpValue = scaledLayerWeight / totalLayerWeight;
-                blendedState.Lerp(layerState, layerLerpValue);
-
-                visibleWeight -= scaledLayerWeight;
-            }
-
-            if (visibleWeight > float.Epsilon)
-            {
-                // blend in base state to fill visible weight
-                float lerpValue = visibleWeight ;
-                blendedState.Lerp(cameraData.baseCameraState, lerpValue);
-            }
-
-            return blendedState;
-        }
-
-        private void UpdateState()
-        {
-            GameCamera.State blendedState = GetBlendedCameraState();
-
-            // Change background color
-            _instance._fog.material.color = blendedState.bgColor;
-
-            // Update camera
-            camera.transform.rotation = blendedState.rotation;
-            camera.transform.position = blendedState.position;
+            // apply blended state to camer
+            _instance._fog.material.color = _blendedState.bgColor;
+            camera.transform.rotation = _blendedState.rotation;
+            camera.transform.position = _blendedState.position;
         }
 
         /// <summary>
@@ -334,18 +210,6 @@ namespace Puzzled
                 camera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else
                 camera.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
-        }
-
-        private void UpdateCameras()
-        {
-            SharedCameraData cameraData = GameManager.puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
-            for (int i = cameraData.activeCameras.Count - 1; i >= 0; --i)
-            {
-                GameCamera gameCam = cameraData.activeCameras[i];
-                gameCam.BlendUpdate();
-                if (gameCam.isDead)
-                    gameCam.RemoveCamera();
-            }
         }
     }
 }

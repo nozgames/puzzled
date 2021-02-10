@@ -1,10 +1,11 @@
 ﻿using NoZ;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Puzzled
 {
-    public class GameCamera : TileComponent
+    public partial class GameCamera : TileComponent
     {
         [SerializeField] private GameObject _visualStartingCamera = null;
 
@@ -88,7 +89,20 @@ namespace Puzzled
         private float _weight = 0;
         private float _blendRate = 0;
         private bool _isActivated = false;
+
+        private SharedCameraData _sharedCamDataInternalOnly = null;
         public State state;
+
+        private SharedCameraData sharedCamData
+        {
+            get
+            { 
+                if (_sharedCamDataInternalOnly == null)
+                    _sharedCamDataInternalOnly = puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
+
+                return _sharedCamDataInternalOnly;
+            }
+        }
 
         public float weight 
         { 
@@ -100,6 +114,8 @@ namespace Puzzled
         }
 
         public bool isDead => (!_isActivated && (_weight <= 0));
+        public bool isBlending => (_isActivated ? (_weight < 1) : (_weight > 0));
+        public float remainingTransitionTime => (_isActivated ? (1 - weight) : (weight) / _blendRate);
 
         [ActorEventHandler]
         private void OnEnableEvent(SignalEvent evt)
@@ -107,7 +123,8 @@ namespace Puzzled
             if (isEditing)
                 return;
 
-            ActivateCamera(transitionTime);
+            float totalTransitionTime = (transitionTime > 0) ? ((1 - weight) * (transitionTime * GameManager.tick + GameManager.tickTimeRemaining)) : 0;
+            ActivateCamera(totalTransitionTime);
         }
 
         [ActorEventHandler]
@@ -116,7 +133,7 @@ namespace Puzzled
             if (isEditing)
                 return;
 
-            float totalTransitionTime = (transitionTime > 0) ? transitionTime * GameManager.tick + GameManager.tickTimeRemaining : 0;
+            float totalTransitionTime = (transitionTime > 0) ? (weight * (transitionTime * GameManager.tick + GameManager.tickTimeRemaining)) : 0;
             DeactivateCamera(totalTransitionTime);
         }
 
@@ -135,29 +152,81 @@ namespace Puzzled
             RemoveCamera();
         }
 
-        public void ActivateCamera(int blendTime)
+        public static void Initialize(Puzzle puzzle)
+        {
+            SharedCameraData sharedCamData = new SharedCameraData();
+            puzzle.SetSharedComponentData(typeof(GameCamera), sharedCamData);
+
+            if (!puzzle.isEditing)
+            {
+                if (puzzle.player != null)
+                {
+                    sharedCamData.baseCameraState = new State
+                    {
+                        position = CameraManager.Frame(puzzle.grid.CellToWorld(puzzle.player.tile.cell), CameraManager.DefaultPitch, CameraManager.DefaultZoom, CameraManager.FieldOfView),
+                        rotation = Quaternion.Euler(CameraManager.DefaultPitch, 0, 0),
+                        bgColor = CameraManager.defaultBackground.color
+                    };
+                }
+            }
+        }
+
+        public static State UpdateCameraBlendingState()
+        {
+            SharedCameraData cameraData = GameManager.puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera));
+            return cameraData.UpdateCameraBlendingState();
+        }
+
+        public void ActivateCamera(float blendTime)
         {
             if (_isActivated)
                 return;
 
             _isActivated = true;
 
-            float totalTransitionTime = (blendTime > 0) ? blendTime * GameManager.tick + GameManager.tickTimeRemaining : 0;
-            _blendRate = (totalTransitionTime > 0) ? (1 / totalTransitionTime) : float.MaxValue;
-
             UpdateState();
-            puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera)).ActivateCamera(this, totalTransitionTime);
+            sharedCamData.ActivateCamera(this, blendTime);
         }
 
-        public void DeactivateCamera(float transitionTime)
+        private void SimpleDeactivateCamera(float transitionTime)
         {
             _isActivated = false;
+            if (transitionTime > 0)
+                SetBlendOutTime(transitionTime);
+            else
+                SnapToTargetWeight();
+        }
+
+        public void DeactivateCamera(float blendTime)
+        {
+            if (!_isActivated)
+                return;
+
+            _isActivated = false;
+            sharedCamData.DeactivateCamera(this, blendTime);
+        }
+
+        public void SetBlendInTime(float transitionTime)
+        {
+            _blendRate = (1 - weight) * ((transitionTime > 0) ? (1 / transitionTime) : float.MaxValue);
+        }
+
+        public void SetBlendOutTime(float transitionTime)
+        {
             _blendRate = weight * ((transitionTime > 0) ? -(1 / transitionTime) : -float.MaxValue);
         }
-        
+
+        public void UpdateBlendRate(float transitionTime)
+        {
+            if (_blendRate > 0)
+                SetBlendInTime(transitionTime);
+            else
+                SetBlendOutTime(transitionTime);
+        }
+
         public void RemoveCamera()
         {
-            puzzle.GetSharedComponentData<SharedCameraData>(typeof(GameCamera)).RemoveCamera(this);
+            sharedCamData.RemoveCamera(this);
         }
 
         public void UpdateState()
@@ -167,9 +236,16 @@ namespace Puzzled
             state.bgColor = background?.color ?? CameraManager.defaultBackground.color;
         }
 
+        public void SnapToTargetWeight()
+        {
+            weight = _isActivated ? 1 : 0; // jump to target weight if not expressed
+            _blendRate = 0;
+        }
+
         public void BlendUpdate()
         {
             weight += _blendRate * Time.deltaTime;
+
             UpdateState();
         }
     }
