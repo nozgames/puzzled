@@ -139,21 +139,10 @@ namespace Puzzled
             // Start the puzzle if it has not yet been started
             if(!_started)
             {
-                SharedCameraData sharedCamData = new SharedCameraData();
-                puzzle.SetSharedComponentData(typeof(GameCamera), sharedCamData);
+                GameCamera.Initialize(puzzle);
 
                 if (!isEditing)
                 {
-                    if (_player != null)
-                    {
-                        sharedCamData.baseCameraState = new GameCamera.State
-                        {
-                            position = CameraManager.Frame(grid.CellToWorld(_player.tile.cell), CameraManager.DefaultPitch, CameraManager.DefaultZoom, CameraManager.FieldOfView),
-                            rotation = Quaternion.Euler(CameraManager.DefaultPitch, 0, 0),
-                            bgColor = CameraManager.defaultBackground.color
-                        };
-                    }
-
                     // Center on starting camera if there is one
                     if (properties.startingCamera != null)
                         properties.startingCamera.ActivateCamera(0);
