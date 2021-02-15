@@ -1,54 +1,44 @@
-﻿using System.Linq;
-
-namespace Puzzled.Editor.Commands
+﻿namespace Puzzled.Editor.Commands
 {
+    /// <summary>
+    /// Command used to move a tile to a new cell
+    /// </summary>
     class TileMoveCommand : Command
     {
-        private Cell _offset;
-        private Tile[] _tiles;
-        private Cell[] _tileCells;
-        private Cell _from;
-        private Cell _to;
-        private Cell _size;
+        private Tile _tile;
+        private Cell _redoCell;
+        private Cell _undoCell;
 
-        public TileMoveCommand(Tile[] tiles, Cell from, Cell to, Cell size)
+        public TileMoveCommand(Tile tile, Cell cell)
         {
-            _tiles = tiles;
-            _offset = to - from;
-            _from = from;
-            _to = to;
-            _size = size;
-            _tileCells = tiles.Select(t => t.cell).ToArray();
+            _tile = tile;
+            _undoCell = tile.cell;
+            _redoCell = cell;
         }
 
-        protected override void OnExecute()
+        public TileMoveCommand(Tile tile, Cell cell, Cell undo)
         {
-            foreach (var tile in _tiles)
-                puzzle.grid.UnlinkTile(tile);
-
-            for (int i = 0; i < _tiles.Length; i++)
-                _tiles[i].cell = _tileCells[i] + _offset;
-
-            var startEvent = new StartEvent();
-            foreach (var tile in _tiles)
-                tile.Send(startEvent);
-
-            UIPuzzleEditor.instance.SetSelectionRect(_to, _to + _size);
+            _tile = tile;
+            _undoCell = undo;
+            _redoCell = cell;
         }
+
+        protected override void OnExecute() => OnRedo();
 
         protected override void OnUndo()
         {
-            foreach (var tile in _tiles)
-                puzzle.grid.UnlinkTile(tile);
+            if (_undoCell == _redoCell)
+                return;
 
-            for (int i = 0; i < _tiles.Length; i++)
-                _tiles[i].cell = _tileCells[i];
+            _tile.cell = _undoCell;
+        }
 
-            var startEvent = new StartEvent();
-            foreach (var tile in _tiles)
-                tile.Send(startEvent);
+        protected override void OnRedo()
+        {
+            if (_undoCell == _redoCell)
+                return;
 
-            UIPuzzleEditor.instance.SetSelectionRect(_from, _from + _size);
+            _tile.cell = _redoCell;
         }
     }
 }

@@ -19,10 +19,11 @@ namespace Puzzled.Editor
         [SerializeField] private Button _searchClearButton = null;
 
         [SerializeField] private UIRadio _filterAll = null;
-        [SerializeField] private UIRadio _filterLogic = null;
-        [SerializeField] private UIRadio _filterDynamic = null;
         [SerializeField] private UIRadio _filterFloor = null;
+        [SerializeField] private UIRadio _filterWall = null;
         [SerializeField] private UIRadio _filterStatic = null;
+        [SerializeField] private UIRadio _filterDynamic = null;
+        [SerializeField] private UIRadio _filterLogic = null;
 
         private Type _componentFilter;
         private Tile _selected;
@@ -101,6 +102,7 @@ namespace Puzzled.Editor
             _filterDynamic.onValueChanged.AddListener(OnLayerValueChanged);
             _filterStatic.onValueChanged.AddListener(OnLayerValueChanged);
             _filterFloor.onValueChanged.AddListener(OnLayerValueChanged);
+            _filterWall.onValueChanged.AddListener(OnLayerValueChanged);
         }
 
         private void OnLayerValueChanged(bool v)
@@ -121,6 +123,8 @@ namespace Puzzled.Editor
                 layer = TileLayer.Logic;
             else if (_filterStatic.isOn)
                 layer = TileLayer.Static;
+            else if (_filterWall.isOn)
+                layer = TileLayer.Wall;
 
             for (int i = allowNone ? 1 : 0; i < _list.itemCount; i++)
             {
@@ -129,7 +133,7 @@ namespace Puzzled.Editor
 
                 var active = true;
                 active &= !checkText || tile.name.ToLower().Contains(text);
-                active &= !checkLayer || tile.info.layer == layer;
+                active &= !checkLayer || tile.layer == layer;
                 active &= (_componentFilter == null) || (tile.GetComponentInChildren(_componentFilter) != null);
                     
                 _list.GetItem(i).gameObject.SetActive(active);
@@ -150,6 +154,9 @@ namespace Puzzled.Editor
                     break;
                 case TileLayer.Floor:
                     _filterFloor.isOn = true;
+                    break;
+                case TileLayer.Wall:
+                    _filterWall.isOn = true;
                     break;
                 case TileLayer.Static:
                     _filterStatic.isOn = true;

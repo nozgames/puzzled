@@ -80,6 +80,8 @@ namespace Puzzled
             // Add a star to the end of the puzzle name
             if (!instance.puzzleName.text.EndsWith("*"))
                 instance.puzzleName.text = instance.puzzleName.text + "*";
+
+            instance.UpdateCursor(true);
         }
 
         /// <summary>
@@ -106,6 +108,8 @@ namespace Puzzled
             selectedWire = command.selectedWireUndo;
 
             UpdateUndoButtons();
+
+            instance.UpdateCursor(true);
         }
 
         /// <summary>
@@ -132,6 +136,8 @@ namespace Puzzled
             selectedWire = command.selectedWireRedo;
 
             UpdateUndoButtons();
+
+            instance.UpdateCursor(true);
         }
 
         /// <summary>

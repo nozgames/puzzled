@@ -7,6 +7,9 @@ namespace Puzzled
 {
     public class TileGrid : MonoBehaviour
     {
+        private const float CellEdgeHintBias = 0.25f;
+        private const float CellEdgeSize = 0.25f;
+
         [SerializeField] private int _size = 255;
         [SerializeField] private Grid _grid = null;
 
@@ -15,26 +18,33 @@ namespace Puzzled
         /// </summary>
         public int size => _size;
 
-        /// <summary>
-        /// Returns true if the tile grid is within the LinkTile call
-        /// </summary>
-        internal bool isLinking => _linking;
-
         public Cell minCell => new Cell(-_size / 2, -_size / 2);
         public Cell maxCell => new Cell(_size / 2, _size / 2);
 
-        private Tile[] _tiles;
+        private Tile[][] _tiles;
         private int _layerCount;
+        private int _layerStride;
         private int _stride;
         private int _center;
-        private bool _linking;
+
+        /// <summary>
+        /// Returns true if the given layer is an edge layer
+        /// </summary>
+        /// <param name="layer">Layer</param>
+        /// <returns>True if the layer is an edge layer</returns>
+        public static bool IsEdgeLayer(TileLayer layer) => layer == TileLayer.Wall || layer == TileLayer.WallStatic;
 
         private void Awake ()
         {
             _layerCount = Enum.GetNames(typeof(TileLayer)).Length;
-            _tiles = new Tile[_size * _size * _layerCount];
-            _stride = _layerCount * _size;
+            _tiles = new Tile[_layerCount][];
+            _stride = _size;
+            _layerStride = _size * size;
             _center = (_size / 2) * _stride + (_size / 2) * _layerCount;
+
+            // Allocate all layers
+            for (int i = 0; i < _layerCount; i++)
+                _tiles[i] = new Tile[_layerStride * (IsEdgeLayer((TileLayer)i) ? 2 : 1)];
         }
 
         /// <summary>
@@ -42,7 +52,7 @@ namespace Puzzled
         /// an entirely new list and is just a snapshop of the linked tiles at the time of the call.
         /// </summary>
         /// <returns></returns>
-        public Tile[] GetLinkedTiles() => _tiles.Where(t => t != null).ToArray();
+        public Tile[] GetLinkedTiles() => _tiles.SelectMany(t => t.Where(t => t != null)).ToArray();
 
         /// <summary>
         /// Get all linked tiles within the given bounds
@@ -50,21 +60,51 @@ namespace Puzzled
         /// <param name="min">Min cell</param>
         /// <param name="max">Max cdell</param>
         /// <returns>Array of tiles</returns>
-        public Tile[] GetLinkedTiles(Cell min, Cell max) => _tiles.Where(t => t != null && t.cell.x >= min.x && t.cell.x <= max.x && t.cell.y >= min.y && t.cell.y <= max.y).ToArray();
+        public Tile[] GetLinkedTiles(Cell min, Cell max) => GetLinkedTiles(new CellBounds(min, max));
+
+        /// <summary>
+        /// Get all linked tiles within the given bounds
+        /// </summary>
+        /// <param name="bounds">Cell bounds</param>
+        /// <returns>Array of tiles</returns>
+        public Tile[] GetLinkedTiles(CellBounds bounds) =>
+            _tiles.SelectMany(l => l.Where(t => t != null && bounds.Contains(t.cell))).ToArray();
+
+        /// <summary>
+        /// Get all linked tiles for the given cell
+        /// </summary>
+        /// <param name="Cell">cell</param>
+        /// <returns>Array of tiles</returns>
+        public Tile[] GetLinkedTiles(Cell cell) => _tiles.SelectMany(l => l.Where(t => t != null && t.cell == cell)).ToArray();
 
         /// <summary>
         /// Return the first tile that matches the given tile info
         /// </summary>
         /// <param name="tileInfo">Tile info to search for</param>
         /// <returns>Tile that matches the given tile info or null if none found</returns>
-        public Tile GetLinkedTile(TileInfo tileInfo) => _tiles.Where(t => t != null && t.info == tileInfo).FirstOrDefault();
+        public Tile GetLinkedTile(Guid guid) => _tiles.Select(l => l.Where(t => t != null && t.guid == guid).FirstOrDefault()).FirstOrDefault();
+
+        private Tile[] GetTiles(TileLayer layer) => _tiles[(int)layer];
 
         /// <summary>
         /// Convert a world coordinate to a cell coordinate
         /// </summary>
         /// <param name="position">World coordinate</param>
         /// <returns>Cell coorindate</returns>
-        public Cell WorldToCell(Vector3 position) => _grid.WorldToCell(position).ToCell();
+        public Cell WorldToCell(Vector3 position)
+        {
+            var cellPosition = _grid.WorldToCell(position);
+            var offset = position - (_grid.CellToWorld(cellPosition) + new Vector3(0.5f, 0, 0.5f));
+            var absoffset = new Vector3(Mathf.Abs(offset.x), 0, Mathf.Abs(offset.z));
+            var edge = Cell.Edge.None;
+
+            if (absoffset.x > absoffset.z)
+                edge = (offset.x > 0f) ? Cell.Edge.East : Cell.Edge.West;
+            else
+                edge = (offset.z > 0f) ? Cell.Edge.North : Cell.Edge.South;
+
+            return new Cell(cellPosition.x, cellPosition.y, edge);
+        }
 
         /// <summary>
         /// Convert a cell coordinate to a world coordinate
@@ -73,13 +113,7 @@ namespace Puzzled
         /// <returns>World Coordinate</returns>
         public Vector3 CellToWorld(Cell cell) => _grid.CellToWorld(cell.ToVector3Int());
 
-        /// <summary>
-        /// Convert the given cell to a tile index
-        /// </summary>
-        /// <param name="cell">Cell coordinate</param>
-        /// <returns>Index into tile array</returns>
-        private int CellToIndex(Cell cell) => 
-            _center + cell.x * _layerCount + cell.y * _stride;
+        private int CellToIndex(Cell cell) => _center + cell.x + cell.y * _stride;
 
         /// <summary>
         /// Convert the given cell and layer to a tile index
@@ -87,7 +121,41 @@ namespace Puzzled
         /// <param name="cell">Cell coordinate</param>
         /// <param name="layer">Tile layer</param>
         /// <returns>Index into the tile array</returns>
-        private int CellToIndex(Cell cell, TileLayer layer) => CellToIndex(cell) + (int)layer;
+        private int CellToIndex(Cell cell, TileLayer layer)
+        {
+            var index = CellToIndex(cell);
+
+            if (IsEdgeLayer(layer))
+            {
+                int offset = 0;
+
+                switch (cell.edge)
+                {
+                    default:
+                        return -1;
+
+                    case Cell.Edge.West:
+                        index--;
+                        offset = 1;
+                        break;
+
+                    case Cell.Edge.East:                        
+                        offset = 1;
+                        break;
+
+                    case Cell.Edge.North:
+                        break;
+
+                    case Cell.Edge.South:
+                        index -= _stride;
+                        break;
+                }
+
+                index = index * 2 + offset;
+            }
+
+            return index;
+        }
 
         /// <summary>
         /// Convert the given cell and layer to a tile
@@ -97,11 +165,15 @@ namespace Puzzled
         /// <returns>Tile at the given cell and layer or null if none</returns>
         public Tile CellToTile(Cell cell, TileLayer layer)
         {
+            if (cell.isEdge != IsEdgeLayer(layer))
+                return null;
+
+            var tiles = GetTiles(layer);
             var index = CellToIndex(cell, layer);
-            if (index < 0 || index >= _tiles.Length)
+            if (index < 0 || index >= tiles.Length)
                 return null;
             
-            return _tiles[index];
+            return tiles[index];
         }
 
         /// <summary>
@@ -127,11 +199,17 @@ namespace Puzzled
         /// <returns>Topmost tile in the cell</returns>
         public Tile CellToTile(Cell cell)
         {
-            var tiles = _tiles;
-            var index = CellToIndex(cell);
-            for (int layerIndex = _layerCount - 1; layerIndex >= 0; layerIndex--)
-                if (tiles[index + layerIndex] != null)
-                    return tiles[index + layerIndex];
+            var edgeLayer = (cell.edge != Cell.Edge.None);
+
+            // Normal cells
+            for (var layer = TileLayer.Logic; layer >= TileLayer.Floor; layer--)
+                if (edgeLayer == IsEdgeLayer(layer))
+                {
+                    var tiles = GetTiles(layer);
+                    var index = CellToIndex(cell, layer);
+                    if (tiles[index] != null)
+                        return tiles[index];
+                }
 
             return null;
         }
@@ -142,10 +220,11 @@ namespace Puzzled
         /// <param name="tile"></param>
         public void LinkTile (Tile tile)
         {
-            Debug.Assert(tile != null);
+            if (null == tile)
+                return;
 
-            var tiles = _tiles;
-            var index = CellToIndex(tile.cell, tile.info.layer);
+            var tiles = _tiles[(int)tile.layer];
+            var index = CellToIndex(tile.cell, tile.layer);
             if (index <= 0 || index >= tiles.Length)
                 return;
 
@@ -162,90 +241,31 @@ namespace Puzzled
                 return;
             }
 
-            _linking = true;
-
             tiles[index] = tile;
-
-            // Ensure the tile is parented to the grid
-            if (tile.transform.parent != _grid.transform)
-                tile.transform.SetParent(_grid.transform);
-
-            // Move the tile to the correct world position
-            tile.transform.position = CellToWorld(tile.cell);
-
-            _linking = false;
         }
-
-        /// <summary>
-        /// Unlink the tile at the given index
-        /// </summary>
-        /// <param name="index">Tile index</param>
-        /// <param name="destroy">True if the tile should be destroyed after being unlinked</param>
-        private void UnlinkTile(int index, bool destroy)
-        {
-            var tiles = _tiles;
-            if (index < 0 || index > tiles.Length)
-                return;
-
-            _linking = true;
-
-            var tile = tiles[index];
-            tiles[index] = null;
-            if (destroy && tile != null)
-                tile.Destroy();
-            else
-                tile.cell = Cell.invalid;
-
-            _linking = false;
-        }
-
-        /// <summary>
-        /// Unlink the tile at the given cell and layer
-        /// </summary>
-        /// <param name="cell">Cell coordinate</param>
-        /// <param name="layer">Tile layer</param>
-        /// <param name="destroy">True if the tile should be destroyed after being unlinked</param>
-        public void UnlinkTile(Cell cell, TileLayer layer, bool destroy = false) =>
-            UnlinkTile(CellToIndex(cell, layer), destroy);
 
         /// <summary>
         /// Unlink the given tile from the tile grid
         /// </summary>
         /// <param name="tile">Tile to unlink</param>
-        /// <param name="destroy">True if the tile should be destroyed after it is unlinked</param>
-        public void UnlinkTile(Tile tile, bool destroy = false)
+        public void UnlinkTile(Tile tile)
         {
             if (null == tile)
                 return;
 
             // Ensure the tile being unlinked is the tile that is linked
-            if (CellToTile(tile.cell, tile.info.layer) != tile)
+            if (CellToTile(tile.cell, tile.layer) != tile)
                 return;
 
-            UnlinkTile(tile.cell, tile.info.layer, destroy);
-        }
+            var tiles = _tiles[(int)tile.layer];
+            var index = CellToIndex(tile.cell, tile.layer);
+            if (index <= 0 || index >= tiles.Length)
+                return;
 
-        /// <summary>
-        /// Unlink all tiles at the given cell
-        /// </summary>
-        /// <param name="cell">Cell coordinate</param>
-        /// <param name="destroy">True if the tile should be destroyed when unlinking</param>
-        public void UnlinkTiles (Cell cell, bool destroy = false)
-        {
-            var index = CellToIndex(cell);
-            for (int i = _layerCount - 1; i >= 0; i--)
-                UnlinkTile(index + i, destroy);
-        }
+            if (tiles[index] != tile)
+                return;
 
-        /// <summary>
-        /// Unlink all tiles in the grid
-        /// <param name="destroy">True if the tile should be destroyed when unlinking</param>
-        /// </summary>
-        public void UnlinkAll (bool destroy = false)
-        {
-            var tiles = _tiles;
-            for (int i = 0; i < tiles.Length; i++)
-                UnlinkTile(i, destroy);
+            tiles[index] = null;
         }
 
         /// <summary>
@@ -257,24 +277,55 @@ namespace Puzzled
         public bool IsLinked(Cell cell, TileLayer layer) => CellToTile(cell, layer) != null;
 
         /// <summary>
+        /// Returns the world bounds for a given cell
+        /// </summary>
+        /// <param name="cell">Cell to return the bounds for</param>
+        /// <returns>Cell bounds</returns>
+        public Bounds CellToWorldBounds(Cell cell)
+        {
+            var world = CellToWorld(cell);
+            switch (cell.edge)
+            {
+                default:
+                    return new Bounds(world, new Vector3(1, 0, 1));
+
+                case Cell.Edge.North:
+                    return new Bounds(world + new Vector3(0, 0, 0.5f), new Vector3(1, 0, CellEdgeSize));
+
+                case Cell.Edge.South:
+                    return new Bounds(world - new Vector3(0, 0, 0.5f), new Vector3(1, 0, CellEdgeSize));
+
+                case Cell.Edge.East:
+                    return new Bounds(world + new Vector3(0.5f, 0, 0), new Vector3(CellEdgeSize, 0, 1));
+
+                case Cell.Edge.West:
+                    return new Bounds(world - new Vector3(0.5f, 0, 0), new Vector3(CellEdgeSize, 0, 1));
+            }
+        }
+
+        /// <summary>
         /// Send an event to a given cell
         /// </summary>
         public bool SendToCell(ActorEvent evt, Cell cell, CellEventRouting routing = CellEventRouting.All)
         {
-            var tiles = _tiles;
+            // Validate the cell coordinates against the known grid
             var index = CellToIndex(cell);
-
-            if (index < 0 || index > _tiles.Length)
+            if (index < 0 || index >= _layerStride)
                 return false;
+
+            var edge = cell.edge != Cell.Edge.None;
 
             switch (routing)
             {
                 case CellEventRouting.All:
                 {
                     var handled = false;
-                    for (int layer = _layerCount - 1; layer >= 0; layer--)
+                    for (var layer = TileLayer.Logic; layer >= TileLayer.Floor; layer--)
                     {
-                        var tile = tiles[index + layer];
+                        if (IsEdgeLayer(layer) != edge)
+                            continue;
+
+                        var tile = CellToTile(cell, layer);
                         if (null == tile || tile.isDestroyed)
                             continue;
 
@@ -287,9 +338,12 @@ namespace Puzzled
 
                 case CellEventRouting.FirstHandled:
                 {
-                    for (int layer = _layerCount- 1; layer >= 0 && !evt.IsHandled; layer--)
+                    for (var layer = TileLayer.Logic; layer >= TileLayer.Floor && !evt.IsHandled; layer--)
                     {
-                        var tile = tiles[index + layer];
+                        if (IsEdgeLayer(layer) != edge)
+                            continue;
+
+                        var tile = CellToTile(cell, layer);
                         if (null == tile || tile.isDestroyed)
                             continue;
 
@@ -300,9 +354,12 @@ namespace Puzzled
 
                 case CellEventRouting.FirstVisible:
                 {
-                    for (int layer = (int)(TileLayer.Logic - 1); layer >= 0; layer--)
+                    for (var layer = TileLayer.Logic - 1; layer >= TileLayer.Floor; layer--)
                     {
-                        var tile = tiles[index + layer];
+                        if (IsEdgeLayer(layer) != edge)
+                            continue;
+
+                        var tile = CellToTile(cell, layer);
                         if (null == tile || tile.isDestroyed)
                             continue;
 

@@ -33,13 +33,11 @@ namespace Puzzled
 
         private void OnEraseToolLButtonDown(Vector2 position)
         {
-            var cell = canvas.CanvasToCell(position);
-            var tile = GetTile(cell);
+            var tile = GetTile(_cursorCell);
             _eraseLayerOnly = !eraseToolAllLayers.isOn && tile != null;
-            _eraseLayer = tile != null ? tile.info.layer : TileLayer.Logic;
+            _eraseLayer = tile != null ? tile.layer : TileLayer.Logic;
             _eraseStarted = false;
-
-            Erase(cell);
+            Erase(_cursorCell);
         }
 
         private void OnEraseToolLButtonUp(Vector2 position)
@@ -47,7 +45,7 @@ namespace Puzzled
             _lastEraseCell = Cell.invalid;
         }
 
-        private void OnEraseToolDrag(Vector2 position, Vector2 delta) => Erase(canvas.CanvasToCell(position));
+        private void OnEraseToolDrag(Vector2 position, Vector2 delta) => Erase(_cursorCell);
 
         private void Erase(Cell cell)
         {
@@ -74,10 +72,11 @@ namespace Puzzled
                 if (null == tile)
                     return;
 
-                if (_eraseLayerOnly && tile.info.layer != _eraseLayer)
+                if (_eraseLayerOnly && tile.layer != _eraseLayer)
                     return;
 
                 ExecuteCommand(Erase(tile), _eraseStarted);
+                _eraseStarted = true;
             }
         }
 

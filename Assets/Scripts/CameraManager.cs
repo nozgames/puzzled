@@ -52,6 +52,7 @@ namespace Puzzled
         [SerializeField] [Layer] private int gizmoLayer = 0;
         [SerializeField] [Layer] private int wireLayer = 0;
         [SerializeField] [Layer] private int fogLayer = 0;
+        [SerializeField] [Layer] private int wallLayer = 0;
 
         [Header("Background")]
         [SerializeField] private Background _defaultBackground = null;
@@ -153,6 +154,9 @@ namespace Puzzled
 
                 case TileLayer.Logic:
                     return _instance.logicLayer;
+
+                case TileLayer.Wall:
+                    return _instance.wallLayer;
             }
 
             return 0;

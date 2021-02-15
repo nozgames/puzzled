@@ -46,7 +46,7 @@ namespace Puzzled
                 return CursorType.ArrowWithMinus;
             }
 
-            if (decalSurface.tile.info.layer == TileLayer.Floor && instance._puzzle.grid.CellToTile(cell, TileLayer.Static) != null)
+            if (decalSurface.tile.layer == TileLayer.Floor && instance._puzzle.grid.CellToTile(cell, TileLayer.Static) != null)
                 return CursorType.ArrowWithNot;
 
             return CursorType.ArrowWithPlus;
@@ -84,7 +84,7 @@ namespace Puzzled
             if (surface == null)
                 return false;
 
-            if (surface.tile.info.layer == TileLayer.Floor && instance._puzzle.grid.CellToTile(cell, TileLayer.Static) != null)
+            if (surface.tile.layer == TileLayer.Floor && instance._puzzle.grid.CellToTile(cell, TileLayer.Static) != null)
                 return false;
 
             if (surface.decal == decal && surface.decal.flags == decal.flags)

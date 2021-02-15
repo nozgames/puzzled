@@ -11,6 +11,8 @@ namespace Puzzled
 
         public Cell targetCell => source.cell + offset;
 
+        public bool hasResult => !_noresult;
+
         private bool _noresult = true;
         private bool _result = false;
 

@@ -1,26 +1,46 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace Puzzled
 {
     public partial class UIPuzzleEditor 
     {
-        private enum MoveDragState
+        private enum MoveState
         {
             None,
-            PreSelect,
-            PreMove,
             Moving,
             Selecting
         }
 
-        private Cell _selectionDragStart;
-        private Tile[] _movingTiles;
-        private Cell _moveDragMin;
-        private Cell _moveDragMax;
-        private MoveDragState _moveDragState = MoveDragState.None;
+        /// <summary>
+        /// Tiles being moved
+        /// </summary>
+        private Tile[] _moveTiles;
+
+        /// <summary>
+        /// Anchor cell for moving tiles
+        /// </summary>
+        private Cell _moveAnchor;
+
+        /// <summary>
+        /// Current offset from the anchor
+        /// </summary>
+        private Cell _moveOffset;
+
+        /// <summary>
+        /// Mask of layers participating in the move
+        /// </summary>
+        private uint _moveLayerMask;
+
+        /// <summary>
+        /// Last move command issued
+        /// </summary>
+        private Editor.Commands.Command _moveCommand;
+
+        /// <summary>
+        /// Current move tool state
+        /// </summary>
+        private MoveState _moveDragState = MoveState.None;
 
         private void EnableMoveTool ()
         {
@@ -28,187 +48,202 @@ namespace Puzzled
 
             canvas.onLButtonDown = OnMoveToolLButtonDown;
             canvas.onLButtonUp = OnMoveToolLButtonUp;
-            canvas.onLButtonDragBegin = onMoveToolDragBegin;
-            canvas.onLButtonDrag = onMoveToolDrag;
-            canvas.onLButtonDragEnd = onMoveToolDragEnd;
+            canvas.onLButtonDragBegin = OnMoveToolDragBegin;
+            canvas.onLButtonDrag = OnMoveToolDrag;
+            canvas.onLButtonDragEnd = OnMoveToolDragEnd;
+
+            inspector.SetActive(true);
 
             _onKey = OnMoveKey;
-            _moveDragState = MoveDragState.None;
+            _moveDragState = MoveState.None;
+
+            if(selectedTile == null)
+                puzzle.HideWires();
 
             _getCursor = OnMoveGetCursor;
         }
 
         private void DisableMoveTool()
         {
+            if (hasSelection && !selectedTile)
+                ClearSelection();
+
             moveToolOptions.SetActive(false);
         }
 
         private void OnMoveToolLButtonDown(Vector2 position)
         {
-            var cell = canvas.CanvasToCell(position);
-
-            _selectionDragStart = cell;
-            if (isCellInSelection(cell))
-                _moveDragState = MoveDragState.PreMove;
-            else
-            {
-                _moveDragState = MoveDragState.PreSelect;
-                SetSelectionRect(_selectionDragStart, _selectionDragStart);
-            }
+            _moveAnchor = _cursorCell;            
         }
 
-        private void onMoveToolDragBegin(Vector2 position)
+        private void OnMoveToolDragBegin(Vector2 position)
         {
-            if (_moveDragState == MoveDragState.PreMove)
-                _moveDragState = MoveDragState.Moving;
-            else if (_moveDragState == MoveDragState.PreSelect)
-                _moveDragState = MoveDragState.Selecting;
-            else
-                _moveDragState = MoveDragState.None;
+            Debug.Assert(_moveDragState == MoveState.None);
 
-            if (_moveDragState == MoveDragState.Moving)
+            // If dragging a selected tile then drag only that tile
+            if (selectedTile != null && selectedTile.cell == _moveAnchor)
             {
-                // Get all tiles in the selection area that match the enbled layers
-                _movingTiles = puzzle.grid.GetLinkedTiles(_selectionMin, _selectionMax).Where(t => layerToggles[(int)t.info.layer].isOn).ToArray();
-                _moveDragMin = _selectionMin;
-                _moveDragMax = _selectionMax;
+                _moveTiles = new[] { selectedTile };
+                _moveDragState = MoveState.Moving;
+            } 
+            // If dragging from a selected cell then start moving
+            else if(IsSelected(_cursorCell))
+            {
+                _moveAnchor = _cursorCell;
+                _moveTiles = GetSelectedTiles();
+                _moveDragState = MoveState.Moving;
+                _moveLayerMask = GetVisibleLayerMask();
+            } 
+            // Start dragging a new selection
+            else
+            {
+                _moveAnchor.edge = Cell.Edge.None;
+                _moveDragState = MoveState.Selecting;
             }
 
             UpdateCursor();
         }
 
-        private void onMoveToolDragEnd(Vector2 position)
+        private void OnMoveToolDragEnd(Vector2 position)
         {
-
         }
 
-
-        private void onMoveToolDrag(Vector2 position, Vector2 delta)
+        /// <summary>
+        /// Create a command to move tiles from the current cell to a new cell using an offset
+        /// </summary>
+        /// <param name="tiles">List of tiles to move</param>
+        /// <param name="offset">Offset to move tiles by</param>
+        /// <param name="layerMask">Layers to include </param>
+        /// <returns>Command used to move the tiles</returns>
+        private Editor.Commands.Command CreateMoveCommand (Tile[] tiles, Cell offset, uint layerMask)
         {
-            if (_moveDragState == MoveDragState.Selecting)
+            var command = new Editor.Commands.GroupCommand();
+
+            // Unlink all tiles being moved
+            foreach (var tile in tiles)
+                command.Add(new Editor.Commands.TileMoveCommand(tile, Cell.invalid));
+
+            // Destroy any tiles in the target that overlap the tiles being moved
+            foreach (var tile in tiles)
             {
-                SetSelectionRect(_selectionDragStart, canvas.CanvasToCell(position));
-                return;
+                var existing = puzzle.grid.CellToTile(tile.cell + offset, tile.layer);
+                if (null == existing || tiles.Contains(existing))
+                    continue;
+
+                Erase(existing, command);
             }
             
-            if(_moveDragState == MoveDragState.Moving)
+            // Link the new tiles in the moved position
+            foreach (var tile in tiles)
+                command.Add(new Editor.Commands.TileMoveCommand(tile, tile.cell + offset, Cell.invalid));
+
+            return command;
+        }
+
+        private void OnMoveToolDrag(Vector2 position, Vector2 delta)
+        {
+            switch (_moveDragState)
             {
-                var offset = canvas.CanvasToCell(position) - _selectionDragStart;
-                var wdelta = canvas.CanvasToWorld(position + delta) - canvas.CanvasToWorld(position);
-                foreach (var tile in _movingTiles)
-                    tile.transform.position = puzzle.grid.CellToWorld(tile.cell + offset);
+                case MoveState.Selecting:
+                {
+                    SelectRect(_moveAnchor, _cursorCell);
+                    break;
+                }
 
-                SetSelectionRect(_moveDragMin + offset, _moveDragMax + offset);
+                case MoveState.Moving:
+                {
+                    // Calculate the move offset and early out if there is no difference
+                    var offset = Cell.zero;
+                    if (selectedTile != null)
+                        offset = _cursorCell.NormalizeEdge() - _moveAnchor.NormalizeEdge();
+                    else
+                        offset = (new Cell(_cursorCell, Cell.Edge.None) - _moveAnchor);
 
-                UpdateCursor();
+                    if (offset == _moveOffset)
+                        return;
+
+                    // If there was a previous move command undo it to revert back to the pre move state
+                    if (_moveCommand != null)
+                    {
+                        _moveCommand.Undo();
+                        _moveCommand = null;
+                    }
+
+                    // Move the tiles using the new offset
+                    _moveOffset = offset;
+                    _moveCommand = CreateMoveCommand(_moveTiles, _moveOffset, _moveLayerMask);
+                    _moveCommand.Execute();
+                    
+                    // Update the selection to reflect the move
+                    SelectTiles(_moveTiles);
+
+                    UpdateCursor();
+                    break;
+                }
+                default:
+                    break;
+
             }
         }
 
         private void OnMoveToolLButtonUp (Vector2 position)
         {
-            if ((_moveDragState == MoveDragState.PreMove || _moveDragState == MoveDragState.PreSelect) && GetTile(_selectionDragStart) != null)
-                SetSelectionRect(_selectionDragStart, _selectionDragStart);
-            else if (_moveDragState == MoveDragState.Selecting)
-                FitSelectionRect();
-            else if (_moveDragState == MoveDragState.Moving && _movingTiles != null)
-            { 
-                if (!CanDrop())
+            switch (_moveDragState)
+            {
+                // If a cell was clicked but never dragged then cycle select the tile on that cell
+                case MoveState.None:
                 {
-                    // Return the tiles back to where they were since it failed
-                    foreach (var tile in _movingTiles)
-                        tile.transform.position = puzzle.grid.CellToWorld(tile.cell);
+                    if (selectedTile != null && selectedTile.cell == _cursorCell)
+                        SelectTile(GetNextTile(selectedTile));
+                    else
+                        SelectTile(_cursorCell);
 
-                    SetSelectionRect(_moveDragMin, _moveDragMax);
-                } 
-                else
-                    ExecuteCommand(new Editor.Commands.TileMoveCommand(_movingTiles, _moveDragMin, _selectionMin, _selectionSize));
+                    break;
+                }
+                
+                case MoveState.Moving:
+                {
+                    if (_moveTiles == null)
+                        break;
+
+                    if (_moveCommand != null)
+                    {
+                        _moveCommand.Undo();
+                        ExecuteCommand(_moveCommand);
+                        _moveCommand = null;
+
+                        SelectTiles(_moveTiles);
+                    }
+
+                    break;
+                }
+
+                case MoveState.Selecting:
+                    FitSelection();
+                    break;
             }
-            else
-                selectionGizmo.gameObject.SetActive(false);
 
-            _movingTiles = null;
-            _moveDragState = MoveDragState.None;
+            if(_moveCommand != null)
+            {
+                _moveCommand.Undo();
+                _moveCommand = null;
+            }
+
+            _moveTiles = null;
+            _moveDragState = MoveState.None;
+            _moveAnchor = Cell.invalid;
+            _moveLayerMask = 0;
 
             UpdateCursor();
         }
 
-        /// <summary>
-        /// Fit the selection rect to the visible tiles within it
-        /// </summary>
-        private void FitSelectionRect()
-        {
-            if (!hasSelection)
-                return;
-
-            var tiles = puzzle.grid.GetLinkedTiles(_selectionMin, _selectionMax).Where(t => layerToggles[(int)t.info.layer].isOn).ToArray();
-            if (tiles.Length == 0)
-                selectionGizmo.gameObject.SetActive(false);
-            else
-            {
-                _selectionMin = _selectionMax = tiles[0].cell;
-                foreach (var tile in tiles)
-                {
-                    _selectionMin = Cell.Min(_selectionMin, tile.cell);
-                    _selectionMax = Cell.Max(_selectionMax, tile.cell);
-                }
-                SetSelectionRect(_selectionMin, _selectionMax);
-            }
-        }
-
-        private bool isCellInSelection(Cell cell) =>
-            hasSelection && (cell.x >= _selectionMin.x && cell.x <= _selectionMax.x && cell.y >= _selectionMin.y && cell.y <= _selectionMax.y);
-
         private CursorType OnMoveGetCursor(Cell cell)
         {
-            if (_moveDragState == MoveDragState.PreMove)
-                return CursorType.ArrowWithMove;
-
-            if(_moveDragState == MoveDragState.Moving)
-                return CanDrop() ? CursorType.ArrowWithMove : CursorType.ArrowWithNot;
-
-            if (_moveDragState == MoveDragState.Selecting || _moveDragState == MoveDragState.PreSelect)
-                return CursorType.Arrow;
-
-            if (isCellInSelection(cell))
+            if (_moveDragState != MoveState.Selecting && IsSelected(cell))
                 return CursorType.ArrowWithMove;
 
             return CursorType.Arrow;
         }
-
-        private bool CanDrop ()
-        {
-            var offset = _selectionMin - _moveDragMin;
-            foreach(var tile in _movingTiles)
-            {
-                var cell = tile.cell + offset;
-
-                // If the tile is within the original selection rect then we know its ok to drop 
-                if (cell.x >= _moveDragMin.x && cell.x <= _moveDragMax.x && cell.y >= _moveDragMin.y && cell.y <= _moveDragMax.y)
-                    continue;
-
-                // Look for any tile on the same layer in the new cell
-                if (null != puzzle.grid.CellToTile(cell, tile.info.layer))
-                    return false;
-
-                // Do not allow dynamic tiles to be moved on top of state tiles that do not allow it
-                if(tile.info.layer == TileLayer.Dynamic)
-                {
-                    var staticTile = puzzle.grid.CellToTile(cell, TileLayer.Static);
-                    if (staticTile != null && !staticTile.info.allowDynamic)
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Return and array of all selected tiles
-        /// </summary>
-        private Tile[] GetSelectedTiles() =>
-            hasSelection ?
-                puzzle.grid.GetLinkedTiles(_selectionMin, _selectionMax).Where(t => layerToggles[(int)t.info.layer].isOn).ToArray() :
-                null;
 
         /// <summary>
         /// Handle keyboard keys for move too

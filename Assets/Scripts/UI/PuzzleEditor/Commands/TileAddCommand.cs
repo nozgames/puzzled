@@ -26,12 +26,11 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnUndo()
         {
-            // Move to the trash
-            UIPuzzleEditor.MoveToTrash(tile.gameObject);
-
             // Unlink the tile
             tile.cell = Cell.invalid;
 
+            // Move to the trash
+            UIPuzzleEditor.MoveToTrash(tile.gameObject);
         }
 
         protected override void OnRedo()
