@@ -328,10 +328,29 @@ namespace Puzzled
                 return;
         }
 
+        /// <summary>
+        /// Returns true if the player can move through the edge between the current position and the offset
+        /// </summary>
+        /// <param name="offset">Movement offset</param>
+        /// <returns>True if the player can move through the edge</returns>
+        private bool CanMoveThroughEdge (Cell offset)
+        {
+            var queryEdge = new QueryMoveEvent(tile, offset);
+            SendToCell(queryEdge, new Cell(tile.cell, Cell.OffsetToEdge(offset)), CellEventRouting.FirstVisible);
+            if (queryEdge.hasResult && !queryEdge.result)
+                return false;
+
+            return true;
+        }
+
         private bool Move (Cell offset)
         {
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;
+
+            // First check to make sure the edge isnt blocked
+            if (!CanMoveThroughEdge(offset))
+                return false;
 
             // Can we move wherre we are going?
             var query = new QueryMoveEvent(tile, offset);
@@ -455,6 +474,10 @@ namespace Puzzled
 
         private bool Use (Cell offset)
         {
+            // Before we try to use what is in front of us make sure there isnt anything on the edge that would prevent it
+            if (!CanMoveThroughEdge(offset))
+                return false;
+
             return SendToCell(new UseEvent(tile), tile.cell + offset, CellEventRouting.FirstVisible);
         }
 
@@ -490,6 +513,11 @@ namespace Puzzled
             }
 
             var cell = tile.cell + facingDirection;
+
+            // Make sure there is nothing blocking the tooltip
+            if (!CanMoveThroughEdge(facingDirection))
+                return;
+
             var query = new QueryTooltipEvent();
             SendToCell(query, cell, CellEventRouting.FirstHandled);
             if (query.tooltip == null)

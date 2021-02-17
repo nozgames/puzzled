@@ -223,6 +223,7 @@ namespace Puzzled
             CameraManager.ShowLayer(TileLayer.Floor, true);
             CameraManager.ShowLayer(TileLayer.Static, true);
             CameraManager.ShowLayer(TileLayer.Logic, false);
+            CameraManager.ShowLayer(TileLayer.Wall, true);
         }
 
         public static void Stop ()

@@ -52,6 +52,7 @@ namespace Puzzled
         [SerializeField] [Layer] private int gizmoLayer = 0;
         [SerializeField] [Layer] private int wireLayer = 0;
         [SerializeField] [Layer] private int fogLayer = 0;
+        [SerializeField] [Layer] private int wallLayer = 0;
 
         [Header("Background")]
         [SerializeField] private Background _defaultBackground = null;
@@ -69,6 +70,7 @@ namespace Puzzled
         public static GameCamera.State editorCameraState { get; set; }
 
         private GameCamera.State _blendedState;
+        private bool _cameraIsBusy = false;
 
         public void Initialize()
         {
@@ -92,6 +94,12 @@ namespace Puzzled
 
             // update blended state
             _blendedState = (GameManager.puzzle.isEditing) ? editorCameraState : GameCamera.UpdateCameraBlendingState();
+
+            if (_blendedState.isBusy != _cameraIsBusy)
+            {
+                _cameraIsBusy = _blendedState.isBusy;
+                GameManager.busy += _cameraIsBusy ? 1 : -1;
+            }
 
             // apply blended state to camer
             _instance._fog.material.color = _blendedState.bgColor;
@@ -153,6 +161,9 @@ namespace Puzzled
 
                 case TileLayer.Logic:
                     return _instance.logicLayer;
+
+                case TileLayer.Wall:
+                    return _instance.wallLayer;
             }
 
             return 0;

@@ -6,10 +6,13 @@ namespace Puzzled
 {
     public partial class UIPuzzleEditor
     {
+        private const float CursorEdgeBias = 0.25f;
+
         [Header("Cursor")]
         [SerializeField] private InputActionReference _pointerAction = null;
 
         private Cell _cursorCell = Cell.invalid;
+        private Vector3 _cursorWorld = Vector3.zero;
         private Func<Cell, CursorType> _getCursor = null;
 
         private void InitializeCursor()
@@ -31,21 +34,7 @@ namespace Puzzled
         {            
         }
 
-        private void OnPointerMoved(InputAction.CallbackContext ctx)
-        {
-            if (!canvas.isMouseOver)
-                return;
-
-            var cell = canvas.CanvasToCell(ctx.ReadValue<Vector2>());
-            if (cell == _cursorCell)
-                return;
-
-            if (cell == Cell.invalid)
-                return;
-
-            _cursorCell = cell;
-            UpdateCursor();
-        }
+        private void OnPointerMoved(InputAction.CallbackContext ctx) => UpdateCursor(true);
 
         private void UpdateCursor(bool updatePosition = false)
         {
@@ -57,18 +46,71 @@ namespace Puzzled
 
             if (updatePosition && canvas.isMouseOver)
             {
-                var cell = canvas.CanvasToCell(_pointerAction.action.ReadValue<Vector2>());
+                var position = _pointerAction.action.ReadValue<Vector2>();
+                var cell = canvas.CanvasToCell(position);
                 if (cell == Cell.invalid)
                     return;
+
+                _cursorWorld = canvas.CanvasToWorld(position);
+
+                // Check for cursor continuity on the same edge
+                var old = _cursorCell.NormalizeEdge();
+                if (old.edge == Cell.Edge.North || old.edge == Cell.Edge.East)
+                {
+                    var bounds = puzzle.grid.CellToWorldBounds(old);
+                    bounds.Expand(CursorEdgeBias);
+                    if (old.edge == Cell.Edge.North && _cursorWorld.z >= bounds.min.z && _cursorWorld.z <= bounds.max.z)
+                        cell = new Cell(cell.x, cell.y, cell.y == old.y ? Cell.Edge.North : Cell.Edge.South);
+                    else if (old.edge == Cell.Edge.East && _cursorWorld.x >= bounds.min.x && _cursorWorld.x <= bounds.max.x)
+                        cell = new Cell(cell.x, cell.y, cell.x == old.x ? Cell.Edge.East : Cell.Edge.West);
+                }
 
                 _cursorCell = cell;
             }
 
-            UIManager.cursor = _getCursor?.Invoke(_cursorCell) ?? CursorType.Arrow;
+            if (_cursorCell == Cell.invalid)
+                return;
+
+            var renderCell = _cursorCell;
+
+            if (mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null && _moveAnchor.isEdge)
+            {
+                var cellCenter = puzzle.grid.CellToWorld(_cursorCell);
+                var cellCenterOffset = _cursorWorld - cellCenter;
+
+                if (_moveAnchor.NormalizeEdge().edge == Cell.Edge.North)
+                    renderCell.edge = (cellCenterOffset.z > 0 ? Cell.Edge.North : Cell.Edge.South);
+                else
+                    renderCell.edge = (cellCenterOffset.x > 0 ? Cell.Edge.East : Cell.Edge.West);
+            }
+            else if (mode == Mode.Move && _moveDragState == MoveState.Moving)
+            {
+                renderCell.edge = Cell.Edge.None;
+            }
+            else if (mode == Mode.Draw && !KeyboardManager.isAltPressed)
+            {
+                if (_tilePalette.selected == null || !TileGrid.IsEdgeLayer(_tilePalette.selected.layer))
+                    renderCell.edge = Cell.Edge.None;
+            }
+            else
+            {
+                var cellCenter = puzzle.grid.CellToWorld(_cursorCell);
+                var cellCenterOffset = _cursorWorld - cellCenter;
+                if (Mathf.Abs(cellCenterOffset.x) < 0.25f && Mathf.Abs(cellCenterOffset.z) < 0.25f)
+                    renderCell.edge = Cell.Edge.None;
+                else if (renderCell.edge != Cell.Edge.None && puzzle.grid.CellToTile(renderCell) == null)
+                    renderCell.edge = Cell.Edge.None;
+            }
+
+            _cursorCell = renderCell;
+
+            UIManager.cursor = _getCursor?.Invoke(renderCell) ?? CursorType.Arrow;
 
             _cursorGizmo.gameObject.SetActive(canvas.isMouseOver);
-            _cursorGizmo.min = puzzle.grid.CellToWorld(_cursorCell) - new Vector3(0.5f, 0.0f, 0.5f);
-            _cursorGizmo.max = puzzle.grid.CellToWorld(_cursorCell) + new Vector3(0.5f, 0.0f, 0.5f);
+
+            var cursorBounds = puzzle.grid.CellToWorldBounds(renderCell);
+            _cursorGizmo.min = cursorBounds.min;
+            _cursorGizmo.max = cursorBounds.max;
         }
     }
 }

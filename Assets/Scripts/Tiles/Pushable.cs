@@ -77,6 +77,12 @@ namespace Puzzled
 
         private bool MoveTo(Cell offset, float duration)
         {
+            // Make sure we can move through the edge itself
+            var queryEdge = new QueryMoveEvent(tile, offset);
+            SendToCell(queryEdge, new Cell(tile.cell, Cell.OffsetToEdge(offset)), CellEventRouting.FirstVisible);
+            if (queryEdge.hasResult && !queryEdge.result)
+                return false;
+
             // Check if we can move the same direction as we are being pushed
             var queryMove = new QueryMoveEvent(tile, offset);
             SendToCell(queryMove, queryMove.targetCell, CellEventRouting.FirstVisible);

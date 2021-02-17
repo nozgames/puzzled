@@ -48,6 +48,11 @@ namespace Puzzled
         public System.Guid guid { get; set; }
 
         /// <summary>
+        /// Tile layer
+        /// </summary>
+        public TileLayer layer => info.layer;
+
+        /// <summary>
         /// Return the tile properties array for this tile
         /// </summary>
         public TileProperty[] properties => _properties == null ? _properties = DatabaseManager.GetProperties(this) : _properties;
@@ -66,6 +71,12 @@ namespace Puzzled
         /// Get/Set the puzzle this tile belongs to
         /// </summary>
         public Puzzle puzzle { get; set; }
+
+        /// <summary>
+        /// Get the tile grid the tile belongs to.  Note that even if a tile is not linked into the grid
+        /// it still belongs to the grid of the parent puzzle.
+        /// </summary>
+        public TileGrid grid => puzzle.grid;
 
         /// <summary>
         /// True if the tile has been destroyed
@@ -111,9 +122,9 @@ namespace Puzzled
 
                 Debug.Assert(puzzle != null);
 
-                // Unlink ourselves from the tile we are in
-                if (isLinked && !puzzle.grid.isLinking)
-                    puzzle.grid.UnlinkTile(this);
+                // If this tile is linked then unlink it from the grid
+                if (isLinked)
+                    grid.UnlinkTile(this);
 
                 var old = _cell;
                 _cell = value;
@@ -122,23 +133,54 @@ namespace Puzzled
                 {
                     // Give our own components a chance to react to the cell change
                     Send(new CellChangedEvent(this, old));
+
+                    // Disable the tile since it is not linked into the grid
+                    gameObject.SetActive(false);
                     return;
                 }
 
-                transform.position = puzzle.grid.CellToWorld(_cell);
+                // Link ourself into the grid
+                grid.LinkTile(this);
 
-                // TODO: maintain a list of ports in tile?
-                foreach (var property in properties)
-                    if (property.type == TilePropertyType.Port)
-                        foreach (var wire in property.GetValue<Port>(this).wires)
-                            wire.UpdatePositions();
+                // Ensure the tile is parented to the grid
+                if (transform.parent != grid.transform)
+                    transform.SetParent(grid.transform);
 
-                if (!puzzle.grid.isLinking)
-                    puzzle.grid.LinkTile(this);
+                // Ensure the tile is enabled since it is linked into the grid
+                gameObject.SetActive(true);
+
+                // Move the tile to the correct world position
+                transform.position = grid.CellToWorld(_cell);
+
+                // When a tile changes positions make sure all of its wires are informed
+                foreach(var port in GetPorts())
+                    foreach (var wire in port.wires)
+                        wire.UpdatePositions();
 
                 // Give our own components a chance to react to the cell change
                 Send(new CellChangedEvent(this, old));
             }
+        }
+
+        /// <summary>
+        /// Return the cell bounds for the given list of tiles
+        /// </summary>
+        /// <param name="tiles">Tiles</param>
+        /// <returns>Cell bounds that encompasses the given list of tiles</returns>
+        public static CellBounds GetCellBounds (Tile[] tiles)
+        {
+            if (tiles.Length == 0)
+                return new CellBounds(Cell.invalid, Cell.invalid);
+
+            var min = tiles[0].cell;
+            var max = min;
+            foreach (var tile in tiles)
+            {
+                min = Cell.Min(min, tile.cell);
+                max = Cell.Max(max, tile.cell);
+            }
+
+            return new CellBounds(min, max);
         }
 
         /// <summary>
@@ -178,6 +220,9 @@ namespace Puzzled
 
             _pendingDestroy = true;
 
+            // Unlink ourself from the tile grid
+            cell = Cell.invalid;
+
             // Let all the components know
             Send(new DestroyEvent());
 
@@ -191,12 +236,6 @@ namespace Puzzled
             foreach (var property in properties)
                 if (property.type == TilePropertyType.Port)
                     property.GetValue<Port>(this).Clear();
-
-            // Unlink the tile from the tile grid
-            if (isLinked && !puzzle.grid.isLinking)
-                puzzle.grid.UnlinkTile(this);
-
-            cell = Cell.invalid;
 
             if (GameManager.isQuitting)
                 DestroyImmediate(gameObject);

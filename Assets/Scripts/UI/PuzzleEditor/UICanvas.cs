@@ -46,21 +46,13 @@ namespace Puzzled.Editor
         {
             var ray = CameraManager.camera.ScreenPointToRay(position);
             if ((new Plane(Vector3.up, Vector3.zero)).Raycast(ray, out float enter))
-            {
                 return ray.origin + ray.direction * enter;
-            }
 
             return Vector3.zero;
         }
 
-        public Cell CanvasToCell(Vector2 position)
-        {
-#if true
-            return UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0, 0.5f));
-#else
-            return UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0.5f, 0));
-#endif
-        }
+        public Cell CanvasToCell(Vector2 position) => 
+            UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0, 0.5f));
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {

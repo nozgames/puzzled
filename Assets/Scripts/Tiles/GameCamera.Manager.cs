@@ -46,6 +46,7 @@ namespace Puzzled
                     _activeLayer = cam.layer;
                     isInActiveLayer = true;
 
+                    cam.state.isBusy = cam.busyDuringTransition;
                     cam.SetBlendInTime(transitionTime);
                 }
 
@@ -55,6 +56,8 @@ namespace Puzzled
                     GameCamera activeCam = activeCameras[i];
                     if (activeCam == cam)
                         continue; // skip this camera if it is already in there
+
+                    activeCam.state.isBusy = false;
 
                     if (activeCam.layer == cam.layer)
                     {
@@ -95,6 +98,8 @@ namespace Puzzled
                 }
                 else
                 {
+                    cam.state.isBusy = cam.busyDuringTransition;
+
                     // find next best active camera
                     for (int i = 0; i < activeCameras.Count; ++i)
                     {
@@ -146,6 +151,7 @@ namespace Puzzled
                 float layerWeight = 0;
                 float visibleWeight = 1;
                 int currentLayer = int.MaxValue;
+                bool isCameraBusy = false;
                 for (int i = 0; i < activeCameras.Count; ++i)
                 {
                     GameCamera cam = activeCameras[i];
@@ -168,6 +174,9 @@ namespace Puzzled
 
                         if (visibleWeight <= 0)
                             break; // no more weight left
+
+                        if (cam.state.isBusy)
+                            isCameraBusy = true;
 
                         _lowestExpressedPriority = currentLayer;
                         currentLayer = cam.layer;
@@ -200,6 +209,7 @@ namespace Puzzled
                     blendedState.Lerp(baseCameraState, lerpValue);
                 }
 
+                blendedState.isBusy = isCameraBusy;               
                 return blendedState;
             }
         }

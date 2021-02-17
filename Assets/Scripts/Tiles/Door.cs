@@ -27,8 +27,6 @@ namespace Puzzled
         [SerializeField] private Animator _animator = null;
         [SerializeField] private AudioClip _openSound = null;
         [SerializeField] private AudioClip _closeSound = null;
-        [SerializeField] private GameObject _visualEast = null;
-        [SerializeField] private GameObject _visualWest = null;
 
         [Editable]
         public bool isOpen {
@@ -68,19 +66,18 @@ namespace Puzzled
             }
         }
 
+        [ActorEventHandler(priority=10)]
+        private void OnQueryMoveEvent(QueryMoveEvent evt)
+        {
+            evt.IsHandled = true;
+            evt.result = _open;
+        }
+
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
         {
-            UpdateVisuals();
-
             if (null != _blockRaycast)
                 _blockRaycast.enabled = !_open;
-        }
-
-        [ActorEventHandler(priority=1)]
-        private void OnQueryMove(QueryMoveEvent evt)
-        {
-            evt.result = _open;
         }
 
         [ActorEventHandler]
@@ -116,28 +113,6 @@ namespace Puzzled
                 isOpen = true;
             else if (!powerInPort.hasPower && isOpen)
                 isOpen = false;
-        }
-
-        [ActorEventHandler]
-        private void CellChangedEvent(CellChangedEvent evt)
-        {
-            UpdateVisuals();
-        }
-
-        private Wall GetWall(Cell cell) => puzzle.grid.CellToComponent<Wall>(cell, TileLayer.Static);
-
-        private void UpdateVisuals()
-        {
-            if (tile == null)
-                return;
-
-            var rotatedProperty = tile.GetProperty("rotated");
-            var rotated = rotatedProperty?.GetValue<bool>(tile) ?? false;
-
-            if (_visualWest != null)
-                _visualWest.SetActive(GetWall(tile.cell + (rotated ? Cell.up : Cell.left)) != null);
-            if (_visualEast != null)
-                _visualEast.SetActive(GetWall(tile.cell + (rotated ? Cell.down : Cell.right)) != null);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 5;
+        private const int FileVersion = 6;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -25,6 +25,13 @@ namespace Puzzled
         private bool _started;
         private PuzzleProperties _properties;
         private Dictionary<Type, object> _sharedComponentData = new Dictionary<Type, object>();
+
+        [Flags]
+        private enum SerializedTileFlags
+        {
+            HasName = 1 << 0,
+            HasCellEdge = 1 << 1
+        }
 
         /// <summary>
         /// Helper function for getting/setting the current puzzle
@@ -175,30 +182,35 @@ namespace Puzzled
         /// </summary>
         /// <param name="prefab">Tile prefab</param>
         /// <param name="cell">Cell to create tile in</param>
+        /// <param name="layer">Layer to put the tile in</param>
         /// <returns>Instantiated tile</returns>
-        public Tile InstantiateTile(Tile prefab, Cell cell)
+        public Tile InstantiateTile(Tile prefab, Cell cell, bool forceEdge = true)
         {
             if (prefab == null)
                 return null;
 
             // Do not allow two tiles to be intstantiated into the same cell
-            if (_tiles.IsLinked(cell, prefab.info.layer))
+            if (_tiles.IsLinked(cell, prefab.layer))
             {
-                Debug.LogError($"Cannot create tile `{prefab.info.displayName} at cell {cell}, layer is occupied by `{grid.CellToTile(cell, prefab.info.layer).info.displayName}");
+                Debug.LogError($"Cannot create tile `{prefab.info.displayName} at cell {cell}, layer is occupied by `{grid.CellToTile(cell, prefab.layer).info.displayName}");
                 return null;
             }
+
+            // Do not spawn tiles that are supposed to be on an edge if they are not on an edge
+            if (forceEdge && cell.isEdge != TileGrid.IsEdgeLayer(prefab.layer))
+                return null;
 
             var tile = Instantiate(prefab.gameObject, _tiles.transform).GetComponent<Tile>();
             tile.puzzle = this;
             tile.guid = prefab.guid;
             tile.name = prefab.name;
-            tile.gameObject.SetChildLayers(CameraManager.TileLayerToObjectLayer(tile.info.layer));
+            tile.gameObject.SetChildLayers(CameraManager.TileLayerToObjectLayer(tile.layer));
 
             // Send awake event before the tile is linked into the grid
             tile.Send(new AwakeEvent());
 
-            // Link the tile into the grid
-            tile.cell = cell;
+            // Link the tile into the grid and normalize the cell
+            tile.cell = cell.NormalizeEdge(tile.layer);
 
             // Keep track of the player
             var playerComponent = tile.GetComponent<Player>();
@@ -321,13 +333,21 @@ namespace Puzzled
                 writer.Write(tile.guid);
                 writer.Write(tile.cell);
 
-                // Optionally write the tile name
+                var flags = (SerializedTileFlags)0;
                 if (tile.name != DatabaseManager.GetTile(tile.guid).name)
-                {
-                    writer.Write(true);
+                    flags |= SerializedTileFlags.HasName;
+                if (tile.cell.edge != Cell.Edge.None)
+                    flags |= SerializedTileFlags.HasCellEdge;
+
+                writer.Write((byte)flags);
+
+                // Optionally write the tile name
+                if ((flags & SerializedTileFlags.HasName) == SerializedTileFlags.HasName)
                     writer.Write(tile.name);
-                } else
-                    writer.Write(false);
+
+                // Optionally write the tile name
+                if ((flags & SerializedTileFlags.HasCellEdge) == SerializedTileFlags.HasCellEdge)
+                    writer.Write((byte)tile.cell.edge);
             }
 
             // Write tile properties
@@ -539,6 +559,7 @@ namespace Puzzled
                     break;
 
                 case 5:
+                case 6:
                     LoadV5(reader, version);
                     break;
 
@@ -769,7 +790,21 @@ namespace Puzzled
             {
                 var guid = reader.ReadGuid();
                 var cell = reader.ReadCell();
-                var name = reader.ReadBoolean() ? reader.ReadString() : null;
+                var name = (string)null;
+
+                if(version == 5)
+                {
+                    name = reader.ReadBoolean() ? reader.ReadString() : null;
+                }
+                else
+                {
+                    var flags = (SerializedTileFlags)reader.ReadByte();
+                    if ((flags & SerializedTileFlags.HasName) == SerializedTileFlags.HasName)
+                        name = reader.ReadString();
+
+                    if ((flags & SerializedTileFlags.HasCellEdge) == SerializedTileFlags.HasCellEdge)
+                        cell.edge = (Cell.Edge)reader.ReadByte();
+                }
 
                 var prefab = DatabaseManager.GetTile(guid);
                 if (null == prefab)
@@ -1077,11 +1112,20 @@ namespace Puzzled
         /// <returns></returns>
         public RayCastEvent RayCast (Cell from, Cell dir, int distance)
         {
+            dir.edge = Cell.Edge.None;
             dir = dir.normalized;
-            var cell = from + dir;
+            var cell = from;
             var raycast = new RayCastEvent(dir);
-            for(int i=0; i<distance; i++, cell += dir)
+            var edge = Cell.OffsetToEdge(dir);
+            for(int i=0; i<distance; i++)
             {
+                // Test the edge between the current cell and the next cell first
+                grid.SendToCell(raycast, new Cell(cell, edge), CellEventRouting.All);
+                if (raycast.hit != null)
+                    break;
+
+                // Now test the next cell in the direction
+                cell += dir;
                 grid.SendToCell(raycast, cell, CellEventRouting.All);
                 if (raycast.hit != null)
                     break;

@@ -84,7 +84,7 @@ namespace Puzzled
                 _instance._tilesByGuid[tile.guid] = tile;
                 return tile;
             }).Where(t => t != null)
-                .OrderBy(t => t.info.layer)
+                .OrderBy(t => t.layer)
                 .ThenBy(t => t.info.name)
                 .ThenBy(t => t.name)
                 .ToArray();
@@ -183,7 +183,7 @@ namespace Puzzled
             var puzzle = GameManager.puzzle;
 
             GameManager.puzzle = _tilePreviewPuzzle;
-            var tile = _tilePreviewPuzzle.InstantiateTile(prefab, Cell.zero);
+            var tile = _tilePreviewPuzzle.InstantiateTile(prefab, Cell.zero, false);
             tile.Send(new StartEvent());
             tile.Send(new PreviewStartEvent());
 
@@ -199,7 +199,7 @@ namespace Puzzled
             // Position camera to frame the content
             var extents = ((max - min));
             var size = Mathf.Max(extents.x, Mathf.Max(extents.y, extents.z));
-            var rotation = new Vector3(tile.info.layer == TileLayer.Logic ? 90 : _tilePreviewCamera.transform.localEulerAngles.x, 0, 0);
+            var rotation = new Vector3(tile.layer == TileLayer.Logic ? 90 : _tilePreviewCamera.transform.localEulerAngles.x, 0, 0);
             _tilePreviewCamera.transform.localEulerAngles = rotation;
             _tilePreviewCamera.transform.position = CameraManager.Frame(
                 tile.transform.position + new Vector3(0, (max.y + min.y) * 0.5f, 0),

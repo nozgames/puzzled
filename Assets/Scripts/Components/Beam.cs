@@ -161,7 +161,7 @@ namespace Puzzled
             for (int i = 0; i < length - 1; i++)
                 _line.SetPosition(i + 1, source + dirv * (i + 1));
 
-            _line.SetPosition(_line.positionCount - 1, puzzle.grid.CellToWorld(target) + Vector3.up * _line.transform.localPosition.y - dirv * raycast.offset);
+            _line.SetPosition(_line.positionCount - 1, puzzle.grid.CellToWorldBounds(target).center + Vector3.up * _line.transform.localPosition.y - dirv * raycast.offset);
 
             if (_impactFX != null)
             {

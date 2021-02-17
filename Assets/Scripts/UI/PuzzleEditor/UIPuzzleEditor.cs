@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,7 +34,11 @@ namespace Puzzled
         [SerializeField] private UICameraEditor _cameraEditor = null;
 
         [SerializeField] private GameObject inspector = null;
-        [SerializeField] private UIRadio[] layerToggles = null;
+        [SerializeField] private UIRadio _layerToggleLogic = null;
+        [SerializeField] private UIRadio _layerToggleFloor = null;
+        [SerializeField] private UIRadio _layerToggleWall = null;
+        [SerializeField] private UIRadio _layerToggleDynamic = null;
+        [SerializeField] private UIRadio _layerToggleStatic = null;
         [SerializeField] private UIRadio _gridToggle = null;
         [SerializeField] private UIRadio _wireToggle = null;
         [SerializeField] private GameObject _canvasControls = null;
@@ -44,7 +47,7 @@ namespace Puzzled
         [SerializeField] private GameObject _playControls = null;
 
         [Header("Gizmos")]
-        [SerializeField] private SelectionGizmo selectionGizmo = null;
+        [SerializeField] private SelectionGizmo _selectionGizmo = null;
         [SerializeField] private SelectionGizmo _cursorGizmo = null;
 
         [Header("Toolbar")]
@@ -83,9 +86,6 @@ namespace Puzzled
         private Action<Background> _chooseBackgroundCallback;
         private Action<Sound> _chooseSoundCallback;
         private Mode savedMode;
-        private Cell _selectionMin;
-        private Cell _selectionMax;
-        private Cell _selectionSize;
         private Action<KeyCode> _onKey;
 
         private Vector3 _cameraTarget;
@@ -95,8 +95,6 @@ namespace Puzzled
 
         public Puzzle puzzle => _puzzle;
 
-        public bool hasSelection => selectionGizmo.gameObject.activeSelf;
-
         public static bool isOpen => instance != null;
 
         public Mode mode {
@@ -104,8 +102,6 @@ namespace Puzzled
             set {
                 if (_mode == value)
                     return;
-
-                selectionGizmo.gameObject.SetActive(false);
 
                 _mode = value;
 
@@ -184,6 +180,13 @@ namespace Puzzled
                     break;
             }
 
+            // Clear selection if the inspector is not enabled
+            if (!inspector.gameObject.activeSelf)
+            {
+                puzzle.HideWires();
+                SelectTile(null);
+            }
+
             UpdateCursor();
         }
 
@@ -206,26 +209,30 @@ namespace Puzzled
 
             _wireToggle.onValueChanged.AddListener((v) => CameraManager.ShowWires(v));
 
-            _inspectorRotate.onValueChanged.AddListener((v) => {
-                if (_selectedTile == null)
+            _inspectorRotation.onClick.AddListener(() => {
+                var rotation = selectedTile.GetProperty("rotation");
+                if (null != rotation)
+                    ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(selectedTile, "rotation", rotation.GetValue<int>(selectedTile) + 1));
+            });
+
+            _inspectorRotated.onValueChanged.AddListener((v) => {
+                if (selectedTile == null)
                     return;
 
-                var rotated = _selectedTile.GetProperty("rotated");
-                if (null == rotated)
-                    return;
-
-                ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(_selectedTile, "rotated", v));
+                var rotated = selectedTile.GetProperty("rotated");
+                if (null != rotated)
+                    ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(selectedTile, "rotated", v));
             });
 
             _inspectorFlip.onValueChanged.AddListener((v) => {
-                if (_selectedTile == null)
+                if (selectedTile == null)
                     return;
 
-                var flip = _selectedTile.GetProperty("flipped");
+                var flip = selectedTile.GetProperty("flipped");
                 if (null == flip)
                     return;
 
-                ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(_selectedTile, "flipped", v));
+                ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(selectedTile, "flipped", v));
             });
 
             _chooseFilePopup.onCancel += () => HidePopup();
@@ -258,11 +265,11 @@ namespace Puzzled
                 HidePopup();
             };
 
-            foreach (var toggle in layerToggles)
-                toggle.onValueChanged.AddListener((value) => {
-                    UpdateCameraFlags();
-                    FitSelectionRect();
-                });
+            _layerToggleWall.onValueChanged.AddListener((v) => UpdateCameraFlags());
+            _layerToggleDynamic.onValueChanged.AddListener((v) => UpdateCameraFlags());
+            _layerToggleLogic.onValueChanged.AddListener((v) => UpdateCameraFlags());
+            _layerToggleStatic.onValueChanged.AddListener((v) => UpdateCameraFlags());
+            _layerToggleFloor.onValueChanged.AddListener((v) => UpdateCameraFlags());
         }
 
         private void OnEnable()
@@ -279,7 +286,7 @@ namespace Puzzled
 
             inspector.SetActive(false);
 
-            selectionGizmo.gameObject.SetActive(false);
+            _selectionGizmo.gameObject.SetActive(false);
 
             // Start off with an empty puzzle
             NewPuzzle();
@@ -310,9 +317,7 @@ namespace Puzzled
             _cameraZoom = Mathf.Clamp(zoom, CameraManager.MinZoom, CameraManager.MaxZoom);
 
             UpdateCamera();
-
-            if (hasSelection)
-                SetSelectionRect(_selectionMin, _selectionMax);
+            UpdateSelectionGizmo();
 
             _zoomSlider.SetValueWithoutNotify(_cameraZoom);
 
@@ -353,28 +358,16 @@ namespace Puzzled
                 mode = Mode.Decal;
         }
 
-        public void SetSelectionRect(Cell min, Cell max)
-        {
-            _selectionMin = Cell.Min(min, max);
-            _selectionMax = Cell.Max(min, max);
-            _selectionSize = _selectionMax - _selectionMin;
-
-            selectionGizmo.gameObject.SetActive(true);
-            selectionGizmo.min = _puzzle.grid.CellToWorld(_selectionMin) - new Vector3(0.5f, 0, 0.5f);
-            selectionGizmo.max = _puzzle.grid.CellToWorld(_selectionMax) + new Vector3(0.5f, 0, 0.5f);
-        }
-
         private void OnPan(Vector2 position, Vector2 delta)
         {
+            // Do not allow panning in play mode
             if (playing)
                 return;
 
             _cameraTarget += -(canvas.CanvasToWorld(position + delta) - canvas.CanvasToWorld(position));
+
             UpdateCamera();
-
-            if (hasSelection)
-                SetSelectionRect(_selectionMin, _selectionMax);
-
+            UpdateSelectionGizmo();
             UpdateCursor();
         }
 
@@ -434,9 +427,7 @@ namespace Puzzled
             // Default puzzle name to unnamed
             puzzleName.text = "Unnamed";
 
-            SelectWire(null);
-            SelectTile(null);
-            selectionGizmo.gameObject.SetActive(false);
+            ClearSelection();
 
             // Reset the camera back to zero,zero
             Center(new Cell(0, 0), DefaultZoom);
@@ -495,8 +486,7 @@ namespace Puzzled
 
             playing = true;
 
-            // Clear selection
-            selectionGizmo.gameObject.SetActive(false);
+            ClearSelection();
 
             // Load the puzzle and play
             GameManager.LoadPuzzle(_puzzle.path);
@@ -642,17 +632,9 @@ namespace Puzzled
             UpdateCursor();
         }
 
-        [Flags]
-        private enum GetTileFlag
-        {
-            None = 0,
-            AllowInputs = 1,
-            AllowOutputs = 2
-        }
+        private Tile GetTile(Cell cell) => GetTile(cell, TileLayer.Logic);
 
-        private Tile GetTile(Cell cell, GetTileFlag flags) => GetTile(cell, TileLayer.Logic, flags);
-
-        private Tile GetTile(Cell cell, TileLayer topLayer = TileLayer.Logic, GetTileFlag flags = GetTileFlag.None)
+        private Tile GetTile(Cell cell, TileLayer topLayer = TileLayer.Logic)
         {
             for (int i = (int)topLayer; i >= 0; i--)
             {
@@ -660,22 +642,28 @@ namespace Puzzled
                 if (null == tile)
                     continue;
 
-#if false
-                if (!tile.info.allowWireInputs && (flags & GetTileFlag.AllowInputs) == GetTileFlag.AllowInputs)
-                    continue;
-
-                if (!tile.info.allowWireOutputs && (flags & GetTileFlag.AllowOutputs) == GetTileFlag.AllowOutputs)
-                    continue;
-#endif
-
                 // Do not return tiles on hidden layers
-                if (!layerToggles[i].isOn)
+                if (!IsLayerVisible((TileLayer)i))
                     continue;
 
                 return tile;
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Returns the next tile in the same cell in reverse layer order.
+        /// </summary>
+        /// <param name="tile">Current tile</param>
+        /// <returns>Next tile in reverse layer order</returns>
+        private Tile GetNextTile (Tile tile)
+        {
+            var nextTile = GetTile(tile.cell, tile.layer != TileLayer.Floor ? (tile.layer - 1) : TileLayer.Logic);
+            if (null == nextTile)
+                nextTile = GetTile(tile.cell, TileLayer.Logic);
+
+            return nextTile;
         }
 
         public void ChoosePort(Tile tileFrom, Tile tileTo, Action<Port, Port> callback)
@@ -752,8 +740,11 @@ namespace Puzzled
             CameraManager.ShowWires(_wireToggle.isOn);
             CameraManager.ShowFog(false);
 
-            for (int i = 0; i < layerToggles.Length; i++)
-                CameraManager.ShowLayer((TileLayer)i, layerToggles[i].isOn);
+            CameraManager.ShowLayer(TileLayer.Wall, _layerToggleWall.isOn);
+            CameraManager.ShowLayer(TileLayer.Dynamic, _layerToggleDynamic.isOn);
+            CameraManager.ShowLayer(TileLayer.Logic, _layerToggleLogic.isOn);
+            CameraManager.ShowLayer(TileLayer.Floor, _layerToggleFloor.isOn);
+            CameraManager.ShowLayer(TileLayer.Static, _layerToggleStatic.isOn);
         }
 
         void KeyboardManager.IKeyboardHandler.OnKey(KeyCode keyCode)
@@ -794,19 +785,23 @@ namespace Puzzled
                     break;
 
                 case KeyCode.Alpha1:
-                    layerToggles[0].isOn = !layerToggles[0].isOn;
+                    _layerToggleFloor.isOn = !_layerToggleFloor.isOn;
                     break;
 
                 case KeyCode.Alpha2:
-                    layerToggles[1].isOn = !layerToggles[1].isOn;
+                    _layerToggleWall.isOn = !_layerToggleWall.isOn;
                     break;
 
                 case KeyCode.Alpha3:
-                    layerToggles[2].isOn = !layerToggles[2].isOn;
+                    _layerToggleStatic.isOn = !_layerToggleStatic.isOn;
                     break;
 
                 case KeyCode.Alpha4:
-                    layerToggles[3].isOn = !layerToggles[3].isOn;
+                    _layerToggleDynamic.isOn = !_layerToggleDynamic.isOn;
+                    break;
+
+                case KeyCode.Alpha5:
+                    _layerToggleLogic.isOn = !_layerToggleLogic.isOn;
                     break;
 
                 case KeyCode.Z:
@@ -836,14 +831,6 @@ namespace Puzzled
 
             UpdateCursor();
         }
-
-        /// <summary>
-        /// Returns true if the given tile layer is visible in the editor
-        /// </summary>
-        /// <param name="layer">Given layer</param>
-        /// <returns>True if the layer is visible</returns>
-        public static bool IsLayerVisible(TileLayer layer) => instance.layerToggles[(int)layer].isOn;
-
 
         public void UpgradeAllFiles()
         {
@@ -875,6 +862,39 @@ namespace Puzzled
         public static void HideTooltip ()
         {
             instance._tooltip.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        /// Returns true if the given layer is visible within the editor
+        /// </summary>
+        /// <param name="layer">Layer</param>
+        /// <returns>True if the layer is visible</returns>
+        public static bool IsLayerVisible (TileLayer layer)
+        {
+            switch (layer)
+            {
+                case TileLayer.Wall: return instance._layerToggleWall.isOn;
+                case TileLayer.Dynamic: return instance._layerToggleDynamic.isOn;
+                case TileLayer.Static: return instance._layerToggleStatic.isOn;
+                case TileLayer.Logic: return instance._layerToggleLogic.isOn;
+                case TileLayer.Floor: return instance._layerToggleFloor.isOn;
+
+                default:
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// Create a visibility mask for all layers using the current visibility state
+        /// </summary>
+        /// <returns>Mask where each layer is represented by a single bit</returns>
+        public static uint GetVisibleLayerMask ()
+        {
+            uint mask = 0;
+            for (var layer = TileLayer.Floor; layer <= TileLayer.Logic; layer++)
+                mask |= (IsLayerVisible(layer) ? (1u << (int)layer) : 0u);
+
+            return mask;
         }
     }
 }

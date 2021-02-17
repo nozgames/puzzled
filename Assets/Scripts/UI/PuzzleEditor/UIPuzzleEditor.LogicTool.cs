@@ -34,23 +34,12 @@ namespace Puzzled
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
         [SerializeField] private UIRadio _inspectorFlip = null;
-        [SerializeField] private UIRadio _inspectorRotate = null;
+        [SerializeField] private UIRadio _inspectorRotated = null;
+        [SerializeField] private Button _inspectorRotation = null;
 
         private WireVisuals dragWire = null;
         private bool logicCycleSelection = false;
-        private Tile _selectedTile = null;
-        private Wire _selectedWire = null;
         private bool _allowLogicDrag = false;
-
-        public static Tile selectedTile {
-            get => instance._selectedTile;
-            set => instance.SelectTile(value);
-        }
-
-        public static Wire selectedWire {
-            get => instance._selectedWire;
-            set => instance.SelectWire(value);
-        }
 
         public static Action<Wire> onSelectedWireChanged;
 
@@ -70,58 +59,55 @@ namespace Puzzled
             logicCycleSelection = false;
 
             // Show all wires when logic tool is enabled
-            _puzzle.ShowWires(true);
+            if(selectedTile == null)
+                _puzzle.ShowWires(true);
         }
 
         private void DisableLogicTool()
-        {
-            SelectTile(null);
-
-            // Hide all wires when logic tool is hidden
-            _puzzle.ShowWires(false);
+        {            
         }
 
         private void OnInspectorTileNameChanged(string name)
         {
-            if (_selectedTile == null)
+            if (selectedTile == null)
                 return;
 
             name = name.Trim();
 
             if (string.IsNullOrWhiteSpace(name))
             {
-                inspectorTileName.SetTextWithoutNotify(_selectedTile.name);
+                inspectorTileName.SetTextWithoutNotify(selectedTile.name);
                 return;
             }
 
-            if (name == _selectedTile.name)
+            if (name == selectedTile.name)
                 return;
 
-            ExecuteCommand(new Editor.Commands.TileRenameCommand(_selectedTile, name));
+            ExecuteCommand(new Editor.Commands.TileRenameCommand(selectedTile, name));
         }
 
         private void OnLogicLButtonDown(Vector2 position)
         {
             // Ensure the cell being dragged is the selected cell
-            var cell = canvas.CanvasToCell(position);
+            var cell = _cursorCell;
 
             _allowLogicDrag = false;
 
             // QuickConnect mode
-            if (_selectedTile != null && KeyboardManager.isShiftPressed)
+            if (selectedTile != null && KeyboardManager.isShiftPressed)
             {
-                Connect(_selectedTile, cell);
+                Connect(selectedTile, cell);
                 return;
             }
 
-            if (_selectedTile != null && KeyboardManager.isCtrlPressed)
+            if (selectedTile != null && KeyboardManager.isCtrlPressed)
             {
-                Disconnect(_selectedTile, cell);
+                Disconnect(selectedTile, cell);
                 return;
             }
 
             // Handle no selection or selecting a new tile
-            if (_selectedTile == null || _selectedTile.cell != cell)
+            if (selectedTile == null || selectedTile.cell != cell)
             {
                 SelectTile(GetTile(cell, TileLayer.Logic));
                 logicCycleSelection = false;
@@ -129,20 +115,20 @@ namespace Puzzled
             else
                 logicCycleSelection = true;
 
-            _allowLogicDrag = selectedTile != null && _selectedTile.hasOutputs;
+            _allowLogicDrag = selectedTile != null && selectedTile.hasOutputs;
         }
 
         private void OnLogicLButtonUp(Vector2 position)
         {
-            if (null != dragWire || _selectedTile==null || !logicCycleSelection)
+            if (null != dragWire || selectedTile==null || !logicCycleSelection)
                 return;
 
-            var cell = canvas.CanvasToCell(position);
-            if (_selectedTile.cell != cell)
+            var cell = _cursorCell;
+            if (selectedTile.cell != cell)
                 return;
 
-            var tile = GetTile(cell, (_selectedTile != null && _selectedTile.info.layer != TileLayer.Floor && _selectedTile.cell == cell) ? ((TileLayer)_selectedTile.info.layer - 1) : TileLayer.Logic);
-            if (null == tile && _selectedTile != null)
+            var tile = GetTile(cell, (selectedTile != null && selectedTile.layer != TileLayer.Floor && selectedTile.cell == cell) ? ((TileLayer)selectedTile.layer - 1) : TileLayer.Logic);
+            if (null == tile && selectedTile != null)
                 tile = GetTile(cell, TileLayer.Logic);
 
             if (tile != null)
@@ -156,16 +142,15 @@ namespace Puzzled
             if (!_allowLogicDrag)
                 return;
 
-            var cell = canvas.CanvasToCell(position);
-            if (_selectedTile == null || !_selectedTile.hasOutputs)
+            if (selectedTile == null || !selectedTile.hasOutputs)
                 return;
 
             dragWire = Instantiate(dragWirePrefab, puzzle.transform).GetComponent<WireVisuals>();
             dragWire.portTypeFrom = PortType.Power;
             dragWire.portTypeTo = PortType.Power;
             dragWire.selected = true;
-            dragWire.transform.position = puzzle.grid.CellToWorld(_selectedTile.cell);
-            dragWire.target = puzzle.grid.CellToWorld(_selectedTile.cell);
+            dragWire.transform.position = puzzle.grid.CellToWorldBounds(selectedTile.cell).center;
+            dragWire.target = puzzle.grid.CellToWorldBounds(selectedTile.cell).center;
 
             UpdateCursor();
         }
@@ -175,7 +160,7 @@ namespace Puzzled
             if (null == dragWire)
                 return;
 
-            dragWire.target = puzzle.grid.CellToWorld(canvas.CanvasToCell(position));
+            dragWire.target = puzzle.grid.CellToWorldBounds(_cursorCell).center;
         }
 
         private void OnLogicLButtonDragEnd(Vector2 position)
@@ -188,7 +173,7 @@ namespace Puzzled
             dragWire = null;
 
             // Connect to the cell
-            Connect(_selectedTile, canvas.CanvasToCell(position));
+            Connect(selectedTile, _cursorCell);
 
             UpdateCursor();
         }
@@ -201,7 +186,7 @@ namespace Puzzled
                 return;
 
             // Get all in the given cell that we can connect to
-            var tiles = puzzle.grid.GetLinkedTiles(cell, cell).Where(t => tile.CanConnectTo(t, false)).ToArray();
+            var tiles = puzzle.grid.GetLinkedTiles(cell).Where(t => tile.CanConnectTo(t, false)).ToArray();
             if (tiles.Length == 0)
                 return;
 
@@ -243,7 +228,6 @@ namespace Puzzled
             UpdateCursor();
         }
 
-        private void SelectTile(Cell cell) => SelectTile(GetTile(cell));
 
         private void UpdateInspectorState(Tile tile)
         {
@@ -261,95 +245,12 @@ namespace Puzzled
                         wire.visuals.highlight = !dark;
         }
 
-        private void SelectTile(Tile tile)
-        {
-            // Save the inspector state
-            if (_selectedTile != null)
-            {
-                // Make sure the current edit box finishes before we clear the selected tile
-                if(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == inspectorTileName)
-                    UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-                SetWiresDark(_selectedTile, false);
-                UpdateInspectorState(_selectedTile);                
-            }
-
-            _selectedTile = tile;
-
-            HideCameraEditor();
-
-            if (tile == null)
-            {
-                selectionGizmo.gameObject.SetActive(false);
-                _inspectorContent.transform.DetachAndDestroyChildren();
-                _inspectorContent.SetActive(false);
-                _inspectorHeader.SetActive(false);
-                _inspectorEmpty.SetActive(true);
-
-                // Show all wires when no tile is selected
-                _puzzle.ShowWires();
-            } 
-            else
-            {
-                _inspectorEmpty.SetActive(false);
-                _inspectorContent.SetActive(true);
-                _inspectorHeader.SetActive(true);
-                inspectorTileName.SetTextWithoutNotify(tile.name);
-                _inspectorTileType.text = $"<{_selectedTile.info.displayName}>";
-
-                var rotated = _selectedTile.GetProperty("rotated");
-                _inspectorRotate.gameObject.SetActive(rotated != null);
-                _inspectorRotate.isOn = (rotated != null && rotated.GetValue<bool>(_selectedTile));
-
-                var flipped = _selectedTile.GetProperty("flipped");
-                _inspectorFlip.gameObject.SetActive(flipped != null);
-                _inspectorFlip.isOn = (flipped != null && flipped.GetValue<bool>(_selectedTile));
-
-                _inspectorTilePreview.texture = DatabaseManager.GetPreview(tile.guid);
-                SetSelectionRect(tile.cell, tile.cell);
-
-                // Hide all wires in case they were all visible previously and show the selected tiles wires
-                _puzzle.HideWires();
-                _puzzle.ShowWires(tile);
-                RefreshInspectorInternal();
-
-                // If the tile is a camera then open the camera editor as well
-                var gameCamera = tile.GetComponent<GameCamera>();
-                if (gameCamera != null)
-                    ShowCameraEditor(gameCamera);
-            }
-
-            // Clear wire selection if the selected wire does not connect to the newly selected tile
-            if (selectedWire != null && selectedWire.from.tile != tile && selectedWire.to.tile != tile)
-                SelectWire(null);
-        }
-
-        /// <summary>
-        /// Select the given wire
-        /// </summary>
-        /// <param name="wire">Wire to select</param>
-        private void SelectWire(Wire wire)
-        {
-            // Make sure one of the two tiles from the wire is selected, if not select the input
-            if (wire != null && _selectedTile != wire.from.tile && _selectedTile != wire.to.tile)
-                SelectTile(wire.from.tile);
-
-            if (_selectedWire != null)
-                _selectedWire.visuals.selected = false;
-
-            _selectedWire = wire;
-
-            if (_selectedWire != null)
-                _selectedWire.visuals.selected = true;
-
-            onSelectedWireChanged?.Invoke(_selectedWire);
-        }
-
 
         public static void RefreshInspector() => instance.RefreshInspectorInternal();
 
         private void RefreshInspectorInternal()
         {
-            var tile = _selectedTile;
+            var tile = selectedTile;
             _inspectorContent.transform.DetachAndDestroyChildren();
 
             // Create the custom editos
@@ -387,8 +288,8 @@ namespace Puzzled
                 propertiesGroup.transform.SetAsFirstSibling();
 
             // Apply the saved inspector state
-            if (_selectedTile.inspectorState != null)
-                foreach (var state in _selectedTile.inspectorState)
+            if (selectedTile.inspectorState != null)
+                foreach (var state in selectedTile.inspectorState)
                     state.Apply(inspector.transform);
         }
 
@@ -453,8 +354,8 @@ namespace Puzzled
                     break;
 
                 case KeyCode.F:
-                    if(_selectedTile != null)
-                        Center(_selectedTile.cell, _cameraZoom);
+                    if(selectedTile != null)
+                        Center(selectedTile.cell, _cameraZoom);
                     break;
             }
         }
