@@ -70,6 +70,7 @@ namespace Puzzled
         public static GameCamera.State editorCameraState { get; set; }
 
         private GameCamera.State _blendedState;
+        private bool _cameraIsBusy = false;
 
         public void Initialize()
         {
@@ -93,6 +94,12 @@ namespace Puzzled
 
             // update blended state
             _blendedState = (GameManager.puzzle.isEditing) ? editorCameraState : GameCamera.UpdateCameraBlendingState();
+
+            if (_blendedState.isBusy != _cameraIsBusy)
+            {
+                _cameraIsBusy = _blendedState.isBusy;
+                GameManager.busy += _cameraIsBusy ? 1 : -1;
+            }
 
             // apply blended state to camer
             _instance._fog.material.color = _blendedState.bgColor;

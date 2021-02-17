@@ -14,6 +14,7 @@ namespace Puzzled
             public Vector3 position;
             public Quaternion rotation;
             public Color bgColor;
+            public bool isBusy;
 
             public void Lerp(State stateB, float t)
             {
@@ -73,6 +74,9 @@ namespace Puzzled
         [Editable]
         public int layer { get; set; }
 
+        [Editable]
+        public bool busyDuringTransition { get; set; } = true;
+
         public virtual Vector3 target => puzzle.grid.CellToWorld(tile.cell) + new Vector3(offset.x * 0.25f, 0, offset.y * 0.25f);
 
         [Editable]
@@ -110,6 +114,8 @@ namespace Puzzled
             set 
             {
                 _weight = Mathf.Clamp(value, 0, 1);
+                if (!isBlending)
+                    state.isBusy = false; // clear busy if not blending anymore
             } 
         }
 
