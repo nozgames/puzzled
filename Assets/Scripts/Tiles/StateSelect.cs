@@ -9,6 +9,9 @@ namespace Puzzled
         [Editable(hidden = true)]
         public string[] steps { get; set; }
 
+        [Editable]
+        public bool alwaysSignal { get; set; } = false;
+
         /// <summary>
         /// Output used to forward power to the current state
         /// </summary>
@@ -39,6 +42,10 @@ namespace Puzzled
                     if ((wireStates & (1 << stateIndex)) != 0)
                         isPowered = true;
                 }
+
+                // for signal ports, toggle power if configured to always signal
+                if ((powerOutPort.GetWire(i).to.port.type == PortType.Signal) && isPowered && alwaysSignal)
+                    powerOutPort.SetPowered(i, false);
 
                 powerOutPort.SetPowered(i, isPowered);
             }
