@@ -25,7 +25,7 @@ namespace Puzzled
 
             var surface = DecalSurface.FromCell(puzzle, tile.cell);
             if (surface != null)
-                surface.decal = decals[evt.transientValue - 1];
+                surface.decal = decals[evt.transientValue];
         }
     }
 }

@@ -17,14 +17,15 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnSelectUpdate(SelectUpdateEvent evt)
         {
+            // FIXME
             HashSet<int> wireValues = new HashSet<int>();
 
             // add transient value first (may be 0)
             if (evt.transientValue > 0)
-                wireValues.Add(evt.transientValue - 1);
+                wireValues.Add(evt.transientValue);
 
             foreach (Wire wire in evt.wires)
-                wireValues.Add(wire.value - 1);
+                wireValues.Add(wire.value);
 
             // Enable power for the selected wires and disabled for any other
             for (int i = 0; i < powerOutPort.wireCount; ++i)

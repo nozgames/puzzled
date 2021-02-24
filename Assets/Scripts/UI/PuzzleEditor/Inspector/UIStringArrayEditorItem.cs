@@ -43,7 +43,7 @@ namespace Puzzled.Editor
             _text.gameObject.SetActive(true);
 
             if(_index != null)
-                _index.text = (transform.GetSiblingIndex() + 1).ToString();
+                _index.text = transform.GetSiblingIndex().ToString();
         }
 
         public override void OnPointerClick(PointerEventData eventData)

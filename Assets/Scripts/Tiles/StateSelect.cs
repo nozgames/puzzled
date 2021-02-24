@@ -31,14 +31,14 @@ namespace Puzzled
                 // check transient value first
                 if (evt.transientValue > 0)
                 {
-                    int stateIndex = evt.transientValue - 1;
+                    int stateIndex = evt.transientValue;
                     if ((wireStates & (1 << stateIndex)) != 0)
                         isPowered = true;
                 }
 
                 foreach (Wire wire in evt.wires)
                 {
-                    int stateIndex = wire.value - 1;
+                    int stateIndex = wire.value;
                     if ((wireStates & (1 << stateIndex)) != 0)
                         isPowered = true;
                 }

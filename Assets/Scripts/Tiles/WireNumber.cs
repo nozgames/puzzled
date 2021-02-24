@@ -6,7 +6,7 @@ namespace Puzzled
 {
     class WireNumber : TileComponent
     {
-        private int _value = 1;
+        private int _value = 0;
 
         /// <summary>
         /// Input signal
@@ -25,7 +25,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnSignal(TriggerSignal evt)
         {
-            _value = signalPort.wires.IndexOf(evt.wire) + 1;
+            _value = signalPort.wires.IndexOf(evt.wire);
 
             valueOutPort.SendValue(_value);
         }

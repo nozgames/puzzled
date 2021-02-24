@@ -12,8 +12,8 @@ namespace Puzzled
 
         abstract protected Sprite[] sprites { get; }
 
-        private int _target = 1;
-        private int _value = 1;
+        private int _target = 0;
+        private int _value = 0;
         private int _rotateIndex = 0;
 
         [Editable]
@@ -51,7 +51,7 @@ namespace Puzzled
                 var old = _value;
 
                 if (sprites == null || sprites.Length == 0)
-                    _value = 1;
+                    _value = 0;
                 else
                     _value = ClampedValue(value);
 
@@ -111,13 +111,13 @@ namespace Puzzled
             if (sprites.Length == 0)
                 return;
 
-            _decalRenderers[_rotateIndex].sprite = sprites[value - 1];
-            _decalRenderers[(_rotateIndex + 1) % _decalRenderers.Length].sprite = sprites[WrappedValue(value + 1) - 1];
-            _decalRenderers[(_rotateIndex + _decalRenderers.Length - 1) % _decalRenderers.Length].sprite = sprites[WrappedValue(value - 1) - 1];
+            _decalRenderers[_rotateIndex].sprite = sprites[value];
+            _decalRenderers[(_rotateIndex + 1) % _decalRenderers.Length].sprite = sprites[WrappedValue(value + 1)];
+            _decalRenderers[(_rotateIndex + _decalRenderers.Length - 1) % _decalRenderers.Length].sprite = sprites[WrappedValue(value - 1)];
         }
 
-        private int ClampedValue(int value) => Mathf.Clamp(1 + ((value - 1) % sprites.Length), 1, sprites.Length);
-        private int WrappedValue(int value) => ((value + sprites.Length - 1) % sprites.Length) + 1;
+        private int ClampedValue(int value) => Mathf.Clamp(1 + (value % sprites.Length), 1, sprites.Length);
+        private int WrappedValue(int value) => ((value + sprites.Length - 1) % sprites.Length);
 
         private void OnUpdateValue()
         {

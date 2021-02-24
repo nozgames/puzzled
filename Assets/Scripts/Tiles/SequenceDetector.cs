@@ -48,7 +48,7 @@ namespace Puzzled
 
         private void HandleCorrectWire()
         {
-            SetSequenceIndex(sequenceIndex + 1);
+            SetSequenceIndex(sequenceIndex);
         }
 
         private void HandleIncorrectWire()
@@ -68,7 +68,7 @@ namespace Puzzled
             if (sequenceIndex >= steps.Length)
                 HandleSequenceComplete();
 
-            valueOutPort.SendValue(sequenceIndex + 1, true);
+            valueOutPort.SendValue(sequenceIndex, true);
         }
 
         private void HandleSequenceComplete()
