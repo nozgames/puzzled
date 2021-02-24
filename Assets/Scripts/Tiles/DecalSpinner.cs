@@ -18,7 +18,7 @@ namespace Puzzled
 
         override protected void InitializeSprites()
         {
-            _decalSprites = decals.Select(d => d.sprite).ToArray();
+            _decalSprites = decals?.Select(d => d.sprite).ToArray() ?? new Sprite[0];
         }
     }
 }

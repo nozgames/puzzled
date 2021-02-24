@@ -108,6 +108,9 @@ namespace Puzzled
 
         private void UpdateDecals()
         {
+            if (sprites.Length == 0)
+                return;
+
             _decalRenderers[_rotateIndex].sprite = sprites[value - 1];
             _decalRenderers[(_rotateIndex + 1) % _decalRenderers.Length].sprite = sprites[WrappedValue(value + 1) - 1];
             _decalRenderers[(_rotateIndex + _decalRenderers.Length - 1) % _decalRenderers.Length].sprite = sprites[WrappedValue(value - 1) - 1];
