@@ -1,5 +1,6 @@
 using UnityEngine;
 using NoZ;
+using System.Collections.Generic;
 
 namespace Puzzled
 {
@@ -142,6 +143,25 @@ namespace Puzzled
 
             if (_capRight != null)
                 _capRight.gameObject.SetActive(capRight);
+        }
+
+        public Tile[] GetMountedTiles ()
+        {
+            var tile0 = tile.grid.CellToTile(tile.cell.ConvertTo(CellCoordinateSystem.Edge), TileLayer.WallStatic);
+            var tile1 = tile.grid.CellToTile(
+                tile.cell.edge == CellEdge.East ?
+                    new Cell(tile.cell + new Vector2Int(1, 0), CellEdge.West) :
+                    new Cell(tile.cell + new Vector2Int(0, 1), CellEdge.South), 
+                TileLayer.WallStatic);
+
+            if (tile0 != null && tile1 != null)
+                return new Tile[] { tile0, tile1 };
+            else if (tile0 != null)
+                return new Tile[] { tile0 };
+            else if (tile1 != null)
+                return new Tile[] { tile1 };
+
+            return new Tile[] { };
         }
     }
 }

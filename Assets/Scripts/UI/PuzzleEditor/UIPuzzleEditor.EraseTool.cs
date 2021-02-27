@@ -1,9 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Puzzled
 {
     public partial class UIPuzzleEditor
     {
+        [Flags]
+        private enum EraseFlags
+        {
+            None = 0,
+            KeepWallMount = 1
+        }
+
         private Cell _lastEraseCell;
         private TileLayer _eraseLayer = TileLayer.Static;
         private bool _eraseLayerOnly;
@@ -81,10 +89,19 @@ namespace Puzzled
             }
         }
 
-        private Editor.Commands.GroupCommand Erase (Tile tile, Editor.Commands.GroupCommand group = null)
+        private Editor.Commands.GroupCommand Erase (Tile tile, Editor.Commands.GroupCommand group = null, EraseFlags flags = EraseFlags.None)
         {
             if (null == group)
                 group = new Editor.Commands.GroupCommand();
+
+            // If a wall layer is being erased and we were not told to keep the wall mounts then remove all wall mounts
+            if(tile.layer == TileLayer.Wall && (flags & EraseFlags.KeepWallMount) != EraseFlags.KeepWallMount)
+            {
+                var wall = tile.GetComponent<Wall>();
+                if (null != wall)
+                    foreach (var mounted in wall.GetMountedTiles())
+                        Erase(mounted, group);
+            }
 
             // Destroy all wires connected to the tile
             foreach (var property in tile.properties)

@@ -100,10 +100,20 @@ namespace Puzzled
             if (existing != null && existing.guid == prefab.guid)
                 return;
 
-            // Remove what is already in that slot
-            // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
-            if (null != existing)
-                Erase(existing, command);
+            if(existing != null)
+            {
+                var eraseFlags = EraseFlags.None;
+                if (existing.layer == TileLayer.WallStatic)
+                {
+                    var wall = prefab.GetComponent<Wall>();
+                    if (null != wall && wall.allowsWallMounts)
+                        eraseFlags |= EraseFlags.KeepWallMount;
+                }
+
+                // Remove what is already in that slot
+                // TODO: if it is just a variant we should be able to swap it and reapply the connections and properties
+                Erase(existing, command, eraseFlags);
+            }
 
             // Destroy all other instances of this tile regardless of variant
             if (!prefab.info.allowMultiple)

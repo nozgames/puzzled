@@ -570,6 +570,8 @@ namespace Puzzled
 
                 mode = Mode.Logic;
 
+                ClearSelection();
+
                 puzzleName.text = _puzzle.filename;
 
                 Vector3 targetPosition;
