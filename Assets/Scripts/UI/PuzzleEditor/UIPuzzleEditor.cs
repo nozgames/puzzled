@@ -583,7 +583,7 @@ namespace Puzzled
                 {
                     var min = _puzzle.grid.maxCell;
                     var max = _puzzle.grid.minCell;
-                    foreach (var tile in puzzle.grid.GetLinkedTiles())
+                    foreach (var tile in puzzle.grid.GetTiles())
                     {
                         // Special case to skip the puzzle properties
                         if (tile.cell == _puzzle.grid.minCell)
@@ -657,11 +657,31 @@ namespace Puzzled
         /// </summary>
         /// <param name="tile">Current tile</param>
         /// <returns>Next tile in reverse layer order</returns>
-        private Tile GetNextTile (Tile tile)
+        private Tile GetNextTile(Tile tile) => GetNextTile(tile, tile.cell.system);
+
+        private Tile GetNextTile (Tile tile, CellCoordinateSystem system)
         {
-            var nextTile = GetTile(tile.cell, tile.layer != TileLayer.Floor ? (tile.layer - 1) : TileLayer.Logic);
+            if (null == tile)
+                return null;
+
+            var cell = tile.cell.ConvertTo(system);
+
+            var nextTile = GetTile(cell, tile.layer != TileLayer.Floor ? (tile.layer - 1) : TileLayer.Logic);
             if (null == nextTile)
-                nextTile = GetTile(tile.cell, TileLayer.Logic);
+            {
+                switch (cell.system)
+                {
+                    case CellCoordinateSystem.Edge:
+                        return GetNextTile(tile, CellCoordinateSystem.SharedEdge);
+
+                    case CellCoordinateSystem.SharedEdge:
+                        return GetNextTile(tile, CellCoordinateSystem.Grid);
+
+                    default:
+                        nextTile = GetTile(cell, TileLayer.Logic);
+                        break;
+                }
+            }                    
 
             return nextTile;
         }

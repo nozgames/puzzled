@@ -9,7 +9,7 @@ namespace Puzzled
         {
             public Cell min;
             public Cell max;
-            public Cell size;
+            public Vector2Int size;
             public Tile tile;
             public Wire wire;
         }
@@ -45,7 +45,7 @@ namespace Puzzled
         /// </summary>
         private Tile[] GetSelectedTiles() =>
             hasSelection ?
-                puzzle.grid.GetLinkedTiles(selectedBounds).Where(t => IsLayerVisible(t.layer)).ToArray() :
+                puzzle.grid.GetTiles(selectedBounds).Where(t => IsLayerVisible(t.layer)).ToArray() :
                 null;
 
         public void ClearSelection()
@@ -57,7 +57,7 @@ namespace Puzzled
                 SelectTile(null);
 
             _selection.min = _selection.max = Cell.invalid;
-            _selection.size = Cell.zero;
+            _selection.size = Vector2Int.zero;
             _selectionGizmo.gameObject.SetActive(false);
         }
 
@@ -75,7 +75,7 @@ namespace Puzzled
 
         private void UpdateSelectionGizmo()
         {
-            if (_selection.min.isEdge && _selection.min == _selection.max)
+            if (_selection.min == _selection.max)
             {
                 var cellWorldBounds = puzzle.grid.CellToWorldBounds(_selection.min);
                 _selectionGizmo.min = cellWorldBounds.min;
@@ -94,6 +94,8 @@ namespace Puzzled
             // Save the inspector state
             if (_selection.tile != null)
             {
+                _selection.tile.ShowGizmos(false);
+
                 // Make sure the current edit box finishes before we clear the selected tile
                 if (UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == inspectorTileName)
                     UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
@@ -142,7 +144,7 @@ namespace Puzzled
 
                 // Update the selection
                 _selection.min = _selection.max = tile.cell;
-                _selection.size = new Cell(1, 1);
+                _selection.size = Vector2Int.one;
                 _selectionGizmo.gameObject.SetActive(true);
                 UpdateSelectionGizmo();
 
@@ -155,6 +157,8 @@ namespace Puzzled
                 var gameCamera = tile.GetComponent<GameCamera>();
                 if (gameCamera != null)
                     ShowCameraEditor(gameCamera);
+
+                _selection.tile.ShowGizmos(true);
             }
 
             // Clear wire selection if the selected wire does not connect to the newly selected tile

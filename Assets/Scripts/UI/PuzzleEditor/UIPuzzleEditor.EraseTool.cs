@@ -35,7 +35,7 @@ namespace Puzzled
         {
             var tile = GetTile(_cursorCell);
             _eraseLayerOnly = !eraseToolAllLayers.isOn && tile != null;
-            _eraseLayer = tile != null ? tile.layer : TileLayer.Logic;
+            _eraseLayer = _eraseLayerOnly ? tile.layer : TileLayer.Logic;
             _eraseStarted = false;
             Erase(_cursorCell);
         }
@@ -43,6 +43,7 @@ namespace Puzzled
         private void OnEraseToolLButtonUp(Vector2 position)
         {
             _lastEraseCell = Cell.invalid;
+            _eraseLayerOnly = false;            
         }
 
         private void OnEraseToolDrag(Vector2 position, Vector2 delta) => Erase(_cursorCell);

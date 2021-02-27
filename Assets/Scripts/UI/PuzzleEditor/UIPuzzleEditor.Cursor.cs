@@ -44,25 +44,63 @@ namespace Puzzled
                 return;
             }
 
+            // When drawing we want to lock the cursor to the coordinate system of the tile being drawn.
+            var coordinateSystem = CellCoordinateSystem.Edge;
+            if (mode == Mode.Draw && _tilePalette.selected != null)
+                coordinateSystem = _puzzle.grid.LayerToCoordinateSystem(_tilePalette.selected.layer);
+            else if (mode == Mode.Erase && _eraseLayerOnly)
+                coordinateSystem = _puzzle.grid.LayerToCoordinateSystem(_eraseLayer);
+
             if (updatePosition && canvas.isMouseOver)
             {
                 var position = _pointerAction.action.ReadValue<Vector2>();
-                var cell = canvas.CanvasToCell(position);
+                var cell = canvas.CanvasToCell(position, coordinateSystem);
                 if (cell == Cell.invalid)
                     return;
 
                 _cursorWorld = canvas.CanvasToWorld(position);
 
-                // Check for cursor continuity on the same edge
-                var old = _cursorCell.NormalizeEdge();
-                if (old.edge == Cell.Edge.North || old.edge == Cell.Edge.East)
+                // When moving a single tile around that is on an edge lock the edge to that edge
+                if (mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null && selectedTile.cell.edge != CellEdge.None)
+                    cell = new Cell(selectedTile.cell.system, cell.x, cell.y, selectedTile.cell.edge);
+                // When the cursor was an edge and will be an edge try to maintain some contiunity beween the edges
+                else if (cell.edge != CellEdge.None && _cursorCell.edge != CellEdge.None && _cursorCell.edge != cell.edge)
                 {
-                    var bounds = puzzle.grid.CellToWorldBounds(old);
-                    bounds.Expand(CursorEdgeBias);
-                    if (old.edge == Cell.Edge.North && _cursorWorld.z >= bounds.min.z && _cursorWorld.z <= bounds.max.z)
-                        cell = new Cell(cell.x, cell.y, cell.y == old.y ? Cell.Edge.North : Cell.Edge.South);
-                    else if (old.edge == Cell.Edge.East && _cursorWorld.x >= bounds.min.x && _cursorWorld.x <= bounds.max.x)
-                        cell = new Cell(cell.x, cell.y, cell.x == old.x ? Cell.Edge.East : Cell.Edge.West);
+                    // If the cursor is still within the previous cell then dont change.  This will
+                    // help prevent oscillation between vertical and horizontal edges on the corners.
+                    if (_puzzle.grid.CellToWorldBounds(_cursorCell).Contains(_cursorWorld))
+                        cell = _cursorCell;
+                    // Otherwise check to see if the cursor is over a parallel edge to the previous cell 
+                    // and if so use that cell.  This will help transitioning from one cell to the other
+                    // on the same edge and prevent it from oscillating between vertical and horizontal edges.
+                    else
+                    {
+                        var parallel = Cell.GetParallelEdge(_cursorCell, CellEdgeSide.Min);
+                        if (_puzzle.grid.CellToWorldBounds(parallel).Contains(_cursorWorld))
+                            cell = parallel;
+                        else
+                        {
+                            parallel = Cell.GetParallelEdge(_cursorCell, CellEdgeSide.Max);
+                            if (_puzzle.grid.CellToWorldBounds(parallel).Contains(_cursorWorld))
+                                cell = parallel;
+                        }
+                    }
+                }
+
+                if (mode != Mode.Draw && 
+                    !(mode == Mode.Erase && _eraseLayerOnly) &&
+                    !(mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null))
+                {
+                    Debug.Assert(cell.edge != CellEdge.None);
+
+                    if (!_puzzle.grid.CellContainsWorldPoint(cell,_cursorWorld) || null == GetTile(cell))
+                    {
+                        var sharedEdgeCell = cell.ConvertTo(CellCoordinateSystem.SharedEdge);
+                        if (!_puzzle.grid.CellContainsWorldPoint(sharedEdgeCell,_cursorWorld) || null == _puzzle.grid.CellToTile(sharedEdgeCell))
+                            cell = cell.ConvertTo(CellCoordinateSystem.Grid);
+                        else
+                            cell = sharedEdgeCell;
+                    }
                 }
 
                 _cursorCell = cell;
@@ -73,35 +111,38 @@ namespace Puzzled
 
             var renderCell = _cursorCell;
 
+
+
+#if false
             if (mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null && _moveAnchor.isEdge)
             {
                 var cellCenter = puzzle.grid.CellToWorld(_cursorCell);
                 var cellCenterOffset = _cursorWorld - cellCenter;
 
-                if (_moveAnchor.NormalizeEdge().edge == Cell.Edge.North)
-                    renderCell.edge = (cellCenterOffset.z > 0 ? Cell.Edge.North : Cell.Edge.South);
+                if (_moveAnchor.NormalizeEdge().edge == CellEdge.North)
+                    renderCell.edge = (cellCenterOffset.z > 0 ? CellEdge.North : CellEdge.South);
                 else
-                    renderCell.edge = (cellCenterOffset.x > 0 ? Cell.Edge.East : Cell.Edge.West);
+                    renderCell.edge = (cellCenterOffset.x > 0 ? CellEdge.East : CellEdge.West);
             }
             else if (mode == Mode.Move && _moveDragState == MoveState.Moving)
             {
-                renderCell.edge = Cell.Edge.None;
+                renderCell.edge = CellEdge.None;
             }
             else if (mode == Mode.Draw && !KeyboardManager.isAltPressed)
             {
                 if (_tilePalette.selected == null || !TileGrid.IsEdgeLayer(_tilePalette.selected.layer))
-                    renderCell.edge = Cell.Edge.None;
+                    renderCell.edge = CellEdge.None;
             }
             else
             {
                 var cellCenter = puzzle.grid.CellToWorld(_cursorCell);
                 var cellCenterOffset = _cursorWorld - cellCenter;
                 if (Mathf.Abs(cellCenterOffset.x) < 0.25f && Mathf.Abs(cellCenterOffset.z) < 0.25f)
-                    renderCell.edge = Cell.Edge.None;
-                else if (renderCell.edge != Cell.Edge.None && puzzle.grid.CellToTile(renderCell) == null)
-                    renderCell.edge = Cell.Edge.None;
+                    renderCell.edge = CellEdge.None;
+                else if (renderCell.edge != CellEdge.None && puzzle.grid.CellToTile(renderCell) == null)
+                    renderCell.edge = CellEdge.None;
             }
-
+#endif
             _cursorCell = renderCell;
 
             UIManager.cursor = _getCursor?.Invoke(renderCell) ?? CursorType.Arrow;

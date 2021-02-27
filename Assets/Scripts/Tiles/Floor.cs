@@ -15,7 +15,7 @@ namespace Puzzled
 
         private void UpdateVisuals()
         {
-            if (tile.cell == Cell.invalid)
+            if (!tile.isLinked)
                 return;
 
             var state = Random.state;

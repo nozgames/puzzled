@@ -106,7 +106,7 @@ namespace Puzzled.Editor
             {
                 var step = _rectTransform.rect.height / (_gameCamera.zoomLevel * 4 + 1);
                 var delta = (_dragStart - eventData.position) / step;
-                var offset = _offsetStart + new Cell((int)delta.x, (int)delta.y);
+                var offset = _offsetStart + new Vector2Int((int)delta.x, (int)delta.y);
                 if (offset != _gameCamera.offset)
                 {
                     UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(_gameCamera.tile, "offset", offset));

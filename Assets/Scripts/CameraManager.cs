@@ -163,6 +163,7 @@ namespace Puzzled
                     return _instance.logicLayer;
 
                 case TileLayer.Wall:
+                case TileLayer.WallStatic:
                     return _instance.wallLayer;
             }
 

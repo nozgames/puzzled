@@ -19,6 +19,8 @@ namespace Puzzled
 
         private bool _default = false;
         private bool _on = false;
+        private int _animationOn;
+        private int _animationOff;
         private string _globalId;
 
         // TODO: on/off/reset ports?
@@ -78,13 +80,7 @@ namespace Puzzled
                                 globalSwitch.isOn = _on;
                 }
 
-                if(_animator != null)
-                {
-                    if (value)
-                        _animator.SetTrigger(isLoading ? "On" : "OffToOn");
-                    else
-                        _animator.SetTrigger(isLoading ? "Off" : "OnToOff");
-                }
+                UpdateAnimation();
 
                 PlaySound(value ? _onSound : _offSound);
 
@@ -111,6 +107,15 @@ namespace Puzzled
                     _globalId = null;
                 else
                     _globalId = value;
+            }
+        }
+
+        private void Awake()
+        {
+            if (null != _animator)
+            {
+                _animationOn = Animator.StringToHash("On");
+                _animationOff = Animator.StringToHash("Off");
             }
         }
 
@@ -142,9 +147,7 @@ namespace Puzzled
 
             _default = _on;
 
-            if(_animator != null)
-                _animator.SetTrigger(isOn ? "On" : "Off");
-
+            UpdateAnimation();
             UpdateState();
         }
 
@@ -187,6 +190,15 @@ namespace Puzzled
                 return;
 
             powerOutPort.SetPowered(isOn);
+        }
+
+        private void UpdateAnimation ()
+        {
+            if (_animator != null)
+            {
+                _animator.enabled = true;
+                _animator.Play(isOn ? _animationOn : _animationOff, 0, (isEditing || isLoading || isStarting) ? 1.0f : 0.0f);
+            }
         }
     }
 }

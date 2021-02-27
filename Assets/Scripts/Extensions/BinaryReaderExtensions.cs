@@ -38,9 +38,21 @@ namespace Puzzled
         /// </summary>
         /// <param name="reader">Reader</param>
         /// <returns>Cell</returns>
-        public static Cell ReadCell (this BinaryReader reader)
+        public static Cell ReadCell (this BinaryReader reader, int version)
         {
-            return new Cell(reader.ReadInt32(), reader.ReadInt32());
+            var x = reader.ReadInt32();
+            var y = reader.ReadInt32();
+            var edge = CellEdge.None;
+            var system = CellCoordinateSystem.Grid;
+
+            if(version >= 7)
+            {
+                system = (CellCoordinateSystem)reader.ReadByte();
+                if (system == CellCoordinateSystem.Edge || system == CellCoordinateSystem.SharedEdge)
+                    edge = (CellEdge)reader.ReadByte();
+            }
+
+            return new Cell(system, x, y, edge);
         }
     }
 }

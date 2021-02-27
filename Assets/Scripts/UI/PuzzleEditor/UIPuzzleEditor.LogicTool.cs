@@ -127,14 +127,7 @@ namespace Puzzled
             if (selectedTile.cell != cell)
                 return;
 
-            var tile = GetTile(cell, (selectedTile != null && selectedTile.layer != TileLayer.Floor && selectedTile.cell == cell) ? ((TileLayer)selectedTile.layer - 1) : TileLayer.Logic);
-            if (null == tile && selectedTile != null)
-                tile = GetTile(cell, TileLayer.Logic);
-
-            if (tile != null)
-                SelectTile(tile);
-            else
-                SelectTile(null);
+            SelectTile(GetNextTile(selectedTile));
         }
 
         private void OnLogicLButtonDragBegin(Vector2 position)
@@ -186,7 +179,7 @@ namespace Puzzled
                 return;
 
             // Get all in the given cell that we can connect to
-            var tiles = puzzle.grid.GetLinkedTiles(cell).Where(t => tile.CanConnectTo(t, false)).ToArray();
+            var tiles = puzzle.grid.GetTiles(cell).Where(t => tile.CanConnectTo(t, false)).ToArray();
             if (tiles.Length == 0)
                 return;
 

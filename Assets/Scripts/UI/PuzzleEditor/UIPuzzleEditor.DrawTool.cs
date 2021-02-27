@@ -53,6 +53,15 @@ namespace Puzzled
                 if (null != _puzzle.grid.CellToTile(cell, TileLayer.Dynamic))
                     return CursorType.Not;
 
+            // Special case to prevent wall mounted objects from being placed where there are no walls
+            // or on walls that do not allow wall mounted objects.
+            if (tile.layer == TileLayer.WallStatic)
+            {
+                var wall = _puzzle.grid.CellToComponent<Wall>(cell.ConvertTo(CellCoordinateSystem.SharedEdge), TileLayer.Wall);
+                if (null == wall || !wall.allowsWallMounts)
+                    return CursorType.Not;
+            }
+
             return CursorType.Crosshair;
         }
             
@@ -99,7 +108,7 @@ namespace Puzzled
             // Destroy all other instances of this tile regardless of variant
             if (!prefab.info.allowMultiple)
             {
-                existing = puzzle.grid.GetLinkedTile(prefab.guid);
+                existing = puzzle.grid.CellToTile(prefab.guid);
                 if (null != existing)
                     Erase(existing, command);
             }

@@ -8,10 +8,9 @@ namespace Puzzled
         private bool _open = false;
         private int _animationOpen;
         private int _animationClosed;
-        private int _animationOpenToClosed;
-        private int _animationClosedToOpen;
 
-        [Editable]
+        [SerializeField] private GameObject _gizmos = null;
+
         [SerializeField] private Tile keyItem = null;
         [SerializeField] private AudioClip _unlockSound = null;
         [SerializeField] private BlockRaycast _blockRaycast = null;
@@ -61,8 +60,6 @@ namespace Puzzled
             {
                 _animationOpen = Animator.StringToHash("Open");
                 _animationClosed = Animator.StringToHash("Closed");
-                _animationOpenToClosed = Animator.StringToHash("OpenToClosed");
-                _animationClosedToOpen = Animator.StringToHash("ClosedToOpen");
             }
         }
 
@@ -113,6 +110,13 @@ namespace Puzzled
                 isOpen = true;
             else if (!powerInPort.hasPower && isOpen)
                 isOpen = false;
+        }
+
+        [ActorEventHandler]
+        private void ShowGizmos(ShowGizmosEvent evt)
+        {
+            if (null != _gizmos)
+                _gizmos.gameObject.SetActive(evt.show);
         }
     }
 }
