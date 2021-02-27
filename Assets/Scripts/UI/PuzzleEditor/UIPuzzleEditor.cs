@@ -659,25 +659,25 @@ namespace Puzzled
         /// </summary>
         /// <param name="tile">Current tile</param>
         /// <returns>Next tile in reverse layer order</returns>
-        private Tile GetNextTile(Tile tile) => GetNextTile(tile, tile.cell.system);
+        //private Tile GetNextTile(Tile tile) => GetNextTile(tile.cell, tile.layer, tile.cell.system);
 
-        private Tile GetNextTile (Tile tile, CellCoordinateSystem system)
+        private Tile GetNextTile (Cell cell, TileLayer layer, CellCoordinateSystem system)
         {
-            if (null == tile)
+            if (cell == Cell.invalid)
                 return null;
+            
+            cell = cell.ConvertTo(system);
 
-            var cell = tile.cell.ConvertTo(system);
-
-            var nextTile = GetTile(cell, tile.layer != TileLayer.Floor ? (tile.layer - 1) : TileLayer.Logic);
+            var nextTile = GetTile(cell, layer != TileLayer.Floor ? (layer - 1) : TileLayer.Logic);
             if (null == nextTile)
             {
                 switch (cell.system)
                 {
                     case CellCoordinateSystem.Edge:
-                        return GetNextTile(tile, CellCoordinateSystem.SharedEdge);
+                        return GetNextTile(cell, TileLayer.Logic, CellCoordinateSystem.SharedEdge);
 
                     case CellCoordinateSystem.SharedEdge:
-                        return GetNextTile(tile, CellCoordinateSystem.Grid);
+                        return GetNextTile(cell, TileLayer.Logic, CellCoordinateSystem.Grid);
 
                     default:
                         nextTile = GetTile(cell, TileLayer.Logic);

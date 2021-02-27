@@ -19,13 +19,10 @@ namespace Puzzled
             UpdateVisuals();
         }
 
-        private void UpdateVisuals()
+        public void UpdateVisuals()
         {
-            var wall = tile.grid.CellToComponent<Wall>(tile.cell.ConvertTo(CellCoordinateSystem.SharedEdge), TileLayer.Wall);
-            if (wall != null)
-                _visuals.position = wall.tile.grid.CellToWorldBounds(wall.tile.cell).center + _visuals.forward * wall.thickness;
-            else
-                _visuals.position = transform.position + Vector3.up * 0.5f;
+            if (tile.cell == Cell.invalid)
+                return;
 
             switch (tile.cell.edge)
             {
@@ -47,6 +44,11 @@ namespace Puzzled
                     break;
             }
 
+            var wall = tile.grid.CellToComponent<Wall>(tile.cell.ConvertTo(CellCoordinateSystem.SharedEdge), TileLayer.Wall);
+            if (wall != null)
+                _visuals.position = wall.tile.grid.CellToWorldBounds(wall.tile.cell).center + _visuals.forward * wall.thickness;
+            else
+                _visuals.position = transform.position + Vector3.up * 0.5f;
         }
     }
 }

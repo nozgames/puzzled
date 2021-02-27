@@ -107,7 +107,7 @@ namespace Puzzled
             }
 
             // Handle no selection or selecting a new tile
-            if (selectedTile == null || selectedTile.cell != cell)
+            if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
             {
                 SelectTile(GetTile(cell, TileLayer.Logic));
                 logicCycleSelection = false;
@@ -123,11 +123,7 @@ namespace Puzzled
             if (null != dragWire || selectedTile==null || !logicCycleSelection)
                 return;
 
-            var cell = _cursorCell;
-            if (selectedTile.cell != cell)
-                return;
-
-            SelectTile(GetNextTile(selectedTile));
+            SelectNextTileUnderCursor();
         }
 
         private void OnLogicLButtonDragBegin(Vector2 position)

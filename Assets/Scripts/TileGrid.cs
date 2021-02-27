@@ -366,13 +366,7 @@ namespace Puzzled
         /// <returns>Cell bounds</returns>
         public Bounds CellToWorldBounds(Cell cell) => new Bounds(CellToWorld(cell),_edgeWorldSize[(int)cell.system][(int)cell.edge]);
 
-        public bool CellContainsWorldPoint (Cell cell, Vector3 world)
-        {
-            var bounds = CellToWorldBounds(cell);
-
-            return world.x >= bounds.min.x && world.x <= bounds.max.x &&
-                   world.z >= bounds.min.z && world.z <= bounds.max.z;
-        }
+        public bool CellContainsWorldPoint(Cell cell, Vector3 world) => CellToWorldBounds(cell).ContainsXZ(world);
 
         /// <summary>
         /// Send an event to a given cell

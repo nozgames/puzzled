@@ -31,6 +31,14 @@ namespace Puzzled
         /// </summary>
         public static CellBounds selectedBounds => new CellBounds(instance._selection.min, instance._selection.max);
 
+        public static Bounds selectedWorldBounds {
+            get {
+                var bounds = instance._puzzle.grid.CellToWorldBounds(instance._selection.min);
+                bounds.Encapsulate(instance._puzzle.grid.CellToWorldBounds(instance._selection.max));
+                return bounds;
+            }
+        }
+            
         public bool hasSelection => _selectionGizmo.gameObject.activeSelf;
 
         /// <summary>
@@ -39,6 +47,8 @@ namespace Puzzled
         /// <param name="cell">Cell to test</param>
         /// <returns>True if the cell is part of the current selection+</returns>
         private bool IsSelected (Cell cell) => hasSelection && (_selection.min == _selection.max ? _selection.min == cell : selectedBounds.Contains(cell));
+
+        private bool IsSelected(Vector3 position) => hasSelection && selectedWorldBounds.ContainsXZ(position);
 
         /// <summary>
         /// Return and array of all selected tiles
@@ -196,6 +206,22 @@ namespace Puzzled
                 return;
 
             SelectTiles(GetSelectedTiles());
+        }
+
+        private void SelectNextTileUnderCursor()
+        {
+            if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
+            {
+                SelectTile(_cursorCell);
+                return;
+            }
+
+            var cell = _puzzle.grid.WorldToCell(_cursorWorld + new Vector3(0.5f, 0, 0.5f), CellCoordinateSystem.Grid);
+            var overlappingTiles = _puzzle.grid.GetTiles(cell, cell).Where(t => _puzzle.grid.CellContainsWorldPoint(t.cell, _cursorWorld)).OrderByDescending(t => t.layer).ToList();
+            if (overlappingTiles.Count == 0)
+                SelectTile(null);
+            else
+                SelectTile(overlappingTiles[(overlappingTiles.IndexOf(selectedTile) + 1) % overlappingTiles.Count]);
         }
 
         /// <summary>

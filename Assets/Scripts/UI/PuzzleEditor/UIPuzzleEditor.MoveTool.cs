@@ -87,7 +87,7 @@ namespace Puzzled
                 _moveDragState = MoveState.Moving;
             } 
             // If dragging from a selected cell then start moving
-            else if(IsSelected(_cursorCell))
+            else if(IsSelected(_cursorWorld))
             {
                 _moveAnchor = _cursorCell;
                 _moveTiles = GetSelectedTiles();
@@ -193,11 +193,7 @@ namespace Puzzled
                 // If a cell was clicked but never dragged then cycle select the tile on that cell
                 case MoveState.None:
                 {
-                    if (selectedTile != null && selectedTile.cell == _cursorCell)
-                        SelectTile(GetNextTile(selectedTile));
-                    else
-                        SelectTile(_cursorCell);
-
+                    SelectNextTileUnderCursor();
                     break;
                 }
                 
@@ -239,7 +235,7 @@ namespace Puzzled
 
         private CursorType OnMoveGetCursor(Cell cell)
         {
-            if (_moveDragState != MoveState.Selecting && IsSelected(cell))
+            if (_moveDragState != MoveState.Selecting && IsSelected(_cursorWorld))
                 return CursorType.ArrowWithMove;
 
             return CursorType.Arrow;

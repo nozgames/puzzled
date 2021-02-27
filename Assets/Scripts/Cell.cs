@@ -79,6 +79,8 @@ namespace Puzzled
 
         public Cell(Cell cell, CellEdge edge) : this(cell.system, cell.x, cell.y, edge) { }
 
+        public Cell(CellCoordinateSystem system, Cell cell, CellEdge edge) : this(system, cell.x, cell.y, edge) { }
+
         public Cell (CellCoordinateSystem system, int x, int y, CellEdge edge)
         {
             _system = system;

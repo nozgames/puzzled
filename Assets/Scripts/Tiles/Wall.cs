@@ -27,6 +27,7 @@ namespace Puzzled
         private void OnStart(StartEvent evt)
         {
             UpdateVisuals(tile.cell, isEditing);
+            UpdateMounts();
         }
 
         [ActorEventHandler]
@@ -37,6 +38,7 @@ namespace Puzzled
 
             UpdateVisuals(evt.old, true);
             UpdateVisuals(tile.cell, true);
+            UpdateMounts();
         }
 
         [ActorEventHandler]
@@ -145,23 +147,44 @@ namespace Puzzled
                 _capRight.gameObject.SetActive(capRight);
         }
 
+        private WallMounted GetMounted (CellEdgeSide side)
+        {
+            return side == CellEdgeSide.Min ?
+                (tile.grid.CellToComponent<WallMounted>(tile.cell.ConvertTo(CellCoordinateSystem.Edge), TileLayer.WallStatic)) :
+                (tile.grid.CellToComponent<WallMounted>(
+                    tile.cell.edge == CellEdge.East ?
+                        new Cell(CellCoordinateSystem.Edge, tile.cell + new Vector2Int(1, 0), CellEdge.West) :
+                        new Cell(CellCoordinateSystem.Edge, tile.cell + new Vector2Int(0, 1), CellEdge.South),
+                    TileLayer.WallStatic));
+        }
+
         public Tile[] GetMountedTiles ()
         {
-            var tile0 = tile.grid.CellToTile(tile.cell.ConvertTo(CellCoordinateSystem.Edge), TileLayer.WallStatic);
-            var tile1 = tile.grid.CellToTile(
-                tile.cell.edge == CellEdge.East ?
-                    new Cell(tile.cell + new Vector2Int(1, 0), CellEdge.West) :
-                    new Cell(tile.cell + new Vector2Int(0, 1), CellEdge.South), 
-                TileLayer.WallStatic);
+            var mounted0 = GetMounted(CellEdgeSide.Min);
+            var mounted1 = GetMounted(CellEdgeSide.Max);
 
-            if (tile0 != null && tile1 != null)
-                return new Tile[] { tile0, tile1 };
-            else if (tile0 != null)
-                return new Tile[] { tile0 };
-            else if (tile1 != null)
-                return new Tile[] { tile1 };
+            if (mounted0 != null && mounted1 != null)
+                return new Tile[] { mounted0.tile, mounted1.tile };
+            else if (mounted0 != null)
+                return new Tile[] { mounted0.tile };
+            else if (mounted1 != null)
+                return new Tile[] { mounted1.tile };
 
             return new Tile[] { };
+        }
+
+        private void UpdateMounts()
+        {
+            if (tile.cell == Cell.invalid)
+                return;
+
+            var mountedMin = GetMounted(CellEdgeSide.Min);
+            if (mountedMin != null)
+                mountedMin.UpdateVisuals();
+
+            var mountedMax = GetMounted(CellEdgeSide.Max);
+            if (mountedMax != null)
+                mountedMax.UpdateVisuals();
         }
     }
 }
