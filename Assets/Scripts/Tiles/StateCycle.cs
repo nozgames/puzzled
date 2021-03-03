@@ -8,6 +8,9 @@ namespace Puzzled
     {
         private int _stateIndex;
 
+        [Editable]
+        public bool alwaysSignal { get; set; } = false;
+
         /// <summary>
         /// Output port used to forward power to active states
         /// </summary>
@@ -48,7 +51,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnCycleUpdate(CycleUpdateEvent evt)
         {
-            valueOutPort.SendValue(_stateIndex + 1, true);
+            valueOutPort.SendValue(_stateIndex, true);
 
             if (!evt.isActive)
             {
@@ -57,7 +60,15 @@ namespace Puzzled
             }
 
             for (int i = 0; i < powerOutPort.wireCount; ++i)
-                powerOutPort.SetPowered(i, (powerOutPort.GetWireOption(i, 0) & (1 << _stateIndex)) != 0);
+            {
+                bool isPowered = (powerOutPort.GetWireOption(i, 0) & (1 << _stateIndex)) != 0;
+
+                // for signal ports, toggle power if configured to always signal
+                if ((powerOutPort.GetWire(i).to.port.type == PortType.Signal) && isPowered && alwaysSignal)
+                    powerOutPort.SetPowered(i, false);
+
+                powerOutPort.SetPowered(i, isPowered);
+            }
         }
 
         [ActorEventHandler]

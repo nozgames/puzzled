@@ -76,8 +76,12 @@ namespace Puzzled.Editor
                         if(null == portOut)
                             continue;
 
+                        var portIn = property.GetValue<Port>(tileTo);
+                        if (!portOut.CanConnectTo(portIn))
+                            continue;
+
                         _ports[portCount].from = portOut;
-                        _ports[portCount].to = property.GetValue<Port>(tileTo);
+                        _ports[portCount].to = portIn;
                         _ports[portCount].gameObject.SetActive(true);
                         portCount++;
                     }

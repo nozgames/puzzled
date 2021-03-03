@@ -17,10 +17,18 @@ namespace Puzzled
         Output
     }
 
+    [Flags]
+    public enum PortFlags
+    {
+        None = 0,
+        AllowSelfWire = 1
+    }
+
     public class PortAttribute : Attribute
     {
         public PortType type { get; private set; }
         public PortFlow flow { get; private set; }
+        public PortFlags flags { get; private set; }
         public Type signalEvent { get; set; }
         
         /// <summary>
@@ -28,10 +36,11 @@ namespace Puzzled
         /// </summary>
         public bool legacy { get; set; }
 
-        public PortAttribute(PortFlow flow, PortType type) 
+        public PortAttribute(PortFlow flow, PortType type, PortFlags flags = PortFlags.None) 
         {
             this.type = type;
             this.flow = flow;
+            this.flags = flags;
         }
     }
 
@@ -61,6 +70,11 @@ namespace Puzzled
         /// Port flow type
         /// </summary>
         public PortFlow flow => _property.port.flow;
+
+        /// <summary>
+        /// Port flags
+        /// </summary>
+        public PortFlags flags => _property.port.flags;
 
         /// <summary>
         /// Returns the port signal event type
@@ -169,7 +183,9 @@ namespace Puzzled
         /// </summary>
         /// <param name="port">Port to check</param>
         /// <returns>True if a connection can be made to the given port</returns>
-        public bool CanConnectTo(Port port) => type == port.type || type == PortType.Power && port.type == PortType.Signal;
+        public bool CanConnectTo(Port port) => 
+            (type == port.type || (type == PortType.Power && port.type == PortType.Signal)) &&
+            (port.flags.HasFlag(PortFlags.AllowSelfWire) || tile != port.tile);
 
         /// <summary>
         /// Get the wire at the given index

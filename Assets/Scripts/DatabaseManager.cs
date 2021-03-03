@@ -183,7 +183,8 @@ namespace Puzzled
             var puzzle = GameManager.puzzle;
 
             GameManager.puzzle = _tilePreviewPuzzle;
-            var tile = _tilePreviewPuzzle.InstantiateTile(prefab, Cell.zero, false);
+
+            var tile = _tilePreviewPuzzle.InstantiateTile(prefab, _tilePreviewPuzzle.grid.LayerToCell(prefab.layer));
             tile.Send(new StartEvent());
             tile.Send(new PreviewStartEvent());
 

@@ -51,7 +51,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnValueEvent(ValueEvent evt)
         {
-            value = evt.value - 1;
+            value = evt.value;
             UpdateBeam();
         }
 

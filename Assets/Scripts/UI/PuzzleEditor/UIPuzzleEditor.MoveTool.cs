@@ -25,7 +25,7 @@ namespace Puzzled
         /// <summary>
         /// Current offset from the anchor
         /// </summary>
-        private Cell _moveOffset;
+        private Vector2Int _moveOffset;
 
         /// <summary>
         /// Mask of layers participating in the move
@@ -87,7 +87,7 @@ namespace Puzzled
                 _moveDragState = MoveState.Moving;
             } 
             // If dragging from a selected cell then start moving
-            else if(IsSelected(_cursorCell))
+            else if(IsSelected(_cursorWorld))
             {
                 _moveAnchor = _cursorCell;
                 _moveTiles = GetSelectedTiles();
@@ -97,7 +97,7 @@ namespace Puzzled
             // Start dragging a new selection
             else
             {
-                _moveAnchor.edge = Cell.Edge.None;
+                _moveAnchor = _moveAnchor.ConvertTo(CellCoordinateSystem.Grid);
                 _moveDragState = MoveState.Selecting;
             }
 
@@ -115,7 +115,7 @@ namespace Puzzled
         /// <param name="offset">Offset to move tiles by</param>
         /// <param name="layerMask">Layers to include </param>
         /// <returns>Command used to move the tiles</returns>
-        private Editor.Commands.Command CreateMoveCommand (Tile[] tiles, Cell offset, uint layerMask)
+        private Editor.Commands.Command CreateMoveCommand (Tile[] tiles, Vector2Int offset, uint layerMask)
         {
             var command = new Editor.Commands.GroupCommand();
 
@@ -153,11 +153,11 @@ namespace Puzzled
                 case MoveState.Moving:
                 {
                     // Calculate the move offset and early out if there is no difference
-                    var offset = Cell.zero;
+                    var offset = Vector2Int.zero;
                     if (selectedTile != null)
-                        offset = _cursorCell.NormalizeEdge() - _moveAnchor.NormalizeEdge();
+                        offset = _cursorCell - _moveAnchor;
                     else
-                        offset = (new Cell(_cursorCell, Cell.Edge.None) - _moveAnchor);
+                        offset = (new Cell(_cursorCell, CellEdge.None) - _moveAnchor);
 
                     if (offset == _moveOffset)
                         return;
@@ -193,11 +193,7 @@ namespace Puzzled
                 // If a cell was clicked but never dragged then cycle select the tile on that cell
                 case MoveState.None:
                 {
-                    if (selectedTile != null && selectedTile.cell == _cursorCell)
-                        SelectTile(GetNextTile(selectedTile));
-                    else
-                        SelectTile(_cursorCell);
-
+                    SelectNextTileUnderCursor();
                     break;
                 }
                 
@@ -239,7 +235,7 @@ namespace Puzzled
 
         private CursorType OnMoveGetCursor(Cell cell)
         {
-            if (_moveDragState != MoveState.Selecting && IsSelected(cell))
+            if (_moveDragState != MoveState.Selecting && IsSelected(_cursorWorld))
                 return CursorType.ArrowWithMove;
 
             return CursorType.Arrow;

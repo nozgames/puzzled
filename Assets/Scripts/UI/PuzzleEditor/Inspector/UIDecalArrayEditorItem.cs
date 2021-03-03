@@ -34,7 +34,7 @@ namespace Puzzled.Editor
             base.OnEnable();
 
             if (_index != null)
-                _index.text = (transform.GetSiblingIndex() + 1).ToString();
+                _index.text = transform.GetSiblingIndex().ToString();
         }
     }
 }

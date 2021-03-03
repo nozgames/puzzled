@@ -9,7 +9,7 @@ namespace Puzzled
         {
             public Cell min;
             public Cell max;
-            public Cell size;
+            public Vector2Int size;
             public Tile tile;
             public Wire wire;
         }
@@ -31,6 +31,14 @@ namespace Puzzled
         /// </summary>
         public static CellBounds selectedBounds => new CellBounds(instance._selection.min, instance._selection.max);
 
+        public static Bounds selectedWorldBounds {
+            get {
+                var bounds = instance._puzzle.grid.CellToWorldBounds(instance._selection.min);
+                bounds.Encapsulate(instance._puzzle.grid.CellToWorldBounds(instance._selection.max));
+                return bounds;
+            }
+        }
+            
         public bool hasSelection => _selectionGizmo.gameObject.activeSelf;
 
         /// <summary>
@@ -40,12 +48,14 @@ namespace Puzzled
         /// <returns>True if the cell is part of the current selection+</returns>
         private bool IsSelected (Cell cell) => hasSelection && (_selection.min == _selection.max ? _selection.min == cell : selectedBounds.Contains(cell));
 
+        private bool IsSelected(Vector3 position) => hasSelection && selectedWorldBounds.ContainsXZ(position);
+
         /// <summary>
         /// Return and array of all selected tiles
         /// </summary>
         private Tile[] GetSelectedTiles() =>
             hasSelection ?
-                puzzle.grid.GetLinkedTiles(selectedBounds).Where(t => IsLayerVisible(t.layer)).ToArray() :
+                puzzle.grid.GetTiles(selectedBounds).Where(t => IsLayerVisible(t.layer)).ToArray() :
                 null;
 
         public void ClearSelection()
@@ -57,7 +67,7 @@ namespace Puzzled
                 SelectTile(null);
 
             _selection.min = _selection.max = Cell.invalid;
-            _selection.size = Cell.zero;
+            _selection.size = Vector2Int.zero;
             _selectionGizmo.gameObject.SetActive(false);
         }
 
@@ -75,7 +85,7 @@ namespace Puzzled
 
         private void UpdateSelectionGizmo()
         {
-            if (_selection.min.isEdge && _selection.min == _selection.max)
+            if (_selection.min == _selection.max)
             {
                 var cellWorldBounds = puzzle.grid.CellToWorldBounds(_selection.min);
                 _selectionGizmo.min = cellWorldBounds.min;
@@ -94,6 +104,8 @@ namespace Puzzled
             // Save the inspector state
             if (_selection.tile != null)
             {
+                _selection.tile.ShowGizmos(false);
+
                 // Make sure the current edit box finishes before we clear the selected tile
                 if (UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == inspectorTileName)
                     UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
@@ -142,7 +154,7 @@ namespace Puzzled
 
                 // Update the selection
                 _selection.min = _selection.max = tile.cell;
-                _selection.size = new Cell(1, 1);
+                _selection.size = Vector2Int.one;
                 _selectionGizmo.gameObject.SetActive(true);
                 UpdateSelectionGizmo();
 
@@ -155,6 +167,8 @@ namespace Puzzled
                 var gameCamera = tile.GetComponent<GameCamera>();
                 if (gameCamera != null)
                     ShowCameraEditor(gameCamera);
+
+                _selection.tile.ShowGizmos(true);
             }
 
             // Clear wire selection if the selected wire does not connect to the newly selected tile
@@ -192,6 +206,22 @@ namespace Puzzled
                 return;
 
             SelectTiles(GetSelectedTiles());
+        }
+
+        private void SelectNextTileUnderCursor()
+        {
+            if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
+            {
+                SelectTile(_cursorCell);
+                return;
+            }
+
+            var cell = _puzzle.grid.WorldToCell(_cursorWorld + new Vector3(0.5f, 0, 0.5f), CellCoordinateSystem.Grid);
+            var overlappingTiles = _puzzle.grid.GetTiles(cell, cell).Where(t => _puzzle.grid.CellContainsWorldPoint(t.cell, _cursorWorld)).OrderByDescending(t => t.layer).ToList();
+            if (overlappingTiles.Count == 0)
+                SelectTile(null);
+            else
+                SelectTile(overlappingTiles[(overlappingTiles.IndexOf(selectedTile) + 1) % overlappingTiles.Count]);
         }
 
         /// <summary>

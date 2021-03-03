@@ -36,7 +36,7 @@ namespace Puzzled
         {
             _input.gameObject.SetActive(false);
             _text.gameObject.SetActive(true);
-            _index.text = (transform.GetSiblingIndex() + 1).ToString();
+            _index.text = transform.GetSiblingIndex().ToString();
         }
 
         public void OnPointerClick(PointerEventData eventData)

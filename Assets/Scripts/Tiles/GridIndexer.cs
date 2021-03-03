@@ -5,8 +5,8 @@ namespace Puzzled
 {
     class GridIndexer : TileComponent
     {
-        private int _row = 1;
-        private int _column = 1;
+        private int _row = 0;
+        private int _column = 0;
 
         [Editable]
         public int rowCount { get; private set; } = 3;
@@ -15,10 +15,10 @@ namespace Puzzled
         public int columnCount { get; private set; } = 3;
 
         [Editable]
-        public int initialRow { get; private set; } = 1;
+        public int initialRow { get; private set; } = 0;
 
         [Editable]
-        public int initialColumn { get; private set; } = 1;
+        public int initialColumn { get; private set; } = 0;
 
         [Editable]
         [Port(PortFlow.Output, PortType.Number, legacy = true)]
@@ -103,12 +103,12 @@ namespace Puzzled
 
         private void HandleReset()
         {
-            _row = Mathf.Clamp(initialRow - 1, 0, rowCount - 1);
-            _column = Mathf.Clamp(initialColumn - 1, 0, columnCount - 1);
+            _row = Mathf.Clamp(initialRow, 0, rowCount - 1);
+            _column = Mathf.Clamp(initialColumn, 0, columnCount - 1);
 
             SendValue();
         }
 
-        private void SendValue() => valueOutPort.SendValue(GetIndex(_row, _column) + 1, true);
+        private void SendValue() => valueOutPort.SendValue(GetIndex(_row, _column), true);
     }
 }

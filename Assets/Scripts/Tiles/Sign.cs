@@ -56,6 +56,9 @@ namespace Puzzled
 
         private void HandleUse()
         {
+            if (isEditing)
+                return;
+
             if (pages == null || pages.Length == 0)
                 return;
 

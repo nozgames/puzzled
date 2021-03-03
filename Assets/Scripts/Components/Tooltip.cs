@@ -14,6 +14,9 @@ namespace Puzzled
     class Tooltip : TileComponent
     {
         [SerializeField] private string _text = null;
+        [SerializeField] private float _height = 0.0f;
+
+        public float height => _height;
 
         [ActorEventHandler]
         private void OnQueryTooltipEvent (QueryTooltipEvent evt)
@@ -22,6 +25,7 @@ namespace Puzzled
             {
                 evt.IsHandled = true;
                 evt.tooltip = _text;
+                evt.height = _height;
             }
         }
     }

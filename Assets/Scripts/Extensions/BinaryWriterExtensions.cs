@@ -30,6 +30,10 @@ namespace Puzzled
         {
             writer.Write(cell.x);
             writer.Write(cell.y);
+            writer.Write((byte)cell.system);
+
+            if (cell.system == CellCoordinateSystem.Edge || cell.system == CellCoordinateSystem.SharedEdge)
+                writer.Write((byte)cell.edge);
         }
     }
 }

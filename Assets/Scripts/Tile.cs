@@ -25,7 +25,11 @@ namespace Puzzled
         /// </summary>
         private Port[][] _ports;
 
-        public TileInfo info => _info;
+
+        public TileInfo info {
+            get => _info;
+            set => _info = value;
+        }
 
         /// <summary>
         /// True if the tile is being edited
@@ -58,7 +62,7 @@ namespace Puzzled
         public TileProperty[] properties => _properties == null ? _properties = DatabaseManager.GetProperties(this) : _properties;
 
         /// <summary>
-        /// Current cell
+        /// Cell the tile belongs to
         /// </summary>
         private Cell _cell = Cell.invalid;
 
@@ -111,13 +115,11 @@ namespace Puzzled
             }
         }
 
-        /// <summary>
-        /// Current cell
-        /// </summary>
         public Cell cell {
             get => _cell;
             set {
-                if (_cell == value)
+                // If already linked to this cell early out
+                if(IsLinkedTo(value))
                     return;
 
                 Debug.Assert(puzzle != null);
@@ -129,8 +131,10 @@ namespace Puzzled
                 var old = _cell;
                 _cell = value;
 
-                if (_cell == Cell.invalid)
+                if(_cell == Cell.invalid || !grid.LinkTile(this))
                 {
+                    _cell = Cell.invalid;
+
                     // Give our own components a chance to react to the cell change
                     Send(new CellChangedEvent(this, old));
 
@@ -138,9 +142,6 @@ namespace Puzzled
                     gameObject.SetActive(false);
                     return;
                 }
-
-                // Link ourself into the grid
-                grid.LinkTile(this);
 
                 // Ensure the tile is parented to the grid
                 if (transform.parent != grid.transform)
@@ -161,6 +162,11 @@ namespace Puzzled
                 Send(new CellChangedEvent(this, old));
             }
         }
+
+        /// <summary>
+        /// Returns true if the tile is linked to the given cell
+        /// </summary>
+        public bool IsLinkedTo(Cell cell) => grid != null && grid.CellToTile(cell, layer) == this;
 
         /// <summary>
         /// Return the cell bounds for the given list of tiles
@@ -443,6 +449,43 @@ namespace Puzzled
             return false;
         }
 
+
+        /// <summary>
+        /// Returns true if the tile can move through the edge between the current position and the offset
+        /// </summary>
+        /// <param name="offset">Movement offset</param>
+        /// <returns>True if the tile can move through the edge</returns>
+        public bool CanMoveThroughEdge(CellEdge edge)
+        {
+            var queryEdge = new QueryMoveEvent(this, Cell.EdgeToDirection(edge));
+            SendToCell(queryEdge, new Cell(CellCoordinateSystem.SharedEdge, cell.x, cell.y, edge), CellEventRouting.FirstVisible);
+            if (queryEdge.hasResult && !queryEdge.result)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Returns true if the tile can move to the cell on the other side of the given edge
+        /// </summary>
+        /// <param name="edge">Edge to move through</param>
+        /// <returns>True if the tile can move</returns>
+        public bool CanMove(CellEdge edge)
+        {
+            // First check to make sure the edge isnt blocked
+            if (!CanMoveThroughEdge(edge))
+                return false;
+
+            // Can we move wherre we are going?
+            var direction = Cell.EdgeToDirection(edge);
+            var query = new QueryMoveEvent(this, direction);
+            SendToCell(query, cell + direction, CellEventRouting.FirstVisible);
+            if (!query.result)
+                return false;
+
+            return true;
+        }
+
         /// <summary>
         /// Return an array of ports for the given flow
         /// </summary>
@@ -475,5 +518,7 @@ namespace Puzzled
 
             return _ports[0];
         }
+
+        public void ShowGizmos(bool show) => Send(new ShowGizmosEvent(show));
     }
 }

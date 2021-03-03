@@ -51,8 +51,10 @@ namespace Puzzled.Editor
             return Vector3.zero;
         }
 
-        public Cell CanvasToCell(Vector2 position) => 
-            UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0, 0.5f));
+        public Cell CanvasToCell(Vector2 position) => CanvasToCell(position, CellCoordinateSystem.Grid);
+
+        public Cell CanvasToCell(Vector2 position, CellCoordinateSystem system) => 
+            UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0, 0.5f), system);
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {

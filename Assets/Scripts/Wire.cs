@@ -87,7 +87,7 @@ namespace Puzzled
         /// <summary>
         /// Return the value that is persisted on the wire
         /// </summary>
-        public int value { get; private set; }
+        public int value { get; private set; } = -1;
 
         /// <summary>
         /// Puzzle the wire belongs to
@@ -105,9 +105,9 @@ namespace Puzzled
         public bool hasPower => enabled;
 
         /// <summary>
-        /// Returns true if the wire has a persistant value
+        /// Returns true if the wire has a persistent value
         /// </summary>
-        public bool hasValue => value != 0;
+        public bool hasValue => value >= 0;
 
         /// <summary>
         /// Control the wire visual state

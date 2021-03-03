@@ -9,11 +9,6 @@ namespace Puzzled
     {
         private const float TooltipDelay = 0.15f;
 
-        private readonly Cell leftCell = new Cell(-1, 0);
-        private readonly Cell rightCell = new Cell(1, 0);
-        private readonly Cell upCell = new Cell(0, 1);
-        private readonly Cell downCell = new Cell(0, -1);
-
         private Cell moveFromCell;
         private Cell moveToCell;
         private float queuedMoveTime = float.MinValue;
@@ -44,10 +39,11 @@ namespace Puzzled
         private bool isDownHeld = false;
         private bool isUseHeld = false;
 
-        private Cell facingDirection; // this is the direction the player is facing
-        private Cell desiredMovement; // this is the currently held input
-        private Cell queuedMovement;  // this is the last desired movement (if within input threshold it will be treated as desired)
-        private Cell lastMovement;  // this is the last continuous movement made (cleared when desired is cleared)
+        private CellEdge _desiredMovement; // this is the currently held input
+        private CellEdge _lastMovement;  // this is the last continuous movement made (cleared when desired is cleared)
+        private CellEdge _queuedMovement;  // this is the last desired movement (if within input threshold it will be treated as desired)
+
+        private CellEdge _facingDirection; // this is the direction the player is facing
 
         protected override void OnEnable()
         {
@@ -127,15 +123,15 @@ namespace Puzzled
         private void OnUpdate(NoZ.ActorUpdateEvent evt)
         {
             // update queued movement state
-            if ((desiredMovement != Cell.zero) && (desiredMovement != lastMovement))
+            if (_desiredMovement != CellEdge.None && (_desiredMovement != _lastMovement))
             {
-                queuedMovement = desiredMovement;
+                _queuedMovement = _desiredMovement;
                 queuedMoveTime = Time.time;
             }
 
             // timeout movement if it has been too long
             if (Time.time > (queuedMoveTime + queuedInputThreshold))
-                queuedMovement = Cell.zero;
+                _queuedMovement = CellEdge.None;
 
             if (GameManager.isBusy)
                 return;
@@ -145,18 +141,18 @@ namespace Puzzled
             // handle use? TODO
 
             // handle move
-            Cell movement = desiredMovement;
-            if (movement == Cell.zero)
-                movement = queuedMovement;
+            CellEdge edge = _desiredMovement;
+            if (edge == CellEdge.None)
+                edge = _queuedMovement;
 
-            if (movement != Cell.zero)
+            if (edge != CellEdge.None)
             {
-                PerformMove(movement);
-                lastMovement = movement;
+                PerformMove(edge);
+                _lastMovement = edge;
 
                 // if there is no desired movement anymore, clear the queued movement too
-                if (desiredMovement == Cell.zero)
-                    queuedMovement = Cell.zero;
+                if (_desiredMovement == CellEdge.None)
+                    _queuedMovement = CellEdge.None;
             } 
             else if (_animator.GetBool("Walking"))
                 _animator.SetBool("Walking", false);
@@ -167,8 +163,7 @@ namespace Puzzled
         {
             Debug.Assert(evt.target.IsAdjacentTo(tile.cell));
 
-            Cell targetDirection = evt.target - tile.cell;
-            UpdateVisuals(targetDirection);
+            UpdateVisuals(Cell.DirectionToEdge(evt.target - tile.cell));
 
             isGrabbing = true;
 
@@ -180,44 +175,44 @@ namespace Puzzled
         {
             isLeftHeld = !KeyboardManager.isShiftPressed;
             if (!isLeftHeld && !isGrabbing)
-                UpdateVisuals(Cell.left);
+                UpdateVisuals(CellEdge.West);
             else
-                desiredMovement = leftCell;
+                _desiredMovement = CellEdge.West;
         }
 
         private void OnRightActionStarted(InputAction.CallbackContext ctx)
         {
             isRightHeld = !KeyboardManager.isShiftPressed;
             if (!isRightHeld && !isGrabbing)
-                UpdateVisuals(Cell.right);
+                UpdateVisuals(CellEdge.East);
             else
-                desiredMovement = rightCell;
+                _desiredMovement = CellEdge.East;
         }
 
         private void OnUpActionStarted(InputAction.CallbackContext ctx)
         {
             isUpHeld = !KeyboardManager.isShiftPressed;
             if (!isUpHeld && !isGrabbing)
-                UpdateVisuals(Cell.up);
+                UpdateVisuals(CellEdge.North);
             else
-                desiredMovement = upCell;
+                _desiredMovement = CellEdge.North;
         }
 
         private void OnDownActionStarted(InputAction.CallbackContext ctx)
         {
             isDownHeld = !KeyboardManager.isShiftPressed;
             if (!isDownHeld && !isGrabbing)
-                UpdateVisuals(Cell.down);
+                UpdateVisuals(CellEdge.South);
             else
-                desiredMovement = downCell;
+                _desiredMovement = CellEdge.South;
         }
 
         private void OnLeftActionEnded(InputAction.CallbackContext ctx)
         {
             isLeftHeld = false;
-            if (desiredMovement == leftCell)
+            if (_desiredMovement == CellEdge.West)
             {
-                desiredMovement = Cell.zero;
+                _desiredMovement = CellEdge.None;
                 UpdateDesiredMovement();
             }
         }
@@ -225,20 +220,19 @@ namespace Puzzled
         private void OnRightActionEnded(InputAction.CallbackContext ctx)
         {
             isRightHeld = false;
-            if (desiredMovement == rightCell)
-            { 
-                desiredMovement = Cell.zero;
+            if (_desiredMovement == CellEdge.East)
+            {
+                _desiredMovement = CellEdge.None;
                 UpdateDesiredMovement();
             }
-
         }
 
         private void OnUpActionEnded(InputAction.CallbackContext ctx)
         {
             isUpHeld = false;
-            if (desiredMovement == upCell)
-            { 
-                desiredMovement = Cell.zero;
+            if (_desiredMovement == CellEdge.North)
+            {
+                _desiredMovement = CellEdge.None;
                 UpdateDesiredMovement();
             }
         }
@@ -246,9 +240,9 @@ namespace Puzzled
         private void OnDownActionEnded(InputAction.CallbackContext ctx)
         {
             isDownHeld = false;
-            if (desiredMovement == downCell)
-            { 
-                desiredMovement = Cell.zero;
+            if (_desiredMovement == CellEdge.South)
+            {
+                _desiredMovement = CellEdge.None;
                 UpdateDesiredMovement();
             }
         }
@@ -262,101 +256,75 @@ namespace Puzzled
 
         private void OnUseAction(InputAction.CallbackContext ctx)
         {
-            if (facingDirection == Cell.zero)
+            if (_facingDirection == CellEdge.None)
                 return; // use needs a direction
 
-            PerformUse(facingDirection);
-        }
-
-        private void UpdateDesiredMovement()
-        {
-            if (isLeftHeld)
-                desiredMovement = leftCell;
-            else if (isRightHeld)
-                desiredMovement = rightCell;
-            else if (isUpHeld)
-                desiredMovement = upCell;
-            else if (isDownHeld)
-                desiredMovement = downCell;
-            else
-                lastMovement = Cell.zero;
-        }
-
-        private void PerformMove(Cell cell)
-        {
-            queuedMoveTime = float.MinValue;
-
-            if (isGrabbing)
-            {
-                // Try a push move
-                if (PushMove(cell))
-                    return;
-
-                // Try a pull move
-                PullMove(cell);
-
-                return;  // block other movement
-            }
-
-            // Change facing direction 
-            /*            if (cell.x < 0)
-                            visuals.localScale = new Vector3(-1, 1, 1);
-                        else if (cell.x > 0)
-                            visuals.localScale = Vector3.one;
-            */
-            UpdateVisuals(cell);
-
-            if (Move(cell))
-                return;
-        }
-
-        private void PerformUse(Cell cell)
-        {
             if (GameManager.isBusy)
                 return;
 
             queuedMoveTime = float.MinValue;
 
-            // Change facing direction 
-            /*            if (cell.x < 0)
-                            visuals.localScale = new Vector3(-1, 1, 1);
-                        else if (cell.x > 0)
-                            visuals.localScale = Vector3.one;
-            */
-            // Try a use move
-            if (Use(cell))
+            var cell = tile.cell;
+            
+            // Try to use the edge in front of us first
+            if (SendToCell(new UseEvent(tile), new Cell(CellCoordinateSystem.Edge, cell.x, cell.y, _facingDirection), CellEventRouting.FirstVisible))
+                return;
+
+            // Then try to use the shared edge
+            if (SendToCell(new UseEvent(tile), new Cell(CellCoordinateSystem.SharedEdge, cell.x, cell.y, _facingDirection), CellEventRouting.FirstVisible))
+                return;
+
+            // Before we try to use the adjacent tile make sure there is nothing obstructing our movement on that edge
+            // as that would also obstruct our being able to use.
+            if (!tile.CanMoveThroughEdge(_facingDirection))
+                return;
+
+            // Use the adjacent cell
+            SendToCell(new UseEvent(tile), tile.cell + Cell.EdgeToDirection(_facingDirection), CellEventRouting.FirstVisible);
+        }
+
+        private void UpdateDesiredMovement()
+        {
+            if (isLeftHeld)
+                _desiredMovement = CellEdge.West;
+            else if (isRightHeld)
+                _desiredMovement = CellEdge.East;
+            else if (isUpHeld)
+                _desiredMovement = CellEdge.North;
+            else if (isDownHeld)
+                _desiredMovement = CellEdge.South;
+            else
+                _lastMovement = CellEdge.None;
+        }
+
+        private void PerformMove(CellEdge edge)
+        {
+            queuedMoveTime = float.MinValue;
+
+            if (isGrabbing)
+            {
+                if(Cell.IsOppositeEdge(_facingDirection, edge))
+                    PullMove(edge);
+                else
+                    PushMove(edge);
+
+                return;  // block other movement
+            }
+
+            UpdateVisuals(edge);
+
+            if (Move(edge))
                 return;
         }
 
-        /// <summary>
-        /// Returns true if the player can move through the edge between the current position and the offset
-        /// </summary>
-        /// <param name="offset">Movement offset</param>
-        /// <returns>True if the player can move through the edge</returns>
-        private bool CanMoveThroughEdge (Cell offset)
+        private bool Move (CellEdge edge)
         {
-            var queryEdge = new QueryMoveEvent(tile, offset);
-            SendToCell(queryEdge, new Cell(tile.cell, Cell.OffsetToEdge(offset)), CellEventRouting.FirstVisible);
-            if (queryEdge.hasResult && !queryEdge.result)
+            if (!tile.CanMove(edge))
                 return false;
 
-            return true;
-        }
-
-        private bool Move (Cell offset)
-        {
+            var offset = Cell.EdgeToDirection(edge);
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;
-
-            // First check to make sure the edge isnt blocked
-            if (!CanMoveThroughEdge(offset))
-                return false;
-
-            // Can we move wherre we are going?
-            var query = new QueryMoveEvent(tile, offset);
-            SendToCell(query, moveToCell, CellEventRouting.FirstVisible);
-            if (!query.result)
-                return false;
 
             // Move to that cell immediately 
             tile.cell = moveToCell;
@@ -397,13 +365,12 @@ namespace Puzzled
             return true;
         }
 
-        private bool PushMove (Cell offset)
+        private bool PushMove (CellEdge edge)
         {
             Debug.Assert(isGrabbing);
+            Debug.Assert(!Cell.IsOppositeEdge(_facingDirection, edge));
 
-            if (facingDirection != offset)
-                return false; // can only push in direction of grabbed object
-
+            var offset = Cell.EdgeToDirection(edge);
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;
 
@@ -428,22 +395,18 @@ namespace Puzzled
             return true;
         }
 
-        private bool PullMove(Cell offset)
+        private bool PullMove(CellEdge edge)
         {
             Debug.Assert(isGrabbing);
- 
-            if (facingDirection != offset.Flipped())
-                return false; // can only pull in opposite direction of grabbed object
+            Debug.Assert(Cell.IsOppositeEdge(_facingDirection, edge));
 
+            if (!tile.CanMove(edge))
+                return false;
+
+            var offset = Cell.EdgeToDirection(edge);
             moveFromCell = tile.cell;
             moveToCell = tile.cell + offset;
             var pullFromCell = tile.cell - offset;
-
-            // Make sure we can actually move where we are going first
-            var queryMove = new QueryMoveEvent(tile, moveToCell);
-            SendToCell(queryMove, moveToCell, CellEventRouting.FirstVisible);
-            if (!queryMove.result)
-                return false;
 
             // Move to the new cell immediately to ensure proper timing.  This will teleport the player
             // but the call to Tween.Move below will immediately set the player back to the previous position
@@ -472,13 +435,19 @@ namespace Puzzled
             return true;
         }
 
-        private bool Use (Cell offset)
+        private bool Use (CellEdge edge)
         {
+            var direction = Cell.EdgeToDirection(edge);
+
+            // Try to use the edge in front of us first
+            if (SendToCell(new UseEvent(tile), new Cell(tile.cell, Cell.DirectionToEdge(direction)), CellEventRouting.FirstVisible))
+                return true;
+
             // Before we try to use what is in front of us make sure there isnt anything on the edge that would prevent it
-            if (!CanMoveThroughEdge(offset))
+            if (!tile.CanMoveThroughEdge(edge))
                 return false;
 
-            return SendToCell(new UseEvent(tile), tile.cell + offset, CellEventRouting.FirstVisible);
+            return SendToCell(new UseEvent(tile), tile.cell + direction, CellEventRouting.FirstVisible);
         }
 
         private void OnMoveComplete()
@@ -512,19 +481,28 @@ namespace Puzzled
                 return;
             }
 
-            var cell = tile.cell + facingDirection;
+            var cell = tile.cell;
+            var edgeCell = new Cell(CellCoordinateSystem.Edge, cell.x, cell.y, _facingDirection);
+            var direction = Cell.EdgeToDirection (_facingDirection);
 
-            // Make sure there is nothing blocking the tooltip
-            if (!CanMoveThroughEdge(facingDirection))
-                return;
-
-            var query = new QueryTooltipEvent();
-            SendToCell(query, cell, CellEventRouting.FirstHandled);
+            var query = new QueryTooltipEvent(this);
+            SendToCell(query, edgeCell, CellEventRouting.FirstHandled);
             if (query.tooltip == null)
             {
-                HideTooltip();
-                return;
-            }
+                cell += direction;
+
+                // Make sure there is nothing blocking the tooltip
+                if (!tile.CanMoveThroughEdge(_facingDirection))
+                    return;
+
+                SendToCell(query, cell, CellEventRouting.FirstHandled);
+                if (query.tooltip == null)
+                {
+                    HideTooltip();
+                    return;
+                }
+            } else
+                cell = edgeCell;
 
             if (_tooltipCell == cell && query.tooltip == _tooltip)
             {
@@ -535,8 +513,8 @@ namespace Puzzled
                     {
                         _tooltipElapsed = TooltipDelay;
                         var tooltipDirection = TooltipDirection.Top;
-                        var offset = new Vector3(0, 0, 0.25f);
-                        UIManager.ShowTooltip(puzzle.grid.CellToWorld(cell) + offset, query.tooltip, tooltipDirection);
+                        var worldOffset = new Vector3(0, 0, 0.25f);
+                        UIManager.ShowTooltip(puzzle.grid.CellToWorldBounds(cell).center + worldOffset + Vector3.up * query.height, query.tooltip, tooltipDirection);
                     }
                 }
             } 
@@ -623,24 +601,28 @@ namespace Puzzled
             }
         }
 
-        private void UpdateVisuals(Cell cell)
+        private void UpdateVisuals(CellEdge edge)
         {
-            var oldFacing = facingDirection;
-            facingDirection = cell;
+            _facingDirection = edge;
 
-            //visualsLeft.SetActive(cell.x < 0);
-            //visualsRight.SetActive(cell.x > 0);
-            //visualsDown.SetActive(cell.y < 0);
-            //visualsUp.SetActive(cell.y > 0);
+            switch (edge)
+            {
+                case CellEdge.North:
+                    visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, 0);
+                    break;
 
-            if(cell.x == -1)
-                visualsLeft.transform.localRotation = Quaternion.Euler(0, -90, 0);
-            else if (cell.x == 1)
-                visualsLeft.transform.localRotation = Quaternion.Euler(0, 90, 0);
-            else if (cell.y == 1)
-                visualsLeft.transform.localRotation = Quaternion.Euler(0, 0, 0);
-            else if (cell.y == -1)
-                visualsLeft.transform.localRotation = Quaternion.Euler(0, 180, 0);
+                case CellEdge.South:
+                    visualsLeft.transform.localRotation = Quaternion.Euler(0, 180, 0);
+                    break;
+
+                case CellEdge.East:
+                    visualsLeft.transform.localRotation = Quaternion.Euler(0, 90, 0);
+                    break;
+
+                case CellEdge.West:
+                    visualsLeft.transform.localRotation = Quaternion.Euler(0, -90, 0);
+                    break;
+            }
         }
     }
 }

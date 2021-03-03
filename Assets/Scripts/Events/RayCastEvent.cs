@@ -5,7 +5,7 @@ namespace Puzzled
 {
     public class RayCastEvent : ActorEvent
     {
-        public Cell direction { get; set; }
+        public Vector2Int direction { get; set; }
         public float offset { get; set; }
 
         private Tile _hit = null;
@@ -19,7 +19,7 @@ namespace Puzzled
             }
         }
 
-        public RayCastEvent (Cell dir)
+        public RayCastEvent (Vector2Int dir)
         {
             direction = dir;
         }

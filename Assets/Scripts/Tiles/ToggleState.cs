@@ -27,7 +27,7 @@ namespace Puzzled
 
         private void UpdatePower()
         {
-            var hasPower = powerInPort.wireCount == 0 || powerInPort.hasPower;
+            var hasPower = powerInPort.hasPower;
             visualOn.SetActive(hasPower);
             visualOff.SetActive(!hasPower);
             powerOutPort.SetPowered(hasPower);

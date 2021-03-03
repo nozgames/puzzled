@@ -1,5 +1,6 @@
 using UnityEngine;
 using NoZ;
+using System.Collections.Generic;
 
 namespace Puzzled
 {
@@ -12,10 +13,21 @@ namespace Puzzled
         [SerializeField] private int _capPriority = 0;
         [SerializeField] private bool _smartCorners = true;
 
+        [SerializeField] private bool _allowWallMounts = true;
+        [SerializeField] private float _thickness = 0.1f;
+
+        public float thickness => _thickness;
+
+        /// <summary>
+        /// True if the wall allows tils to be attached to it
+        /// </summary>
+        public bool allowsWallMounts => _allowWallMounts;
+
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
         {
             UpdateVisuals(tile.cell, isEditing);
+            UpdateMounts();
         }
 
         [ActorEventHandler]
@@ -26,55 +38,28 @@ namespace Puzzled
 
             UpdateVisuals(evt.old, true);
             UpdateVisuals(tile.cell, true);
+            UpdateMounts();
         }
 
         [ActorEventHandler]
         private void OnQueryMoveEvent (QueryMoveEvent evt)
         {
             var edge = tile.cell.edge;
-            if (evt.offset.x > 0 && edge == Cell.Edge.East)
+            if (evt.offset.x > 0 && edge == CellEdge.East)
                 evt.result = false;
-            else if (evt.offset.x < 0 && edge == Cell.Edge.East)
+            else if (evt.offset.x < 0 && edge == CellEdge.East)
                 evt.result = false;
-            else if (evt.offset.y < 0 && edge == Cell.Edge.North)
+            else if (evt.offset.y < 0 && edge == CellEdge.North)
                 evt.result = false;
-            else if (evt.offset.y > 0 && edge == Cell.Edge.North)
+            else if (evt.offset.y > 0 && edge == CellEdge.North)
                 evt.result = false;
         }
 
-        private Wall GetParallel (Cell cell, int cap)
-        {
-            switch (cell.edge)
-            {
-                case Cell.Edge.North:
-                    return puzzle.grid.CellToComponent<Wall>(new Cell(cell + (cap == 0 ? Cell.west : Cell.east), Cell.Edge.North), TileLayer.Wall);
+        private Wall GetParallel(Cell cell, CellEdgeSide cap) => 
+            puzzle.grid.CellToComponent<Wall>(Cell.GetParallelEdge(cell, cap), tile.layer);
 
-                case Cell.Edge.East:
-                    return puzzle.grid.CellToComponent<Wall>(new Cell(cell + (cap == 0 ? Cell.north : Cell.south), Cell.Edge.East), TileLayer.Wall);
-
-                default:
-                    return null;
-            }
-        }
-
-        private Wall GetPerpendicular (Cell cell, int cap, int dir)
-        {
-            switch (cell.edge)
-            {
-                case Cell.Edge.North:
-                    return dir == 0 ?
-                        puzzle.grid.CellToComponent<Wall>(new Cell(cell + (cap == 0 ? Cell.west : Cell.zero) + Cell.north, Cell.Edge.East), TileLayer.Wall) :
-                        puzzle.grid.CellToComponent<Wall>(new Cell(cell + (cap == 0 ? Cell.west : Cell.zero), Cell.Edge.East), TileLayer.Wall);
-
-                case Cell.Edge.East:
-                    return dir == 0 ?
-                        puzzle.grid.CellToComponent<Wall>(new Cell(cell + (cap == 0 ? Cell.south : Cell.zero), Cell.Edge.North), TileLayer.Wall) :
-                        puzzle.grid.CellToComponent<Wall>(new Cell(cell + (cap == 0 ? Cell.south : Cell.zero) + Cell.east, Cell.Edge.North), TileLayer.Wall);
-
-                default:
-                    return null;
-            }
-        }
+        private Wall GetPerpendicular (Cell cell, CellEdgeSide capSide, CellEdgeSide perpendicularSide) =>
+            puzzle.grid.CellToComponent<Wall>(Cell.PerpendicularEdge(cell, capSide, perpendicularSide), tile.layer);
 
         private bool IsHigherPriority (Wall compare)
         {
@@ -88,8 +73,8 @@ namespace Puzzled
                 return false;
 
             // Priority is the same so use the edge to choose one
-            var cell = tile.cell.NormalizeEdge();
-            var compareCell = compare.tile.cell.NormalizeEdge();
+            var cell = tile.cell;
+            var compareCell = compare.tile.cell;
 
             if (cell.edge > compareCell.edge)
                 return true;
@@ -101,11 +86,11 @@ namespace Puzzled
             return cell.x > compareCell.x || cell.y > compareCell.y;
         }
 
-        private bool UpdateCap (Cell cell, int cap, bool updateNeighbors)
+        private bool UpdateCap (Cell cell, CellEdgeSide cap, bool updateNeighbors)
         {
             var wallParallel = GetParallel(cell, cap);
-            var wallPerpendicular0 = GetPerpendicular(cell, cap, 0);
-            var wallPerpendicular1 = GetPerpendicular(cell, cap, 1);
+            var wallPerpendicular0 = GetPerpendicular(cell, cap, CellEdgeSide.Min);
+            var wallPerpendicular1 = GetPerpendicular(cell, cap, CellEdgeSide.Max);
 
             if(updateNeighbors)
             {
@@ -116,9 +101,6 @@ namespace Puzzled
                 if (wallPerpendicular1 != null)
                     wallPerpendicular1.UpdateVisuals(wallPerpendicular1.tile.cell, false);
             }
-
-            if (cell != tile.cell.NormalizeEdge())
-                return false;
 
             if (!IsHigherPriority(wallParallel))
                 return false;
@@ -149,28 +131,15 @@ namespace Puzzled
             if (cell == Cell.invalid)
                 return;
 
-            cell = cell.NormalizeEdge();
-            switch (cell.edge)
-            {
-                case Cell.Edge.North:
-                    _visuals.transform.localPosition = new Vector3(0, 0, 0.5f);
-                    break;
+            // Rotate wall when on the east edge
+            if(cell.edge == CellEdge.East)
+                _visuals.transform.localEulerAngles = new Vector3(0, 90, 0);
 
-                case Cell.Edge.East:
-                    _visuals.transform.localEulerAngles = new Vector3(0, 90, 0);
-                    _visuals.transform.localPosition = new Vector3(0.5f, 0, 0);
-                    break;
+            // Update the caps
+            var capLeft = UpdateCap(cell, CellEdgeSide.Min, updateNeighbors);
+            var capRight = UpdateCap(cell, CellEdgeSide.Max, updateNeighbors);
 
-                case Cell.Edge.None:
-                    return;
-
-                default:
-                    throw new System.NotSupportedException();
-            }
-
-            var capLeft = UpdateCap(cell, 0, updateNeighbors);
-            var capRight = UpdateCap(cell, 1, updateNeighbors);
-
+            // Show/Hide the caps if there are any
             if (_capLeft != null)
                 _capLeft.gameObject.SetActive(capLeft);
 
@@ -178,44 +147,44 @@ namespace Puzzled
                 _capRight.gameObject.SetActive(capRight);
         }
 
-#if false
-        [SerializeField] private GameObject _visualWest = null;
-        [SerializeField] private GameObject _visualNorth = null;
-
-        private Wall GetWall(Cell cell) => puzzle.grid.CellToComponent<Wall>(cell, TileLayer.Static);
-
-        [ActorEventHandler]
-        private void OnStart(StartEvent evt)
+        private WallMounted GetMounted (CellEdgeSide side)
         {
-            UpdateVisuals();
-
-            UpdateNeighbors(tile.cell);
+            return side == CellEdgeSide.Min ?
+                (tile.grid.CellToComponent<WallMounted>(tile.cell.ConvertTo(CellCoordinateSystem.Edge), TileLayer.WallStatic)) :
+                (tile.grid.CellToComponent<WallMounted>(
+                    tile.cell.edge == CellEdge.East ?
+                        new Cell(CellCoordinateSystem.Edge, tile.cell + new Vector2Int(1, 0), CellEdge.West) :
+                        new Cell(CellCoordinateSystem.Edge, tile.cell + new Vector2Int(0, 1), CellEdge.South),
+                    TileLayer.WallStatic));
         }
 
-        private void UpdateNeighbors (Cell cell)
+        public Tile[] GetMountedTiles ()
         {
-            var east = GetWall(cell + Cell.right);
-            if (east != null)
-                east.UpdateVisuals();
+            var mounted0 = GetMounted(CellEdgeSide.Min);
+            var mounted1 = GetMounted(CellEdgeSide.Max);
 
-            var south = GetWall(cell + Cell.down);
-            if (south != null)
-                south.UpdateVisuals();
+            if (mounted0 != null && mounted1 != null)
+                return new Tile[] { mounted0.tile, mounted1.tile };
+            else if (mounted0 != null)
+                return new Tile[] { mounted0.tile };
+            else if (mounted1 != null)
+                return new Tile[] { mounted1.tile };
+
+            return new Tile[] { };
         }
 
-        [ActorEventHandler]
-        private void CellChangedEvent (CellChangedEvent evt)
+        private void UpdateMounts()
         {
-            UpdateNeighbors(evt.old);
-            UpdateNeighbors(tile.cell);
-            UpdateVisuals();
-        }
+            if (tile.cell == Cell.invalid)
+                return;
 
-        private void UpdateVisuals()
-        { 
-            _visualWest.SetActive(GetWall(tile.cell + Cell.left) != null);
-            _visualNorth.SetActive(GetWall(tile.cell + Cell.up) != null);
+            var mountedMin = GetMounted(CellEdgeSide.Min);
+            if (mountedMin != null)
+                mountedMin.UpdateVisuals();
+
+            var mountedMax = GetMounted(CellEdgeSide.Max);
+            if (mountedMax != null)
+                mountedMax.UpdateVisuals();
         }
-#endif
     }
 }

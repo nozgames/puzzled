@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 6;
+        private const int FileVersion = 7;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -165,7 +165,6 @@ namespace Puzzled
                 isStarting = false;
                 _started = true;
             }
-
         }
 
         /// <summary>
@@ -182,9 +181,9 @@ namespace Puzzled
         /// </summary>
         /// <param name="prefab">Tile prefab</param>
         /// <param name="cell">Cell to create tile in</param>
-        /// <param name="layer">Layer to put the tile in</param>
+        /// <param name="info">Optional tile info override
         /// <returns>Instantiated tile</returns>
-        public Tile InstantiateTile(Tile prefab, Cell cell, bool forceEdge = true)
+        public Tile InstantiateTile(Tile prefab, Cell cell, TileInfo info = null)
         {
             if (prefab == null)
                 return null;
@@ -196,11 +195,8 @@ namespace Puzzled
                 return null;
             }
 
-            // Do not spawn tiles that are supposed to be on an edge if they are not on an edge
-            if (forceEdge && cell.isEdge != TileGrid.IsEdgeLayer(prefab.layer))
-                return null;
-
             var tile = Instantiate(prefab.gameObject, _tiles.transform).GetComponent<Tile>();
+            tile.info = info != null ? info : tile.info;
             tile.puzzle = this;
             tile.guid = prefab.guid;
             tile.name = prefab.name;
@@ -210,7 +206,14 @@ namespace Puzzled
             tile.Send(new AwakeEvent());
 
             // Link the tile into the grid and normalize the cell
-            tile.cell = cell.NormalizeEdge(tile.layer);
+            tile.cell = cell;
+
+            // If the tile failed to link to the given cell then just destroy it
+            if(tile.cell == Cell.invalid)
+            {
+                tile.Destroy();
+                return null;
+            }
 
             // Keep track of the player
             var playerComponent = tile.GetComponent<Player>();
@@ -297,7 +300,7 @@ namespace Puzzled
             // Save the file using the given path
             using (var file = File.Create(_path))
             using (var writer = new BinaryWriter(file))
-                Save(_tiles.GetLinkedTiles(), writer);
+                Save(_tiles.GetTiles(), writer);
         }
 
         /// <summary>
@@ -336,18 +339,12 @@ namespace Puzzled
                 var flags = (SerializedTileFlags)0;
                 if (tile.name != DatabaseManager.GetTile(tile.guid).name)
                     flags |= SerializedTileFlags.HasName;
-                if (tile.cell.edge != Cell.Edge.None)
-                    flags |= SerializedTileFlags.HasCellEdge;
 
                 writer.Write((byte)flags);
 
                 // Optionally write the tile name
                 if ((flags & SerializedTileFlags.HasName) == SerializedTileFlags.HasName)
                     writer.Write(tile.name);
-
-                // Optionally write the tile name
-                if ((flags & SerializedTileFlags.HasCellEdge) == SerializedTileFlags.HasCellEdge)
-                    writer.Write((byte)tile.cell.edge);
             }
 
             // Write tile properties
@@ -560,6 +557,7 @@ namespace Puzzled
 
                 case 5:
                 case 6:
+                case 7:
                     LoadV5(reader, version);
                     break;
 
@@ -597,7 +595,7 @@ namespace Puzzled
                 }
 
                 // Create the tile and if it fails skip the tile
-                var cell = reader.ReadCell();
+                var cell = reader.ReadCell(version);
                 var tile = InstantiateTile(prefab, cell);
                 if (tile == null)
                 {
@@ -789,7 +787,7 @@ namespace Puzzled
             for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
             {
                 var guid = reader.ReadGuid();
-                var cell = reader.ReadCell();
+                var cell = reader.ReadCell(version);
                 var name = (string)null;
 
                 if(version == 5)
@@ -802,8 +800,8 @@ namespace Puzzled
                     if ((flags & SerializedTileFlags.HasName) == SerializedTileFlags.HasName)
                         name = reader.ReadString();
 
-                    if ((flags & SerializedTileFlags.HasCellEdge) == SerializedTileFlags.HasCellEdge)
-                        cell.edge = (Cell.Edge)reader.ReadByte();
+                    if (version < 7 && (flags & SerializedTileFlags.HasCellEdge) == SerializedTileFlags.HasCellEdge)
+                        cell = new Cell(CellCoordinateSystem.SharedEdge, cell.x, cell.y, (CellEdge)reader.ReadByte());
                 }
 
                 var prefab = DatabaseManager.GetTile(guid);
@@ -811,6 +809,9 @@ namespace Puzzled
                     continue;
 
                 tiles[tileIndex] = InstantiateTile(prefab, cell);
+
+                if (null == tiles[tileIndex])
+                    continue;
 
                 if (name != null)
                     tiles[tileIndex].name = name;
@@ -1107,16 +1108,17 @@ namespace Puzzled
         /// Ray cast through tiles in a cardinal direction and stop at the first tile hit
         /// </summary>
         /// <param name="from"></param>
-        /// <param name="dir"></param>
+        /// <param name="direction"></param>
         /// <param name="distance"></param>
         /// <returns></returns>
-        public RayCastEvent RayCast (Cell from, Cell dir, int distance)
+        public RayCastEvent RayCast (Cell from, Vector2Int direction, int distance)
         {
-            dir.edge = Cell.Edge.None;
-            dir = dir.normalized;
             var cell = from;
-            var raycast = new RayCastEvent(dir);
-            var edge = Cell.OffsetToEdge(dir);
+            var raycast = new RayCastEvent(direction);
+            var edge = Cell.DirectionToEdge(direction);
+
+            // TODO: diagonal
+
             for(int i=0; i<distance; i++)
             {
                 // Test the edge between the current cell and the next cell first
@@ -1125,7 +1127,7 @@ namespace Puzzled
                     break;
 
                 // Now test the next cell in the direction
-                cell += dir;
+                cell += direction;
                 grid.SendToCell(raycast, cell, CellEventRouting.All);
                 if (raycast.hit != null)
                     break;

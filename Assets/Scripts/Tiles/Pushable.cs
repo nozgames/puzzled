@@ -70,30 +70,21 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnPush(PushEvent evt) => evt.IsHandled = MoveTo(evt.offset, evt.duration);
+        private void OnPush(PushEvent evt) => evt.IsHandled = MoveTo(evt.direction, evt.duration);
 
         [ActorEventHandler]
-        private void OnPull(PullEvent evt) => evt.IsHandled = MoveTo(evt.offset, evt.duration);
+        private void OnPull(PullEvent evt) => evt.IsHandled = MoveTo(evt.direction, evt.duration);
 
-        private bool MoveTo(Cell offset, float duration)
+        private bool MoveTo(Vector2Int direction, float duration)
         {
-            // Make sure we can move through the edge itself
-            var queryEdge = new QueryMoveEvent(tile, offset);
-            SendToCell(queryEdge, new Cell(tile.cell, Cell.OffsetToEdge(offset)), CellEventRouting.FirstVisible);
-            if (queryEdge.hasResult && !queryEdge.result)
-                return false;
-
-            // Check if we can move the same direction as we are being pushed
-            var queryMove = new QueryMoveEvent(tile, offset);
-            SendToCell(queryMove, queryMove.targetCell, CellEventRouting.FirstVisible);
-            if (!queryMove.result)
+            if(!tile.CanMove(Cell.DirectionToEdge(direction)))
                 return false;
 
             moveFromCell = tile.cell;
-            moveToCell = queryMove.targetCell;
+            moveToCell = moveFromCell + direction;
 
             // Immediately change our cell
-            tile.cell = queryMove.targetCell;
+            tile.cell = moveToCell;
 
             PlaySound(_moveSound);
 

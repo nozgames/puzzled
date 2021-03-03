@@ -10,7 +10,7 @@ namespace Puzzled
         [SerializeField] private Light _light = null;
 
         [Editable(hiddenIfFalse = "decal")]
-        [Port(PortFlow.Input, PortType.Power)]
+        [Port(PortFlow.Input, PortType.Power, PortFlags.AllowSelfWire)]
         public Port decalPowerPort { get; private set; }
 
         private Decal _decal;

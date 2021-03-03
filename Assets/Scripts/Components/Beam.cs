@@ -24,15 +24,15 @@ namespace Puzzled
             public List<Beam> beams = new List<Beam>();
         }
 
-        private static readonly Cell[] _dirs = {
-            Cell.north,
-            Cell.northEast,
-            Cell.east,
-            Cell.southEast,
-            Cell.south,
-            Cell.southWest,
-            Cell.west,
-            Cell.northWest
+        private static readonly Vector2Int[] _dirs = {
+            new Vector2Int(0,1),   // North
+            new Vector2Int(1,1),   // NorthEast
+            new Vector2Int(1,0),   // East
+            new Vector2Int(1,-1),  // SouthEast
+            new Vector2Int(0,-1),  // South
+            new Vector2Int(-1,-1), // SouthWest
+            new Vector2Int(-1,0),  // West
+            new Vector2Int(-1,1)   // NorthWest
         };
 
         [SerializeField] private LineRenderer _line = null;
@@ -54,7 +54,7 @@ namespace Puzzled
         }
 
         public static Quaternion GetRotation (BeamDirection dir) =>
-            Quaternion.LookRotation(_dirs[(int)dir].ToVector3().normalized, Vector3.up);
+            Quaternion.LookRotation(_dirs[(int)dir].ToVector3Int().ToVector3().XYToXZ().normalized, Vector3.up);
 
         public bool isPowered {
             get => _powered;
@@ -135,12 +135,14 @@ namespace Puzzled
                 return;
 
             var dir = _dirs[(int)_direction];
-            var raycast = puzzle.RayCast(tile.cell, dir, _length);
+            var raycast = puzzle.RayCast(tile.cell + dir, dir, _length);
             var target = tile.cell + dir * _length;
             if (null != raycast.hit)
                 target = raycast.hit.cell;
 
             var length = tile.cell.DistanceTo(target);
+            if (length == 0)
+                return;
 
             var terminal = raycast.hit != null ? raycast.hit.GetComponent<BeamTerminal>() : null;
             if (terminal != _terminal)
@@ -157,7 +159,7 @@ namespace Puzzled
             _line.SetPosition(0, tile.transform.position + Vector3.up * _line.transform.localPosition.y);
 
             var source = _line.GetPosition(0);
-            var dirv = dir.ToVector3();
+            var dirv = dir.ToVector3Int().ToVector3().XYToXZ();
             for (int i = 0; i < length - 1; i++)
                 _line.SetPosition(i + 1, source + dirv * (i + 1));
 
