@@ -48,7 +48,7 @@ namespace Puzzled
 
         private void HandleCorrectWire()
         {
-            SetSequenceIndex(sequenceIndex);
+            SetSequenceIndex(sequenceIndex + 1);
         }
 
         private void HandleIncorrectWire()
