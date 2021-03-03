@@ -188,6 +188,9 @@ namespace Puzzled
                     layerWeight += cam.weight;
                     float lerpValue = cam.weight / layerWeight;
                     layerState.Lerp(cam.state, lerpValue);
+
+                    if (cam.state.isBusy)
+                        isCameraBusy = true;
                 }
 
                 // blend in last layer if there is any weight
