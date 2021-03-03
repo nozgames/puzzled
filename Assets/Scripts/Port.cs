@@ -119,6 +119,8 @@ namespace Puzzled
             }
         }
 
+        private bool _desiredPowered = false;
+
         public Port(Tile tile, TileProperty tileProperty)
         {
             this.tile = tile;
@@ -237,8 +239,11 @@ namespace Puzzled
                 return;
             }
 
-            foreach(var wire in wires)
-                wire.enabled = powered;
+            // this is to avoid issues with changing powered state causing the desired powered state to change while we are looping
+            _desiredPowered = powered;
+
+            foreach (var wire in wires)
+                wire.enabled = _desiredPowered;
         }
 
         /// <summary>

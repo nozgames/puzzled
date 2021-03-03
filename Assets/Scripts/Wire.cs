@@ -124,6 +124,8 @@ namespace Puzzled
 
         private void OnEnable()
         {
+            _visuals.flowing = true;
+
             // When a wire is powered and the output port is a port port then
             // send a power event to the tile
             if (to.port.type == PortType.Power)
@@ -133,16 +135,14 @@ namespace Puzzled
                 SendSignalInternal();
 
             UpdatePositions();
-
-            _visuals.flowing = true;
         }
 
         private void OnDisable()
         {
+            _visuals.flowing = false;
+
             if (to?.port?.type == PortType.Power)
                 to.tile.Send(new WirePowerChangedEvent(this));
-
-            _visuals.flowing = false;
         }
 
         private void OnDestroy()
