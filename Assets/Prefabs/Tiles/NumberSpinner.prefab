@@ -535,6 +535,7 @@ GameObject:
   - component: {fileID: -8286699205250075377}
   - component: {fileID: 7845356564993762924}
   - component: {fileID: -6327194840247934323}
+  - component: {fileID: 5464663693219281288}
   m_Layer: 0
   m_Name: NumberSpinner
   m_TagString: Untagged
@@ -615,6 +616,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _text: Spin
+  _height: 0
+--- !u!114 &5464663693219281288
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &613554879436773724
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -699,9 +713,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
   m_PrefabInstance: {fileID: 613554879436773724}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &5467519805120103753 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4855795888126270485, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
+  m_PrefabInstance: {fileID: 613554879436773724}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8406690577078863787 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -276592717996122377, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
+  m_PrefabInstance: {fileID: 613554879436773724}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1926480157787300299 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1315037443409934487, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
   m_PrefabInstance: {fileID: 613554879436773724}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &8572548439837536319 stripped
@@ -712,15 +736,5 @@ Transform:
 --- !u!4 &5226229895255878688 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4610414368364317316, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
-  m_PrefabInstance: {fileID: 613554879436773724}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &5467519805120103753 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4855795888126270485, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
-  m_PrefabInstance: {fileID: 613554879436773724}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1926480157787300299 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1315037443409934487, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
   m_PrefabInstance: {fileID: 613554879436773724}
   m_PrefabAsset: {fileID: 0}
