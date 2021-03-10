@@ -28,6 +28,7 @@ namespace Puzzled
 
         [Header("Screens")]
         [SerializeField] private UIScreen mainMenu = null;
+        [SerializeField] private UIScreen worldsMenu = null;
         [SerializeField] private UIScreen ingameScreen = null;
         [SerializeField] private UIScreen puzzleComplete = null;
 
@@ -83,22 +84,28 @@ namespace Puzzled
             _instance = null;
         }
 
-        public void ShowMainMenu()
+        public static void ShowMainMenu()
         {
-            if (activeScreen != null)
-                activeScreen.gameObject.SetActive(false);
+            if (_instance.activeScreen != null)
+                _instance.activeScreen.gameObject.SetActive(false);
 
-            activeScreen = mainMenu;
-            activeScreen.gameObject.SetActive(true);
+            _instance.activeScreen = _instance.mainMenu;
+            _instance.activeScreen.gameObject.SetActive(true);
         }
 
-        public void ShowIngame ()
+        public static void ShowIngame ()
         {
-            if (activeScreen != null)
-                activeScreen.gameObject.SetActive(false);
+            if (_instance.activeScreen != null)
+                _instance.activeScreen.gameObject.SetActive(false);
 
-            activeScreen = ingameScreen;
-            activeScreen.gameObject.SetActive(true);
+            _instance.activeScreen = _instance.ingameScreen;
+            _instance.activeScreen.gameObject.SetActive(true);
+        }
+
+        public static void ShowWorldsMenu()
+        {
+            _instance.activeScreen = _instance.worldsMenu;
+            _instance.activeScreen.gameObject.SetActive(true);
         }
 
         public void ShowPuzzleComplete()

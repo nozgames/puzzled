@@ -142,8 +142,12 @@ namespace Puzzled
             if (instance == null)
                 return;
 
+            instance._pointerAction.action.performed -= instance.OnPointerMoved;
+
             instance.gameObject.SetActive(false);
             SceneManager.UnloadSceneAsync("Editor");
+
+            UIManager.ShowMainMenu();
         }
 
         private void UpdateMode()
@@ -435,6 +439,14 @@ namespace Puzzled
             HidePopup();
 
             mode = Mode.Draw;
+        }
+
+        public void OnExitButton()
+        {
+            if (_puzzle != null && _puzzle.isModified)
+                Save();
+
+            Shutdown();
         }
 
         public void OnNewButton()
