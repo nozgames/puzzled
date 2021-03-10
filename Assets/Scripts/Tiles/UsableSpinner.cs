@@ -7,24 +7,24 @@ namespace Puzzled
     abstract class UsableSpinner : Spinner
     {
         [Header("Visuals")]
-        [SerializeField] private SpriteRenderer[] _decalRenderers = null;
         [SerializeField] private Transform _rotator = null;
         [SerializeField] private AudioClip _useSound = null;
 
-        abstract protected Sprite[] sprites { get; }
+        protected abstract int stepCount { get; }
 
         private int _rotateIndex = 0;
+        protected int rotateIndex => _rotateIndex;
+        private float step => 360.0f / stepCount;
 
-        override protected int maxValues => sprites.Length;
+        protected abstract Vector3 initialEulerAngles { get; }
+        protected abstract Vector3 rotationAxis { get; }
 
-        virtual protected void InitializeSprites()
-        {
-        }
+        private Vector3 currentEulerAngles => initialEulerAngles + rotationAxis * _rotateIndex * step;
+        private Vector3 previousEulerAngles => initialEulerAngles + rotationAxis * (_rotateIndex - 1) * step;
 
         protected override void OnStart(StartEvent evt)
         {
-            InitializeSprites();
-            _rotator.localRotation = Quaternion.Euler(-90 - _rotateIndex * 60.0f, 0, -90);
+            _rotator.localEulerAngles = currentEulerAngles;
 
             base.OnStart(evt);
         }
@@ -35,44 +35,24 @@ namespace Puzzled
             evt.IsHandled = true;
 
             var oldIndex = _rotateIndex;
-            _rotateIndex = (_rotateIndex + 1) % _decalRenderers.Length;
+            _rotateIndex = (_rotateIndex + 1) % stepCount;
 
             PlaySound(_useSound, 1, 1.4f);
 
-            var step = (360.0f / _decalRenderers.Length);
             GameManager.busy++;
-            Tween.Rotate(
-                new Vector3(-90 - oldIndex * step, 0, -90),
-                new Vector3(-90 - (oldIndex + 1) * step, 0, -90))
+            Tween.Rotate(previousEulerAngles, currentEulerAngles)
                 .Duration(0.25f)
                 .OnStop(OnUseComplete)
                 .Start(_rotator.gameObject);
         }
 
-        private void OnUseComplete()
+        protected virtual void OnUseComplete()
         {
             value++;
-            UpdateDecals();
             GameManager.busy--;
         }
 
         [ActorEventHandler]
         private void OnIncrement(IncrementSignal evt) => value++;
-
-        override protected void OnPortValuesUpdated()
-        {
-            base.OnPortValuesUpdated();
-            UpdateDecals();
-        }
-
-        private void UpdateDecals()
-        {
-            if (sprites.Length == 0)
-                return;
-
-            _decalRenderers[_rotateIndex].sprite = sprites[value];
-            _decalRenderers[(_rotateIndex + 1) % _decalRenderers.Length].sprite = sprites[WrappedValue(value + 1)];
-            _decalRenderers[(_rotateIndex + _decalRenderers.Length - 1) % _decalRenderers.Length].sprite = sprites[WrappedValue(value - 1)];
-        }
     }
 }

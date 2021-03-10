@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Puzzled
 {
-    class DecalSpinner : UsableSpinner
+    class DecalSpinner : RecyclableSpinner
     {
         private Sprite[] _decalSprites = null;
 

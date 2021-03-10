@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class NumberSpinner : UsableSpinner
+    class NumberSpinner : RecyclableSpinner
     {
         [Header("Visuals")]
         [SerializeField] private Sprite[] _numberSprites = null;
