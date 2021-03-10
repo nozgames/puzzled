@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 
 namespace Puzzled
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : MonoBehaviour, KeyboardManager.IKeyboardHandler
     {
         [Header("General")]
         [SerializeField] private float _tick = 0.25f;
@@ -224,10 +224,19 @@ namespace Puzzled
             CameraManager.ShowLayer(TileLayer.Static, true);
             CameraManager.ShowLayer(TileLayer.Logic, false);
             CameraManager.ShowLayer(TileLayer.Wall, true);
+
+            if (!puzzle.isEditing)
+                KeyboardManager.Push(_instance);
         }
 
         public static void Stop ()
         {
+            if (puzzle == null)
+                return;
+
+            if (!puzzle.isEditing)
+                KeyboardManager.Pop();
+
             UIManager.ClosePopup();
             
             paused = true;
@@ -236,6 +245,18 @@ namespace Puzzled
         private void OnDeviceChanged(InputDevice inputDevice, InputDeviceChange deviceChange)
         {
             _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
+        }
+
+        public void OnKey(KeyCode keyCode)
+        {
+            if(keyCode == KeyCode.Escape)
+            {
+                UIManager.ShowIngame();
+            }
+        }
+
+        public void OnModifiersChanged(bool shift, bool ctrl, bool alt)
+        {            
         }
     }
 }

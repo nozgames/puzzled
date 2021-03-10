@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.IO;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -22,7 +23,19 @@ namespace Puzzled
 #endif
         }
 
-        public void OnEditorButton()
+        public void OnStoryButton()
+        {
+            GameManager.LoadPuzzle(Path.Combine(Application.dataPath, "Puzzles", "Story", "main.puzzle"));
+            GameManager.Play();
+            UIManager.HideMenu();            
+        }
+
+        public void OnWorldButton()
+        {
+            UIManager.ShowWorldsMenu();
+        }
+
+        public void OnCreateButton()
         {
             UIPuzzleEditor.Initialize();
         }
