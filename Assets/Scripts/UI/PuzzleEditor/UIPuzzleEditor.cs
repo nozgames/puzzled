@@ -41,6 +41,7 @@ namespace Puzzled
         [SerializeField] private UIRadio _layerToggleStatic = null;
         [SerializeField] private UIRadio _gridToggle = null;
         [SerializeField] private UIRadio _wireToggle = null;
+        [SerializeField] private UIRadio _debugToggle = null;
         [SerializeField] private GameObject _canvasControls = null;
 
         [SerializeField] private UITooltipPopup _tooltip = null;
@@ -96,6 +97,8 @@ namespace Puzzled
         public Puzzle puzzle => _puzzle;
 
         public static bool isOpen => instance != null;
+
+        public static bool isDebugging => instance.playing && instance._debugToggle.isOn;
 
         public Mode mode {
             get => _mode;
@@ -465,6 +468,15 @@ namespace Puzzled
 
         public void OnPlayButton() => BeginPlay();
         public void OnStopButton() => EndPlay();
+        public void OnDebugButton()
+        {
+            if (!playing)
+                return;
+
+            GameManager.puzzle.ShowWires(isDebugging);
+            CameraManager.ShowWires(isDebugging);
+            CameraManager.ShowLayer(TileLayer.Logic, isDebugging);
+        }
 
         private void BeginPlay()
         {
@@ -503,6 +515,9 @@ namespace Puzzled
             // Load the puzzle and play
             GameManager.LoadPuzzle(_puzzle.path);
             GameManager.Play();
+
+            if (isDebugging)
+                OnDebugButton();
         }
 
         private void EndPlay ()
