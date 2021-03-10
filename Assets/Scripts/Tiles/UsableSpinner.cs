@@ -26,7 +26,13 @@ namespace Puzzled
         {
             _rotator.localEulerAngles = currentEulerAngles;
 
-            base.OnStart(evt);
+            base.OnStart(evt);        
+        }
+
+        protected void ForceRotationIndex(int index)
+        {
+            _rotateIndex = index;
+            _rotator.localEulerAngles = currentEulerAngles;
         }
 
         [ActorEventHandler]
