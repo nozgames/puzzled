@@ -4,7 +4,8 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class Switch : UsableTileComponent
+    [RequireComponent(typeof(Usable))]
+    class Switch : TileComponent
     {
         private class SharedData
         {
@@ -165,9 +166,6 @@ namespace Puzzled
         [ActorEventHandler(autoRegister = false)]
         private void OnUse(UseEvent evt)
         {
-            if (!isUsable)
-                return;
-
             evt.IsHandled = true;
             isOn = !isOn;
         }

@@ -1,10 +1,13 @@
 ﻿using NoZ;
+using UnityEngine;
 
 namespace Puzzled
 {
-    class TriggerBox : UsableTileComponent
+    [RequireComponent(typeof(Usable))]
+    class TriggerBox : TileComponent
     {
-        // TODO: power in to use as a kill switch ? (no wires = self powered, else use power)
+        private bool _isUsable = false;
+
 
         [Editable]
         [Port(PortFlow.Output, PortType.Power, legacy = true)]
@@ -15,7 +18,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnEnter(EnterCellEvent evt)
         {
-            if (!isUsable)
+            if (!_isUsable)
                 return;
 
             if (evt.isPlayer)
@@ -28,7 +31,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnExit(LeaveCellEvent evt)
         {
-            if (!isUsable)
+            if (!_isUsable)
                 return;
 
             if (evt.isPlayer)
@@ -38,8 +41,10 @@ namespace Puzzled
             }
         }
 
-        protected override void OnUsableChanged()
+        [ActorEventHandler]
+        private void OnUsableChanged(UsableChangedEvent evt)
         {
+            _isUsable = evt.isUsable;
             powerOutPort.SetPowered(false);
         }
     }

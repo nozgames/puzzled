@@ -16,9 +16,10 @@ namespace Puzzled
 
         override protected Sprite[] sprites => _decalSprites;
 
-        override protected void InitializeSprites()
+        protected override void OnStart(StartEvent evt)
         {
             _decalSprites = decals?.Select(d => d.sprite).ToArray() ?? new Sprite[0];
+            base.OnStart(evt);
         }
     }
 }

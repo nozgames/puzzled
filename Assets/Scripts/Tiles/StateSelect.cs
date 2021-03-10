@@ -29,7 +29,7 @@ namespace Puzzled
                 bool isPowered = false;
 
                 // check transient value first
-                if (evt.transientValue > 0)
+                if (evt.transientValue >= 0)
                 {
                     int stateIndex = evt.transientValue;
                     if ((wireStates & (1 << stateIndex)) != 0)

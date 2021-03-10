@@ -3,9 +3,11 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class PressurePlate : UsableTileComponent
+    [RequireComponent(typeof(Usable))]
+    class PressurePlate : TileComponent
     {
         private bool _pressed = false;
+        private bool _isUsable = false;
 
         [Header("Visuals")]
         [SerializeField] private Animator _animator = null;
@@ -39,14 +41,16 @@ namespace Puzzled
 
             _animator.SetTrigger(pressed ? "Down" : "Up");
 
-            if (!isUsable)
+            if (!_isUsable)
                 powerOutPort.SetPowered(false);
             else
                 powerOutPort.SetPowered(pressed);
         }
 
-        protected override void OnUsableChanged()
+        [ActorEventHandler]
+        private void OnUsableChanged(UsableChangedEvent evt)
         {
+            _isUsable = evt.isUsable;
             powerOutPort.SetPowered(false);
         }
     }

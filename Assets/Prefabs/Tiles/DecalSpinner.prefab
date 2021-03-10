@@ -108,7 +108,7 @@ Transform:
   m_GameObject: {fileID: 1413466520703090957}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.35000002, y: 0.34999993, z: 0.3499999}
+  m_LocalScale: {x: 0.35000002, y: 0.34999993, z: 0.34999987}
   m_Children: []
   m_Father: {fileID: 3976088353694975326}
   m_RootOrder: 0
@@ -190,7 +190,7 @@ Transform:
   m_GameObject: {fileID: 5193300972239241731}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.35, y: 0.34999996, z: 0.35}
+  m_LocalScale: {x: 0.35, y: 0.34999996, z: 0.34999996}
   m_Children: []
   m_Father: {fileID: 8572548439837536319}
   m_RootOrder: 0
@@ -534,7 +534,8 @@ GameObject:
   - component: {fileID: 2819266254877709548}
   - component: {fileID: -8286699205250075377}
   - component: {fileID: -6327194840247934323}
-  - component: {fileID: 6819145216567098776}
+  - component: {fileID: 4930026805704109339}
+  - component: {fileID: 7512739909169767742}
   m_Layer: 0
   m_Name: DecalSpinner
   m_TagString: Untagged
@@ -583,7 +584,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _text: Spin
---- !u!114 &6819145216567098776
+  _height: 0
+--- !u!114 &4930026805704109339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7512739909169767742
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -688,9 +702,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
   m_PrefabInstance: {fileID: 613554879436773724}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &5467519805120103753 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4855795888126270485, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
+  m_PrefabInstance: {fileID: 613554879436773724}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8406690577078863787 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -276592717996122377, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
+  m_PrefabInstance: {fileID: 613554879436773724}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1926480157787300299 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1315037443409934487, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
   m_PrefabInstance: {fileID: 613554879436773724}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &8572548439837536319 stripped
@@ -701,15 +725,5 @@ Transform:
 --- !u!4 &5226229895255878688 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4610414368364317316, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
-  m_PrefabInstance: {fileID: 613554879436773724}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &5467519805120103753 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4855795888126270485, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
-  m_PrefabInstance: {fileID: 613554879436773724}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1926480157787300299 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1315037443409934487, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
   m_PrefabInstance: {fileID: 613554879436773724}
   m_PrefabAsset: {fileID: 0}

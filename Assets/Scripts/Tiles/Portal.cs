@@ -4,7 +4,8 @@ using System;
 
 namespace Puzzled
 {
-    public class Portal : UsableTileComponent
+    [RequireComponent(typeof(Usable))]
+    public class Portal : TileComponent
     {
         [Editable]
         public string puzzleName { get; set; }
@@ -15,9 +16,6 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
-            if (!isUsable)
-                return;
-
             if (!saveState)
                 GameManager.UnloadPuzzle();
 

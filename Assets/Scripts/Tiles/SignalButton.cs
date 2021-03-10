@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class SignalButton : UsableTileComponent
+    [RequireComponent(typeof(Usable))]
+    class SignalButton : TileComponent
     {
         [SerializeField] private Animator _animator = null;
         [SerializeField] private AudioClip _useSound = null;
@@ -16,9 +17,6 @@ namespace Puzzled
         private void OnUse(UseEvent evt)
         {
             evt.IsHandled = true;
-
-            if (!isUsable)
-                return;
 
             signalOutPort.SendSignal();
 
