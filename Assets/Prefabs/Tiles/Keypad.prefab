@@ -79,7 +79,7 @@ SpriteRenderer:
   m_Size: {x: 0.2, y: 0.2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1979402765203244668
@@ -93,6 +93,7 @@ GameObject:
   - component: {fileID: 4980225229906135306}
   - component: {fileID: 1491141461308355783}
   - component: {fileID: -347710796697769489}
+  - component: {fileID: 6518538193161190665}
   m_Layer: 0
   m_Name: Keypad
   m_TagString: Untagged
@@ -144,6 +145,18 @@ MonoBehaviour:
   _visualLocked: {fileID: 0}
   _visualUnlocked: {fileID: 0}
   _popupPrefab: {fileID: 1247488093453790480, guid: bfa2cff040516b544a1e7fc2a74cec0c, type: 3}
+--- !u!114 &6518538193161190665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1979402765203244668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3529365862182102574
 GameObject:
   m_ObjectHideFlags: 0
@@ -223,6 +236,6 @@ SpriteRenderer:
   m_Size: {x: 0.2, y: 0.2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0

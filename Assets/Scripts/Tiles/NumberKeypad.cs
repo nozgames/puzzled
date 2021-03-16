@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    class NumberKeypad : UsableTileComponent
+    [RequireComponent(typeof(Usable))]
+    class NumberKeypad : TileComponent
     {
         [Header("Visuals")]
         //[SerializeField] private GameObject _visualLocked = null;
@@ -41,9 +42,6 @@ namespace Puzzled
         private void OnUse(UseEvent evt)
         {
             evt.IsHandled = true;
-
-            if (!isUsable)
-                return;
 
             if (!_locked)
                 return;

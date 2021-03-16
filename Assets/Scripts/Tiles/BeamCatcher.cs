@@ -4,7 +4,7 @@ using NoZ;
 
 namespace Puzzled
 {
-    public class BeamCatcher : UsableTileComponent
+    public class BeamCatcher : TileComponent
     {
         [SerializeField] private BeamTerminal _terminal = null;
         [SerializeField] private GameObject _visualsOn = null;

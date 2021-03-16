@@ -3,7 +3,8 @@ using NoZ;
 
 namespace Puzzled
 {
-    class BeamEmitter : UsableTileComponent
+    [RequireComponent(typeof(Usable))]
+    class BeamEmitter : TileComponent
     {
         [SerializeField] private GameObject _visualsOn = null;
         [SerializeField] private GameObject _visualsOff = null;
@@ -12,6 +13,7 @@ namespace Puzzled
         [SerializeField] private Transform _rotator = null;
 
         private int _value = 0;
+        private bool _isEmitting = false;
 
         private static readonly BeamDirection[] _dirs = { 
             BeamDirection.North,
@@ -32,8 +34,6 @@ namespace Puzzled
                 UpdateBeam();
             }
         }
-
-        public bool isEmitting => isUsable;
 
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
@@ -58,23 +58,17 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUseEvent(UseEvent evt)
         {
-            if (!isUsable)
-                return;
-
             evt.IsHandled = true;
             value++;
             PlaySound(_useSound);
         }
-
-        [ActorEventHandler]
-        private void OnBeamChangedEvent (BeamChangedEvent evt) => OnUsableChanged();
 
         private void UpdateBeam()
         {
             if (null != _rotator)
                 _rotator.localRotation = Beam.GetRotation((BeamDirection)value);
 
-            if (!isEmitting)
+            if (!_isEmitting)
             {
                 _beam.gameObject.SetActive(false);
                 return;
@@ -85,12 +79,12 @@ namespace Puzzled
             _beam.length = 10;
         }
 
-        protected override void OnUsableChanged()
+        [ActorEventHandler]
+        private void OnUsableChanged(UsableChangedEvent evt)
         {
-            base.OnUsableChanged();
-
-            _visualsOff.gameObject.SetActive(!isEmitting);
-            _visualsOn.gameObject.SetActive(isEmitting);
+            _isEmitting = evt.isUsable;
+            _visualsOff.gameObject.SetActive(!_isEmitting);
+            _visualsOn.gameObject.SetActive(_isEmitting);
             UpdateBeam();
         }
     }

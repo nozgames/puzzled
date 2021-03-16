@@ -4,7 +4,8 @@ using NoZ;
 
 namespace Puzzled
 {
-    public class BeamReflector : UsableTileComponent
+    [RequireComponent(typeof(Usable))]
+    public class BeamReflector : TileComponent
     {
         [Serializable]
         private class Reflection
@@ -82,9 +83,6 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUseEvent (UseEvent evt)
         {
-            if (!isUsable)
-                return;
-
             rotated = !rotated;
 
             PlaySound(_useSound, 1.0f, UnityEngine.Random.Range(0.8f,1.2f));

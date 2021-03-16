@@ -2,28 +2,24 @@
 
 namespace Puzzled
 {
-    public class UsableTileComponent : TileComponent
+    public class Usable : TileComponent
     {
         private bool _isUsable = false;
         private Tooltip _tooltip = null;
 
-        protected bool isUsable
+        [ActorEventHandler (priority = int.MaxValue)]
+        private void OnUse(UseEvent evt)
         {
-            get => _isUsable;
-            set 
-            {
-                bool hadPower = _isUsable;
-                _isUsable = value;
-
-                if (hadPower != _isUsable)
-                    OnUsableChanged();
-            }
+            if (!_isUsable)
+                evt.IsHandled = true;
         }
 
         private void Awake()
         {
             _tooltip = GetComponent<Tooltip>();
         }
+
+        public bool isUsable => _isUsable;
 
         [Editable]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]
@@ -37,17 +33,14 @@ namespace Puzzled
 
         private void UpdateUsable()
         {
-            var oldUsable = _isUsable;
+            bool oldUsable = _isUsable;
             _isUsable = powerInPort.wireCount == 0 || powerInPort.hasPower;
+
             if (_isUsable != oldUsable)
-                OnUsableChanged();
+                Send(new UsableChangedEvent(this));
 
             if (_tooltip != null)
                 _tooltip.enabled = _isUsable;
-        }
-
-        protected virtual void OnUsableChanged()
-        {
         }
     }
 }
