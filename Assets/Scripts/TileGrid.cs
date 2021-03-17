@@ -212,10 +212,10 @@ namespace Puzzled
                     return _center + coordinate.x + coordinate.y * size;
 
                 case CellCoordinateSystem.SharedEdge:
-                    return _center + coordinate.x * 2 + coordinate.y * size * 2 + (int)coordinate.edge;
+                    return _center * 2 + coordinate.x * 2 + coordinate.y * size * 2 + (int)coordinate.edge;
 
                 case CellCoordinateSystem.Edge:
-                    return _center + coordinate.x * 4 + coordinate.y * size * 4 + (int)coordinate.edge;
+                    return _center * 4 + coordinate.x * 4 + coordinate.y * size * 4 + (int)coordinate.edge;
 
                 default:
                     throw new NotImplementedException();
