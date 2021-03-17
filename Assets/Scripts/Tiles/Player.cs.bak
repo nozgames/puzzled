@@ -15,7 +15,7 @@ namespace Puzzled
         private string _tooltip;
         private Cell _tooltipCell = Cell.invalid;
         private float _tooltipElapsed;
-
+        private bool _isInMove = false;
         public Tile inventory { get; private set; }
 
         [SerializeField] private float queuedInputThreshold = 0.25f;
@@ -342,6 +342,7 @@ namespace Puzzled
             tile.transform.position = puzzle.grid.CellToWorld(moveFromCell);
 
             BeginBusy();
+            _isInMove = true;
 
             _animator.SetBool("Walking", true);
             UIManager.HideTooltip();
@@ -351,6 +352,7 @@ namespace Puzzled
                 .Duration(moveDuration)
                 .OnStop(OnMoveComplete)
                 .Start(gameObject);
+            _isInMove = false;
 
             return true;
         }

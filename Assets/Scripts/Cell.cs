@@ -23,6 +23,7 @@ namespace Puzzled
         SharedEdge
     }
 
+    // NOTE: keep this order, None needs to be first too
     public enum CellEdge
     {
         None,

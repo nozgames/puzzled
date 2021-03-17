@@ -205,6 +205,7 @@ namespace Puzzled
             _tilePreviewCamera.transform.position = CameraManager.Frame(
                 tile.transform.position + new Vector3(0, (max.y + min.y) * 0.5f, 0),
                 rotation.x,
+                0,
                 size * 1.5f,
                 _tilePreviewCamera.fieldOfView
                 );

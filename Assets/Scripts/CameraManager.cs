@@ -21,6 +21,11 @@ namespace Puzzled
         public const int DefaultPitch = 55;
 
         /// <summary>
+        /// Default camera yaw
+        /// </summary>
+        public const int DefaultYaw = 0;
+
+        /// <summary>
         /// Default zoom level
         /// </summary>
         public const int DefaultZoom = 8;
@@ -69,8 +74,11 @@ namespace Puzzled
 
         public static GameCamera.State editorCameraState { get; set; }
 
+        public static int yawIndex => _instance._blendedState.yawIndex;
+
         private GameCamera.State _blendedState;
         private bool _cameraIsBusy = false;
+
 
         public void Initialize()
         {
@@ -101,10 +109,11 @@ namespace Puzzled
                 GameManager.busy += _cameraIsBusy ? 1 : -1;
             }
 
-            // apply blended state to camer
+            // apply blended state to camera
             _instance._fog.material.color = _blendedState.bgColor;
-            camera.transform.rotation = _blendedState.rotation;
-            camera.transform.position = _blendedState.position;
+
+            camera.transform.position = CameraManager.Frame(_blendedState.targetPosition, _blendedState.pitch, _blendedState.yaw, _blendedState.zoomLevel, CameraManager.FieldOfView);
+            camera.transform.rotation = Quaternion.Euler(_blendedState.pitch, _blendedState.yaw, 0);
         }
 
         /// <summary>
@@ -125,11 +134,12 @@ namespace Puzzled
         /// Frame the camera on the given position using the given zoom level 
         /// </summary>
         /// <param name="pitch">Pitch of the camera</param>
+        /// <param name="yaw">Yaw of the camera</param>
         /// <param name="target">Target for the camera to focus on</param>
         /// <param name="zoom">Zoom level in number of vertical tiles that should be visible</param>
         /// <param name="fov">Camera fov</param>
         /// <returns></returns>
-        public static Vector3 Frame(Vector3 target, float pitch, float zoom, float fov)
+        public static Vector3 Frame(Vector3 target, float pitch, float yaw, float zoom, float fov)
         {
             var frustumHeight = zoom;
             var distance = (frustumHeight * 0.5f) / Mathf.Tan(fov * 0.5f * Mathf.Deg2Rad);
@@ -138,7 +148,7 @@ namespace Puzzled
                 target
 
                 // Zoom to frame entire target
-                + (distance * -(Quaternion.Euler(pitch, 0, 0) * Vector3.forward));
+                + (distance * -(Quaternion.Euler(pitch, yaw, 0) * Vector3.forward));
         }
 
         /// <summary>

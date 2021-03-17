@@ -11,15 +11,21 @@ namespace Puzzled
 
         public struct State
         {
-            public Vector3 position;
-            public Quaternion rotation;
+            public Vector3 targetPosition;
+            public float pitch;
+            public float yaw;
+            public int yawIndex;
+            public float zoomLevel;
             public Color bgColor;
             public bool isBusy;
 
             public void Lerp(State stateB, float t)
             {
-                position = Vector3.Lerp(position, stateB.position, t);
-                rotation = Quaternion.Slerp(rotation, stateB.rotation, t);
+                targetPosition = Vector3.Lerp(targetPosition, stateB.targetPosition, t);
+                pitch = Mathf.LerpAngle(pitch, stateB.pitch, t);
+                yaw = Mathf.LerpAngle(yaw, stateB.yaw, t);
+                yawIndex = (t >= 0.5) ? stateB.yawIndex : yawIndex;
+                zoomLevel = Mathf.Lerp(zoomLevel, stateB.zoomLevel, t);
                 bgColor = Color.Lerp(bgColor, stateB.bgColor, t);
             }
         }
@@ -58,6 +64,18 @@ namespace Puzzled
             set => _pitch = Mathf.Clamp(value, 25, 90);
         }
 
+        public int yaw
+        {
+            get => _yawIndex * 90;
+        }
+
+        [Editable(rangeMin = 0, rangeMax = 3)]
+        public int yawIndex
+        {
+            get => _yawIndex;
+            set => _yawIndex = Mathf.Clamp(value, 0, 3);
+        }
+
         [Editable]
         public Cell offset { get; set; }
 
@@ -90,6 +108,7 @@ namespace Puzzled
         private int _zoomLevel = CameraManager.DefaultZoom;
         private int _transitionTime = 4;
         private int _pitch = 55;
+        private int _yawIndex = 0;
         private float _weight = 0;
         private float _blendRate = 0;
         private bool _isActivated = false;
@@ -169,8 +188,10 @@ namespace Puzzled
                 {
                     sharedCamData.baseCameraState = new State
                     {
-                        position = CameraManager.Frame(puzzle.grid.CellToWorld(puzzle.player.tile.cell), CameraManager.DefaultPitch, CameraManager.DefaultZoom, CameraManager.FieldOfView),
-                        rotation = Quaternion.Euler(CameraManager.DefaultPitch, 0, 0),
+                        targetPosition = puzzle.grid.CellToWorld(puzzle.player.tile.cell),
+                        yaw = CameraManager.DefaultYaw,
+                        pitch = CameraManager.DefaultPitch,
+                        zoomLevel = CameraManager.DefaultZoom,
                         bgColor = CameraManager.defaultBackground.color
                     };
                 }
@@ -237,8 +258,11 @@ namespace Puzzled
 
         public void UpdateState()
         {
-            state.position = CameraManager.Frame(target, pitch, zoomLevel, CameraManager.FieldOfView);
-            state.rotation = Quaternion.Euler(pitch, 0, 0);
+            state.targetPosition = target;
+            state.pitch = pitch;
+            state.yaw = yaw;
+            state.yawIndex = _yawIndex;
+            state.zoomLevel = zoomLevel;
             state.bgColor = background?.color ?? CameraManager.defaultBackground.color;
         }
 

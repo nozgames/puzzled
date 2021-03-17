@@ -552,8 +552,11 @@ namespace Puzzled
         {
             CameraManager.editorCameraState = new GameCamera.State
             {
-                position = CameraManager.Frame(_cameraTarget, CameraManager.DefaultPitch, _cameraZoom, CameraManager.FieldOfView),
-                rotation = Quaternion.Euler(CameraManager.DefaultPitch, 0, 0),
+                targetPosition = _cameraTarget,
+                pitch = CameraManager.DefaultPitch, 
+                yaw = CameraManager.DefaultYaw,
+                yawIndex = 0,
+                zoomLevel = _cameraZoom,
                 bgColor = Color.black
             };
         }
