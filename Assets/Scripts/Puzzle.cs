@@ -209,7 +209,7 @@ namespace Puzzled
             tile.cell = cell;
 
             // If the tile failed to link to the given cell then just destroy it
-            if(tile.cell == Cell.invalid)
+            if(tile.cell == Cell.invalid && cell != Cell.invalid)
             {
                 tile.Destroy();
                 return null;

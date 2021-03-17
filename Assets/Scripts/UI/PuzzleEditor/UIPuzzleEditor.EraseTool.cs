@@ -106,8 +106,14 @@ namespace Puzzled
             // Destroy all wires connected to the tile
             foreach (var property in tile.properties)
                 if (property.type == TilePropertyType.Port)
-                    foreach (var wire in property.GetValue<Port>(tile).wires)
+                {
+                    var port = property.GetValue<Port>(tile);
+                    if (port.flow != PortFlow.Output)
+                        continue;
+
+                    foreach (var wire in port.wires)
                         group.Add(new Editor.Commands.WireDestroyCommand(wire));
+                }
 
             group.Add(new Editor.Commands.TileDestroyCommand(tile));
 

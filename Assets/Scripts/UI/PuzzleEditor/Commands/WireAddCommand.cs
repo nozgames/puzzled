@@ -18,6 +18,13 @@ namespace Puzzled.Editor.Commands
             this.to = to;
         }
 
+        public WireAddCommand(Wire wire)
+        {
+            this.wire = wire;
+            this.from = wire.from.port;
+            this.to = wire.to.port;
+        }
+
         protected override void OnUndo()
         {
             from.wires.RemoveAt(fromIndex);
@@ -29,8 +36,8 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnExecute()
         {
-            Debug.Assert(wire == null);
-            wire = puzzle.InstantiateWire(from, to);
+            if(wire == null)
+                wire = puzzle.InstantiateWire(from, to);
             wire.visible = true;
             fromIndex = from.wires.IndexOf(wire);
             toIndex = to.wires.IndexOf(wire);

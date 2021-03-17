@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Puzzled.Editor.Commands
 {
@@ -9,16 +8,18 @@ namespace Puzzled.Editor.Commands
         private Tile tile;
         private Cell cell;
 
-        public TileAddCommand(Tile prefab, Cell cell)
+        public TileAddCommand(Tile prefab, Cell cell, Tile tile = null)
         {
             this.prefab = prefab;
             this.cell = cell;
+            this.tile = tile;
         }
 
         protected override void OnExecute()
         {
             // Create the new tile
-            tile = puzzle.InstantiateTile(prefab, cell);
+            if(tile == null)
+                tile = puzzle.InstantiateTile(prefab, cell);
 
             // Start again
             tile.Send(new StartEvent());
