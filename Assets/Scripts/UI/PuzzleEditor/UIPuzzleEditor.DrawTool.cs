@@ -92,6 +92,9 @@ namespace Puzzled
 
         private void Draw (Cell cell, Tile prefab, bool group = false)
         {
+            if (!puzzle.grid.IsValid(cell))
+                return;
+
             var command = new Editor.Commands.GroupCommand();
 
             // Dont draw if the same exact tile is already there.  This prevents accidental removal 

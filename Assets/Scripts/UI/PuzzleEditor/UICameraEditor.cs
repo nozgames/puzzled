@@ -16,6 +16,8 @@ namespace Puzzled.Editor
         private GameCamera _gameCamera;
         private bool _dragPan = false;
         private bool _dragPitch = false;
+        private bool _dragCombine = false;
+        private float _lastZoomTime = float.MinValue;
         private Vector2 _dragStart;
         private int _pitchStart;
         private Cell _offsetStart;
@@ -85,7 +87,10 @@ namespace Puzzled.Editor
             if (zoomLevel == _gameCamera.zoomLevel)
                 return;
 
-            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(_gameCamera.tile, "zoomLevel", zoomLevel));
+            var combine = (Time.time - _lastZoomTime < 0.25f);
+            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(_gameCamera.tile, "zoomLevel", zoomLevel), combine);
+            _lastZoomTime = Time.time;
+            _dragCombine = false;
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -97,8 +102,9 @@ namespace Puzzled.Editor
                 var pitch = Mathf.Clamp(_pitchStart - (int)(dist / step), 0, 90);
                 if(pitch != _gameCamera.pitch)
                 {
-                    UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(_gameCamera.tile, "pitch", pitch));
+                    UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(_gameCamera.tile, "pitch", pitch), _dragCombine);
                     UpdateCamera();
+                    _dragCombine = true;
                 }
                 return;
             }
@@ -110,8 +116,9 @@ namespace Puzzled.Editor
                 var offset = _offsetStart + new Vector2Int((int)delta.x, (int)delta.y);
                 if (offset != _gameCamera.offset)
                 {
-                    UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(_gameCamera.tile, "offset", offset));
+                    UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(_gameCamera.tile, "offset", offset), _dragCombine);
                     UpdateCamera();
+                    _dragCombine = true;
                 }
                 return;
             }
@@ -128,8 +135,9 @@ namespace Puzzled.Editor
             {
                 _dragPan = true;
                 _offsetStart = _gameCamera.offset;
-            }            
+            }
 
+            _dragCombine = false;
             _dragStart = eventData.position;
         }
 
@@ -151,6 +159,7 @@ namespace Puzzled.Editor
         public void OnEndDrag(PointerEventData eventData)
         {
             _dragPan = false;
+            _dragCombine = false;
             _dragPitch = false;
         }
 

@@ -15,7 +15,7 @@
             var mesh = new Mesh();
             var verticies = new List<Vector3>();
 
-            var offset = new Vector3(-GridSize/2, -GridSize/2, 0);
+            var offset = new Vector3(-GridSize/2 - 1, -GridSize/2 - 1, 0);
 
             var indicies = new List<int>();
             for (int i = 0; i < GridSize + 1; i++)

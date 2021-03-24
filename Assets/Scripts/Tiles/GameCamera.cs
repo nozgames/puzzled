@@ -77,7 +77,7 @@ namespace Puzzled
         }
 
         [Editable]
-        public Cell offset { get; set; }
+        public Cell offset { get; set; } = Cell.zero;
 
         [Editable]
         public int transitionTime

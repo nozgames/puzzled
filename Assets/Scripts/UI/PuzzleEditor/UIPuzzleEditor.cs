@@ -12,6 +12,7 @@ namespace Puzzled
     public partial class UIPuzzleEditor : UIScreen, KeyboardManager.IKeyboardHandler
     {
         public const int DefaultZoom = 12;
+        public const int MaxZoom = 30;
 
         public enum Mode
         {
@@ -31,6 +32,8 @@ namespace Puzzled
         [SerializeField] private GameObject dragWirePrefab = null;
         [SerializeField] private RectTransform _canvasCenter = null;
         [SerializeField] private Slider _zoomSlider = null;
+        [SerializeField] private Slider _pitchSlider = null;
+        [SerializeField] private Slider _yawSlider = null;
         [SerializeField] private UICameraEditor _cameraEditor = null;
 
         [SerializeField] private GameObject inspector = null;
@@ -204,11 +207,21 @@ namespace Puzzled
             inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
 
             _zoomSlider.minValue = CameraManager.MinZoom;
-            _zoomSlider.maxValue = CameraManager.MaxZoom;
+            _zoomSlider.maxValue = MaxZoom;
             _zoomSlider.value = _cameraZoom;
             _zoomSlider.onValueChanged.AddListener((v) => {
                 UpdateZoom((int)v);
 ;            });
+
+            _pitchSlider.value = CameraManager.DefaultPitch;
+            _pitchSlider.onValueChanged.AddListener((v) => {
+                UpdateCamera();
+            });
+
+            _yawSlider.value = CameraManager.DefaultYaw;
+            _yawSlider.onValueChanged.AddListener((v) => {
+                UpdateCamera();
+            });
 
             _gridToggle.onValueChanged.AddListener((v) => {
                 _puzzle.showGrid = v;
@@ -321,7 +334,7 @@ namespace Puzzled
 
         private void UpdateZoom(int zoom)
         {
-            _cameraZoom = Mathf.Clamp(zoom, CameraManager.MinZoom, CameraManager.MaxZoom);
+            _cameraZoom = Mathf.Clamp(zoom, CameraManager.MinZoom, MaxZoom);
 
             UpdateCamera();
             UpdateSelectionGizmo();
@@ -553,8 +566,8 @@ namespace Puzzled
             CameraManager.editorCameraState = new GameCamera.State
             {
                 targetPosition = _cameraTarget,
-                pitch = CameraManager.DefaultPitch, 
-                yaw = CameraManager.DefaultYaw,
+                pitch = _pitchSlider.value, 
+                yaw = _yawSlider.value * 90,
                 yawIndex = 0,
                 zoomLevel = _cameraZoom,
                 bgColor = Color.black
