@@ -34,7 +34,6 @@ namespace Puzzled
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
         [SerializeField] private UIRadio _inspectorFlip = null;
-        [SerializeField] private UIRadio _inspectorRotated = null;
         [SerializeField] private Button _inspectorRotation = null;
 
         private WireVisuals dragWire = null;

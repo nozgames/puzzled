@@ -12,25 +12,21 @@ namespace Puzzled
         [SerializeField] private Beam _beam = null;
         [SerializeField] private Transform _rotator = null;
 
-        private int _value = 0;
         private bool _isEmitting = false;
 
-        private static readonly BeamDirection[] _dirs = { 
-            BeamDirection.North,
-            BeamDirection.NorthEast,
-            BeamDirection.East,
-            BeamDirection.SouthEast,
-            BeamDirection.South,
-            BeamDirection.SouthWest,
-            BeamDirection.West,
-            BeamDirection.NorthWest
-        };
+        [SerializeField]
+        private int _rotationIndex = 0;
 
-        [Editable]
-        private int value {
-            get => _value;
-            set {
-                _value = (value % _dirs.Length);
+        [SerializeField]
+        private int _numRotations = 8;
+
+        [Editable(serialized = false, hidden = true)]
+        public int rotation
+        {
+            get => _rotationIndex;
+            set
+            {
+                this._rotationIndex = value % _numRotations;
                 UpdateBeam();
             }
         }
@@ -51,7 +47,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnValueEvent(ValueEvent evt)
         {
-            value = evt.value;
+            rotation = evt.value;
             UpdateBeam();
         }
 
@@ -59,14 +55,14 @@ namespace Puzzled
         private void OnUseEvent(UseEvent evt)
         {
             evt.IsHandled = true;
-            value++;
+            rotation++;
             PlaySound(_useSound);
         }
 
         private void UpdateBeam()
         {
             if (null != _rotator)
-                _rotator.localRotation = Beam.GetRotation((BeamDirection)value);
+                _rotator.localRotation = Beam.GetRotation((BeamDirection)rotation);
 
             if (!_isEmitting)
             {
@@ -75,7 +71,7 @@ namespace Puzzled
             }
 
             _beam.gameObject.SetActive(true);
-            _beam.direction = _dirs[value];
+            _beam.direction = (BeamDirection)rotation;
             _beam.length = 10;
         }
 

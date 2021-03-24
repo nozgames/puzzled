@@ -22,15 +22,19 @@ namespace Puzzled
         [SerializeField] private GameObject _visualsOff = null;
         [SerializeField] private AudioClip _useSound = null;
 
-        private bool _rotated = false;
+        [SerializeField]
+        private int _rotationIndex = 3;
 
-        [Editable(hidden = true)]
-        public bool rotated {
-            get => _rotated;
-            set {
-                if (_rotated == value)
-                    return;
-                _rotated = value;
+        [SerializeField]
+        private int _numRotations = 8;
+
+        [Editable(serialized = false, hidden = true)]
+        public int rotation
+        {
+            get => _rotationIndex;
+            set
+            {
+                this._rotationIndex = value % _numRotations;
                 UpdateRotation();
             }
         }
@@ -53,7 +57,8 @@ namespace Puzzled
 
         private void UpdateRotation()
         {
-            _rotator.localRotation = Quaternion.Euler(0, _rotated ? 90.0f : 0.0f, 0.0f);
+            float rotationStep = 360 / _numRotations;
+            _rotator.localRotation = Quaternion.Euler(0, rotation * rotationStep, 0.0f);
 
             UpdateBeams();
         }
@@ -61,19 +66,149 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnBeamChangedEvent(BeamChangedEvent evt) => UpdateBeams();
 
+        private BeamDirection GetReflectedBeam(BeamDirection inDirection)
+        {
+            int directionDistance = Mathf.Abs((int)inDirection - rotation);
+
+            BeamDirection reflectedDirection = inDirection;
+            if ((directionDistance % 2) == 1)
+            {
+                BeamDirection simplifiedRotation = (BeamDirection)(rotation % 4);
+                switch (inDirection)
+                {
+                    case BeamDirection.SouthEast:
+                        {
+                            switch (simplifiedRotation)
+                            {
+                                case BeamDirection.North:
+                                    reflectedDirection = BeamDirection.NorthEast;
+                                    break;
+                                case BeamDirection.East:
+                                    reflectedDirection = BeamDirection.SouthWest;
+                                    break;
+                            }
+                        }
+                        break;
+                    case BeamDirection.South:
+                        {
+                            switch (simplifiedRotation)
+                            {
+                                case BeamDirection.SouthEast:
+                                    reflectedDirection = BeamDirection.West;
+                                    break;
+                                case BeamDirection.NorthEast:
+                                    reflectedDirection = BeamDirection.East;
+                                    break;
+                            }
+                        }
+                        break;
+                    case BeamDirection.SouthWest:
+                        {
+                            switch (simplifiedRotation)
+                            {
+                                case BeamDirection.North:
+                                    reflectedDirection = BeamDirection.NorthWest;
+                                    break;
+                                case BeamDirection.East:
+                                    reflectedDirection = BeamDirection.SouthEast;
+                                    break;
+                            }
+                        }
+                        break;
+                    case BeamDirection.West:
+                        {
+                            switch (simplifiedRotation)
+                            {
+                                case BeamDirection.NorthEast:
+                                    reflectedDirection = BeamDirection.North;
+                                    break;
+                                case BeamDirection.SouthEast:
+                                    reflectedDirection = BeamDirection.South;
+                                    break;
+                            }
+                        }
+                        break;
+                    case BeamDirection.NorthWest:
+                        {
+                            switch (simplifiedRotation)
+                            {
+                                case BeamDirection.North:
+                                    reflectedDirection = BeamDirection.West;
+                                    break;
+                                case BeamDirection.East:
+                                    reflectedDirection = BeamDirection.South;
+                                    break;
+                            }
+                        }
+                        break;
+                    case BeamDirection.North:
+                        {
+                            switch (simplifiedRotation)
+                            {
+                                case BeamDirection.NorthEast:
+                                    reflectedDirection = BeamDirection.West;
+                                    break;
+                                case BeamDirection.SouthEast:
+                                    reflectedDirection = BeamDirection.East;
+                                    break;
+                            }
+                        }
+                        break;
+                    case BeamDirection.NorthEast:
+                        {
+                            switch (simplifiedRotation)
+                            {
+                                case BeamDirection.North:
+                                    reflectedDirection = BeamDirection.SouthEast;
+                                    break;
+                                case BeamDirection.East:
+                                    reflectedDirection = BeamDirection.NorthWest;
+                                    break;
+                            }
+                        }
+                        break;
+                    case BeamDirection.East:
+                        {
+                            switch (simplifiedRotation)
+                            {
+                                case BeamDirection.NorthEast:
+                                    reflectedDirection = BeamDirection.South;
+                                    break;
+                                case BeamDirection.SouthEast:
+                                    reflectedDirection = BeamDirection.North;
+                                    break;
+                            }
+                        }
+                        break;
+                }
+            }
+
+            return reflectedDirection;
+        }
+
         private void UpdateBeams()
         {
             var hasReflection = false;
 
-            foreach(var reflection in _reflections)
+            foreach (var reflection in _reflections)
             {
-                var from = (BeamDirection)(((int)reflection.from + (_rotated ? 4 : 0)) % 8);
-                var powered = false;
-                for(int i=_terminal.connectionCount - 1; i>=0 && !powered; i--)
-                    powered = _terminal.GetConnection(i).direction == from;
+                bool isPowered = false;
+                for (int i = _terminal.connectionCount - 1; i >= 0; i--)
+                {
+                    BeamDirection reflectedDirection = GetReflectedBeam(_terminal.GetConnection(i).direction);
 
-                reflection.beam.gameObject.SetActive(powered);
-                hasReflection |= powered;
+                    if (reflectedDirection == _terminal.GetConnection(i).direction)
+                        break;
+
+                    if (reflection.to == reflectedDirection)
+                    {
+                        isPowered = true;
+                        hasReflection = true;
+                        break;
+                    }
+                }
+
+                reflection.beam.gameObject.SetActive(isPowered);
             }
 
             _visualsOff.SetActive(!hasReflection);
@@ -83,7 +218,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUseEvent (UseEvent evt)
         {
-            rotated = !rotated;
+            ++rotation;
 
             PlaySound(_useSound, 1.0f, UnityEngine.Random.Range(0.8f,1.2f));
         }

@@ -235,15 +235,6 @@ namespace Puzzled
                     ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(selectedTile, "rotation", rotation.GetValue<int>(selectedTile) + 1));
             });
 
-            _inspectorRotated.onValueChanged.AddListener((v) => {
-                if (selectedTile == null)
-                    return;
-
-                var rotated = selectedTile.GetProperty("rotated");
-                if (null != rotated)
-                    ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(selectedTile, "rotated", v));
-            });
-
             _inspectorFlip.onValueChanged.AddListener((v) => {
                 if (selectedTile == null)
                     return;

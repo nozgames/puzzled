@@ -5,13 +5,19 @@ namespace Puzzled
 {
     class Rotatable : TileComponent
     {
-        private bool _rotated = false;
+        [SerializeField] 
+        private int _rotationIndex = 0;
 
-        [Editable(hidden = true)]
-        public bool rotated {
-            get => _rotated;
-            set {
-                _rotated = value;
+        [SerializeField]
+        public int numRotations = 4;
+
+        [Editable(serialized = false, hidden = true)]
+        public int rotation
+        {
+            get => _rotationIndex;
+            set
+            {
+                this._rotationIndex = value % numRotations;
                 UpdateRotation();
             }
         }
@@ -24,7 +30,8 @@ namespace Puzzled
 
         private void UpdateRotation()
         {
-            transform.localRotation = Quaternion.Euler(0, _rotated ? 90 : 0, 0);
+            float rotationStep = 360 / numRotations;
+            transform.localRotation = Quaternion.Euler(0, _rotationIndex * rotationStep, 0);
         }
     }
 }

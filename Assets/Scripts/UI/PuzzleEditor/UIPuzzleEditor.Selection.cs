@@ -142,10 +142,6 @@ namespace Puzzled
                 var rotation = _selection.tile.GetProperty("rotation");
                 _inspectorRotation.gameObject.SetActive(rotation != null);
 
-                var rotated = _selection.tile.GetProperty("rotated");
-                _inspectorRotated.gameObject.SetActive(rotated != null);
-                _inspectorRotated.isOn = (rotated != null && rotated.GetValue<bool>(_selection.tile));
-
                 var flipped = _selection.tile.GetProperty("flipped");
                 _inspectorFlip.gameObject.SetActive(flipped != null);
                 _inspectorFlip.isOn = (flipped != null && flipped.GetValue<bool>(_selection.tile));

@@ -17,7 +17,6 @@ namespace Puzzled
                 this.value = value;
                 ForceRotationIndex(value);
             }
-
         }
         
         protected override int stepCount => numRotations;
