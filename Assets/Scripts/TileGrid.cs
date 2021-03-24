@@ -206,6 +206,9 @@ namespace Puzzled
         /// <returns>Index into the tile array</returns>
         private int GetIndex(Cell coordinate)
         {
+            if (!IsValid(coordinate))
+                return -1;
+
             switch (coordinate.system)
             {
                 case CellCoordinateSystem.Grid:
@@ -223,6 +226,16 @@ namespace Puzzled
         }
 
         public CellCoordinateSystem LayerToCoordinateSystem (TileLayer layer) => _layers[(int)layer].system;
+
+        public bool IsValid (Cell cell)
+        {
+            if (cell.x < minCell.x || cell.x >= maxCell.x)
+                return false;
+            if (cell.y < minCell.y || cell.y >= maxCell.y)
+                return false;
+
+            return true;
+        }
 
         /// <summary>
         /// Convert the given cell and layer to a tile

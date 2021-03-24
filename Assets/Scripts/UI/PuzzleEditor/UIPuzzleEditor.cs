@@ -12,6 +12,7 @@ namespace Puzzled
     public partial class UIPuzzleEditor : UIScreen, KeyboardManager.IKeyboardHandler
     {
         public const int DefaultZoom = 12;
+        public const int MaxZoom = 30;
 
         public enum Mode
         {
@@ -206,7 +207,7 @@ namespace Puzzled
             inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
 
             _zoomSlider.minValue = CameraManager.MinZoom;
-            _zoomSlider.maxValue = CameraManager.MaxZoom;
+            _zoomSlider.maxValue = MaxZoom;
             _zoomSlider.value = _cameraZoom;
             _zoomSlider.onValueChanged.AddListener((v) => {
                 UpdateZoom((int)v);
@@ -333,7 +334,7 @@ namespace Puzzled
 
         private void UpdateZoom(int zoom)
         {
-            _cameraZoom = Mathf.Clamp(zoom, CameraManager.MinZoom, CameraManager.MaxZoom);
+            _cameraZoom = Mathf.Clamp(zoom, CameraManager.MinZoom, MaxZoom);
 
             UpdateCamera();
             UpdateSelectionGizmo();
