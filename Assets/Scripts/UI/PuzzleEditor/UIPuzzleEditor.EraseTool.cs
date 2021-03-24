@@ -108,8 +108,8 @@ namespace Puzzled
                 if (property.type == TilePropertyType.Port)
                 {
                     var port = property.GetValue<Port>(tile);
-                    if (port.flow != PortFlow.Output)
-                        continue;
+                    //if (port.flow != PortFlow.Output)
+                      //  continue;
 
                     foreach (var wire in port.wires)
                         group.Add(new Editor.Commands.WireDestroyCommand(wire));

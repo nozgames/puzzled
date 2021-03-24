@@ -181,6 +181,9 @@ namespace Puzzled
 
             instance._trash.Remove(gameObject.GetInstanceID());
             gameObject.transform.SetParent(parent);
-        }        
+        }
+
+        public static bool IsInTrash(GameObject gameObject) =>
+            gameObject.transform.parent == instance._puzzle.trash;
     }
 }

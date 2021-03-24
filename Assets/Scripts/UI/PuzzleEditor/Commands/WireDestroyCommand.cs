@@ -15,6 +15,9 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnExecute()
         {
+            if (UIPuzzleEditor.IsInTrash(wire.gameObject))
+                return;
+
             fromIndex = wire.from.port.wires.IndexOf(wire);
             toIndex = wire.to.port.wires.IndexOf(wire);
             Debug.Assert(fromIndex >= 0);
@@ -25,6 +28,9 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnRedo()
         {
+            if (UIPuzzleEditor.IsInTrash(wire.gameObject))
+                return;
+
             wire.from.port.wires.RemoveAt(fromIndex);
             wire.to.port.wires.RemoveAt(toIndex);
             wire.from.tile.Send(new StartEvent());
@@ -35,6 +41,9 @@ namespace Puzzled.Editor.Commands
 
         protected override void OnUndo()
         {
+            if (!UIPuzzleEditor.IsInTrash(wire.gameObject))
+                return;
+
             UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
             wire.from.port.wires.Insert(fromIndex, wire);
             wire.to.port.wires.Insert(toIndex, wire);
@@ -45,7 +54,7 @@ namespace Puzzled.Editor.Commands
         protected override void OnDestroy()
         {
             // If the command was exeucted then the wire still exists in the deleted section, so destroy it now
-            if (isExecuted)
+            if (isExecuted && UIPuzzleEditor.IsInTrash(wire.gameObject))
             {
                 UIPuzzleEditor.RestoreFromTrash(wire.gameObject);
                 Object.Destroy(wire.gameObject);
