@@ -6,19 +6,19 @@ namespace Puzzled
 {
     class DecalSpinner : RecyclableSpinner
     {
-        private Sprite[] _decalSprites = null;
-
         /// <summary>
         /// List of all decals
         /// </summary>
         [Editable]
-        public Decal[] decals { get; private set; }
+        public Decal[] spinnerDecals { get; private set; }
 
-        override protected Sprite[] sprites => _decalSprites;
+        override protected Decal[] decals => spinnerDecals;
 
         protected override void OnStart(StartEvent evt)
         {
-            _decalSprites = decals?.Select(d => d.sprite).ToArray() ?? new Sprite[0];
+            if (spinnerDecals == null)
+                spinnerDecals = new Decal[0];
+
             base.OnStart(evt);
         }
     }
