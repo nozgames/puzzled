@@ -36,26 +36,39 @@ namespace Puzzled
 
         private void HandleWireChange()
         {
+            bool isStateCorrect = IsCurrentStateCorrect();
+            if (isStateCorrect)
+            {
+                HandleCorrectState();
+            }
+            else
+            {
+                HandleIncorrectState();
+
+                // after failing, check signal again to see if it matched first thing
+                if (IsCurrentStateCorrect())
+                    HandleCorrectState();
+            }
+        }
+
+        private bool IsCurrentStateCorrect()
+        {
             for (int i = 0; i < powerInPort.wireCount; ++i)
             {
                 bool isWireExpected = ((powerInPort.GetWireOption(i, 0) & (1 << sequenceIndex)) != 0);
                 if (powerInPort.GetWire(i).hasPower != isWireExpected)
-                {
-                    // failure
-                    HandleIncorrectWire();
-                    return;
-                }
+                    return false; // failure
             }
 
-            HandleCorrectWire();
+            return true;
         }
 
-        private void HandleCorrectWire()
+        private void HandleCorrectState()
         {
             SetSequenceIndex(sequenceIndex + 1);
         }
 
-        private void HandleIncorrectWire()
+        private void HandleIncorrectState()
         {
             ResetSequence();
         }

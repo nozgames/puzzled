@@ -32,18 +32,32 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnSignal (SignalEvent evt)
         {
+            bool bCorrectWire = IsSignalCorrect(evt);
+
+            if (bCorrectWire)
+            {
+                HandleCorrectWire();
+            }
+            else
+            {
+                HandleIncorrectWire();
+
+                // after failing, check signal again to see if it matched first thing
+                if (IsSignalCorrect(evt))
+                    HandleCorrectWire();
+            }
+        }
+
+        private bool IsSignalCorrect(SignalEvent evt)
+        {
             for (int i = 0; i < signalInPort.wireCount; ++i)
             {
                 bool isWireExpected = ((signalInPort.GetWireOption(i, 0) & (1 << sequenceIndex)) != 0);
                 if ((signalInPort.GetWire(i) == evt.wire) && !isWireExpected)
-                {
-                    // failure
-                    HandleIncorrectWire();
-                    return;
-                }
+                    return false; // failure
             }
 
-            HandleCorrectWire();
+            return true;
         }
 
         private void HandleCorrectWire()
