@@ -536,6 +536,7 @@ GameObject:
   - component: {fileID: -6327194840247934323}
   - component: {fileID: 4930026805704109339}
   - component: {fileID: 7512739909169767742}
+  - component: {fileID: 7028891472176480007}
   m_Layer: 0
   m_Name: DecalSpinner
   m_TagString: Untagged
@@ -609,6 +610,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 971242d9f121266428494884b46489e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _rotator: {fileID: 6105048635979744109}
+  _useSound: {fileID: 8300000, guid: 7faa803b984bba94396b4c8b84c2718b, type: 3}
   _decalRenderers:
   - {fileID: 2117967446351575966}
   - {fileID: 7944637707133523420}
@@ -616,8 +619,20 @@ MonoBehaviour:
   - {fileID: 7594356759567320372}
   - {fileID: 3733114559759376607}
   - {fileID: 4360461392720309242}
-  _rotator: {fileID: 6105048635979744109}
-  _useSound: {fileID: 8300000, guid: 7faa803b984bba94396b4c8b84c2718b, type: 3}
+--- !u!114 &7028891472176480007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ab130ebf49553541a9a64f7822f96db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _rotationIndex: 0
+  numRotations: 4
 --- !u!1001 &613554879436773724
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -687,6 +702,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
+--- !u!4 &5226229895255878688 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4610414368364317316, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
+  m_PrefabInstance: {fileID: 613554879436773724}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6105048635979744109 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -2577548232221058511, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
@@ -720,10 +740,5 @@ Transform:
 --- !u!4 &8572548439837536319 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -111455799354513053, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
-  m_PrefabInstance: {fileID: 613554879436773724}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &5226229895255878688 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -4610414368364317316, guid: f61f6e09ce01001489157153b1ac6050, type: 3}
   m_PrefabInstance: {fileID: 613554879436773724}
   m_PrefabAsset: {fileID: 0}
