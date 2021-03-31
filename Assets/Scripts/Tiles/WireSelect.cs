@@ -17,21 +17,28 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnSelectUpdate(SelectUpdateEvent evt)
         {
-            // FIXME
-            HashSet<int> wireValues = new HashSet<int>();
-
-            // add transient value first (may be 0)
-            if (evt.transientValue > 0)
-                wireValues.Add(evt.transientValue);
-
-            foreach (Wire wire in evt.wires)
-                wireValues.Add(wire.value);
-
             // Enable power for the selected wires and disabled for any other
             for (int i = 0; i < powerOutPort.wireCount; ++i)
             {
-                bool isPowered = wireValues.Contains(i) ;
-                powerOutPort.SetPowered(i, isPowered);
+                bool isWirePowered = false;
+                if (evt.isPowered)
+                {
+                    isWirePowered = (i == evt.transientValue);
+                    if (!isWirePowered)
+                    {
+                        // FIXME: is there a nicer way than iterating over each wire?  (the wire count should be pretty small in most cases)
+                        foreach (Wire wire in evt.wires)
+                        {
+                            if (wire.value == i)
+                            {
+                                isWirePowered = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                powerOutPort.SetPowered(i, isWirePowered);
             }
         }
     }

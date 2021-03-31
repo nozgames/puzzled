@@ -34,6 +34,13 @@ namespace Puzzled
         private Port powerOutPort { get; set; }
 
         /// <summary>
+        /// Output value (0 or 1)
+        /// </summary>
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number)]
+        private Port valueOutPort { get; set; }
+
+        /// <summary>
         /// Inport signal port to toggle the switch state
         /// </summary>
         [Editable]
@@ -188,6 +195,7 @@ namespace Puzzled
                 return;
 
             powerOutPort.SetPowered(isOn);
+            valueOutPort.SendValue(isOn ? 1 : 0, true);
         }
 
         private void UpdateAnimation ()

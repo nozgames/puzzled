@@ -8,6 +8,7 @@ namespace Puzzled
         public Select source { get; private set; }
         public List<Wire> wires { get; private set; }
         public int transientValue { get; private set; }
+        public bool isPowered => source.isPowered;
 
         public SelectUpdateEvent(Select source, int transientValue, List<Wire> wires)
         {
