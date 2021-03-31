@@ -25,7 +25,7 @@ namespace Puzzled
 
         public void OnStoryButton()
         {
-            GameManager.LoadPuzzle(Path.Combine(Application.dataPath, "Puzzles", "Story", "main.puzzle"));
+            GameManager.LoadPuzzle(Path.Combine(Application.dataPath, "Puzzles", "Story", "IntroDream.puzzle"));
             GameManager.Play();
             UIManager.HideMenu();            
         }
