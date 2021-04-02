@@ -28,19 +28,22 @@ namespace Puzzled
 
                 bool isPowered = false;
 
-                // check transient value first
-                if (evt.transientValue >= 0)
+                if (evt.isPowered)
                 {
-                    int stateIndex = evt.transientValue;
-                    if ((wireStates & (1 << stateIndex)) != 0)
-                        isPowered = true;
-                }
+                    // check transient value first
+                    if (evt.transientValue >= 0)
+                    {
+                        int stateIndex = evt.transientValue;
+                        if ((wireStates & (1 << stateIndex)) != 0)
+                            isPowered = true;
+                    }
 
-                foreach (Wire wire in evt.wires)
-                {
-                    int stateIndex = wire.value;
-                    if ((wireStates & (1 << stateIndex)) != 0)
-                        isPowered = true;
+                    foreach (Wire wire in evt.wires)
+                    {
+                        int stateIndex = wire.value;
+                        if ((wireStates & (1 << stateIndex)) != 0)
+                            isPowered = true;
+                    }
                 }
 
                 // for signal ports, toggle power if configured to always signal
