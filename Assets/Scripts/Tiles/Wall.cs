@@ -1,16 +1,16 @@
+using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
 using NoZ;
-using System.Collections.Generic;
 
 namespace Puzzled
 {
     public class Wall : TileComponent
     {
-        [SerializeField] private GameObject _visuals = null;
-        [SerializeField] private GameObject _capLeft = null;
-        [SerializeField] private GameObject _capRight = null;
+        [SerializeField] private Transform _rotator = null;
+        [SerializeField] private GameObject _cornerPrefab = null;
 
-        [SerializeField] private int _capPriority = 0;
+        [SerializeField] private int _cornerPriority = 0;
         [SerializeField] private bool _smartCorners = true;
 
         [SerializeField] private bool _allowWallMounts = true;
@@ -22,6 +22,9 @@ namespace Puzzled
         /// True if the wall allows tils to be attached to it
         /// </summary>
         public bool allowsWallMounts => _allowWallMounts;
+
+        private GameObject _cornerMin = null;
+        private GameObject _cornerMax = null;
 
         [ActorEventHandler]
         private void OnStart(StartEvent evt)
@@ -55,96 +58,120 @@ namespace Puzzled
                 evt.result = false;
         }
 
-        private Wall GetParallel(Cell cell, CellEdgeSide cap) => 
-            puzzle.grid.CellToComponent<Wall>(Cell.GetParallelEdge(cell, cap), tile.layer);
-
-        private Wall GetPerpendicular (Cell cell, CellEdgeSide capSide, CellEdgeSide perpendicularSide) =>
-            puzzle.grid.CellToComponent<Wall>(Cell.PerpendicularEdge(cell, capSide, perpendicularSide), tile.layer);
-
-        private bool IsHigherPriority (Wall compare)
+        private int ComparePriority (Wall compare)
         {
             if (compare == null)
-                return true;
+                return 1;
 
-            if (_capPriority > compare._capPriority)
-                return true;
+            if (_cornerPrefab == null)
+                return -1;
 
-            if (_capPriority < compare._capPriority)
-                return false;
+            if (_cornerPriority > compare._cornerPriority)
+                return 1;
+
+            if (_cornerPriority < compare._cornerPriority)
+                return -1;
 
             // Priority is the same so use the edge to choose one
             var cell = tile.cell;
             var compareCell = compare.tile.cell;
 
             if (cell.edge > compareCell.edge)
-                return true;
+                return 1;
 
             if (cell.edge < compareCell.edge)
-                return false;
+                return -1;
 
-            // Edge is the same so use x/y to choose one
-            return cell.x > compareCell.x || cell.y > compareCell.y;
+            if (cell.x > compareCell.x)
+                return 1;
+            else if (compareCell.x > cell.x)
+                return -1;
+
+            return cell.y - compareCell.y;
         }
 
-        private bool UpdateCap (Cell cell, CellEdgeSide cap, bool updateNeighbors)
+        /// <summary>
+        /// Return all walls in the N/E corner of the given cell
+        /// </summary>
+        /// <param name="cell">Cell to return the walls from</param>
+        /// <returns>Array of walls in the N/E corner of the cell </returns>
+        private Wall[] GetCornerWalls (Cell cell)
         {
-            var wallParallel = GetParallel(cell, cap);
-            var wallPerpendicular0 = GetPerpendicular(cell, cap, CellEdgeSide.Min);
-            var wallPerpendicular1 = GetPerpendicular(cell, cap, CellEdgeSide.Max);
+            var list = new List<Wall>();
+            list.Add(puzzle.grid.CellToComponent<Wall>(new Cell(cell, CellEdge.North), TileLayer.Wall));
+            list.Add(puzzle.grid.CellToComponent<Wall>(new Cell(cell, CellEdge.East), TileLayer.Wall));
+            list.Add(puzzle.grid.CellToComponent<Wall>(new Cell(cell + Vector2Int.right, CellEdge.North), TileLayer.Wall));
+            list.Add(puzzle.grid.CellToComponent<Wall>(new Cell(cell + Vector2Int.up, CellEdge.East), TileLayer.Wall));
+            return list.Where(w => w != null).ToArray();
+        }
 
-            if(updateNeighbors)
-            {
-                if (wallParallel != null)
-                    wallParallel.UpdateVisuals(wallParallel.tile.cell, false);
-                if (wallPerpendicular0 != null)
-                    wallPerpendicular0.UpdateVisuals(wallPerpendicular0.tile.cell, false);
-                if (wallPerpendicular1 != null)
-                    wallPerpendicular1.UpdateVisuals(wallPerpendicular1.tile.cell, false);
-            }
+        private GameObject AddCorner (Cell cell, Vector3 offset, bool updateNeighbors)
+        {
+            var cornerWalls = GetCornerWalls(cell).Where(w => w != this).ToArray();
 
-            if (!IsHigherPriority(wallParallel))
-                return false;
+            // Check if any wall is a higher priority
+            var ownsCorner = _cornerPrefab != null;
 
-            if (!IsHigherPriority(wallPerpendicular0))
-                return false;
+            // Smart corners means no corner when the wall is continuing in the same direction.
+            if (_smartCorners && cornerWalls.Length == 1 && cornerWalls[0].tile.cell.edge == tile.cell.edge && cornerWalls[0].tile.guid == tile.guid)
+                ownsCorner = false;
 
-            if (!IsHigherPriority(wallPerpendicular1))
-                return false;
+            if(ownsCorner)
+                foreach (var cornerWall in cornerWalls)
+                {
+                    var compare = ComparePriority(cornerWall);
+                    if (compare < 0)
+                    {
+                        ownsCorner = false;
+                        break;
+                    }
+                }
 
-            var perpendicularWalls = wallPerpendicular0 != null || wallPerpendicular1 != null;
-            var parallelWall = wallParallel != null;
+            // Create the corner if needed
+            var corner = ownsCorner ? Instantiate(_cornerPrefab, _rotator) : null;
+            if (corner != null)
+                corner.transform.localPosition = offset;
 
-            // Always cap the end
-            // TODO: optional?
-            if (!parallelWall && !perpendicularWalls)
-                return true;
 
-            // If using smart corners then dot cap perpendicular only transitions
-            if (_smartCorners && !perpendicularWalls)
-                return false;
+            // Update all neighbors
+            if (updateNeighbors)
+                foreach (var cornerWall in cornerWalls)
+                    cornerWall.UpdateVisuals(cornerWall.tile.cell, false);
 
-            return true;
+            return corner;
         }
 
         private void UpdateVisuals(Cell cell, bool updateNeighbors = false)
         {
+            // Destroy old corners
+            if (_cornerMin != null)
+            {
+                Destroy(_cornerMin);
+                _cornerMin = null;
+            }
+
+            if (_cornerMax != null)
+            {
+                Destroy(_cornerMax);
+                _cornerMax = null;
+            }
+
             if (cell == Cell.invalid)
                 return;
 
             // Rotate wall when on the east edge
-            if(cell.edge == CellEdge.East)
-                _visuals.transform.localEulerAngles = new Vector3(0, 90, 0);
+            if (cell.edge == CellEdge.East)
+            {
+                _rotator.transform.localEulerAngles = new Vector3(0, 90, 0);
 
-            // Update the caps
-            var capLeft = UpdateCap(cell, CellEdgeSide.Min, updateNeighbors);
-            var capRight = UpdateCap(cell, CellEdgeSide.Max, updateNeighbors);
-
-            // Show/Hide the caps if there are any
-            if (_capLeft != null)
-                _capLeft.gameObject.SetActive(capLeft);
-
-            if (_capRight != null)
-                _capRight.gameObject.SetActive(capRight);
+                _cornerMin = AddCorner(cell, new Vector3(-0.5f, 0), updateNeighbors);
+                _cornerMax = AddCorner(cell - Vector2Int.up, new Vector3(0.5f, 0), updateNeighbors);
+            }
+            else
+            {
+                _cornerMin = AddCorner(cell, new Vector3(0.5f, 0), updateNeighbors);
+                _cornerMax = AddCorner(cell - Vector2Int.right, new Vector3(-0.5f, 0), updateNeighbors);
+            }
         }
 
         private WallMounted GetMounted (CellEdgeSide side)
