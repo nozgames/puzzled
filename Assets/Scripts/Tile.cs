@@ -512,8 +512,8 @@ namespace Puzzled
                         ports.Add(property.GetValue<Port>(this));
 
                 _ports[0] = ports.ToArray();
-                _ports[1] = GetPorts().Where(p => p.flow == PortFlow.Input).ToArray();
-                _ports[2] = GetPorts().Where(p => p.flow == PortFlow.Output).ToArray();
+                _ports[1] = ports.Where(p => p.flow == PortFlow.Input).ToArray();
+                _ports[2] = ports.Where(p => p.flow == PortFlow.Output).ToArray();
             }
 
             return _ports[0];
