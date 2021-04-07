@@ -5,13 +5,12 @@ namespace Puzzled
 {
     class Rotatable : TileComponent
     {
-        [SerializeField] 
         private int _rotationIndex = 0;
 
         [SerializeField]
         public int numRotations = 4;
 
-        [Editable(serialized = false, hidden = true)]
+        [Editable(hidden = true)]
         public int rotation
         {
             get => _rotationIndex;

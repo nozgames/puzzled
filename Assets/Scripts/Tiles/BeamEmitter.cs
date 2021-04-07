@@ -14,13 +14,12 @@ namespace Puzzled
 
         private bool _isEmitting = false;
 
-        [SerializeField]
         private int _rotationIndex = 0;
 
         [SerializeField]
         private int _numRotations = 8;
 
-        [Editable(serialized = false, hidden = true)]
+        [Editable(hidden = true)]
         public int rotation
         {
             get => _rotationIndex;

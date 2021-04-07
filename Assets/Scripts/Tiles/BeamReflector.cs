@@ -22,13 +22,12 @@ namespace Puzzled
         [SerializeField] private GameObject _visualsOff = null;
         [SerializeField] private AudioClip _useSound = null;
 
-        [SerializeField]
         private int _rotationIndex = 3;
 
         [SerializeField]
         private int _numRotations = 8;
 
-        [Editable(serialized = false, hidden = true)]
+        [Editable(hidden = true)]
         public int rotation
         {
             get => _rotationIndex;

@@ -8,7 +8,7 @@ namespace Puzzled
         [Editable]
         public int numRotations { get; set; } = 8;
 
-        [Editable (serialized = false, hidden = true)]
+        [Editable (hidden = true)]
         public int rotation
         {
             get => value;
