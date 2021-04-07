@@ -132,10 +132,10 @@ namespace Puzzled
                             switch (simplifiedRotation)
                             {
                                 case BeamDirection.North:
-                                    reflectedDirection = BeamDirection.West;
+                                    reflectedDirection = BeamDirection.SouthWest;
                                     break;
                                 case BeamDirection.East:
-                                    reflectedDirection = BeamDirection.South;
+                                    reflectedDirection = BeamDirection.NorthEast;
                                     break;
                             }
                         }
