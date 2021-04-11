@@ -24,7 +24,7 @@ namespace Puzzled
             public TAsset asset;
         }
 
-        [SerializeField] private SerializedResource[] _serializedResources = null;
+        [SerializeField] private List<SerializedResource> _serialized = null;
 
         protected Dictionary<Guid, Resource> _resources = new Dictionary<Guid, Resource>();
 
@@ -66,12 +66,19 @@ namespace Puzzled
             _resources[guid] = resource;
             OnDeserializeResource(resource);
 
+            _serialized.Add(new SerializedResource { asset = asset, guid = guid.ToString() }); 
+
             EditorUtility.SetDirty(this);
         }
 
         public void Remove(TAsset asset)
         {
             _resources.Remove(GetGuidFromAssetDatabase(asset));
+
+            var serializedIndex = _serialized.FindIndex(m => m.asset == asset);
+            if (serializedIndex != -1)
+                _serialized.RemoveAt(serializedIndex);
+
             EditorUtility.SetDirty(this);
         }
 #endif
@@ -89,22 +96,16 @@ namespace Puzzled
             return Guid.Empty;
         }
 
-        public void OnBeforeSerialize()
-        {
-            _serializedResources = _resources.Select(e => new SerializedResource { asset = e.Value.asset, guid = e.Key.ToString() }).ToArray();
-        }
+        public void OnBeforeSerialize() { }
 
         public void OnAfterDeserialize()
         {
-            if (_serializedResources == null)
-            {
-                _resources.Clear();
+            _resources = new Dictionary<Guid, Resource>(_serialized.Count);
+
+            if (_serialized == null)
                 return;
-            }
 
-            _resources = new Dictionary<Guid, Resource>(_serializedResources.Length);
-
-            foreach (var serializedResource in _serializedResources)
+            foreach (var serializedResource in _serialized)
             {
                 if (serializedResource.asset == null)
                 {
