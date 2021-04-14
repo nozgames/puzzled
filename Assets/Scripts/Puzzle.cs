@@ -304,6 +304,26 @@ namespace Puzzled
         }
 
         /// <summary>
+        /// Save the puzzle using a new path
+        /// </summary>
+        /// <param name="file">file stream to save file with</param>
+        /// <param name="path">Path to save file with</param>
+        public void Save(Stream file, string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentException("path");
+
+            _path = path;
+            _worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(_path));
+
+            isModified = false;
+
+            // Save the file using the given path
+            using (var writer = new BinaryWriter(file))
+                Save(_tiles.GetTiles(), writer);
+        }
+
+        /// <summary>
         /// Save the given tile list
         /// </summary>
         /// <param name="tiles">Tiles to save</param>
@@ -524,6 +544,37 @@ namespace Puzzled
 
                 Debug.Log($"Puzzled Loaded: [{puzzle._tiles.transform.childCount} tiles, {puzzle._wires.transform.childCount} wires]");
             } 
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                puzzle.Destroy();
+                return null;
+            }
+
+            return puzzle;
+        }
+
+        /// <summary>
+        /// Load a puzzle from the file stream
+        /// </summary>
+        /// <param name="file">Puzzle file stream</param>
+        /// <param name="path">Puzzle path</param>
+        /// <returns>Loaded puzzle or null if the puzzle failed to load</returns>
+        public static Puzzle Load(Stream file, string path)
+        {
+            var puzzle = GameManager.InstantiatePuzzle();
+            puzzle.isLoading = true;
+            try
+            {
+                using (var reader = new BinaryReader(file))
+                    puzzle.Load(reader);
+
+                puzzle._path = path;
+                puzzle._worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(puzzle._path));
+                puzzle.isLoading = false;
+
+                Debug.Log($"Puzzled Loaded: [{puzzle._tiles.transform.childCount} tiles, {puzzle._wires.transform.childCount} wires]");
+            }
             catch (Exception e)
             {
                 Debug.LogException(e);
