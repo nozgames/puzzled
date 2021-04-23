@@ -21,6 +21,7 @@ namespace Puzzled.Editor
         [SerializeField] private TMPro.TextMeshProUGUI _selectedName = null;
         [SerializeField] private TMPro.TMP_InputField _searchInput = null;
         [SerializeField] private Button _searchClearButton = null;
+        [SerializeField] private Button _importButton = null;
         [SerializeField] private bool allowNone = false;
 
         [SerializeField] private UIRadio _filterAll = null;
@@ -28,10 +29,6 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _filterRune = null;
         [SerializeField] private UIRadio _filterNumber = null;
         [SerializeField] private UIRadio _filterLine = null;
-
-        [SerializeField] private UIRadio _flagRotate = null;
-        [SerializeField] private UIRadio _flagFlipX = null;
-        [SerializeField] private UIRadio _flagFlipY = null;
 
         private Decal _selected;
 
@@ -44,10 +41,6 @@ namespace Puzzled.Editor
 
         private void Awake()
         {
-            _flagRotate.onValueChanged.AddListener((v) => { _selected.rotate = v; UpdatePreview();  });
-            _flagFlipX.onValueChanged.AddListener((v) => { _selected.flipHorizontal = v; UpdatePreview(); });
-            _flagFlipY.onValueChanged.AddListener((v) => { _selected.flipVertical = v; UpdatePreview(); });
-
             _list.onDoubleClickItem += (index) => {
                 onDoubleClickDecal?.Invoke(_list.GetItem(index).GetComponent<UIDecalPaletteItem>().decal);
             };
@@ -62,6 +55,10 @@ namespace Puzzled.Editor
                 EventSystem.current.SetSelectedGameObject(_searchInput.gameObject);
             });
             _searchClearButton.gameObject.SetActive(false);
+
+            _importButton.onClick.AddListener(() => {
+                UIPuzzleEditor.Import();
+            });
 
             _searchInput.onValueChanged.AddListener((text) => {
                 _searchClearButton.gameObject.SetActive(!string.IsNullOrEmpty(text));
@@ -83,6 +80,21 @@ namespace Puzzled.Editor
             _filterLine.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
         }
 
+        public void RemoveImportedDecals ()
+        {
+            for(var childIndex = _list.transform.childCount - 1; childIndex >=0; childIndex--)
+            {
+                var item = GetItem(childIndex);
+                if (item.decal.isImported)
+                    Destroy(item.gameObject);
+            }
+        }
+
+        public void AddDecal (Decal decal)
+        {
+            Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = decal;
+        }
+
         private void OnEnable()
         {
             if (_list.selected == -1)
@@ -94,10 +106,6 @@ namespace Puzzled.Editor
         private void SetSelected (Decal value, bool scroll)
         {
             _selected = value;
-
-            _flagFlipX.SetIsOnWithoutNotify(_selected.flipHorizontal);
-            _flagFlipY.SetIsOnWithoutNotify(_selected.flipVertical);
-            _flagRotate.SetIsOnWithoutNotify(_selected.rotate);
 
             for (int i = _list.itemCount - 1; i >= 0; i--)
             {
@@ -158,8 +166,8 @@ namespace Puzzled.Editor
         {
             _selectedPreview.sprite = _selected.sprite;
             _selectedPreview.gameObject.SetActive(_selected.sprite != null);
-            _selectedPreview.transform.localScale = new Vector3(_selected.flipHorizontal ? -1 : 1, _selected.flipVertical ? -1 : 1, 1);
-            _selectedPreview.transform.localRotation = Quaternion.Euler(0, 0, _selected.rotate ? -90 : 0);
+            _selectedPreview.transform.localScale = new Vector3(_selected.isFlipped ? -1 : 1, 1, 1);
+            _selectedPreview.transform.localRotation = Quaternion.Euler(0, 0, _selected.rotation);
 
             _selectedName.text = _selected.name;
         }

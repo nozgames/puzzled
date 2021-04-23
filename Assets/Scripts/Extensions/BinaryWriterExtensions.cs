@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using UnityEngine;
 
 namespace Puzzled
 {
@@ -19,6 +20,15 @@ namespace Puzzled
             writer.Write((byte)b);
             writer.Write((byte)c);
             writer.Write((byte)d);
+        }
+
+        public static void Write(this BinaryWriter writer, Color color)
+        {
+            var color32 = (Color32)color;
+            writer.Write(color32.r);
+            writer.Write(color32.g);
+            writer.Write(color32.b);
+            writer.Write(color32.a);
         }
 
         public static void Write(this BinaryWriter writer, Guid guid)

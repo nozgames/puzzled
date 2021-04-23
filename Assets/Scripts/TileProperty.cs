@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 
 namespace Puzzled
@@ -52,20 +51,14 @@ namespace Puzzled
         /// <summary>
         /// Name of the property
         /// </summary>
-        public string name => info.Name;
+        public string name { get; private set; }
+
+        public ulong componentInstanceId { get; private set; }
 
         /// <summary>
         /// Display name of the property
         /// </summary>
-        public string displayName {
-            get {
-                var displayName = name;
-                if (port != null && displayName.EndsWith("Port"))
-                    displayName = name.Substring(0, name.Length - 4);
-
-                return displayName.NicifyName();
-            }
-        }
+        public string displayName { get; private set; }
 
         /// <summary>
         /// Type of the property
@@ -77,8 +70,9 @@ namespace Puzzled
         /// </summary>
         /// <param name="info"></param>
         /// <param name="editable"></param>
-        public TileProperty(PropertyInfo info, EditableAttribute editable, PortAttribute port)
+        public TileProperty(TileComponent tileComponent, PropertyInfo info, EditableAttribute editable, PortAttribute port)
         {
+            this.componentInstanceId = tileComponent.instanceId;
             this.info = info;
             this.editable = editable;
             this.port = port;
@@ -87,6 +81,33 @@ namespace Puzzled
             // Dont bother setting the type if the property isnt ediable
             if (editable == null)
                 return;
+
+            // Dynamic name
+            if (!string.IsNullOrEmpty(editable.dynamicName))
+            {
+                var propertyInfo = tileComponent.GetType().GetProperty(editable.dynamicName);
+                if (null != propertyInfo && propertyInfo.PropertyType == typeof(string))
+                    name = (string)propertyInfo.GetValue(tileComponent);
+            }
+
+            if (string.IsNullOrEmpty(name))
+                name = info.Name;
+
+            // Build the display name
+            if (!string.IsNullOrEmpty(editable.dynamicDisplayName))
+            {
+                var propertyInfo = tileComponent.GetType().GetProperty(editable.dynamicDisplayName);
+                if (null != propertyInfo && propertyInfo.PropertyType == typeof(string))
+                    displayName = (string)propertyInfo.GetValue(tileComponent);
+            }
+
+            if (string.IsNullOrEmpty(displayName))
+            {
+                displayName = name;
+                if (port != null && displayName.EndsWith("Port"))
+                    displayName = displayName.Substring(0, displayName.Length - 4);
+                displayName = displayName.NicifyName();
+            }
 
             if (info.PropertyType == typeof(int))
                 type = TilePropertyType.Int;
@@ -127,7 +148,7 @@ namespace Puzzled
         /// </summary>
         /// <param name="tile">Component parent tile</param>
         /// <returns>Component</returns>
-        private TileComponent GetComponent(Tile tile) => (TileComponent)tile.GetComponentInChildren(info.DeclaringType);
+        public TileComponent GetComponent(Tile tile) => tile.GetTileComponent(componentInstanceId);
 
         /// <summary>
         /// Set the tile property value

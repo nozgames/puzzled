@@ -39,7 +39,8 @@ namespace Puzzled
             if (playSound)
                 PlaySound(_pressed ? _downSound : _upSound, 1.0f, _pressed ? 1.0f : 1.2f);
 
-            _animator.SetTrigger(pressed ? "Down" : "Up");
+            if(_animator != null)
+                _animator.SetTrigger(pressed ? "Down" : "Up");
 
             if (!_isUsable)
                 powerOutPort.SetPowered(false);

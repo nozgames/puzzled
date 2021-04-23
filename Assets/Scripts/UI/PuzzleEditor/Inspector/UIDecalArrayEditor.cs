@@ -11,11 +11,22 @@ namespace Puzzled.Editor
 
         private List<Decal> _decals;
 
+        public object inspectorState {
+            get => _items.selected;
+            set {
+                var index = (int)value;
+                if (index == -1)
+                    _items.ClearSelection();
+                else
+                    _items.Select(index);
+            }
+        }
+
+        public string inspectorStateId => target.id;
+
         protected override void OnTargetChanged()
         {
             base.OnTargetChanged();
-
-            label = target.name;
 
             _items.transform.DetachAndDestroyChildren();
             _items.onReorderItem += OnReorderItem;            
@@ -31,10 +42,9 @@ namespace Puzzled.Editor
         {
             UIPuzzleEditor.instance.ChooseDecal(Decal.none, (decal) => {
                 _decals.Add(decal);
-                UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (cmd) => {
-                    AddDecal(decal);
-                    _items.Select(_items.itemCount - 1);
-                });
+                AddDecal(decal);
+                _items.Select(_items.itemCount - 1);
+                target.SetValue(_decals.ToArray());
             });
         }
 
@@ -43,19 +53,15 @@ namespace Puzzled.Editor
             var step = _decals[from];
             _decals.RemoveAt(from);
             _decals.Insert(to, step);
-            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (command) => {
-                _items.Select(to);
-            });
+            _items.Select(to);
+            target.SetValue(_decals.ToArray());
         }
 
         private void RemoveDecal(int index)
         {
             _decals.RemoveAt(_items.selected);
-
-            UIPuzzleEditor.ExecuteCommand(
-                new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()), false, (command) => {
-                    _items.Select(Mathf.Min(_items.selected, _items.itemCount - 1));
-                });
+            _items.Select(Mathf.Min(_items.selected, _items.itemCount - 1));
+            target.SetValue(_decals.ToArray());
         }
 
         private UIDecalArrayEditorItem AddDecal(Decal decal)
@@ -64,36 +70,10 @@ namespace Puzzled.Editor
             editor.value = decal;
             editor.onValueChanged += (d) => {
                 _decals[editor.transform.GetSiblingIndex()] = d;
-                UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _decals.ToArray()));
+                target.SetValue(_decals.ToArray());
             };
             editor.onDeleted += (item) => RemoveDecal(item.transform.GetSiblingIndex());
             return editor;
         }
-
-        /// <summary>
-        /// Saves the list state in the inspector
-        /// </summary>
-        private class InspectorState : IInspectorState
-        {
-            public int selectedIndex;
-            public TileProperty property;
-
-            public void Apply(Transform inspector)
-            {
-                var editor = inspector.GetComponentsInChildren<UIDecalArrayEditor>().Where(e => e.target.tileProperty == property).FirstOrDefault();
-                if (null == editor)
-                    return;
-
-                if (selectedIndex == -1)
-                    editor._items.ClearSelection();
-                else
-                    editor._items.Select(selectedIndex);
-            }
-        }
-
-        public IInspectorState GetState() => new InspectorState { 
-            selectedIndex = _items.selected,
-            property = target.tileProperty 
-        };
     }
 }

@@ -5,23 +5,25 @@ namespace Puzzled
 {
     public class DecalSurface : TileComponent
     {
+        [Header("Render")]
         [SerializeField] private SpriteRenderer _renderer = null;
-        [SerializeField] private Color _lightColor = Color.white;
-        [SerializeField] private Light _light = null;
 
-        [Editable(hiddenIfFalse = "decal")]
-        [Port(PortFlow.Input, PortType.Power, PortFlags.AllowSelfWire)]
-        public Port decalPowerPort { get; private set; }
+        [Header("Property")]
+        [SerializeField] private string _propertyName = null;
+        [SerializeField] private string _propertyDisplayName = null;
 
-        private Decal _decal;
+        private Decal _decal = Decal.none;
         private Color _defaultColor;
+
+        public string decalName => _propertyName;
+        public string decalDisplayName => _propertyDisplayName;
 
         public Color color {
             get => _renderer.color;
             set => _renderer.color = value;
         }
 
-        public Color lightColor => _lightColor;
+        public bool hasDecal => _decal != Decal.none;
 
         [ActorEventHandler]
         private void OnAwakeEvent(AwakeEvent evt)
@@ -32,16 +34,16 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnStartEvent (StartEvent evt)
         {
-            UpdateDecalPower();
+            //UpdateDecalPower();
         }
 
         [ActorEventHandler]
         private void OnWirePowerChangedEvent (WirePowerChangedEvent evt)
         {
-            UpdateDecalPower();
+            //UpdateDecalPower();
         }
 
-        [Editable]
+        [Editable(dynamicName = "decalName", dynamicDisplayName = "decalDisplayName")]
         public Decal decal {
             get => _decal;
             set {
@@ -52,13 +54,14 @@ namespace Puzzled
                 if (_decal != null)
                 {
                     _renderer.sprite = _decal.sprite;
-                    _renderer.flipX = (_decal.flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal;
-                    _renderer.flipY = (_decal.flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical;
-                    _renderer.transform.transform.localRotation = Quaternion.Euler(0, 0, ((_decal.flags & DecalFlags.Rotate) == DecalFlags.Rotate) ? -90 : 0);
+                    _renderer.flipX = _decal.isFlipped;
+                    _renderer.transform.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotation);
+                    _renderer.color = _decal.isAutoColor ? _defaultColor : _decal.color;
                 }
             }
         }
 
+#if false
         private void UpdateDecalPower()
         {
             if (_light != null)
@@ -66,10 +69,18 @@ namespace Puzzled
 
             _renderer.color = decalPowerPort.hasPower ? _lightColor : _defaultColor;
         }
+#endif
 
         public void ResetColor() => color = _defaultColor;
 
-        public static DecalSurface FromCell(Puzzle puzzle, Cell cell, TileLayer layer)
+        /// <summary>
+        /// Return all decal surfaces for the tile at the given cell and layer
+        /// </summary>
+        /// <param name="puzzle">Puzzle to search in</param>
+        /// <param name="cell">Cell to search in</param>
+        /// <param name="layer">Layer to search in</param>
+        /// <returns>Array of decal surfaces or null if there are none</returns>
+        public static DecalSurface[] FromCell(Puzzle puzzle, Cell cell, TileLayer layer)
         {
             var tile = puzzle.grid.CellToTile(cell, layer);
             if (null == tile)
@@ -78,15 +89,71 @@ namespace Puzzled
             return FromTile(tile);            
         }
 
-        public static DecalSurface FromCell (Puzzle puzzle, Cell cell)
+        /// <summary>
+        /// Return all available decal surfaces for the top most tile in the given cell
+        /// </summary>
+        /// <param name="puzzle">Puzzle to retrieve surfaces from</param>
+        /// <param name="cell">Cell to retrieve surfaces from</param>
+        /// <returns>Array of surfaces or null if the top most tile does not have any</returns>
+        public static DecalSurface[] FromCell (Puzzle puzzle, Cell cell)
         {
-            var result = FromCell(puzzle, cell, TileLayer.Static);
-            if (null != result)
-                return result;
+            // Floor or static
+            if(cell.edge == CellEdge.None)
+            {
+                var result = FromCell(puzzle, cell, TileLayer.Dynamic);
+                if (null != result)
+                    return result;
 
-            return FromCell(puzzle, cell, TileLayer.Floor);
+                result = FromCell(puzzle, cell, TileLayer.Static);
+                if (null != result)
+                    return result;
+
+                return FromCell(puzzle, cell, TileLayer.Floor);
+            }
+            // Wall static or wall
+            else
+            {
+                var result = FromCell(puzzle, cell, TileLayer.WallStatic);
+                if (null != result)
+                    return result;
+
+                return FromCell(puzzle, cell, TileLayer.Wall);
+            }
         }
 
-        public static DecalSurface FromTile (Tile tile) => tile.GetComponentInChildren<DecalSurface>();
+        /// <summary>
+        /// Returns all decal surfaces for the given tile
+        /// </summary>
+        /// <param name="tile">Tile to return decal surfaces for</param>
+        /// <returns>Array of decal surfaces or null if the tile has none</returns>
+        public static DecalSurface[] FromTile(Tile tile)
+        {
+            var surfaces = tile.GetComponentsInChildren<DecalSurface>();
+            if (null == surfaces || surfaces.Length == 0)
+                return null;
+
+            return surfaces;
+        }
+
+        /// <summary>
+        /// Return the top most tile in the given cell that has decal surfaces
+        /// </summary>
+        /// <param name="puzzle">Puzzle to search in</param>
+        /// <param name="cell">Cell to search in</param>
+        /// <returns>Top most tile with decals or null if none found</returns>
+        public static Tile GetTopMostTileWithDecals (Puzzle puzzle, Cell cell)
+        {
+            for (int layer = (int)TileLayer.Logic; layer >= (int)TileLayer.Floor; layer--)
+            {
+                var tile = puzzle.grid.CellToTile(cell, (TileLayer)layer);
+                if (tile == null)
+                    continue;
+
+                if (tile.HasTileComponent<DecalSurface>())
+                    return tile;
+            }
+
+            return null;
+        }
     }
 }

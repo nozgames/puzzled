@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using UnityEngine;
 
 namespace Puzzled
 {
@@ -53,6 +54,11 @@ namespace Puzzled
             }
 
             return new Cell(system, x, y, edge);
+        }
+
+        public static Color ReadColor (this BinaryReader reader)
+        {
+            return new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         }
     }
 }

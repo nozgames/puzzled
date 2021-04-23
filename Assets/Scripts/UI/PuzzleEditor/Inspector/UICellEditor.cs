@@ -15,19 +15,16 @@ namespace Puzzled.Editor
 
         private void OnInputValueChanged(string text)
         {
-            UIPuzzleEditor.ExecuteCommand(
-                new Commands.TileSetPropertyCommand(
-                    target.tile, 
-                    target.tileProperty.name,
-                    new Cell(
+            target.SetValue(new Cell(
                         int.TryParse(_inputX.text, out var parsedX) ? parsedX : 0,
                         int.TryParse(_inputY.text, out var parsedY) ? parsedY : 0
-            )));
+            ));
         }
 
         protected override void OnTargetChanged()
         {
-            label = target.name;
+            base.OnTargetChanged();
+
             var cell = target.GetValue<Cell>();
             _inputX.SetTextWithoutNotify(cell.x.ToString());
             _inputY.SetTextWithoutNotify(cell.y.ToString());

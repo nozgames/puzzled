@@ -80,6 +80,8 @@ namespace Puzzled
         [SerializeField] private UISoundPalette _chooseSoundPalette= null;
         [SerializeField] private UIPortSelector _choosePortPopup = null;
         [SerializeField] private UITileSelector _chooseTileConnectionPopup = null;
+        [SerializeField] private UIImportPopup _importPopup = null;
+        [SerializeField] private UIColorPicker _colorPicker = null;
 
         private Mode _mode = Mode.Unknown;
 
@@ -668,9 +670,36 @@ namespace Puzzled
             UpdateCursor();
         }
 
-        private Tile GetTile(Cell cell) => GetTile(cell, TileLayer.Logic);
 
-        private Tile GetTile(Cell cell, TileLayer topLayer = TileLayer.Logic)
+        /// <summary>
+        /// Returns the top most tile in the given cell that has a property with the given name
+        /// </summary>
+        /// <param name="cell">Cell to search</param>
+        /// <param name="propertyName">Name of property to search for</param>
+        /// <param name="topLayer">Layer to start searching from</param>
+        /// <returns>Topmost tile in the cell with the given property or null</returns>
+        public Tile GetTopMostTileWithProperty(Cell cell, string propertyName, TileLayer topLayer = TileLayer.Logic)
+        {
+            for (int i = (int)topLayer; i >= 0; i--)
+            {
+                var tile = _puzzle.grid.CellToTile(cell, (TileLayer)i);
+                if (null == tile)
+                    continue;
+
+                // Do not return tiles on hidden layers
+                if (!IsLayerVisible((TileLayer)i))
+                    continue;
+
+                if (tile.GetProperty(propertyName) == null)
+                    continue;
+
+                return tile;
+            }
+
+            return null;
+        }
+        
+        private Tile GetTopMostTile(Cell cell, TileLayer topLayer = TileLayer.Logic)
         {
             for (int i = (int)topLayer; i >= 0; i--)
             {
@@ -693,8 +722,6 @@ namespace Puzzled
         /// </summary>
         /// <param name="tile">Current tile</param>
         /// <returns>Next tile in reverse layer order</returns>
-        //private Tile GetNextTile(Tile tile) => GetNextTile(tile.cell, tile.layer, tile.cell.system);
-
         private Tile GetNextTile (Cell cell, TileLayer layer, CellCoordinateSystem system)
         {
             if (cell == Cell.invalid)
@@ -702,7 +729,7 @@ namespace Puzzled
             
             cell = cell.ConvertTo(system);
 
-            var nextTile = GetTile(cell, layer != TileLayer.Floor ? (layer - 1) : TileLayer.Logic);
+            var nextTile = GetTopMostTile(cell, layer != TileLayer.Floor ? (layer - 1) : TileLayer.Logic);
             if (null == nextTile)
             {
                 switch (cell.system)
@@ -714,7 +741,7 @@ namespace Puzzled
                         return GetNextTile(cell, TileLayer.Logic, CellCoordinateSystem.Grid);
 
                     default:
-                        nextTile = GetTile(cell, TileLayer.Logic);
+                        nextTile = GetTopMostTile(cell, TileLayer.Logic);
                         break;
                 }
             }                    
@@ -951,6 +978,52 @@ namespace Puzzled
                 mask |= (IsLayerVisible(layer) ? (1u << (int)layer) : 0u);
 
             return mask;
+        }
+
+        public static void Import()
+        {
+            instance.ShowPopup(instance._importPopup.gameObject);
+            instance._importPopup.Import((path) => {
+                // Re-add all of the world decals to the palette
+                //instance._chooseDecalPalette.RemoveImportedDecals();
+
+                var texture = new Texture2D(1, 1);
+                if (!texture.LoadImage(File.ReadAllBytes(path)))
+                    return;
+
+                var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), texture.width);
+                sprite.name = Path.GetFileNameWithoutExtension(path);
+                instance._chooseDecalPalette.AddDecal(new Decal(Guid.NewGuid(), sprite));
+                instance._decalPalette.AddDecal(new Decal(Guid.NewGuid(), sprite));
+            });
+        }
+
+        public void ChooseColor (Color color, RectTransform rectTransform, Action<Color,bool> valueChanged)
+        {
+            var parentTransform = (_colorPicker.transform.parent as RectTransform);
+            var pickerTransform = _colorPicker.transform as RectTransform;
+            var bounds = rectTransform.TransformBoundsTo(parentTransform);
+            var min = (Vector2)bounds.min - parentTransform.rect.min;
+            var max = (Vector2)bounds.max - parentTransform.rect.min;
+
+            if((min.y + max.y) * 0.5f > 0.5f)
+            {
+                pickerTransform.pivot = Vector2.one;
+                pickerTransform.anchorMin = pickerTransform.anchorMax = new Vector2(
+                    min.x / parentTransform.rect.size.x,
+                    max.y / parentTransform.rect.size.y);
+            }
+            else
+            {
+                pickerTransform.pivot = new Vector2(1.0f, 0.0f);
+                pickerTransform.anchorMin = pickerTransform.anchorMax = new Vector2(
+                    min.x / parentTransform.rect.size.x,
+                    min.y / parentTransform.rect.size.y);
+            }
+
+            _colorPicker.value = color;
+            _colorPicker.onValueChanged = valueChanged;
+            ShowPopup(_colorPicker.gameObject);
         }
     }
 }

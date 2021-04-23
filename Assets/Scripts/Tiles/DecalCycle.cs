@@ -54,9 +54,10 @@ namespace Puzzled
             
             valueOutPort.SendValue(_decalIndex, true);
 
-            var surface = DecalSurface.FromCell(puzzle, tile.cell);
-            if (surface != null)
-                surface.decal = decals[_decalIndex];
+            var surfaces = DecalSurface.FromCell(puzzle, tile.cell);
+            if (surfaces != null)
+                foreach(var surface in surfaces)
+                    surface.decal = decals[_decalIndex];
         }
     }
 }

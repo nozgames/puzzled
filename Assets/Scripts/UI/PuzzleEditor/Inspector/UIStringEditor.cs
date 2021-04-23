@@ -25,16 +25,15 @@ namespace Puzzled
             if (target.GetValue<string>() == text)
                 return;
 
-            UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, text));
+            target.SetValue(text);
         }
 
         protected override void OnTargetChanged()
         {
-            label = target.name;
             input.SetTextWithoutNotify(target.GetValue<string>());
 
-            if (_placeholderText != null && !string.IsNullOrEmpty(target.tileProperty.editable.placeholder))
-                _placeholderText.text = target.tileProperty.editable.placeholder;
+            if (_placeholderText != null && !string.IsNullOrEmpty(target.placeholder))
+                _placeholderText.text = target.placeholder;
         }
     }
 }

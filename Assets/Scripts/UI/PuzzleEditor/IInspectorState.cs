@@ -2,13 +2,16 @@
 
 namespace Puzzled.Editor
 {
-    public interface IInspectorState
-    {
-        void Apply(Transform inspector);
-    }
-
     public interface IInspectorStateProvider
     {
-        IInspectorState GetState();
+        /// <summary>
+        /// Identifier of the provider
+        /// </summary>
+        string inspectorStateId { get; }
+
+        /// <summary>
+        /// Get/Set the inspector state
+        /// </summary>
+        object inspectorState { get; set; }
     }
 }

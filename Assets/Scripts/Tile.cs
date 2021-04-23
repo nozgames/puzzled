@@ -69,7 +69,7 @@ namespace Puzzled
         /// <summary>
         /// Inspector state stored on the tile for the next time the tile is selected
         /// </summary>
-        public Editor.IInspectorState[] inspectorState { get; set; }
+        public (string id, object value)[] inspectorState { get; set; }
 
         /// <summary>
         /// Get/Set the puzzle this tile belongs to
@@ -161,6 +161,27 @@ namespace Puzzled
                 // Give our own components a chance to react to the cell change
                 Send(new CellChangedEvent(this, old));
             }
+        }
+
+        /// <summary>
+        /// Return true if the tile has a component of the given type
+        /// </summary>
+        /// <typeparam name="T">Type to search for</typeparam>
+        /// <returns>True if the tile has the given component</returns>
+        public bool HasTileComponent<T>() => HasTileComponent(typeof(T));
+
+        /// <summary>
+        /// Return true if the tile has a component of the given type
+        /// </summary>
+        /// <param name="type">Component to search for</param>
+        /// <returns>True if the tile has the given component</returns>
+        public bool HasTileComponent (Type type)
+        {
+            for (int i = componentCount - 1; i >= 0; i--)
+                if (type.IsAssignableFrom(GetComponent<TileComponent>().GetType()))
+                    return true;
+
+            return false;
         }
 
         /// <summary>
@@ -300,7 +321,7 @@ namespace Puzzled
         /// </summary>
         /// <param name="name">Name of the property</param>
         /// <returns>Tile property if it exists or null</returns>
-        public TileProperty GetProperty(string name) => properties.Where(p => p.info.Name == name).FirstOrDefault();
+        public TileProperty GetProperty(string name) => properties.Where(p => p.name == name).FirstOrDefault();
 
         /// <summary>
         /// Return the value of a property with the given name as a boolean regardless of its type.  Note that
@@ -520,5 +541,25 @@ namespace Puzzled
         }
 
         public void ShowGizmos(bool show) => Send(new ShowGizmosEvent(show));
+
+        /// <summary>
+        /// Return the tile component that matches the given instance identifier
+        /// </summary>
+        /// <param name="instanceId">Instance identifier to match</param>
+        /// <returns>Matched tile component or null if no tile component could be found</returns>
+        public TileComponent GetTileComponent (ulong instanceId)
+        {
+            for(int i=componentCount - 1; i >= 0; i--)
+            {
+                var tileComponent = GetComponent(i) as TileComponent;
+                if (null == tileComponent)
+                    continue;
+
+                if (tileComponent.instanceId == instanceId)
+                    return tileComponent;
+            }
+
+            return null;
+        }
     }
 }

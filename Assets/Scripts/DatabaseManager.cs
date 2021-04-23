@@ -99,8 +99,8 @@ namespace Puzzled
             {
                 var properties = _instance._tileProperties[tile.guid] =
                     tile.GetComponentsInChildren<TileComponent>()
-                        .SelectMany(tc => tc.GetType().GetFlattenedProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance),
-                            (tc, p) => new TileProperty(p, p.GetCustomAttribute<EditableAttribute>(), p.GetCustomAttribute<PortAttribute>()))
+                        .SelectMany(tc => tc.CreateInstanceId().GetType().GetFlattenedProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance),
+                            (tc, p) => new TileProperty(tc, p, p.GetCustomAttribute<EditableAttribute>(), p.GetCustomAttribute<PortAttribute>()))
                         .Where(ep => ep.editable != null)
                         .ToArray();
 

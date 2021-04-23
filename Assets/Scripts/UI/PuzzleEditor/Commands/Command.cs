@@ -5,8 +5,8 @@ namespace Puzzled.Editor.Commands
 {
     public abstract class Command
     {
-        public IInspectorState[] undoState { get; set; }
-        public IInspectorState[] redoState { get; set; }
+        public (string name,object value)[] undoState { get; set; }
+        public (string name,object value)[] redoState { get; set; }
 
         public UIPuzzleEditor.Mode mode { get; private set; }
 

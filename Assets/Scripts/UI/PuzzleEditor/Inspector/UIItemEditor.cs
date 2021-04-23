@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Puzzled
 {
-    public class UIOptionTile : UIPropertyEditor
+    public class UIItemEditor : UIPropertyEditor
     {
         [SerializeField] private RawImage preview = null;
         [SerializeField] private UIDoubleClick _doubleClick = null;
@@ -16,7 +16,7 @@ namespace Puzzled
                     typeof(Item),
                     DatabaseManager.GetTile(target.GetValue<System.Guid>()),
                     (tile) => {
-                        UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, tile.guid));
+                        target.SetValue(tile.guid);
                         UpdatePreview();
                     });
             });
@@ -25,7 +25,6 @@ namespace Puzzled
         protected override void OnTargetChanged()
         {
             base.OnTargetChanged();
-            label = target.name;
             UpdatePreview();
         }
 

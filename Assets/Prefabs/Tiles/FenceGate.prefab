@@ -124,6 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30596c8681ea2a847af667ef69cc410d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _gizmos: {fileID: 1623538719485643499}
   keyItem: {fileID: 0}
   _unlockSound: {fileID: 0}
@@ -143,6 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69f6ff003d33d64fac6763b3ddcb101, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _offset: 0
 --- !u!114 &1423397730823641005
 MonoBehaviour:
@@ -156,6 +158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 640988266fff0ea468569419c09fd86e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _rotator: {fileID: 6361000663911925158}
   _cornerPrefab: {fileID: 4516048054241225028, guid: 26d024a9a2879d246861533f33647a9f, type: 3}
   _cornerPriority: 1
@@ -174,6 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcc10714aff312b4582a431881474a3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _target: {fileID: 8520089478776394812}
 --- !u!95 &5127086794591847231
 Animator:
@@ -323,6 +327,14 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 06cb9c9f68d6965458eb5f60ee5df998, type: 3}
       propertyPath: m_Name
       value: FenceGate
+      objectReference: {fileID: 0}
+    - target: {fileID: 8010385233021146905, guid: 06cb9c9f68d6965458eb5f60ee5df998, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8010385233021146905, guid: 06cb9c9f68d6965458eb5f60ee5df998, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8729921758559698964, guid: 06cb9c9f68d6965458eb5f60ee5df998, type: 3}
       propertyPath: m_Materials.Array.data[0]

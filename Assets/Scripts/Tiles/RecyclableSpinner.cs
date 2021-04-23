@@ -36,9 +36,8 @@ namespace Puzzled
         private void UpdateDecalRenderer(int rotateIndex, int value)
         {
             _decalRenderers[rotateIndex].sprite = decals[value].sprite;
-            _decalRenderers[rotateIndex].flipX = (decals[value].flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal;
-            _decalRenderers[rotateIndex].flipY = (decals[value].flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical;
-            _decalRenderers[rotateIndex].transform.transform.localRotation = Quaternion.Euler(0, 0, ((decals[value].flags & DecalFlags.Rotate) == DecalFlags.Rotate) ? -90 : 0);
+            _decalRenderers[rotateIndex].flipX = decals[value].isFlipped;
+            _decalRenderers[rotateIndex].transform.transform.localRotation = Quaternion.Euler(0, 0, decals[value].rotation);
         }
 
         private void UpdateDecals()

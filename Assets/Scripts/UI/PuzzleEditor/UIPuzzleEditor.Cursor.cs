@@ -93,7 +93,7 @@ namespace Puzzled
                 {
                     Debug.Assert(cell.edge != CellEdge.None);
 
-                    if (!_puzzle.grid.CellContainsWorldPoint(cell,_cursorWorld) || null == GetTile(cell))
+                    if (!_puzzle.grid.CellContainsWorldPoint(cell,_cursorWorld) || null == GetTopMostTile(cell))
                     {
                         var sharedEdgeCell = cell.ConvertTo(CellCoordinateSystem.SharedEdge);
                         if (!_puzzle.grid.CellContainsWorldPoint(sharedEdgeCell,_cursorWorld) || null == _puzzle.grid.CellToTile(sharedEdgeCell))

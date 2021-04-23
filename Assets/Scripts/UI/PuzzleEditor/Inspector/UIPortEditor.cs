@@ -26,6 +26,21 @@ namespace Puzzled.Editor
 
         public Port port => _port;
 
+        public string inspectorStateId => target.id;
+
+        protected override string label => _sequence != null ? $"{target.name} ({_sequence.GetStepName(_sequence.selection)})" : target.name;
+
+
+        public object inspectorState {
+            get => _sequence != null ? _sequence.selection : -1;
+            set {
+                var selection = (int)value;
+
+                if (_sequence != null && selection > 0)
+                    _sequence.selection = selection;
+            }
+        }
+
         private void Awake()
         {
             _list.onReorderItem += OnReorderItem;
@@ -48,17 +63,9 @@ namespace Puzzled.Editor
             UpdateWires();
         }
 
-        private void UpdateLabel()
-        {
-            if (_sequence != null)
-                label = $"{target.name} ({_sequence.GetStepName(_sequence.selection)})";
-            else
-                label = target.name;
-        }
-
         protected override void OnTargetChanged()
         {
-            _port = target.tileProperty.GetValue<Port>(target.tile);
+            _port = target.GetValue<Port>();
 
             _wires.DetachAndDestroyChildren();
 
@@ -66,7 +73,7 @@ namespace Puzzled.Editor
                 Instantiate(_wirePrefab, _wires).GetComponent<UIWireEditor>().wire = wire;
 
             if (_sequence != null)
-                _sequence.tile = target.tile;
+                _sequence.tile = _port.tile;
 
             UpdateLabel();
             UpdateWires();
@@ -94,43 +101,5 @@ namespace Puzzled.Editor
 
         private UIWireEditor GetWireEditor(int index) =>
             _wires.GetChild(index).GetComponent<UIWireEditor>();
-
-        /// <summary>
-        /// Saves the state of the wires editor for the next tile the tile is selected
-        /// </summary>
-        private class WiresState : IInspectorState
-        {
-            public Port port;
-            //public Wire selectedWire;
-            public int sequenceStep;
-
-            public void Apply(Transform inspector)
-            {
-                var editor = inspector.GetComponentsInChildren<UIPortEditor>().FirstOrDefault(c => c._port == port);
-                if (null == editor)
-                    return;
-
-                if (editor._sequence != null && sequenceStep > 0)
-                    editor._sequence.selection = sequenceStep;
-
-#if false
-                if (selectedWire != null)
-                {
-                    UIPuzzleEditor.selectedWire = selectedWire;
-                    editor._wires.GetComponentsInChildren<UIWireEditor>().FirstOrDefault(o => o.wire == selectedWire);
-                }
-#endif
-            }
-        }
-
-        /// <summary>
-        /// Return the inspector state 
-        /// </summary>
-        IInspectorState IInspectorStateProvider.GetState() =>
-            new WiresState {
-                port = _port,
-                //selectedWire = wires.FirstOrDefault(w => w.selected),
-                sequenceStep = _sequence != null ? _sequence.selection : -1
-            };
     }
 }

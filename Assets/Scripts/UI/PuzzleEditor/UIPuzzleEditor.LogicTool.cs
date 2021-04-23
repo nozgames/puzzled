@@ -108,7 +108,7 @@ namespace Puzzled
             // Handle no selection or selecting a new tile
             if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
             {
-                SelectTile(GetTile(cell, TileLayer.Logic));
+                SelectTile(GetTopMostTile(cell, TileLayer.Logic));
                 logicCycleSelection = false;
             }
             else
@@ -219,7 +219,7 @@ namespace Puzzled
 
         private void UpdateInspectorState(Tile tile)
         {
-            tile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>().Select(p => p.GetState()).ToArray();
+            tile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>(true).Select(p => (p.inspectorStateId, p.inspectorState)).ToArray();
         }
 
         private void SetWiresDark (Tile tile, bool dark)
@@ -277,8 +277,15 @@ namespace Puzzled
 
             // Apply the saved inspector state
             if (selectedTile.inspectorState != null)
+            {
+                var providers = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>(true);
                 foreach (var state in selectedTile.inspectorState)
-                    state.Apply(inspector.transform);
+                {
+                    var provider = providers.FirstOrDefault(p => p.inspectorStateId == state.id);
+                    if (provider != null)
+                        provider.inspectorState = state.value;
+                }
+            }
         }
 
         /// <summary>

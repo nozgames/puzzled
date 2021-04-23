@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 7;
+        private const int FileVersion = 8;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -453,9 +453,17 @@ namespace Puzzled
                             break;
 
                         case TilePropertyType.Decal:
-                            writer.Write(((Decal)value).guid);
-                            writer.Write((int)((Decal)value).flags);
+                        {
+                            var decal = (Decal)value;
+                            writer.Write(decal.guid);
+                            writer.Write((int)decal.flags);
+                            writer.Write(decal.rotation);
+                            writer.Write(decal.offset.x);
+                            writer.Write(decal.offset.y);
+                            writer.Write(decal.scale);
+                            writer.Write((Color32)decal.color);
                             break;
+                        }
 
                         case TilePropertyType.DecalArray:
                         {
@@ -609,6 +617,7 @@ namespace Puzzled
                 case 5:
                 case 6:
                 case 7:
+                case 8:
                     LoadV5(reader, version);
                     break;
 
@@ -735,6 +744,16 @@ namespace Puzzled
                             var decal = DatabaseManager.GetDecal(reader.ReadGuid());
                             if (version > 1)
                                 decal.flags = (DecalFlags)reader.ReadInt32();
+
+                            if(version > 7)
+                            {
+                                decal.rotation = reader.ReadSingle();
+                                decal.offset = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+                                decal.scale = reader.ReadSingle();
+                                new Vector2(reader.ReadSingle(), reader.ReadSingle());
+                                decal.color = reader.ReadColor();
+                            }
+
                             value = decal;
                             break;
                         }
