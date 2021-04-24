@@ -65,7 +65,7 @@ namespace Puzzled
                     {
                         var material = _renderer.materials[_materialIndex];
                         material.EnableKeyword("DECAL_ON");
-                        material.SetTexture("_decal", _decal.sprite.texture);
+                        material.SetTexture("_decal", _decal.texture);
                         material.SetColor("_decalColor", _decal.color);
                         material.SetFloat("_decalSmoothness", _decal.smoothness);
                         material.SetVector("_decalScale", new Vector2(decal.scale * (_decal.isFlipped ? -1 : 1), decal.scale));

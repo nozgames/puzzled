@@ -15,7 +15,7 @@ namespace Puzzled
             set {
                 _decal = value;
 
-                if(_decal.sprite == null)
+                if(_decal.texture == null)
                 {
                     _image.enabled = false;
                     return;

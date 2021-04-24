@@ -5,7 +5,7 @@ namespace Puzzled.Editor
 {
     class UIDecalPreview : MonoBehaviour
     {        
-        [SerializeField] private Image _preview = null;
+        [SerializeField] private RawImage _preview = null;
 
         private Color _autoColor;
         private Decal _decal;
@@ -20,7 +20,7 @@ namespace Puzzled.Editor
             set {
                 _decal = value;
                 _preview.gameObject.SetActive(_decal != Decal.none);
-                _preview.sprite = _decal.sprite;
+                _preview.texture = _decal.texture;
                 _preview.color = value.isAutoColor ? _autoColor : value.color;
                 _preview.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotation);
                 _preview.transform.localScale = new Vector3(_decal.isFlipped ? -1 : 1, 1, 1) * _decal.scale;

@@ -91,7 +91,7 @@ namespace Puzzled.Editor
 
             _boxedDecal = target.GetValue();
             _preview.decal = (Decal)_boxedDecal;
-            _decalButtonPreview.decal = new Decal(_preview.decal.guid, _preview.decal.sprite);
+            _decalButtonPreview.decal = new Decal(_preview.decal.guid, _preview.decal.texture);
 
             _scale.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("scale"), OnBoxedValueChanged) { range = new Vector2Int(1, 100) };
             _rotation.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("rotation"), OnBoxedValueChanged) { range = new Vector2Int(0, 360), floatScale = 1.0f };
@@ -108,7 +108,7 @@ namespace Puzzled.Editor
         private void OnBoxedValueChanged(bool commit)
         {
             _preview.decal = (Decal)_boxedDecal;
-            _decalButtonPreview.decal = new Decal(_preview.decal.guid, _preview.decal.sprite);
+            _decalButtonPreview.decal = new Decal(_preview.decal.guid, _preview.decal.texture);
             target.SetValue(_boxedDecal, commit);
         }
     }

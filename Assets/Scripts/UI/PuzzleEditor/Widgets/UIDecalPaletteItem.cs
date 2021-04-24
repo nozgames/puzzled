@@ -6,7 +6,7 @@ namespace Puzzled.Editor
     public class UIDecalPaletteItem : UIListItem
     {
         [SerializeField] private TMPro.TextMeshProUGUI _nameText = null;
-        [SerializeField] private Image _previewImage = null;
+        [SerializeField] private RawImage _previewImage = null;
 
         private Decal _decal;
 
@@ -15,7 +15,7 @@ namespace Puzzled.Editor
             set {
                 _decal = value;
 
-                if(_decal == null || _decal.sprite == null)
+                if(_decal == null || _decal.texture == null)
                 {
                     _nameText.text = "None";
                     _previewImage.gameObject.SetActive(false);
@@ -23,7 +23,7 @@ namespace Puzzled.Editor
                 else
                 {
                     _nameText.text = _decal.name;
-                    _previewImage.sprite = _decal.sprite;
+                    _previewImage.texture = _decal.texture;
                     _previewImage.gameObject.SetActive(true);
                 }
             }

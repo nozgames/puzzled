@@ -16,11 +16,11 @@ namespace Puzzled
     {
         public static readonly Decal none = new Decal(Guid.Empty, null) { scale = 1.0f, color = Color.white, flags = DecalFlags.AutoColor };
 
-        public string name => sprite == null ? "None" : sprite.name.Substring(5);
+        public string name => texture == null ? "None" : texture.name.Substring(5);
 
         public Guid guid { get; private set; }
 
-        public Sprite sprite { get; private set; }
+        public Texture texture { get; private set; }
 
         public DecalFlags flags { get; set; }
 
@@ -33,6 +33,8 @@ namespace Puzzled
         public float smoothness { get; set; }
 
         public Color color { get; set; }
+
+        public Sprite sprite => texture == null ? null : Sprite.Create((Texture2D)texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
 
         public bool isAutoColor { 
             get => (flags & DecalFlags.AutoColor) == DecalFlags.AutoColor;
@@ -92,14 +94,14 @@ namespace Puzzled
 
         public void SetTexture (Decal decal)
         {
-            sprite = decal.sprite;
+            texture = decal.texture;
             guid = decal.guid;
         }
 
-        public Decal(Guid guid, Sprite sprite)
+        public Decal(Guid guid, Texture texture)
         {
             this.guid = guid;
-            this.sprite = sprite;
+            this.texture = texture;
             offset = Vector2.zero;
             scale = 1.0f;
             smoothness = 0.0f;

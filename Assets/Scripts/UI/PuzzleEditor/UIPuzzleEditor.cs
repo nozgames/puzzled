@@ -991,10 +991,8 @@ namespace Puzzled
                 if (!texture.LoadImage(File.ReadAllBytes(path)))
                     return;
 
-                var sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), texture.width);
-                sprite.name = Path.GetFileNameWithoutExtension(path);
-                instance._chooseDecalPalette.AddDecal(new Decal(Guid.NewGuid(), sprite));
-                instance._decalPalette.AddDecal(new Decal(Guid.NewGuid(), sprite));
+                instance._chooseDecalPalette.AddDecal(new Decal(Guid.NewGuid(), texture));
+                instance._decalPalette.AddDecal(new Decal(Guid.NewGuid(), texture));
             });
         }
 

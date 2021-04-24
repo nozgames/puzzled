@@ -17,7 +17,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIDecalPaletteItem _itemPrefab = null;
         [SerializeField] private UIList _list = null;
         [SerializeField] private ScrollRect _scrollRect = null;
-        [SerializeField] private Image _selectedPreview = null;
+        [SerializeField] private UIDecalPreview _selectedPreview = null;
         [SerializeField] private TMPro.TextMeshProUGUI _selectedName = null;
         [SerializeField] private TMPro.TMP_InputField _searchInput = null;
         [SerializeField] private Button _searchClearButton = null;
@@ -164,11 +164,7 @@ namespace Puzzled.Editor
 
         private void UpdatePreview()
         {
-            _selectedPreview.sprite = _selected.sprite;
-            _selectedPreview.gameObject.SetActive(_selected.sprite != null);
-            _selectedPreview.transform.localScale = new Vector3(_selected.isFlipped ? -1 : 1, 1, 1);
-            _selectedPreview.transform.localRotation = Quaternion.Euler(0, 0, _selected.rotation);
-
+            _selectedPreview.decal = _selected;
             _selectedName.text = _selected.name;
         }
     }

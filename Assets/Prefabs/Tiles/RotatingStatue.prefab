@@ -1049,7 +1049,10 @@ GameObject:
   - component: {fileID: -6327194840247934323}
   - component: {fileID: 4430051005545181219}
   - component: {fileID: 7182164151707916302}
-  - component: {fileID: 5010010014735275090}
+  - component: {fileID: 2039818082851359106}
+  - component: {fileID: 5413045842396125979}
+  - component: {fileID: 4609362771642652177}
+  - component: {fileID: 5148789624159817287}
   m_Layer: 0
   m_Name: RotatingStatue
   m_TagString: Untagged
@@ -1097,6 +1100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _text: Spin
   _height: 0
 --- !u!114 &4430051005545181219
@@ -1111,6 +1115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8783c7d152b5bef42832fc2305312040, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _rotator: {fileID: 2819266254877709548}
   _useSound: {fileID: 8300000, guid: 7faa803b984bba94396b4c8b84c2718b, type: 3}
 --- !u!114 &7182164151707916302
@@ -1125,7 +1130,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5010010014735275090
+  _instanceId: 0
+--- !u!114 &2039818082851359106
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1134,10 +1140,74 @@ MonoBehaviour:
   m_GameObject: {fileID: 8922302472943703707}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a8348c175ab7ab645962fd7db5f59c8c, type: 3}
+  m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _spriteRenderer0: {fileID: 3751343009086415554}
-  _spriteRenderer1: {fileID: 6879692323187769654}
-  _spriteRenderer2: {fileID: 6631877517939577792}
-  _spriteRenderer3: {fileID: 4276642900870549401}
+  _instanceId: 0
+  _renderer: {fileID: 3751343009086415554}
+  _materialIndex: 0
+  _color: {r: 0.254717, g: 0.254717, b: 0.254717, a: 1}
+  _smoothness: 0
+  _rotation: 0
+  _propertyName: decal1
+  _propertyDisplayName: Decal1
+--- !u!114 &5413045842396125979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+  _renderer: {fileID: 6879692323187769654}
+  _materialIndex: 0
+  _color: {r: 0.25490198, g: 0.25490198, b: 0.25490198, a: 1}
+  _smoothness: 0.5
+  _rotation: 0.5
+  _propertyName: decal2
+  _propertyDisplayName: Decal2
+--- !u!114 &4609362771642652177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+  _renderer: {fileID: 6631877517939577792}
+  _materialIndex: 0
+  _color: {r: 0.25490198, g: 0.25490198, b: 0.25490198, a: 1}
+  _smoothness: 0.5
+  _rotation: 0.5
+  _propertyName: decal3
+  _propertyDisplayName: Decal3
+--- !u!114 &5148789624159817287
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+  _renderer: {fileID: 4276642900870549401}
+  _materialIndex: 0
+  _color: {r: 0.25490198, g: 0.25490198, b: 0.25490198, a: 1}
+  _smoothness: 0.5
+  _rotation: 0.5
+  _propertyName: decal4
+  _propertyDisplayName: Decal4

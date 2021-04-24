@@ -188,7 +188,7 @@ namespace Puzzled
                 case TilePropertyType.Int:
                     return GetValue<int>(tile) == 0 ? false : true;
                 case TilePropertyType.Decal:
-                    return GetValue<Decal>(tile).sprite != null;
+                    return GetValue<Decal>(tile).texture != null;
             }
 
             return false;
