@@ -6,7 +6,7 @@ namespace Puzzled.Editor
 {
     class UIDecalArrayEditorItem : UIListItem
     {
-        [SerializeField] private UIDecalPreview _decalEditor = null;
+        [SerializeField] private UIDecalPreview _decalPreview = null;
         [SerializeField] private TMPro.TextMeshProUGUI _index = null;
         [SerializeField] private Button _deleteButton = null;
 
@@ -14,8 +14,8 @@ namespace Puzzled.Editor
         public event Action<UIDecalArrayEditorItem> onDeleted;
 
         public Decal value {
-            get => _decalEditor.decal;
-            set => _decalEditor.decal = value;
+            get => _decalPreview.decal;
+            set => _decalPreview.decal = value;
         }
 
         protected override void Awake()
@@ -25,8 +25,6 @@ namespace Puzzled.Editor
             _deleteButton.onClick.AddListener(() => {
                 onDeleted?.Invoke(this);
             });
-
-            //_decalEditor.onDecalChanged += (value) => onValueChanged?.Invoke(value);
         }
 
         protected override void OnEnable()

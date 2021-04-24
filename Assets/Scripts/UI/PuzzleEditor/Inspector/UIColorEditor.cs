@@ -14,7 +14,7 @@ namespace Puzzled.Editor
         private void Awake()
         {
             _button.onClick.AddListener(() => {
-                UIPuzzleEditor.instance.ChooseColor(_color, transform as RectTransform, (value, commit) => {
+                UIPuzzleEditor.instance.ChooseColor(_color, _image.transform as RectTransform, (value, commit) => {
                     UpdateColor(value);
                     target.SetValue(value, commit);
                 });

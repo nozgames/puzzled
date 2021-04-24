@@ -453,28 +453,15 @@ namespace Puzzled
                             break;
 
                         case TilePropertyType.Decal:
-                        {
-                            var decal = (Decal)value;
-                            writer.Write(decal.guid);
-                            writer.Write((int)decal.flags);
-                            writer.Write(decal.rotation);
-                            writer.Write(decal.offset.x);
-                            writer.Write(decal.offset.y);
-                            writer.Write(decal.scale);
-                            writer.Write(decal.smoothness);
-                            writer.Write((Color32)decal.color);
+                            writer.Write((Decal)value);
                             break;
-                        }
 
                         case TilePropertyType.DecalArray:
                         {
                             var darray = (Decal[])value;
                             writer.Write(darray.Length);
                             foreach (var decal in darray)
-                            {
-                                writer.Write(decal.guid);
-                                writer.Write((int)decal.flags);
-                            }
+                                writer.Write(decal);
                             break;
                         }
 
@@ -982,35 +969,14 @@ namespace Puzzled
                         }
 
                         case TilePropertyType.Decal:
-                        {
-                            var decal = DatabaseManager.GetDecal(reader.ReadGuid());
-                            if (version > 1)
-                                decal.flags = (DecalFlags)reader.ReadInt32();
-
-                            if (version > 7)
-                            {
-                                decal.rotation = reader.ReadSingle();
-                                decal.offset = new Vector2(reader.ReadSingle(), reader.ReadSingle());
-                                decal.scale = reader.ReadSingle();
-                                decal.smoothness = reader.ReadSingle();
-                                decal.color = reader.ReadColor();
-                            }
-
-                            value = decal;
+                            value = reader.ReadDecal(version);
                             break;
-                        }
 
                         case TilePropertyType.DecalArray:
                         {
                             var decals = new Decal[reader.ReadInt32()];
                             for (int i = 0; i < decals.Length; i++)
-                            {
-                                var decal = DatabaseManager.GetDecal(reader.ReadGuid());
-                                var flags = (DecalFlags)reader.ReadInt32();
-
-                                decal.flags = flags;
-                                decals[i] = decal;
-                            }
+                                decals[i] = reader.ReadDecal(version);
 
                             value = decals;
                             break;

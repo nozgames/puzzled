@@ -15,6 +15,15 @@ namespace Puzzled
         protected override Vector3 initialEulerAngles => new Vector3(-90, 0, -90);
         protected override Vector3 rotationAxis => new Vector3(-1, 0, 0);
 
+        private Color _defaultColor = Color.white;
+        private Vector3 _defaultScale = Vector3.one;
+
+        private void Awake()
+        {
+            _defaultColor = _decalRenderers[0].color;
+            _defaultScale = _decalRenderers[0].transform.localScale;
+        }
+
         protected override void OnUseComplete()
         {
             base.OnUseComplete();
@@ -36,12 +45,15 @@ namespace Puzzled
         private void UpdateDecalRenderer(int rotateIndex, int value)
         {
             var decal = decals[value];
-            _decalRenderers[rotateIndex].sprite = decal.sprite;
-            _decalRenderers[rotateIndex].flipX = decal.isFlipped;
-            _decalRenderers[rotateIndex].transform.transform.localRotation = Quaternion.Euler(0, 0, decal.rotation);
+            var renderer = _decalRenderers[rotateIndex];
+            renderer.sprite = decal.sprite;
+            renderer.flipX = decal.isFlipped;
+            renderer.color = decal.isAutoColor ? _defaultColor : decal.color;
+            renderer.transform.localRotation = Quaternion.Euler(0, 0, decal.rotation);
+            renderer.transform.localScale = _defaultScale * decal.scale;
         }
 
-        private void UpdateDecals()
+        protected void UpdateDecals()
         {
             if (decals.Length == 0)
                 return;

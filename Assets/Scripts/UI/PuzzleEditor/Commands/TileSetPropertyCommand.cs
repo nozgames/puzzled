@@ -34,5 +34,7 @@
             tile.GetProperty(propertyName).SetValue(tile, propertyValue);
             tile.Send(new StartEvent());
         }
+
+        
     }
 }

@@ -68,6 +68,7 @@ namespace Puzzled
 
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
+        [SerializeField] private Image _popupDarken = null;
         [SerializeField] private GameObject fileMenuPopup = null;
         [SerializeField] private UIChoosePuzzlePopup _chooseFilePopup = null;
         [SerializeField] private GameObject _chooseTilePopup = null;
@@ -653,11 +654,12 @@ namespace Puzzled
             ShowPopup(fileMenuPopup);
         }
 
-        private void ShowPopup(GameObject popup)
+        private void ShowPopup(GameObject popup, bool darken=true)
         {
             if (popup.transform.parent != popups.transform)
                 return;
 
+            _popupDarken.enabled = darken;
             popups.transform.DisableChildren();
             popups.SetActive(true);
             popup.SetActive(true);
@@ -1004,7 +1006,7 @@ namespace Puzzled
             var min = (Vector2)bounds.min - parentTransform.rect.min;
             var max = (Vector2)bounds.max - parentTransform.rect.min;
 
-            if((min.y + max.y) * 0.5f > 0.5f)
+            if((min.y + max.y) * 0.5f / parentTransform.rect.size.y > 0.5f)
             {
                 pickerTransform.pivot = Vector2.one;
                 pickerTransform.anchorMin = pickerTransform.anchorMax = new Vector2(
@@ -1021,7 +1023,7 @@ namespace Puzzled
 
             _colorPicker.value = color;
             _colorPicker.onValueChanged = valueChanged;
-            ShowPopup(_colorPicker.gameObject);
+            ShowPopup(_colorPicker.gameObject, false);
         }
     }
 }

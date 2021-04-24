@@ -45,5 +45,17 @@ namespace Puzzled
             if (cell.system == CellCoordinateSystem.Edge || cell.system == CellCoordinateSystem.SharedEdge)
                 writer.Write((byte)cell.edge);
         }
+
+        public static void Write(this BinaryWriter writer, Decal decal)
+        {
+            writer.Write(decal.guid);
+            writer.Write((int)decal.flags);
+            writer.Write(decal.rotation);
+            writer.Write(decal.offset.x);
+            writer.Write(decal.offset.y);
+            writer.Write(decal.scale);
+            writer.Write(decal.smoothness);
+            writer.Write((Color32)decal.color);
+        }
     }
 }
