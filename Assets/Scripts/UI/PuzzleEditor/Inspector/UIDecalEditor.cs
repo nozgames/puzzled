@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Puzzled.Editor
 {
@@ -7,9 +8,11 @@ namespace Puzzled.Editor
     {
         [SerializeField] private UIDecalPreview _preview = null;
         [SerializeField] private UIDecalPreview _decalButtonPreview = null;
-        [SerializeField] private UIDoubleClick _decalButton = null;
+        [SerializeField] private Button _decalButton = null;
+        [SerializeField] private Button _rotateButton = null;
         [SerializeField] private UINumberRangeEditor _scale = null;
         [SerializeField] private UINumberRangeEditor _rotation = null;
+        [SerializeField] private UINumberRangeEditor _smoothness = null;
         [SerializeField] private UIBoolEditor _flipped = null;
         [SerializeField] private UIBoolEditor _autoColor = null;
         [SerializeField] private UIColorEditor _color = null;
@@ -65,13 +68,20 @@ namespace Puzzled.Editor
 
         private void Awake()
         {
-            _decalButton.onDoubleClick.AddListener(() => {
+            _decalButton.onClick.AddListener(() => {
                 UIPuzzleEditor.instance.ChooseDecal(Decal.none, (decal) => {
                     var newDecal = (Decal)_boxedDecal;
                     newDecal.SetTexture(decal);
                     _boxedDecal = newDecal;
                     OnBoxedValueChanged(true);
                 });
+            });
+
+            _rotateButton.onClick.AddListener(() => {
+                var decal = (Decal)_boxedDecal;
+                decal.rotation = (((int)(decal.rotation / 45.0f) + 1) % 8) * 45.0f;
+                _boxedDecal = decal;
+                OnBoxedValueChanged(true);                
             });
         }
 
@@ -85,10 +95,14 @@ namespace Puzzled.Editor
 
             _scale.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("scale"), OnBoxedValueChanged) { range = new Vector2Int(1, 100) };
             _rotation.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("rotation"), OnBoxedValueChanged) { range = new Vector2Int(0, 360), floatScale = 1.0f };
+            _smoothness.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("smoothness"), OnBoxedValueChanged) { range = new Vector2Int(0, 100) };
             _flipped.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("isFlipped"), OnBoxedValueChanged);
             _autoColor.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("isAutoColor"), OnBoxedValueChanged);
             _color.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("color"), OnBoxedValueChanged);
-            _color.gameObject.SetActive(!((Decal)_boxedDecal).isAutoColor);
+
+            var autoColor = ((Decal)_boxedDecal).isAutoColor;
+            _color.gameObject.SetActive(!autoColor);
+            _smoothness.gameObject.SetActive(!autoColor);
         }
 
         private void OnBoxedValueChanged(bool commit)

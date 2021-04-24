@@ -46,6 +46,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _instanceId: 0
   _renderer: {fileID: 3569183401346871036}
+  _materialIndex: 0
+  _color: {r: 1, g: 1, b: 1, a: 1}
+  _smoothness: 0.5
   _propertyName: 
   _propertyDisplayName: 
 --- !u!212 &3569183401346871036
@@ -88,15 +91,15 @@ SpriteRenderer:
   m_SortingLayerID: 277350915
   m_SortingLayer: 3
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: dabd0dd129d7bba42b781734225697b6, type: 3}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.2}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &2302447372450729320

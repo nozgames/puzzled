@@ -103,15 +103,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: dabd0dd129d7bba42b781734225697b6, type: 3}
-  m_Color: {r: 0.53099996, g: 0.34411266, b: 0.18903598, a: 1}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &316117399464926798
@@ -126,9 +126,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _renderer: {fileID: 341619301312460381}
-  _lightColor: {r: 1, g: 1, b: 1, a: 1}
-  _light: {fileID: 4784787974464826630}
+  _materialIndex: 0
+  _color: {r: 1, g: 1, b: 1, a: 1}
+  _smoothness: 0.5
+  _propertyName: 
+  _propertyDisplayName: 
 --- !u!1 &8922302472943703707
 GameObject:
   m_ObjectHideFlags: 0
@@ -191,6 +195,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54a004c7c3bad234c8c7d2bb158c751c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   isUsable: 1
   _popupPrefab: {fileID: 7830224496889995870, guid: dab1954387b55d540afcbfe665644602, type: 3}
 --- !u!114 &4256954187638421158
@@ -205,6 +210,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _text: Read
   _height: 0
 --- !u!114 &955199107122021651
@@ -219,7 +225,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ab130ebf49553541a9a64f7822f96db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotationIndex: 0
+  _instanceId: 0
   numRotations: 4
 --- !u!1001 &1167820138492454142
 PrefabInstance:
@@ -297,11 +303,6 @@ PrefabInstance:
 --- !u!4 &7549579747724468981 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
-  m_PrefabInstance: {fileID: 1167820138492454142}
-  m_PrefabAsset: {fileID: 0}
---- !u!108 &4784787974464826630 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 5931827252863601144, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
   m_PrefabInstance: {fileID: 1167820138492454142}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &3428176200594481871

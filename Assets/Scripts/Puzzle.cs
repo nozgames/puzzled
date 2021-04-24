@@ -461,6 +461,7 @@ namespace Puzzled
                             writer.Write(decal.offset.x);
                             writer.Write(decal.offset.y);
                             writer.Write(decal.scale);
+                            writer.Write(decal.smoothness);
                             writer.Write((Color32)decal.color);
                             break;
                         }
@@ -745,15 +746,6 @@ namespace Puzzled
                             if (version > 1)
                                 decal.flags = (DecalFlags)reader.ReadInt32();
 
-                            if(version > 7)
-                            {
-                                decal.rotation = reader.ReadSingle();
-                                decal.offset = new Vector2(reader.ReadSingle(), reader.ReadSingle());
-                                decal.scale = reader.ReadSingle();
-                                new Vector2(reader.ReadSingle(), reader.ReadSingle());
-                                decal.color = reader.ReadColor();
-                            }
-
                             value = decal;
                             break;
                         }
@@ -994,6 +986,16 @@ namespace Puzzled
                             var decal = DatabaseManager.GetDecal(reader.ReadGuid());
                             if (version > 1)
                                 decal.flags = (DecalFlags)reader.ReadInt32();
+
+                            if (version > 7)
+                            {
+                                decal.rotation = reader.ReadSingle();
+                                decal.offset = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+                                decal.scale = reader.ReadSingle();
+                                decal.smoothness = reader.ReadSingle();
+                                decal.color = reader.ReadColor();
+                            }
+
                             value = decal;
                             break;
                         }

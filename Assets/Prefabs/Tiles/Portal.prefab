@@ -290,7 +290,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5452303591330679972}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -323,15 +323,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: dabd0dd129d7bba42b781734225697b6, type: 3}
-  m_Color: {r: 0.827451, g: 0.43137255, b: 0.8784314, a: 1}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &4879327766144304777
@@ -346,9 +346,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _renderer: {fileID: 5954077645607251504}
-  _lightColor: {r: 1, g: 0.823, b: 0.9803334, a: 1}
-  _light: {fileID: 2503297500919863797}
+  _materialIndex: 0
+  _color: {r: 1, g: 1, b: 1, a: 1}
+  _smoothness: 0.5
+  _propertyName: 
+  _propertyDisplayName: 
 --- !u!1 &7680977818543006660
 GameObject:
   m_ObjectHideFlags: 0
@@ -413,6 +417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9adf2b1a3e704cb4db8dc353960d1480, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
 --- !u!114 &-3448904349409468871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -425,6 +430,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _text: Enter
   _height: 0
 --- !u!114 &259947734059033116
@@ -439,6 +445,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
 --- !u!114 &-4360065198499441543
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -451,7 +458,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ab130ebf49553541a9a64f7822f96db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotationIndex: 0
+  _instanceId: 0
   numRotations: 4
 --- !u!1001 &8137840309499924493
 PrefabInstance:
@@ -533,11 +540,6 @@ PrefabInstance:
 --- !u!4 &585180258683278854 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
-  m_PrefabInstance: {fileID: 8137840309499924493}
-  m_PrefabAsset: {fileID: 0}
---- !u!108 &2503297500919863797 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 5931827252863601144, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
   m_PrefabInstance: {fileID: 8137840309499924493}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8303633625496552880

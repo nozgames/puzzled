@@ -6,29 +6,26 @@ namespace Puzzled
     public class DecalSurface : TileComponent
     {
         [Header("Render")]
-        [SerializeField] private SpriteRenderer _renderer = null;
+        [SerializeField] private Renderer _renderer = null;
+        [SerializeField] private int _materialIndex = 0;
+        [SerializeField] private Color _color = Color.white;
+        [SerializeField] private float _smoothness = 0.5f;
+        [SerializeField] private float _rotation = 0.5f;
 
         [Header("Property")]
         [SerializeField] private string _propertyName = null;
         [SerializeField] private string _propertyDisplayName = null;
 
         private Decal _decal = Decal.none;
-        private Color _defaultColor;
 
         public string decalName => _propertyName;
         public string decalDisplayName => _propertyDisplayName;
-
-        public Color color {
-            get => _renderer.color;
-            set => _renderer.color = value;
-        }
 
         public bool hasDecal => _decal != Decal.none;
 
         [ActorEventHandler]
         private void OnAwakeEvent(AwakeEvent evt)
         {
-            _defaultColor = _renderer.color;
         }
 
         [ActorEventHandler]
@@ -49,15 +46,33 @@ namespace Puzzled
             set {
                 _decal = value;
 
-                _renderer.enabled = _decal != null && _decal.sprite != null;
-
-                if (_decal != null)
+                if (_decal.isAutoColor)
                 {
-                    _renderer.sprite = _decal.sprite;
-                    _renderer.flipX = _decal.isFlipped;
-                    _renderer.transform.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotation);
-                    _renderer.color = _decal.isAutoColor ? _defaultColor : _decal.color;
+                    _decal.color = _color;
+                    _decal.smoothness = _smoothness;
                 }
+
+                if (_decal != Decal.none)
+                {
+                    if (_renderer is SpriteRenderer spriteRenderer)
+                    {
+                        _renderer.enabled = true;
+                        spriteRenderer.sprite = _decal.sprite;
+                        spriteRenderer.flipX = _decal.isFlipped;
+                        spriteRenderer.transform.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotation);
+                        spriteRenderer.color = _decal.color;
+                    } else
+                    {
+                        var material = _renderer.materials[_materialIndex];
+                        material.EnableKeyword("DECAL_ON");
+                        material.SetTexture("_decal", _decal.sprite.texture);
+                        material.SetColor("_decalColor", _decal.color);
+                        material.SetFloat("_decalSmoothness", _decal.smoothness);
+                        material.SetVector("_decalScale", new Vector2(decal.scale * (_decal.isFlipped ? -1 : 1), decal.scale));
+                        material.SetFloat("_decalRotation", _rotation + -_decal.rotation);
+                    }
+                } else if (_renderer is SpriteRenderer spriteRenderer)
+                    _renderer.enabled = false;
             }
         }
 
@@ -70,8 +85,6 @@ namespace Puzzled
             _renderer.color = decalPowerPort.hasPower ? _lightColor : _defaultColor;
         }
 #endif
-
-        public void ResetColor() => color = _defaultColor;
 
         /// <summary>
         /// Return all decal surfaces for the tile at the given cell and layer

@@ -30,6 +30,8 @@ namespace Puzzled
 
         public float scale { get; set; }
 
+        public float smoothness { get; set; }
+
         public Color color { get; set; }
 
         public bool isAutoColor { 
@@ -100,6 +102,7 @@ namespace Puzzled
             this.sprite = sprite;
             offset = Vector2.zero;
             scale = 1.0f;
+            smoothness = 0.0f;
             rotation = 0.0f;
             flags = DecalFlags.AutoColor;
             color = Color.white;

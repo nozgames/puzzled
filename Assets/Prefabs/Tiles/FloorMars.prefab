@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36bca5eb496b2854cb4af1921bce4ae0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
 --- !u!114 &6868080960101938933
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,6 +74,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 963c396d425fb9b49b4857627f0f8a40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _visual: {fileID: 2593077135889534261}
 --- !u!1 &8552683826864825143
 GameObject:
@@ -146,15 +148,15 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: dabd0dd129d7bba42b781734225697b6, type: 3}
-  m_Color: {r: 0.877, g: 0.3239748, b: 0.17715396, a: 1}
+  m_Sprite: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &6335634864379398688
@@ -169,9 +171,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _renderer: {fileID: 64116789748320977}
-  _lightColor: {r: 1, g: 1, b: 1, a: 1}
-  _light: {fileID: 2182147064719174958}
+  _materialIndex: 0
+  _color: {r: 1, g: 1, b: 1, a: 1}
+  _smoothness: 0.5
+  _propertyName: 
+  _propertyDisplayName: 
 --- !u!1 &8968025596199766006
 GameObject:
   m_ObjectHideFlags: 0
@@ -305,10 +311,5 @@ PrefabInstance:
 --- !u!4 &3813157699599704797 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8714906172370077195, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
-  m_PrefabInstance: {fileID: 5483869515262846166}
-  m_PrefabAsset: {fileID: 0}
---- !u!108 &2182147064719174958 stripped
-Light:
-  m_CorrespondingSourceObject: {fileID: 5931827252863601144, guid: f03746ddd9f2412458183d10a9dac486, type: 3}
   m_PrefabInstance: {fileID: 5483869515262846166}
   m_PrefabAsset: {fileID: 0}

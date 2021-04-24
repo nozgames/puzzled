@@ -24,12 +24,16 @@ Material:
         m_Texture: {fileID: 2800000, guid: ec8b655464beeb141965fc9f3180f6af, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - Texture2D_3f4fd7440df0437dbf5c7a5ff87363c2:
+    - Texture2D_3c203b799d25411e93da6989ac6e55f9:
         m_Texture: {fileID: 2800000, guid: b3610a52f2668da45b7c911215a62f8e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - Texture2D_3f4fd7440df0437dbf5c7a5ff87363c2:
+        m_Texture: {fileID: 2800000, guid: 9662c7689b64ebc42b808b9a0ec5902e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - Texture2D_8f696148f50947e0833bda7e72ce2cab:
-        m_Texture: {fileID: 2800000, guid: 9c91ba5474f6a6e44bfcebf40e6a2a06, type: 3}
+        m_Texture: {fileID: 2800000, guid: da1e4d83b55e6b545beb84b377af8f48, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_adfc85c991884a359fd38b9bc0001c19:
@@ -80,6 +84,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: b3610a52f2668da45b7c911215a62f8e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _decal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -93,7 +101,14 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
+    - BOOLEAN_DECAL: 0
+    - BOOLEAN_F45C64A4AB214595940B65A671B743A0: 0
+    - DECAL: 0
+    - ENUM_C33E9103007B48F99741EFEAD952D4F1: 0
+    - Vector1_483c5ed396a94e72b9a01c7d3bdb2983: 1
     - Vector1_8fd43fa9190e4a3d9ee6bd1fe5de8aec: 0
+    - Vector1_98e63ed4dad240c6a0e4f22601932a88: 0
+    - Vector1_cf0822196d754b5290d61f470ef4ace9: 0
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1
@@ -101,6 +116,7 @@ Material:
     - _ClearCoatSmoothness: 0
     - _Cull: 2
     - _Cutoff: 0.5
+    - _DecalSmoothness: 0.739
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -120,13 +136,20 @@ Material:
     - _Surface: 0
     - _WorkflowMode: 0
     - _ZWrite: 1
+    - _decalSmoothness: 0
     m_Colors:
-    - Color_95ae0f4f4c5a4131bdf3e1671d036b7f: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 0}
+    - Color_95ae0f4f4c5a4131bdf3e1671d036b7f: {r: 1, g: 1, b: 1, a: 1}
     - Color_c9818b7ab1214cb6be58514dcbe2e8b6: {r: 0, g: 0.11983681, b: 1, a: 0}
+    - Vector2_089f5323f8064f3cb7c2505b2e21e14f: {r: -0.73, g: -0.65, b: 0, a: 0}
+    - Vector2_632c227d45144af6bf30404e1478b6ee: {r: 0.52, g: 0.58, b: 0, a: 0}
     - _BaseColor: {r: 0.6786519, g: 0.7573096, b: 0.8113208, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0, g: 0, b: 0, a: 1}
+    - _decalCenter: {r: 0.5, g: 0.5, b: 0, a: 0}
+    - _decalColor: {r: 0.092, g: 0.092, b: 0.092, a: 0.7490196}
+    - _decalOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _decalSize: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &658318854063356498
 MonoBehaviour:
