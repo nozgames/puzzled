@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using Puzzled.Editor;
 
 namespace Puzzled
 {
-    public class UIFoldout : MonoBehaviour, IPointerClickHandler
+    public class UIInspectorFoldout : MonoBehaviour, IPointerClickHandler, IInspectorStateProvider
     {
         [SerializeField] private Graphic _graphicExpanded = null;
         [SerializeField] private Graphic _graphicCollapsed = null;
@@ -18,6 +19,21 @@ namespace Puzzled
                 _expanded = value;
                 UpdateVisuals();
             }
+        }
+
+        public string inspectorStateId {
+            get {
+                var parent = transform.GetComponentInParent<UIPropertyEditor>();
+                if (parent == null)
+                    return null;
+
+                return $"{parent.target.id}_foldout";
+            }
+        }
+            
+        public object inspectorState {
+            get => _expanded;
+            set => expanded = (bool)value;
         }
 
         public void OnPointerClick(PointerEventData eventData)

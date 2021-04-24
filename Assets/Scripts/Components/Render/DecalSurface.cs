@@ -11,6 +11,7 @@ namespace Puzzled
         [SerializeField] private Color _color = Color.white;
         [SerializeField] private float _smoothness = 0.5f;
         [SerializeField] private float _rotation = 0.5f;
+        [SerializeField] private float _scale = 1.0f;
 
         [Header("Property")]
         [SerializeField] private string _propertyName = null;
@@ -60,6 +61,7 @@ namespace Puzzled
                         spriteRenderer.sprite = _decal.sprite;
                         spriteRenderer.flipX = _decal.isFlipped;
                         spriteRenderer.transform.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotation);
+                        spriteRenderer.transform.transform.localScale = Vector3.one * _decal.scale * _scale;
                         spriteRenderer.color = _decal.color;
                     } else
                     {
@@ -68,7 +70,7 @@ namespace Puzzled
                         material.SetTexture("_decal", _decal.texture);
                         material.SetColor("_decalColor", _decal.color);
                         material.SetFloat("_decalSmoothness", _decal.smoothness);
-                        material.SetVector("_decalScale", new Vector2(decal.scale * (_decal.isFlipped ? -1 : 1), decal.scale));
+                        material.SetVector("_decalScale", new Vector2(decal.scale * (_decal.isFlipped ? -1 : 1), decal.scale * _scale));
                         material.SetFloat("_decalRotation", _rotation + -_decal.rotation);
                     }
                 } else if (_renderer is SpriteRenderer spriteRenderer)

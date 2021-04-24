@@ -46,7 +46,7 @@ namespace Puzzled.Editor
         {
             private UIDecalArrayEditor _editor;
 
-            public string id => throw new System.NotImplementedException();
+            public string id => $"{_editor.target}_{_editor._items.selected}";
 
             public string name => $"{_editor.target.name} {_editor._items.selected}";
 
