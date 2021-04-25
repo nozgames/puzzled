@@ -6,6 +6,7 @@ namespace Puzzled.Editor
     class UIDecalPreview : MonoBehaviour
     {        
         [SerializeField] private RawImage _preview = null;
+        [SerializeField] private Image _none = null;
 
         private Color _autoColor;
         private Decal _decal;
@@ -32,6 +33,7 @@ namespace Puzzled.Editor
 
         private void UpdatePreview()
         {
+            _none.gameObject.SetActive(_decal == Decal.none);
             _preview.gameObject.SetActive(_decal != Decal.none);
             _preview.texture = _decal.texture;
             _preview.color = _decal.isAutoColor ? _autoColor : _decal.color;
