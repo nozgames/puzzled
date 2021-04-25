@@ -83,7 +83,7 @@ namespace Puzzled
         public void Initialize()
         {
             _instance = this;
-            _fog.material.color = Color.white;
+            //_fog.material.color = Color.white;
             camera.fieldOfView = FieldOfView;
         }
 
@@ -124,7 +124,7 @@ namespace Puzzled
 
         public static void SetBackground (Background background)
         {
-            _instance._fog.material.color = background?.color ?? defaultBackground.color;
+            //_instance._fog.material.color = background?.color ?? defaultBackground.color;
         }
 
         /// <summary>

@@ -48,7 +48,7 @@ namespace Puzzled
         private void OnUse(UseEvent evt)
         {
             if (!isUsable)
-                return;
+                return;            
 
             evt.IsHandled = true;
             HandleUse();
@@ -59,11 +59,14 @@ namespace Puzzled
             if (isEditing)
                 return;
 
-            if (pages == null || pages.Length == 0)
+            var surfaces = DecalSurface.FromCell(puzzle, tile.cell);
+
+            if ((surfaces == null || surfaces.Length == 0) && (pages == null || pages.Length == 0))
                 return;
 
-            var popup = UIManager.ShowPopup(_popupPrefab, DoneCallback);
-            popup.GetComponent<UIPopupText>().pages = pages;
+            var popup = UIManager.ShowPopup(_popupPrefab, DoneCallback).GetComponent<UIPopupText>();
+            popup.decal = surfaces == null ? Decal.none : surfaces[0].decal;
+            popup.pages = pages;
         }
 
         private void DoneCallback()

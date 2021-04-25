@@ -484,6 +484,7 @@ namespace Puzzled
 
         private void UpdateTooltip()
         {
+#if false
             if(_animator.GetBool("Walking") || isGrabbing)
             {
                 HideTooltip();
@@ -533,6 +534,7 @@ namespace Puzzled
                 _tooltipCell = cell;
                 _tooltipElapsed = 0.0f;
             }
+#endif
         }
 
         private void PlayAnimation (string name)
