@@ -796,8 +796,7 @@ namespace Puzzled
 
             ShowPopup(_chooseDecalPopup);
 
-            if (decal != Decal.none)
-                _chooseDecalPalette.selected = decal;
+            _chooseDecalPalette.selected = decal;
         }
 
         public void ChooseTile(Type componentType, Tile selected, Action<Tile> callback)

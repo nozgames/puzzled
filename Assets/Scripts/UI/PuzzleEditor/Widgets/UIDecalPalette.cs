@@ -18,10 +18,12 @@ namespace Puzzled.Editor
         [SerializeField] private UIList _list = null;
         [SerializeField] private ScrollRect _scrollRect = null;
         [SerializeField] private UIDecalPreview _selectedPreview = null;
+        [SerializeField] private UIDecalEditor _decalProperties = null;
         [SerializeField] private TMPro.TextMeshProUGUI _selectedName = null;
         [SerializeField] private TMPro.TMP_InputField _searchInput = null;
         [SerializeField] private Button _searchClearButton = null;
         [SerializeField] private Button _importButton = null;
+        [SerializeField] private Button _defaultsButton = null;
         [SerializeField] private bool allowNone = false;
 
         [SerializeField] private UIRadio _filterAll = null;
@@ -30,14 +32,42 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _filterNumber = null;
         [SerializeField] private UIRadio _filterLine = null;
 
-        private Decal _selected;
-
+        private Decal _selected = Decal.none;
+        
         public Decal selected {
             get => _selected;
             set => SetSelected(value, true);
         }
 
         public event Action<Decal> onDoubleClickDecal;
+
+        private class TargetProperty : IPropertyEditorTarget
+        {
+            public UIDecalPalette _palette;
+
+            public string id => "id";
+
+            public string name => _palette._selected.name;
+
+            public string placeholder => null;
+
+            public Vector2Int range => Vector2Int.zero;
+
+            public object GetValue() => _palette._selected;
+
+            public T GetValue<T>() => (T)GetValue();
+
+            public void SetValue(object value, bool commit = true) 
+            {
+                if(commit)
+                    _palette.selected = (Decal) value;
+                else
+                {
+                    _palette._selected = (Decal)value;
+                    _palette._selectedPreview.decal = _palette._selected;
+                }
+            }
+        }
 
         private void Awake()
         {
@@ -46,7 +76,7 @@ namespace Puzzled.Editor
             };
 
             _list.onSelectionChanged += (index) => {
-                SetSelected(_list.selectedItem?.GetComponent<UIDecalPaletteItem>().decal ?? Decal.none, false);
+                _selected.SetTexture(_list.selectedItem?.GetComponent<UIDecalPaletteItem>().decal ?? Decal.none);
                 UpdatePreview();
             };
 
@@ -58,6 +88,12 @@ namespace Puzzled.Editor
 
             _importButton.onClick.AddListener(() => {
                 UIPuzzleEditor.Import();
+            });
+
+            _defaultsButton.onClick.AddListener(() => {
+                var decal = Decal.none;
+                decal.SetTexture(_selected);
+                SetSelected(decal, false);
             });
 
             _searchInput.onValueChanged.AddListener((text) => {
@@ -78,6 +114,8 @@ namespace Puzzled.Editor
             _filterRune.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterLetter.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterLine.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
+
+            UpdatePreview();
         }
 
         public void RemoveImportedDecals ()
@@ -166,6 +204,7 @@ namespace Puzzled.Editor
         {
             _selectedPreview.decal = _selected;
             _selectedName.text = _selected.name;
+            _decalProperties.target = new TargetProperty { _palette = this };
         }
     }
 }

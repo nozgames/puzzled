@@ -69,7 +69,7 @@ namespace Puzzled.Editor
         private void Awake()
         {
             _decalButton.onClick.AddListener(() => {
-                UIPuzzleEditor.instance.ChooseDecal(Decal.none, (decal) => {
+                UIPuzzleEditor.instance.ChooseDecal((Decal)_boxedDecal, (decal) => {
                     var newDecal = (Decal)_boxedDecal;
                     newDecal.SetTexture(decal);
                     _boxedDecal = newDecal;
@@ -82,7 +82,7 @@ namespace Puzzled.Editor
                 decal.rotation = (((int)(decal.rotation / 45.0f) + 1) % 8) * 45.0f;
                 _boxedDecal = decal;
                 OnBoxedValueChanged(true);                
-            });
+            });            
         }
 
         protected override void OnTargetChanged()
