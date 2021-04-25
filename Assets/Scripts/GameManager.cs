@@ -225,7 +225,7 @@ namespace Puzzled
             CameraManager.ShowLayer(TileLayer.Logic, false);
             CameraManager.ShowLayer(TileLayer.Wall, true);
 
-            if (!puzzle.isEditing)
+            if (!UIPuzzleEditor.isOpen)
                 KeyboardManager.Push(_instance);
         }
 
@@ -234,7 +234,7 @@ namespace Puzzled
             if (puzzle == null)
                 return;
 
-            if (!puzzle.isEditing)
+            if (!UIPuzzleEditor.isOpen)
                 KeyboardManager.Pop();
 
             UIManager.ClosePopup();

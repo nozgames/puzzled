@@ -14,6 +14,8 @@ namespace Puzzled.Editor
         private readonly Regex RuneRegex = new Regex("(Rune).*", RegexOptions.IgnoreCase);
         private readonly Regex LineRegex = new Regex("(Arrow).*", RegexOptions.IgnoreCase);
 
+        [SerializeField] private Texture2D _noneTexture = null;
+        [SerializeField] private Color _noneColor = Color.white;
         [SerializeField] private UIDecalPaletteItem _itemPrefab = null;
         [SerializeField] private UIList _list = null;
         [SerializeField] private ScrollRect _scrollRect = null;
@@ -102,8 +104,13 @@ namespace Puzzled.Editor
             });
 
             // Add a none decal
-            if(allowNone)
-                Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = Decal.none;
+            if (allowNone)
+            {
+                var none = new Decal(Guid.Empty, _noneTexture);
+                none.isAutoColor = false;
+                none.color = _noneColor;                
+                Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = none;
+            }
 
             // Add all decals to the palette
             foreach (var decal in DatabaseManager.GetDecals())
@@ -205,6 +212,7 @@ namespace Puzzled.Editor
             _selectedPreview.decal = _selected;
             _selectedName.text = _selected.name;
             _decalProperties.target = new TargetProperty { _palette = this };
+            _defaultsButton.transform.parent.gameObject.SetActive(_selected != Decal.none);
         }
     }
 }

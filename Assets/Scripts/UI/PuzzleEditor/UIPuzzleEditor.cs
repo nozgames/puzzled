@@ -1019,9 +1019,9 @@ namespace Puzzled
                     min.y / parentTransform.rect.size.y);
             }
 
+            ShowPopup(_colorPicker.gameObject, false);
             _colorPicker.value = color;
             _colorPicker.onValueChanged = valueChanged;
-            ShowPopup(_colorPicker.gameObject, false);
         }
     }
 }

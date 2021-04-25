@@ -33,6 +33,7 @@ namespace Puzzled.Editor
         [SerializeField] private RawImage _imagePreviousBackground = null;
 
         [SerializeField] private UIColorTexture _colorTexture = null;
+        [SerializeField] private TMPro.TMP_InputField _hex = null;
 
         public System.Action<Color,bool> onValueChanged;
 
@@ -49,12 +50,23 @@ namespace Puzzled.Editor
                 _s.SetValueWithoutNotify(s * 100.0f);
                 _v.SetValueWithoutNotify(v * 100.0f);
                 _a.SetValueWithoutNotify(value.a * 100.0f);
+
+                if (!_hex.isFocused)
+                    UpdateHex();
+                    
                 UpdateTextures();
             }
         }
 
         private void Awake()
         {
+            _hex.onValueChanged.AddListener((v) => {
+                if (ColorUtility.TryParseHtmlString($"#{v}", out var color))
+                    value = color;
+                else
+                    value = Color.white;
+            });
+
             _colorTexture.onValueChanged.AddListener((s, v) => {
                 _s.value = s * 100.0f;
                 _v.value = v * 100.0f;
@@ -73,6 +85,7 @@ namespace Puzzled.Editor
             _a.onValueChanged.AddListener(v => {
                 _current.color = value;
                 onValueChanged?.Invoke(value,false);
+                UpdateHex();
             });
 
             UpdateTextureH();
@@ -83,12 +96,14 @@ namespace Puzzled.Editor
         private void OnDisable()
         {
             onValueChanged?.Invoke(value, true);
+            onValueChanged = null;
         }
 
         private void OnHSVChanged()
         {
             onValueChanged?.Invoke(value,false);
             UpdateTextures();
+            UpdateHex();
         }
 
         private void UpdateTextures()
@@ -184,6 +199,11 @@ namespace Puzzled.Editor
                 }
 
             _textureA.Apply();
+        }
+
+        private void UpdateHex()
+        {
+            _hex.SetTextWithoutNotify(ColorUtility.ToHtmlStringRGBA(value));
         }
     }
 }

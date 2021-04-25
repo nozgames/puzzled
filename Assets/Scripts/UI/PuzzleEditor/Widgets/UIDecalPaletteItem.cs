@@ -22,9 +22,12 @@ namespace Puzzled.Editor
                 }
                 else
                 {
-                    _nameText.text = _decal.name;
+                    _nameText.text = _decal.name;                    
                     _previewImage.texture = _decal.texture;
                     _previewImage.gameObject.SetActive(true);
+
+                    if (!_decal.isAutoColor)
+                        _previewImage.color = _decal.color;
                 }
             }
         }

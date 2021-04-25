@@ -59,6 +59,8 @@ namespace Puzzled
                     }
                 } else if (_renderer is SpriteRenderer spriteRenderer)
                     _renderer.enabled = false;
+                else
+                    _renderer.materials[_materialIndex].DisableKeyword("DECAL_ON");
             }
         }
 

@@ -370,7 +370,7 @@ namespace Puzzled
                 }
 
                 foreach (var property in tiles[i].properties)
-                    if(property.type != TilePropertyType.Port)
+                    if(property.type != TilePropertyType.Port && property.editable.serialized)
                         property.SetValue(cloned[i], property.GetValue(tiles[i]));
             }
 

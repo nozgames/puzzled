@@ -51,5 +51,11 @@ namespace Puzzled.Editor
         {
             onEndDrag?.Invoke();
         }
+
+        public new void SetValueWithoutNotify(float value)
+        {
+            base.SetValueWithoutNotify(value);
+            OnValueChanged(value);
+        }
     }
 }
