@@ -9,9 +9,12 @@ namespace Puzzled.Editor
         [SerializeField] private UISlider _slider = null;
         [SerializeField] private TMPro.TMP_InputField _input = null;
 
+        private bool _dragging = false;
+
         private void Awake()
-        {            
-            _slider.onEndDrag += OnCommitValue;
+        {
+            _slider.onBeginDrag += () => { _dragging = true; };
+            _slider.onEndDrag += () => { _dragging = false; OnCommitValue(); };
             _input.onSubmit.AddListener(OnInputChanged);
             _input.onEndEdit.AddListener(OnInputChanged);
         }
@@ -34,7 +37,7 @@ namespace Puzzled.Editor
         private void OnValueChanged (float value)
         {
             _input.SetTextWithoutNotify(((int)value).ToString());
-            target.SetValue((int)_slider.value, false);
+            target.SetValue((int)_slider.value, !_dragging);
         }
 
         protected override void OnTargetChanged()

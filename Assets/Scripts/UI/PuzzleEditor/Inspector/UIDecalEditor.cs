@@ -100,9 +100,7 @@ namespace Puzzled.Editor
             _autoColor.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("isAutoColor"), OnBoxedValueChanged);
             _color.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("color"), OnBoxedValueChanged);
 
-            var autoColor = ((Decal)_boxedDecal).isAutoColor;
-            _color.gameObject.SetActive(!autoColor);
-            _smoothness.gameObject.SetActive(!autoColor);
+            UpdateControls();
         }
 
         private void OnBoxedValueChanged(bool commit)
@@ -110,6 +108,20 @@ namespace Puzzled.Editor
             _preview.decal = (Decal)_boxedDecal;
             _decalButtonPreview.decal = new Decal(_preview.decal.guid, _preview.decal.texture);
             target.SetValue(_boxedDecal, commit);
+            UpdateControls();
+        }
+
+        private void UpdateControls()
+        {
+            var hasDecal = _preview.decal != Decal.none;
+            _scale.gameObject.SetActive(hasDecal);
+            _rotation.gameObject.SetActive(hasDecal);
+            _flipped.gameObject.SetActive(hasDecal);
+            _autoColor.gameObject.SetActive(hasDecal);
+
+            var autoColor = ((Decal)_boxedDecal).isAutoColor;
+            _color.gameObject.SetActive(!autoColor && hasDecal);
+            _smoothness.gameObject.SetActive(!autoColor && hasDecal);
         }
     }
 }
