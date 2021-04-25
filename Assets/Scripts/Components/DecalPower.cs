@@ -19,5 +19,24 @@ namespace Puzzled
         {
             _surfaces = GetComponentsInChildren<DecalSurface>();
         }
+
+        [ActorEventHandler]
+        private void OnStartEvent(StartEvent evt)
+        {
+            UpdateDecalPower();
+        }
+
+        [ActorEventHandler]
+        private void OnWirePowerChangedEvent(WirePowerChangedEvent evt)
+        {
+            UpdateDecalPower();
+        }
+
+        private void UpdateDecalPower()
+        {
+            var light = decalPowerPort.hasPower ? 1.0f : 0.0f;
+            foreach (var surface in _surfaces)
+                surface.decalLight = light;
+        }
     }
 }

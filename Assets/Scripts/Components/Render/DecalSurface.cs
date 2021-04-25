@@ -18,28 +18,12 @@ namespace Puzzled
         [SerializeField] private string _propertyDisplayName = null;
 
         private Decal _decal = Decal.none;
+        private float _light = 0.0f;
 
         public string decalName => _propertyName;
         public string decalDisplayName => _propertyDisplayName;
 
         public bool hasDecal => _decal != Decal.none;
-
-        [ActorEventHandler]
-        private void OnAwakeEvent(AwakeEvent evt)
-        {
-        }
-
-        [ActorEventHandler]
-        private void OnStartEvent (StartEvent evt)
-        {
-            //UpdateDecalPower();
-        }
-
-        [ActorEventHandler]
-        private void OnWirePowerChangedEvent (WirePowerChangedEvent evt)
-        {
-            //UpdateDecalPower();
-        }
 
         [Editable(dynamicName = "decalName", dynamicDisplayName = "decalDisplayName")]
         public Decal decal {
@@ -78,15 +62,17 @@ namespace Puzzled
             }
         }
 
-#if false
-        private void UpdateDecalPower()
-        {
-            if (_light != null)
-                _light.gameObject.SetActive(decalPowerPort.hasPower);
+        public float decalLight {
+            get => _light;
+            set {
+                _light = value;
 
-            _renderer.color = decalPowerPort.hasPower ? _lightColor : _defaultColor;
+                if (_renderer is SpriteRenderer spriteRenderer)
+                    return;
+
+                _renderer.materials[_materialIndex].SetFloat("_decalLight", _light);
+            }
         }
-#endif
 
         /// <summary>
         /// Return all decal surfaces for the tile at the given cell and layer
