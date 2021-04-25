@@ -58,8 +58,6 @@ namespace Puzzled.Editor
             if (!_camera.gameObject.activeSelf)
                 return;
 
-            CameraManager.SetBackground(_gameCamera.background);
-
             _camera.transform.localEulerAngles = new Vector3(_gameCamera.pitch, _gameCamera.yaw, 0);
             _camera.transform.position = 
                 CameraManager.Frame(

@@ -109,9 +109,6 @@ namespace Puzzled
                 GameManager.busy += _cameraIsBusy ? 1 : -1;
             }
 
-            // apply blended state to camera
-            _instance._fog.material.color = _blendedState.bgColor;
-
             camera.transform.position = CameraManager.Frame(_blendedState.targetPosition, _blendedState.pitch, _blendedState.yaw, _blendedState.zoomLevel, CameraManager.FieldOfView);
             camera.transform.rotation = Quaternion.Euler(_blendedState.pitch, _blendedState.yaw, 0);
         }

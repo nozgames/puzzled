@@ -128,11 +128,6 @@ namespace Puzzled
         /// </summary>
         public GameCamera activeCamera { get; private set; }
 
-        /// <summary>
-        /// Returns the active background in the puzzle.  Note that this may be null if there is no active camera
-        /// </summary>
-        public Background activeBackground => activeCamera == null ? null : activeCamera.background;
-
         private void Awake()
         {
             GameManager.onPuzzleChanged += OnPuzzleChanged;

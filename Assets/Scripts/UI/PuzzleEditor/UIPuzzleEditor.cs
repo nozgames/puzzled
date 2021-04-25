@@ -563,8 +563,7 @@ namespace Puzzled
                 pitch = _pitchSlider.value, 
                 yaw = _yawSlider.value * 90,
                 yawIndex = 0,
-                zoomLevel = _cameraZoom,
-                bgColor = Color.black
+                zoomLevel = _cameraZoom
             };
         }
 

@@ -16,7 +16,6 @@ namespace Puzzled
             public float yaw;
             public int yawIndex;
             public float zoomLevel;
-            public Color bgColor;
             public bool isBusy;
 
             public void Lerp(State stateB, float t)
@@ -26,7 +25,6 @@ namespace Puzzled
                 yaw = Mathf.LerpAngle(yaw, stateB.yaw, t);
                 yawIndex = (t >= 0.5) ? stateB.yawIndex : yawIndex;
                 zoomLevel = Mathf.Lerp(zoomLevel, stateB.zoomLevel, t);
-                bgColor = Color.Lerp(bgColor, stateB.bgColor, t);
             }
         }
 
@@ -85,9 +83,6 @@ namespace Puzzled
             get => _transitionTime;
             set => _transitionTime = Mathf.Max(value, 0);
         }
-
-        [Editable]
-        public Background background { get; set; }
 
         [Editable]
         public int layer { get; set; }
@@ -191,8 +186,7 @@ namespace Puzzled
                         targetPosition = puzzle.grid.CellToWorld(puzzle.player.tile.cell),
                         yaw = CameraManager.DefaultYaw,
                         pitch = CameraManager.DefaultPitch,
-                        zoomLevel = CameraManager.DefaultZoom,
-                        bgColor = CameraManager.defaultBackground.color
+                        zoomLevel = CameraManager.DefaultZoom
                     };
                 }
             }
@@ -263,7 +257,6 @@ namespace Puzzled
             state.yaw = yaw;
             state.yawIndex = _yawIndex;
             state.zoomLevel = zoomLevel;
-            state.bgColor = background?.color ?? CameraManager.defaultBackground.color;
         }
 
         public void SnapToTargetWeight()
