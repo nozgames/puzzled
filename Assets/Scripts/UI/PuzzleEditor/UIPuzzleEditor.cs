@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.IO;
 using UnityEngine.SceneManagement;
 using UnityEngine;
@@ -671,7 +672,6 @@ namespace Puzzled
             UpdateCursor();
         }
 
-
         /// <summary>
         /// Returns the top most tile in the given cell that has a property with the given name
         /// </summary>
@@ -699,7 +699,35 @@ namespace Puzzled
 
             return null;
         }
-        
+
+        /// <summary>
+        /// Returns the top most visible tile in the given cell that contains a property of the given type
+        /// </summary>
+        /// <param name="cell">Cell to search</param>
+        /// <param name="propertyType">Name of property to search for</param>
+        /// <param name="topLayer">Layer to start searching from</param>
+        /// <returns>Topmost tile in the cell with the given property or null</returns>
+        public Tile GetTopMostTileWithPropertyType(Cell cell, TilePropertyType propertyType, TileLayer topLayer = TileLayer.Logic)
+        {
+            for (int i = (int)topLayer; i >= 0; i--)
+            {
+                var tile = _puzzle.grid.CellToTile(cell, (TileLayer)i);
+                if (null == tile)
+                    continue;
+
+                // Do not return tiles on hidden layers
+                if (!IsLayerVisible((TileLayer)i))
+                    continue;
+
+                if (!tile.properties.Any(p => p.type == propertyType))
+                    continue;
+
+                return tile;
+            }
+
+            return null;
+        }
+
         private Tile GetTopMostTile(Cell cell, TileLayer topLayer = TileLayer.Logic)
         {
             for (int i = (int)topLayer; i >= 0; i--)

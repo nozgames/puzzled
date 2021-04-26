@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 using Puzzled.Editor;
 
@@ -29,21 +30,18 @@ namespace Puzzled
             if (cell == Cell.invalid)
                 return CursorType.Arrow;
 
+#if false
             if (KeyboardManager.isAltPressed)
                 return CursorType.EyeDropper;
+#endif
 
-            var decalSurfaces = DecalSurface.FromCell(instance._puzzle, cell);
-            if (null == decalSurfaces || decalSurfaces.Length > 1)
+            if(instance.GetTopMostTileWithPropertyType(cell, TilePropertyType.Decal) == null)
                 return CursorType.ArrowWithNot;
 
             if(KeyboardManager.isCtrlPressed)
-            {
-                if (decalSurfaces[0].decal == Decal.none)
-                    return CursorType.ArrowWithNot;
-
                 return CursorType.ArrowWithMinus;
-            }
 
+#if false
             // Do not allow decals to be set on the floor tile if there is a static tile in the same cell
             if (decalSurfaces[0].tile.layer == TileLayer.Floor && instance._puzzle.grid.CellToTile(cell, TileLayer.Static) != null)
                 return CursorType.ArrowWithNot;
@@ -51,6 +49,7 @@ namespace Puzzled
             // Do not allow decals to be set on a wall tile if there is a wall static in the same cell
             if (decalSurfaces[0].tile.layer == TileLayer.Wall && instance._puzzle.grid.CellToTile(cell, TileLayer.WallStatic) != null)
                 return CursorType.ArrowWithNot;
+#endif
 
             return CursorType.ArrowWithPlus;
         }
@@ -69,13 +68,12 @@ namespace Puzzled
         /// <param name="tileProperty">Tile property to set</param>
         /// <param name="decal">Decal to set</param>
         /// <returns>True if the decal was set</returns>
-        public static bool SetDecal(Tile tile, TileProperty tileProperty, Decal decal)
+        private static void SetDecal(Tile tile, TileProperty tileProperty, Decal decal, Editor.Commands.GroupCommand command)
         {
             // If the decal is an deep match then there is nothing to do
             if (decal.Equals(tileProperty.GetValue<Decal>(tile), true))
-                return true;
+                return;
 
-            var command = new Editor.Commands.GroupCommand();
             command.Add(new Editor.Commands.TileSetPropertyCommand(tile, tileProperty.name, decal));
 
             // If the decal is being cleared then check to see if there is a decal light and if 
@@ -89,10 +87,6 @@ namespace Puzzled
                         command.Add(new Editor.Commands.WireDestroyCommand(wire));
                 }
             }
-
-            ExecuteCommand(command);
-
-            return true;
         }
 
         /// <summary>
@@ -103,15 +97,20 @@ namespace Puzzled
         /// <returns></returns>
         public static bool SetDecal(Cell cell, Decal decal)
         {
-            var tile = instance.GetTopMostTileWithProperty(cell, "decal");
+            var tile = instance.GetTopMostTileWithPropertyType(cell, TilePropertyType.Decal);
             if (null == tile)
                 return false;
 
-            var tileProperty = tile.GetProperty("decal");
-            if (null == tileProperty)
+            var command = new Editor.Commands.GroupCommand();
+            foreach(var property in tile.properties.Where(p => p.type == TilePropertyType.Decal))
+                SetDecal(tile, property, decal, command);
+
+            if (!command.hasCommands)
                 return false;
 
-            return SetDecal(tile, tileProperty, decal);
+            ExecuteCommand(command);
+
+            return true;
         }
     }
 }

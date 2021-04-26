@@ -365,7 +365,15 @@ namespace Puzzled
                         if (null == toPort)
                             continue;
 
-                        puzzle.InstantiateWire(fromPort, toPort);
+                        // Copy wire options
+                        var wire = puzzle.InstantiateWire(fromPort, toPort);
+                        if (sourceWire.from.hasOptions)
+                            for (int optionIndex = 0; optionIndex < sourceWire.from.options.Length; optionIndex++)
+                                wire.from.SetOption(optionIndex, sourceWire.from.GetOption(optionIndex));
+
+                        if (sourceWire.to.hasOptions)
+                            for (int optionIndex = 0; optionIndex < sourceWire.to.options.Length; optionIndex++)
+                                wire.to.SetOption(optionIndex, sourceWire.to.GetOption(optionIndex));
                     }
                 }
 
