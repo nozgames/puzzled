@@ -7,25 +7,23 @@ namespace Puzzled
 {
     public class UIOptionDecal : UIPropertyEditor
     {
-        [SerializeField] private UIDecalEditor _decalEditor = null;
+        [SerializeField] private UIDecalPreview _decalEditor = null;
 
         protected override void OnTargetChanged()
         {
             base.OnTargetChanged();
 
-            label = target.name;
-
             // Hide the decal option if the decal isnt the top most in the cell
-            gameObject.SetActive(DecalSurface.FromCell(target.tile.puzzle, target.tile.cell) == DecalSurface.FromTile(target.tile));
+            //gameObject.SetActive(DecalSurface.FromCell(target.tile.puzzle, target.tile.cell) == DecalSurface.FromTile(target.tile));
 
             _decalEditor.decal = target.GetValue<Decal>();
-            _decalEditor.onDecalChanged -= OnDecalChanged;
-            _decalEditor.onDecalChanged += OnDecalChanged;
+            //_decalEditor.onDecalChanged -= OnDecalChanged;
+            //_decalEditor.onDecalChanged += OnDecalChanged;
         }
 
         private void OnDecalChanged(Decal decal)
         {
-            UIPuzzleEditor.SetDecal(target.tile.cell, decal);
+            target.SetValue(decal);
         }
     }
 }

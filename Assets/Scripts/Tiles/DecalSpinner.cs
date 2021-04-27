@@ -6,11 +6,21 @@ namespace Puzzled
 {
     class DecalSpinner : RecyclableSpinner
     {
+        private Decal[] _decals;
+
         /// <summary>
         /// List of all decals
         /// </summary>
         [Editable]
-        public Decal[] spinnerDecals { get; private set; }
+        public Decal[] spinnerDecals {
+            get => _decals;
+            set {
+                _decals = value;
+
+                if(isEditing)
+                    UpdateDecals();
+            }
+        }
 
         override protected Decal[] decals => spinnerDecals;
 

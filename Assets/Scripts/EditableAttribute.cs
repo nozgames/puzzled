@@ -14,6 +14,8 @@ namespace Puzzled
         public string hiddenIfFalse;
         public string hiddenIfTrue;
         public bool serialized = true;
+        public string dynamicName = null;
+        public string dynamicDisplayName = null;
 
         public Vector2Int range => new Vector2Int(rangeMin, rangeMax);
     }

@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace Puzzled
 {
-    public class DecalDatabase : ResourceDatabase<Sprite>
+    public class DecalDatabase : ResourceDatabase<Texture>
     {
 #if UNITY_EDITOR
         public static DecalDatabase GetInstance() => GetInstance<DecalDatabase>();

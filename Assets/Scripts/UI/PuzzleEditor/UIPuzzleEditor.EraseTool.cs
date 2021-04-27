@@ -41,7 +41,7 @@ namespace Puzzled
 
         private void OnEraseToolLButtonDown(Vector2 position)
         {
-            var tile = GetTile(_cursorCell);
+            var tile = GetTopMostTile(_cursorCell);
             _eraseLayerOnly = !eraseToolAllLayers.isOn && tile != null;
             _eraseLayer = _eraseLayerOnly ? tile.layer : TileLayer.Logic;
             _eraseStarted = false;
@@ -67,7 +67,7 @@ namespace Puzzled
             {
                 for(int layer = (int)TileLayer.Logic; layer >= (int)TileLayer.Floor; layer --)
                 {
-                    var tile = GetTile(cell, (TileLayer)layer);
+                    var tile = GetTopMostTile(cell, (TileLayer)layer);
                     if (null == tile)
                         continue;
 
@@ -77,7 +77,7 @@ namespace Puzzled
             } 
             else
             {
-                var tile = _eraseLayerOnly ? GetTile(cell,_eraseLayer) : GetTile(cell);
+                var tile = _eraseLayerOnly ? GetTopMostTile(cell,_eraseLayer) : GetTopMostTile(cell);
                 if (null == tile)
                     return;
 

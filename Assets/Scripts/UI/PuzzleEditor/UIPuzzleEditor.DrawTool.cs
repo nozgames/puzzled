@@ -2,6 +2,7 @@
 
 using Puzzled.Editor;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Puzzled
@@ -103,7 +104,14 @@ namespace Puzzled
             if (existing != null && existing.guid == prefab.guid)
                 return;
 
-            if(existing != null)
+            // If this prefab does not allow multiples then destroy all other instances within the puzzle 
+            if (!prefab.info.allowMultiple)
+            {
+                existing = puzzle.grid.GetTiles().FirstOrDefault(t => t.info == prefab.info);
+                if (null != existing)
+                    Erase(existing, command);
+            } 
+            else if (existing != null)
             {
                 var eraseFlags = EraseFlags.None;
                 if (existing.layer == TileLayer.WallStatic)
@@ -118,78 +126,63 @@ namespace Puzzled
                 Erase(existing, command, eraseFlags);
             }
 
-            // Destroy all other instances of this tile regardless of variant
-            if (!prefab.info.allowMultiple)
-            {
-                existing = puzzle.grid.CellToTile(prefab.guid);
-                if (null != existing)
-                    Erase(existing, command);
-            }
+            var tile = puzzle.InstantiateTile(prefab.guid, Cell.invalid);
+            command.Add(new Editor.Commands.TileAddCommand(prefab, cell, tile));
 
-            List<Port> prefabPowerPorts = null;
-            Decal decal = Decal.none;
-            if (prefab.layer == TileLayer.Static)
+            // Copy properties and wires?
+            if (existing)
             {
-                // If there is a floor with a decal we need to remove it
-                var floorSurface = DecalSurface.FromCell(puzzle, cell, TileLayer.Floor);
-                var tileHasDecal = DecalSurface.FromTile(prefab) != null;
-                if (null != floorSurface && floorSurface.decal != Decal.none)
+                foreach (var property in existing.properties)
                 {
-                    if (tileHasDecal)
-                        decal = floorSurface.decal;
+                    var otherProperty = tile.GetProperty(property.name);
+                    if (otherProperty == null || otherProperty.type != property.type || !property.editable.serialized)
+                        continue;
 
-                    command.Add(new Editor.Commands.TileSetPropertyCommand(floorSurface.tile, "decal", Decal.none));
-
-                    prefabPowerPorts = new List<Port>();
-                    foreach (var wire in floorSurface.decalPowerPort.wires)
+                    if (property.type != TilePropertyType.Port)
+                        tile.SetPropertyValue(property.name, property.GetValue(existing));
+                    else
                     {
-                        prefabPowerPorts.Add(wire.from.port);
-                        command.Add(new Editor.Commands.WireDestroyCommand(wire));
+                        var port = property.GetValue<Port>(existing);
+                        var otherPort = otherProperty.GetValue<Port>(tile);
+                        for (int wireIndex = 0; wireIndex < port.wireCount; wireIndex++)
+                        {
+                            var wire = port.GetWire(wireIndex);
+                            var otherWire = port.flow == PortFlow.Output ?
+                                puzzle.InstantiateWire(otherPort, wire.to.port) :
+                                puzzle.InstantiateWire(wire.from.port, otherPort);
+
+                            if (wire.from.hasOptions)
+                                for (int optionIndex = 0; optionIndex < wire.from.options.Length; optionIndex++)
+                                    otherWire.from.SetOption(optionIndex, wire.from.GetOption(optionIndex));
+
+                            if (wire.to.hasOptions)
+                                for (int optionIndex = 0; optionIndex < wire.to.options.Length; optionIndex++)
+                                    otherWire.to.SetOption(optionIndex, wire.to.GetOption(optionIndex));
+                        }
                     }
                 }
             }
 
-            command.Add(new Editor.Commands.TileAddCommand(prefab, cell));
+            command.Add(new Editor.Commands.TileMoveCommand(tile, cell));
+
             ExecuteCommand(command, group);
-
-            // See if we can move an old decal to the new tile
-            if(decal != Decal.none)
-            {
-                // Get the new tile
-                var tile = puzzle.grid.CellToTile(cell, prefab.layer);
-                if (null == tile)
-                    return;
-
-                var tileDecalSurface = DecalSurface.FromTile(tile);
-                if (null == tileDecalSurface)
-                    return;
-
-                command = new Editor.Commands.GroupCommand();
-                command.Add(new Editor.Commands.TileSetPropertyCommand(tile, "decal", decal));
-
-                if (prefabPowerPorts != null)
-                    foreach (var port in prefabPowerPorts)
-                        command.Add(new Editor.Commands.WireAddCommand(port, tileDecalSurface.decalPowerPort));
-
-                ExecuteCommand(command, true);
-            }
         }
 
         private void EyeDropper(Cell cell, bool cycle)
         {
             var selected = _tilePalette.selected;
-            var existing = GetTile(cell, (selected == null || !cycle) ? TileLayer.Logic : selected.layer);
+            var existing = GetTopMostTile(cell, (selected == null || !cycle) ? TileLayer.Logic : selected.layer);
             if (cycle && existing != null && selected != null && existing.guid == selected.guid)
             {
                 if (existing.layer != TileLayer.Floor)
-                    existing = GetTile(cell, (TileLayer)(existing.layer - 1));
+                    existing = GetTopMostTile(cell, (TileLayer)(existing.layer - 1));
                 else
                     existing = null;
             }
 
             if (null == existing)
             {
-                existing = GetTile(cell, TileLayer.Logic);
+                existing = GetTopMostTile(cell, TileLayer.Logic);
                 if (null == existing)
                     return;
             }

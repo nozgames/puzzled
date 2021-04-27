@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 7;
+        private const int FileVersion = 8;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -127,11 +127,6 @@ namespace Puzzled
         /// Returns the active camera in the puzzle.  Note that this may be null if there are no cameras in the level
         /// </summary>
         public GameCamera activeCamera { get; private set; }
-
-        /// <summary>
-        /// Returns the active background in the puzzle.  Note that this may be null if there is no active camera
-        /// </summary>
-        public Background activeBackground => activeCamera == null ? null : activeCamera.background;
 
         private void Awake()
         {
@@ -453,8 +448,7 @@ namespace Puzzled
                             break;
 
                         case TilePropertyType.Decal:
-                            writer.Write(((Decal)value).guid);
-                            writer.Write((int)((Decal)value).flags);
+                            writer.Write((Decal)value);
                             break;
 
                         case TilePropertyType.DecalArray:
@@ -462,10 +456,7 @@ namespace Puzzled
                             var darray = (Decal[])value;
                             writer.Write(darray.Length);
                             foreach (var decal in darray)
-                            {
-                                writer.Write(decal.guid);
-                                writer.Write((int)decal.flags);
-                            }
+                                writer.Write(decal);
                             break;
                         }
 
@@ -609,6 +600,7 @@ namespace Puzzled
                 case 5:
                 case 6:
                 case 7:
+                case 8:
                     LoadV5(reader, version);
                     break;
 
@@ -735,6 +727,7 @@ namespace Puzzled
                             var decal = DatabaseManager.GetDecal(reader.ReadGuid());
                             if (version > 1)
                                 decal.flags = (DecalFlags)reader.ReadInt32();
+
                             value = decal;
                             break;
                         }
@@ -971,25 +964,14 @@ namespace Puzzled
                         }
 
                         case TilePropertyType.Decal:
-                        {
-                            var decal = DatabaseManager.GetDecal(reader.ReadGuid());
-                            if (version > 1)
-                                decal.flags = (DecalFlags)reader.ReadInt32();
-                            value = decal;
+                            value = reader.ReadDecal(version);
                             break;
-                        }
 
                         case TilePropertyType.DecalArray:
                         {
                             var decals = new Decal[reader.ReadInt32()];
                             for (int i = 0; i < decals.Length; i++)
-                            {
-                                var decal = DatabaseManager.GetDecal(reader.ReadGuid());
-                                var flags = (DecalFlags)reader.ReadInt32();
-
-                                decal.flags = flags;
-                                decals[i] = decal;
-                            }
+                                decals[i] = reader.ReadDecal(version);
 
                             value = decals;
                             break;

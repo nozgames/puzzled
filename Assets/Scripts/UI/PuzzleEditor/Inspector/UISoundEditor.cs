@@ -14,7 +14,7 @@ namespace Puzzled.Editor
             _doubleClick.onDoubleClick.AddListener(() => {
                 UIPuzzleEditor.instance.ChooseSound(
                     (sound) => {
-                        UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, sound));
+                        target.SetValue(sound);
                         UpdatePreview();
                     },
                     target.GetValue<Sound>());
@@ -24,7 +24,6 @@ namespace Puzzled.Editor
         protected override void OnTargetChanged()
         {
             base.OnTargetChanged();
-            label = target.name;
             UpdatePreview();
         }
 

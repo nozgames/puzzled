@@ -15,6 +15,15 @@ namespace Puzzled
         protected override Vector3 initialEulerAngles => new Vector3(-90, 0, -90);
         protected override Vector3 rotationAxis => new Vector3(-1, 0, 0);
 
+        private Color _defaultColor = Color.white;
+        private Vector3 _defaultScale = Vector3.one;
+
+        private void Awake()
+        {
+            _defaultColor = _decalRenderers[0].color;
+            _defaultScale = _decalRenderers[0].transform.localScale;
+        }
+
         protected override void OnUseComplete()
         {
             base.OnUseComplete();
@@ -35,13 +44,16 @@ namespace Puzzled
 
         private void UpdateDecalRenderer(int rotateIndex, int value)
         {
-            _decalRenderers[rotateIndex].sprite = decals[value].sprite;
-            _decalRenderers[rotateIndex].flipX = (decals[value].flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal;
-            _decalRenderers[rotateIndex].flipY = (decals[value].flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical;
-            _decalRenderers[rotateIndex].transform.transform.localRotation = Quaternion.Euler(0, 0, ((decals[value].flags & DecalFlags.Rotate) == DecalFlags.Rotate) ? -90 : 0);
+            var decal = decals[value];
+            var renderer = _decalRenderers[rotateIndex];
+            renderer.sprite = decal.sprite;
+            renderer.flipX = decal.isFlipped;
+            renderer.color = decal.isAutoColor ? _defaultColor : decal.color;
+            renderer.transform.localRotation = Quaternion.Euler(0, 0, decal.rotation);
+            renderer.transform.localScale = _defaultScale * decal.scale;
         }
 
-        private void UpdateDecals()
+        protected void UpdateDecals()
         {
             if (decals.Length == 0)
                 return;

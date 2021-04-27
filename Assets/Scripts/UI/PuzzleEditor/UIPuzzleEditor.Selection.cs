@@ -97,7 +97,7 @@ namespace Puzzled
             }
         }
 
-        private void SelectTile(Cell cell) => SelectTile(GetTile(cell));
+        private void SelectTile(Cell cell) => SelectTile(GetTopMostTile(cell));
 
         private void SelectTile(Tile tile)
         {

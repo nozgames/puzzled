@@ -85,7 +85,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1784249378825888584}
   - component: {fileID: 5865390158968611877}
-  - component: {fileID: 2380145758595925651}
+  - component: {fileID: 4275921324306853274}
   m_Layer: 5
   m_Name: Preview
   m_TagString: Untagged
@@ -109,8 +109,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 8}
-  m_SizeDelta: {x: -32, y: -32}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -16, y: -16}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5865390158968611877
 CanvasRenderer:
@@ -120,7 +120,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3361391515645564803}
   m_CullTransparentMesh: 0
---- !u!114 &2380145758595925651
+--- !u!114 &4275921324306853274
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -129,7 +129,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3361391515645564803}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -140,16 +140,13 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 1
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &4642312077439141805
 GameObject:
   m_ObjectHideFlags: 0
@@ -215,7 +212,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   _nameText: {fileID: 8606311165298289421}
-  _previewImage: {fileID: 2380145758595925651}
+  _previewImage: {fileID: 4275921324306853274}
 --- !u!114 &1982481423106839132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -277,7 +274,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4451348581782135016
 RectTransform:
   m_ObjectHideFlags: 0

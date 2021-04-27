@@ -31,6 +31,8 @@
                 return;
 
             _tile.cell = _undoCell;
+
+            _tile.Send(new StartEvent());
         }
 
         protected override void OnRedo()
@@ -39,6 +41,8 @@
                 return;
 
             _tile.cell = _redoCell;
+
+            _tile.Send(new StartEvent());
         }
     }
 }

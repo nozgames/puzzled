@@ -11,7 +11,7 @@ namespace Puzzled
         //[SerializeField] private GameObject _visualUnlocked = null;
         [SerializeField] private UIKeypadPopup _popupPrefab = null;
 
-        [SerializeField] private Sprite[] _numbers = null;
+        [SerializeField] private Texture[] _numbers = null;
 
         private bool _locked = true;
 

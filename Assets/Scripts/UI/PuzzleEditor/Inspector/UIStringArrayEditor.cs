@@ -11,6 +11,19 @@ namespace Puzzled.Editor
 
         private List<string> _values;
 
+        public object inspectorState {
+            get => _items.selected;
+            set {
+                var index = (int)value;
+                if (index == -1)
+                    _items.ClearSelection();
+                else
+                    _items.Select(index);
+            }
+        }
+
+        public string inspectorStateId => target.id;
+
         protected override void OnTargetChanged()
         {
             base.OnTargetChanged();
@@ -23,8 +36,6 @@ namespace Puzzled.Editor
                 AddValue(value);
 
             _items.gameObject.SetActive(_values.Count > 0);
-
-            label = target.name;
         }
 
         public void OnAddButton()
@@ -32,18 +43,15 @@ namespace Puzzled.Editor
             _values.Add("");
             AddValue("");
             _items.Select(_items.itemCount - 1);
-
-            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _values.ToArray()));
+            target.SetValue(_values.ToArray());
         }
 
         private void RemoveItem (UIStringArrayEditorItem item)
         {
             var index = item.transform.GetSiblingIndex();
             _values.RemoveAt(index);
-            UIPuzzleEditor.ExecuteCommand(
-                new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _values.ToArray()), false, (command) => {
-                    _items.Select(Mathf.Min(index, _values.Count - 1));
-                });
+            _items.Select(Mathf.Min(index, _values.Count - 1));
+            target.SetValue(_values.ToArray());
         }
 
         private void OnReorderItem(int from, int to)
@@ -51,9 +59,7 @@ namespace Puzzled.Editor
             var step = _values[from];
             _values.RemoveAt(from);
             _values.Insert(to, step);
-            UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(target.tile, target.tileProperty.name, _values.ToArray()), false, (command) => {
-                _items.Select(to);
-            });
+            target.SetValue(_values.ToArray());
         }
 
         private UIStringArrayEditorItem AddValue(string value)
@@ -71,27 +77,5 @@ namespace Puzzled.Editor
             editor.value = value;
             return editor;
         }
-
-        /// <summary>
-        /// Saves the list state in the inspector
-        /// </summary>
-        private class InspectorState : IInspectorState
-        {
-            public int selectedIndex;
-
-            public void Apply(Transform inspector)
-            {
-                var editor = inspector.GetComponentsInChildren<UIStringArrayEditor>().FirstOrDefault();
-                if (null == editor)
-                    return;
-
-                if (selectedIndex == -1)
-                    editor._items.ClearSelection();
-                else
-                    editor._items.Select(selectedIndex);
-            }
-        }
-
-        public IInspectorState GetState() => new InspectorState { selectedIndex = _items.selected };
     }
 }

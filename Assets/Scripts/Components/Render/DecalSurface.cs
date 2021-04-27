@@ -5,71 +5,96 @@ namespace Puzzled
 {
     public class DecalSurface : TileComponent
     {
-        [SerializeField] private SpriteRenderer _renderer = null;
-        [SerializeField] private Color _lightColor = Color.white;
-        [SerializeField] private Light _light = null;
+        [Header("Render")]
+        [SerializeField] private Renderer _renderer = null;
+        [SerializeField] private int _materialIndex = 0;
 
-        [Editable(hiddenIfFalse = "decal")]
-        [Port(PortFlow.Input, PortType.Power, PortFlags.AllowSelfWire)]
-        public Port decalPowerPort { get; private set; }
+        [Header("Property")]
+        [SerializeField] private string _propertyName = null;
+        [SerializeField] private string _propertyDisplayName = null;
 
-        private Decal _decal;
-        private Color _defaultColor;
+        private Decal _decal = Decal.none;
+        private float _light = 0.0f;
+        private float _defaultSmoothness = 0.5f;
+        private Color _defaultColor = Color.white;
 
-        public Color color {
-            get => _renderer.color;
-            set => _renderer.color = value;
-        }
+        public string decalName => _propertyName;
+        public string decalDisplayName => _propertyDisplayName;
 
-        public Color lightColor => _lightColor;
+        public bool hasDecal => _decal != Decal.none;
 
-        [ActorEventHandler]
-        private void OnAwakeEvent(AwakeEvent evt)
-        {
-            _defaultColor = _renderer.color;
-        }
-
-        [ActorEventHandler]
-        private void OnStartEvent (StartEvent evt)
-        {
-            UpdateDecalPower();
-        }
-
-        [ActorEventHandler]
-        private void OnWirePowerChangedEvent (WirePowerChangedEvent evt)
-        {
-            UpdateDecalPower();
-        }
-
-        [Editable]
+        [Editable(dynamicName = "decalName", dynamicDisplayName = "decalDisplayName")]
         public Decal decal {
             get => _decal;
             set {
                 _decal = value;
 
-                _renderer.enabled = _decal != null && _decal.sprite != null;
-
-                if (_decal != null)
+                if (_decal.isAutoColor)
                 {
-                    _renderer.sprite = _decal.sprite;
-                    _renderer.flipX = (_decal.flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal;
-                    _renderer.flipY = (_decal.flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical;
-                    _renderer.transform.transform.localRotation = Quaternion.Euler(0, 0, ((_decal.flags & DecalFlags.Rotate) == DecalFlags.Rotate) ? -90 : 0);
+                    _decal.color = _defaultColor;
+                    _decal.smoothness = _defaultSmoothness;
                 }
+
+                if (_decal != Decal.none)
+                {
+                    if (_renderer is SpriteRenderer spriteRenderer)
+                    {
+                        _renderer.enabled = true;
+                        spriteRenderer.sprite = _decal.sprite;
+                        spriteRenderer.flipX = _decal.isFlipped;
+                        spriteRenderer.transform.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotation);
+                        spriteRenderer.transform.transform.localScale = Vector3.one * _decal.scale;
+                        spriteRenderer.color = _decal.color;
+                    } else
+                    {
+                        var material = _renderer.materials[_materialIndex];
+                        material.EnableKeyword("DECAL_ON");
+                        material.SetTexture("_decal", _decal.texture);
+                        material.SetColor("_decalColor", _decal.color);
+                        material.SetFloat("_decalSmoothness", _decal.smoothness);
+                        material.SetVector("_decalScale", new Vector2(decal.scale * (_decal.isFlipped ? -1 : 1), decal.scale));
+                        material.SetFloat("_decalRotation", _decal.rotation);
+                    }
+                } else if (_renderer is SpriteRenderer spriteRenderer)
+                    _renderer.enabled = false;
+                else
+                    _renderer.materials[_materialIndex].DisableKeyword("DECAL_ON");
             }
         }
 
-        private void UpdateDecalPower()
-        {
-            if (_light != null)
-                _light.gameObject.SetActive(decalPowerPort.hasPower);
+        public float decalLight {
+            get => _light;
+            set {
+                _light = value;
 
-            _renderer.color = decalPowerPort.hasPower ? _lightColor : _defaultColor;
+                if (_renderer is SpriteRenderer spriteRenderer)
+                    return;
+
+                _renderer.materials[_materialIndex].SetFloat("_decalLight", _light);
+            }
         }
 
-        public void ResetColor() => color = _defaultColor;
+        private void Awake()
+        {
+            if (_renderer is SpriteRenderer spriteRenderer)
+            {
+                _defaultColor = spriteRenderer.color;
+            }
+            else
+            {
+                _defaultColor = _renderer.materials[_materialIndex].GetColor("_decalColor");
+                _defaultSmoothness = _renderer.materials[_materialIndex].GetFloat("_decalSmoothness");
+            }
+        }
 
-        public static DecalSurface FromCell(Puzzle puzzle, Cell cell, TileLayer layer)
+        /// <summary>
+        /// Return all decal surfaces for the tile at the given cell and layer
+        /// </summary>
+        /// <param name="puzzle">Puzzle to search in</param>
+        /// <param name="cell">Cell to search in</param>
+        /// <param name="layer">Layer to search in</param>
+        /// <returns>Array of decal surfaces or null if there are none</returns>
+        public static DecalSurface[] FromCell(Puzzle puzzle, Cell cell, TileLayer layer)
         {
             var tile = puzzle.grid.CellToTile(cell, layer);
             if (null == tile)
@@ -78,15 +103,71 @@ namespace Puzzled
             return FromTile(tile);            
         }
 
-        public static DecalSurface FromCell (Puzzle puzzle, Cell cell)
+        /// <summary>
+        /// Return all available decal surfaces for the top most tile in the given cell
+        /// </summary>
+        /// <param name="puzzle">Puzzle to retrieve surfaces from</param>
+        /// <param name="cell">Cell to retrieve surfaces from</param>
+        /// <returns>Array of surfaces or null if the top most tile does not have any</returns>
+        public static DecalSurface[] FromCell (Puzzle puzzle, Cell cell)
         {
-            var result = FromCell(puzzle, cell, TileLayer.Static);
-            if (null != result)
-                return result;
+            // Floor or static
+            if(cell.edge == CellEdge.None)
+            {
+                var result = FromCell(puzzle, cell, TileLayer.Dynamic);
+                if (null != result)
+                    return result;
 
-            return FromCell(puzzle, cell, TileLayer.Floor);
+                result = FromCell(puzzle, cell, TileLayer.Static);
+                if (null != result)
+                    return result;
+
+                return FromCell(puzzle, cell, TileLayer.Floor);
+            }
+            // Wall static or wall
+            else
+            {
+                var result = FromCell(puzzle, cell, TileLayer.WallStatic);
+                if (null != result)
+                    return result;
+
+                return FromCell(puzzle, cell, TileLayer.Wall);
+            }
         }
 
-        public static DecalSurface FromTile (Tile tile) => tile.GetComponentInChildren<DecalSurface>();
+        /// <summary>
+        /// Returns all decal surfaces for the given tile
+        /// </summary>
+        /// <param name="tile">Tile to return decal surfaces for</param>
+        /// <returns>Array of decal surfaces or null if the tile has none</returns>
+        public static DecalSurface[] FromTile(Tile tile)
+        {
+            var surfaces = tile.GetComponentsInChildren<DecalSurface>();
+            if (null == surfaces || surfaces.Length == 0)
+                return null;
+
+            return surfaces;
+        }
+
+        /// <summary>
+        /// Return the top most tile in the given cell that has decal surfaces
+        /// </summary>
+        /// <param name="puzzle">Puzzle to search in</param>
+        /// <param name="cell">Cell to search in</param>
+        /// <returns>Top most tile with decals or null if none found</returns>
+        public static Tile GetTopMostTileWithDecals (Puzzle puzzle, Cell cell)
+        {
+            for (int layer = (int)TileLayer.Logic; layer >= (int)TileLayer.Floor; layer--)
+            {
+                var tile = puzzle.grid.CellToTile(cell, (TileLayer)layer);
+                if (tile == null)
+                    continue;
+
+                if (tile.HasTileComponent<DecalSurface>())
+                    return tile;
+            }
+
+            return null;
+        }
     }
 }

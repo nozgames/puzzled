@@ -15,7 +15,7 @@ namespace Puzzled
             set {
                 _decal = value;
 
-                if(_decal.sprite == null)
+                if(_decal.texture == null)
                 {
                     _image.enabled = false;
                     return;
@@ -23,8 +23,8 @@ namespace Puzzled
 
                 _image.sprite = _decal.sprite;
 
-                _image.transform.localScale = new Vector3(_decal.flipHorizontal ? -1 : 1, _decal.flipVertical ? -1 : 1, 1);
-                _image.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotate ? -90 : 0);
+                _image.transform.localScale = new Vector3(_decal.isFlipped ? -1 : 1, 1.0f, 1.0f);
+                _image.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotation);
                 _image.enabled = true;
             }
         }

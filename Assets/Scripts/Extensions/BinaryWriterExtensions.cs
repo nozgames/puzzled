@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using UnityEngine;
 
 namespace Puzzled
 {
@@ -21,6 +22,15 @@ namespace Puzzled
             writer.Write((byte)d);
         }
 
+        public static void Write(this BinaryWriter writer, Color color)
+        {
+            var color32 = (Color32)color;
+            writer.Write(color32.r);
+            writer.Write(color32.g);
+            writer.Write(color32.b);
+            writer.Write(color32.a);
+        }
+
         public static void Write(this BinaryWriter writer, Guid guid)
         {
             writer.Write(guid.ToByteArray());
@@ -34,6 +44,18 @@ namespace Puzzled
 
             if (cell.system == CellCoordinateSystem.Edge || cell.system == CellCoordinateSystem.SharedEdge)
                 writer.Write((byte)cell.edge);
+        }
+
+        public static void Write(this BinaryWriter writer, Decal decal)
+        {
+            writer.Write(decal.guid);
+            writer.Write((int)decal.flags);
+            writer.Write(decal.rotation);
+            writer.Write(decal.offset.x);
+            writer.Write(decal.offset.y);
+            writer.Write(decal.scale);
+            writer.Write(decal.smoothness);
+            writer.Write((Color32)decal.color);
         }
     }
 }

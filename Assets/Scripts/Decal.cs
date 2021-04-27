@@ -7,50 +7,62 @@ namespace Puzzled
     public enum DecalFlags
     {
         None,
-        FlipHorizontal = 1, 
-        FlipVertical = 2,
-        Rotate = 4
+        Imported = 1,
+        Flip = 2,
+        AutoColor = 4
     }
 
     public struct Decal
     {
-        public static readonly Decal none = new Decal(Guid.Empty, null);
+        public static readonly Decal none = new Decal(Guid.Empty, null) { scale = 1.0f, color = Color.white, flags = DecalFlags.AutoColor };
 
-        public string name => sprite == null ? "None" : sprite.name.Substring(5);
+        public string name => texture == null ? "None" : texture.name.Substring(5);
 
         public Guid guid { get; private set; }
 
-        public Sprite sprite { get; private set; }
+        public Texture texture { get; private set; }
 
         public DecalFlags flags { get; set; }
 
-        public bool flipHorizontal {
-            get => (flags & DecalFlags.FlipHorizontal) == DecalFlags.FlipHorizontal;
+        public float rotation { get; set; }
+
+        public Vector2 offset { get; set; }
+
+        public float scale { get; set; }
+
+        public float smoothness { get; set; }
+
+        public Color color { get; set; }
+
+        public Sprite sprite => texture == null ? null : Sprite.Create((Texture2D)texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+
+        public bool isAutoColor { 
+            get => (flags & DecalFlags.AutoColor) == DecalFlags.AutoColor;
             set {
                 if (value)
-                    flags |= DecalFlags.FlipHorizontal;
+                    flags |= DecalFlags.AutoColor;
                 else
-                    flags &= ~DecalFlags.FlipHorizontal;
+                    flags &= ~DecalFlags.AutoColor;
             }
         }
 
-        public bool flipVertical {
-            get => (flags & DecalFlags.FlipVertical) == DecalFlags.FlipVertical;
+        public bool isImported {
+            get => (flags & DecalFlags.Imported) == DecalFlags.Imported;
             set {
                 if (value)
-                    flags |= DecalFlags.FlipVertical;
+                    flags |= DecalFlags.Imported;
                 else
-                    flags &= ~DecalFlags.FlipVertical;
+                    flags &= ~DecalFlags.Imported;
             }
         }
 
-        public bool rotate {
-            get => (flags & DecalFlags.Rotate) == DecalFlags.Rotate;
+        public bool isFlipped {
+            get => (flags & DecalFlags.Flip) == DecalFlags.Flip;
             set {
                 if (value)
-                    flags |= DecalFlags.Rotate;
+                    flags |= DecalFlags.Flip;
                 else
-                    flags &= ~DecalFlags.Rotate;
+                    flags &= ~DecalFlags.Flip;
             }
         }
 
@@ -58,19 +70,44 @@ namespace Puzzled
 
         public static bool operator !=(Decal lhs, Decal rhs) => lhs.guid != rhs.guid;
 
-        public bool Equals(Decal other) => guid == other.guid;
+        public bool Equals(Decal other, bool deep = false)
+        {
+            if (guid != other.guid)
+                return false;
+
+            if (!deep)
+                return true;
+
+            return
+                color == other.color &&
+                rotation == other.rotation &&
+                scale == other.scale &&
+                offset == other.offset &&
+                flags == other.flags;
+        }
 
         public override bool Equals(object other) => other.GetType() == typeof(Decal) && Equals((Decal)other);
 
         public override int GetHashCode() => guid.GetHashCode();
 
-        public override string ToString() => $"{guid.ToString()}";
+        public override string ToString() => $"{guid.ToString()}";        
 
-        public Decal(Guid guid, Sprite sprite)
+        public void SetTexture (Decal decal)
+        {
+            texture = decal.texture;
+            guid = decal.guid;
+        }
+
+        public Decal(Guid guid, Texture texture)
         {
             this.guid = guid;
-            this.sprite = sprite;
-            flags = DecalFlags.None;
-        }
+            this.texture = texture;
+            offset = Vector2.zero;
+            scale = 1.0f;
+            smoothness = 0.0f;
+            rotation = 0.0f;
+            flags = DecalFlags.AutoColor;
+            color = Color.white;
+        }        
     }
 }

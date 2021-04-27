@@ -25,7 +25,6 @@ namespace Puzzled.Editor
         protected override void OnTargetChanged()
         {
             base.OnTargetChanged();
-            label = target.name;
             UpdatePreview();
         }
 

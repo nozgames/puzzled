@@ -7,7 +7,19 @@ namespace Puzzled
 {
     public class TileComponent : ActorComponent
     {
+        private static ulong _nextInstanceId = 1;
+
         private int _processedTickFrame = 0;
+
+        [SerializeField, HideInInspector] private ulong _instanceId;
+
+        public TileComponent CreateInstanceId ()
+        {
+            _instanceId = _nextInstanceId++;
+            return this;
+        }
+
+        public ulong instanceId => _instanceId;
 
         /// <summary>
         /// Tile the component is attached to

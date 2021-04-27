@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using UnityEngine;
 
 namespace Puzzled
 {
@@ -53,6 +54,29 @@ namespace Puzzled
             }
 
             return new Cell(system, x, y, edge);
+        }
+
+        public static Color ReadColor (this BinaryReader reader)
+        {
+            return new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
+        }
+
+        public static Decal ReadDecal (this BinaryReader reader, int version)
+        {
+            var decal = DatabaseManager.GetDecal(reader.ReadGuid());
+            if (version > 1)
+                decal.flags = (DecalFlags)reader.ReadInt32();
+
+            if (version > 7)
+            {
+                decal.rotation = reader.ReadSingle();
+                decal.offset = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+                decal.scale = reader.ReadSingle();
+                decal.smoothness = reader.ReadSingle();
+                decal.color = reader.ReadColor();
+            }
+
+            return decal;
         }
     }
 }

@@ -16,6 +16,8 @@
 
         protected override void OnExecute()
         {
+            var prop = tile.GetProperty(propertyName);
+
             undoValue = tile.GetProperty(propertyName).GetValue(tile);
             tile.GetProperty(propertyName).SetValue(tile, propertyValue);
             tile.Send(new StartEvent());
@@ -32,5 +34,7 @@
             tile.GetProperty(propertyName).SetValue(tile, propertyValue);
             tile.Send(new StartEvent());
         }
+
+        
     }
 }
