@@ -8,10 +8,6 @@ namespace Puzzled
         [Header("Render")]
         [SerializeField] private Renderer _renderer = null;
         [SerializeField] private int _materialIndex = 0;
-        [SerializeField] private Color _color = Color.white;
-        [SerializeField] private float _smoothness = 0.5f;
-        [SerializeField] private float _rotation = 0.5f;
-        [SerializeField] private float _scale = 1.0f;
 
         [Header("Property")]
         [SerializeField] private string _propertyName = null;
@@ -19,6 +15,8 @@ namespace Puzzled
 
         private Decal _decal = Decal.none;
         private float _light = 0.0f;
+        private float _defaultSmoothness = 0.5f;
+        private Color _defaultColor = Color.white;
 
         public string decalName => _propertyName;
         public string decalDisplayName => _propertyDisplayName;
@@ -33,8 +31,8 @@ namespace Puzzled
 
                 if (_decal.isAutoColor)
                 {
-                    _decal.color = _color;
-                    _decal.smoothness = _smoothness;
+                    _decal.color = _defaultColor;
+                    _decal.smoothness = _defaultSmoothness;
                 }
 
                 if (_decal != Decal.none)
@@ -45,7 +43,7 @@ namespace Puzzled
                         spriteRenderer.sprite = _decal.sprite;
                         spriteRenderer.flipX = _decal.isFlipped;
                         spriteRenderer.transform.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotation);
-                        spriteRenderer.transform.transform.localScale = Vector3.one * _decal.scale * _scale;
+                        spriteRenderer.transform.transform.localScale = Vector3.one * _decal.scale;
                         spriteRenderer.color = _decal.color;
                     } else
                     {
@@ -54,8 +52,8 @@ namespace Puzzled
                         material.SetTexture("_decal", _decal.texture);
                         material.SetColor("_decalColor", _decal.color);
                         material.SetFloat("_decalSmoothness", _decal.smoothness);
-                        material.SetVector("_decalScale", new Vector2(decal.scale * (_decal.isFlipped ? -1 : 1), decal.scale * _scale));
-                        material.SetFloat("_decalRotation", _rotation + -_decal.rotation);
+                        material.SetVector("_decalScale", new Vector2(decal.scale * (_decal.isFlipped ? -1 : 1), decal.scale));
+                        material.SetFloat("_decalRotation", _decal.rotation);
                     }
                 } else if (_renderer is SpriteRenderer spriteRenderer)
                     _renderer.enabled = false;
@@ -73,6 +71,19 @@ namespace Puzzled
                     return;
 
                 _renderer.materials[_materialIndex].SetFloat("_decalLight", _light);
+            }
+        }
+
+        private void Awake()
+        {
+            if (_renderer is SpriteRenderer spriteRenderer)
+            {
+                _defaultColor = spriteRenderer.color;
+            }
+            else
+            {
+                _defaultColor = _renderer.materials[_materialIndex].GetColor("_decalColor");
+                _defaultSmoothness = _renderer.materials[_materialIndex].GetFloat("_decalSmoothness");
             }
         }
 

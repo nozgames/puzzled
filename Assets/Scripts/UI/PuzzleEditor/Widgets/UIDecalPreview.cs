@@ -37,7 +37,7 @@ namespace Puzzled.Editor
             _preview.gameObject.SetActive(_decal != Decal.none);
             _preview.texture = _decal.texture;
             _preview.color = _decal.isAutoColor ? _autoColor : _decal.color;
-            _preview.transform.localRotation = Quaternion.Euler(0, 0, _decal.rotation);
+            _preview.transform.localRotation = Quaternion.Euler(0, 0, -_decal.rotation);
             _preview.transform.localScale = new Vector3(_decal.isFlipped ? -1 : 1, 1, 1) * _decal.scale;
         }
     }

@@ -100,10 +100,18 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - BOOLEAN_DECAL: 0
     - BOOLEAN_F45C64A4AB214595940B65A671B743A0: 0
     - DECAL: 0
+    - DecalCenterX: 0.5
+    - DecalCenterY: 0.5
+    - DecalHeightMax: 1
+    - DecalHeightMin: 0.1
+    - DecalRotationBase: 180
+    - DecalWidthMax: 1
+    - DecalWidthMin: 0.1
     - ENUM_C33E9103007B48F99741EFEAD952D4F1: 0
     - Vector1_483c5ed396a94e72b9a01c7d3bdb2983: 1
     - Vector1_8fd43fa9190e4a3d9ee6bd1fe5de8aec: 0
@@ -136,10 +144,14 @@ Material:
     - _Surface: 0
     - _WorkflowMode: 0
     - _ZWrite: 1
+    - _decalLight: 0
+    - _decalRotation: 0
     - _decalSmoothness: 0
     m_Colors:
     - Color_95ae0f4f4c5a4131bdf3e1671d036b7f: {r: 1, g: 1, b: 1, a: 1}
     - Color_c9818b7ab1214cb6be58514dcbe2e8b6: {r: 0, g: 0.11983681, b: 1, a: 0}
+    - DecalSizeMax: {r: 0.95, g: 0.95, b: 0, a: 0}
+    - DecalSizeMin: {r: 0.1, g: 0.1, b: 0, a: 0}
     - Vector2_089f5323f8064f3cb7c2505b2e21e14f: {r: -0.73, g: -0.65, b: 0, a: 0}
     - Vector2_632c227d45144af6bf30404e1478b6ee: {r: 0.52, g: 0.58, b: 0, a: 0}
     - _BaseColor: {r: 0.6786519, g: 0.7573096, b: 0.8113208, a: 1}
@@ -149,6 +161,7 @@ Material:
     - _decalCenter: {r: 0.5, g: 0.5, b: 0, a: 0}
     - _decalColor: {r: 0.092, g: 0.092, b: 0.092, a: 0.7490196}
     - _decalOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _decalScale: {r: 1, g: 1, b: 0, a: 0}
     - _decalSize: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &658318854063356498
