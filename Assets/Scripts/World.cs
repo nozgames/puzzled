@@ -11,7 +11,8 @@ namespace Puzzled
     {
         private string _displayName;
         private string _path;
-        ZipArchive archive;
+
+        IWorldArchive archive;
 
         public string displayName => string.IsNullOrEmpty(_displayName) ? Path.GetFileNameWithoutExtension(_path) : _displayName;
 
@@ -22,13 +23,13 @@ namespace Puzzled
 
         private class PuzzleEntry : IPuzzleEntry
         {
-            public PuzzleEntry(ZipArchiveEntry entry)
+            public PuzzleEntry(IWorldArchiveEntry entry)
             {
-                zipEntry = entry;
+                archiveEntry = entry;
             }
 
-            public ZipArchiveEntry zipEntry { get; set; }
-            public string filename => zipEntry.FullName;
+            public IWorldArchiveEntry archiveEntry { get; set; }
+            public string filename => archiveEntry.path;
         };
 
         List<PuzzleEntry> _puzzles;
@@ -37,25 +38,23 @@ namespace Puzzled
         public IPuzzleEntry GetPuzzleEntry(int index) => _puzzles[index];
         public int GetPuzzleEntryIndex(IPuzzleEntry entry) => _puzzles.IndexOf(entry as PuzzleEntry);
 
-        private World(Stream stream)
+        private World(IWorldArchive archive)
         {
-            archive = new ZipArchive(stream);
+            this.archive = archive;
             _puzzles = new List<PuzzleEntry>();
 
-            foreach (ZipArchiveEntry entry in archive.Entries.Where(e => (Path.GetExtension(e.Name) == ".puzzle")))
+            foreach (IWorldArchiveEntry entry in archive.entries.Where(e => (Path.GetExtension(e.name) == ".puzzle")))
                 _puzzles.Add(new PuzzleEntry(entry));
         }
 
-        public static World New(string path)
+        public static World New(IWorldArchive archive)
         {
-            Stream stream = File.Create(path);
-            return new World(stream);
+            return new World(archive);
         }
 
-        public static World Load(string path) 
+        public static World Load(IWorldArchive archive) 
         {
-            Stream stream = File.Open(path, FileMode.Open, FileAccess.ReadWrite);
-            return new World(stream);
+            return new World(archive);
         }
 
         public void Save() 
@@ -73,14 +72,14 @@ namespace Puzzled
         {
             if (entry is PuzzleEntry puzzleEntry)
             {
-                ZipArchiveEntry newEntry = archive.CreateEntry(name);
-                ZipArchiveEntry oldEntry = puzzleEntry.zipEntry;
+                IWorldArchiveEntry newEntry = archive.CreateEntry(name);
+                IWorldArchiveEntry oldEntry = puzzleEntry.archiveEntry;
 
-                using var oldFile = puzzleEntry.zipEntry.Open();
+                using var oldFile = puzzleEntry.archiveEntry.Open();
                 using var newFile = newEntry.Open();
                 oldFile.CopyTo(newFile);
 
-                puzzleEntry.zipEntry = newEntry;
+                puzzleEntry.archiveEntry = newEntry;
                 oldEntry.Delete();
             }
         }
@@ -89,14 +88,14 @@ namespace Puzzled
         {
             if (entry is PuzzleEntry puzzleEntry)
             {
-                puzzleEntry.zipEntry.Delete();
+                puzzleEntry.archiveEntry.Delete();
                 _puzzles.Remove(puzzleEntry);
             }
         }
 
         public IPuzzleEntry NewPuzzleEntry(string name)
         {
-            ZipArchiveEntry entry = archive.CreateEntry(name);
+            IWorldArchiveEntry entry = archive.CreateEntry(name);
             PuzzleEntry newPuzzle = new PuzzleEntry(entry);
             _puzzles.Add(newPuzzle);
 
@@ -109,8 +108,8 @@ namespace Puzzled
             {
                 try
                 {
-                    using var file = puzzleEntry.zipEntry.Open();
-                    return Puzzle.Load(file, puzzleEntry.zipEntry.FullName);
+                    using var file = puzzleEntry.archiveEntry.Open();
+                    return Puzzle.Load(file, puzzleEntry.archiveEntry.path);
                 }
                 catch (Exception e)
                 {
@@ -127,8 +126,8 @@ namespace Puzzled
             {
                 try
                 {
-                    using (var file = puzzleEntry.zipEntry.Open())
-                        puzzle.Save(file, puzzleEntry.zipEntry.FullName);
+                    using (var file = puzzleEntry.archiveEntry.Open())
+                        puzzle.Save(file, puzzleEntry.archiveEntry.path);
 
                 }
                 catch (Exception e)
