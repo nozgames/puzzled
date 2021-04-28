@@ -35,8 +35,7 @@ namespace Puzzled
         List<PuzzleEntry> _puzzles;
 
         public int puzzleCount => _puzzles.Count;
-        public IPuzzleEntry GetPuzzleEntry(int index) => _puzzles[index];
-        public int GetPuzzleEntryIndex(IPuzzleEntry entry) => _puzzles.IndexOf(entry as PuzzleEntry);
+        public IEnumerable<IPuzzleEntry> puzzles => _puzzles;
 
         private World(IWorldArchive archive)
         {
