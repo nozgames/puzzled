@@ -2,7 +2,7 @@
 
 namespace Puzzled
 {
-    class UIGameScreen : UIScreen
+    class UIPauseScreen : UIScreen
     {
         public void OnResumeButton()
         {
@@ -13,7 +13,7 @@ namespace Puzzled
         {
             GameManager.Stop();
             GameManager.UnloadPuzzle();
-            UIManager.ShowMainMenu();
+            UIManager.ShowMainScreen();
         }
     }
 }

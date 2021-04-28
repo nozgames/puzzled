@@ -157,7 +157,7 @@ namespace Puzzled
             instance.gameObject.SetActive(false);
             SceneManager.UnloadSceneAsync("Editor");
 
-            UIManager.ShowMainMenu();
+            UIManager.ShowMainScreen();
         }
 
         private void UpdateMode()

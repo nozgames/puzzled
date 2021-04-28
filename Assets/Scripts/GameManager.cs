@@ -192,7 +192,7 @@ namespace Puzzled
 
         public static void PuzzleComplete ()
         {
-            UIManager._instance.ShowPuzzleComplete();
+            //UIManager._instance.ShowPuzzleComplete();
         }
 
         private void Update()
@@ -251,7 +251,7 @@ namespace Puzzled
         {
             if(keyCode == KeyCode.Escape)
             {
-                UIManager.ShowIngame();
+                UIManager.ShowPauseScreen();
             }
         }
 
