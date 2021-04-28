@@ -74,7 +74,8 @@ namespace Puzzled
                 decal.scale = reader.ReadSingle();
                 decal.smoothness = reader.ReadSingle();
                 decal.color = reader.ReadColor();
-            }
+            } else
+                decal.flags |= DecalFlags.AutoColor;
 
             return decal;
         }
