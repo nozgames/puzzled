@@ -49,7 +49,7 @@ namespace Puzzled
 
         public IWorldArchiveEntry CreateEntry(string name)
         {
-            File.Create(name);
+            using var stream = File.Create(name);
             return new DirectoryWorldArchiveEntry(name);
         }
 
