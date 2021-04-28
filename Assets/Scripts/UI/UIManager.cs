@@ -27,10 +27,10 @@ namespace Puzzled
         [SerializeField] private RawImage _hudPlayerItemIcon = null;
 
         [Header("Screens")]
-        [SerializeField] private UIScreen mainMenu = null;
-        [SerializeField] private UIScreen worldsMenu = null;
-        [SerializeField] private UIScreen ingameScreen = null;
-        [SerializeField] private UIScreen puzzleComplete = null;
+        [SerializeField] private UIScreen _mainScreen = null;
+        [SerializeField] private UIScreen _pauseScreen = null;
+        [SerializeField] private UIScreen _createScreen = null;
+        [SerializeField] private UIScreen _playScreen = null;
 
         [Header("Cursors")]
         [SerializeField] private CursorInfo[] _cursors = null;
@@ -84,46 +84,28 @@ namespace Puzzled
             _instance = null;
         }
 
-        public static void ShowMainMenu()
+        private static void SetActiveScreen (UIScreen screen)
         {
-            if (_instance.activeScreen != null)
-                _instance.activeScreen.gameObject.SetActive(false);
-
-            _instance.activeScreen = _instance.mainMenu;
-            _instance.activeScreen.gameObject.SetActive(true);
-        }
-
-        public static void ShowIngame ()
-        {
-            if (_instance.activeScreen != null)
-                _instance.activeScreen.gameObject.SetActive(false);
-
-            _instance.activeScreen = _instance.ingameScreen;
-            _instance.activeScreen.gameObject.SetActive(true);
-        }
-
-        public static void ShowWorldsMenu()
-        {
-            _instance.activeScreen = _instance.worldsMenu;
-            _instance.activeScreen.gameObject.SetActive(true);
-        }
-
-        public void ShowPuzzleComplete()
-        {
-            // Special case for finishing a puzzle when the editor is open
-            if(UIPuzzleEditor.isOpen)
+            if(_instance.activeScreen != null)
             {
-                UIPuzzleEditor.Stop ();
-                return;
+                _instance.activeScreen.gameObject.SetActive(false);
+                _instance.activeScreen = null;
             }
 
-            if (activeScreen != null)
-                activeScreen.gameObject.SetActive(false);
-
-            activeScreen = puzzleComplete;
-            activeScreen.gameObject.SetActive(true);            
+            _instance.activeScreen = screen;
+            if (_instance.activeScreen != null)
+                _instance.activeScreen.gameObject.SetActive(true);
         }
-        
+
+
+        public static void ShowPauseScreen() => SetActiveScreen(_instance._pauseScreen);
+
+        public static void ShowMainScreen() => SetActiveScreen(_instance._mainScreen);
+
+        public static void ShowCreateScreen() => SetActiveScreen(_instance._createScreen);
+
+        public static void ShowPlayScreen() => SetActiveScreen(_instance._playScreen);
+       
         public static void HideMenu ()
         {
             if (null == _instance.activeScreen)
