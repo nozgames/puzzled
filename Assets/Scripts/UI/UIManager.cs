@@ -31,6 +31,7 @@ namespace Puzzled
         [SerializeField] private UIScreen worldsMenu = null;
         [SerializeField] private UIScreen ingameScreen = null;
         [SerializeField] private UIScreen puzzleComplete = null;
+        [SerializeField] private UIScreen createScreen = null;
 
         [Header("Cursors")]
         [SerializeField] private CursorInfo[] _cursors = null;
