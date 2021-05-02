@@ -12610,7 +12610,6 @@ GameObject:
   - component: {fileID: 2039045967}
   - component: {fileID: 2039045969}
   - component: {fileID: 2039045968}
-  - component: {fileID: 2039045966}
   m_Layer: 5
   m_Name: Tooltip
   m_TagString: Untagged
@@ -12618,22 +12617,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &2039045966
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2039045965}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3df25a218e1323d4f95cbfb630cc279e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _arrow: {fileID: 1283743312}
-  _arrowMargin: 20
-  _text: {fileID: 1612518091}
-  _animationTime: 0
 --- !u!224 &2039045967
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17668,7 +17651,7 @@ MonoBehaviour:
   _wireToggle: {fileID: 1381153589}
   _debugToggle: {fileID: 948769025}
   _canvasControls: {fileID: 1262769208}
-  _tooltip: {fileID: 2039045966}
+  _tooltip: {fileID: 0}
   _playControls: {fileID: 1604041282}
   _selectionGizmo: {fileID: 575329655}
   _cursorGizmo: {fileID: 1390728434}
@@ -24244,6 +24227,7 @@ GameObject:
   - component: {fileID: 7672252709280917541}
   - component: {fileID: 7672252709280917540}
   - component: {fileID: 7672252709280917539}
+  - component: {fileID: 7672252709280917542}
   m_Layer: 5
   m_Name: UI
   m_TagString: Untagged
@@ -24312,6 +24296,23 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 1
   m_TargetDisplay: 0
+--- !u!114 &7672252709280917542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7672252709280917538}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3df25a218e1323d4f95cbfb630cc279e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _target: {fileID: 2039045967}
+  _arrow: {fileID: 1283743312}
+  _arrowMargin: 20
+  _text: {fileID: 1612518091}
+  _animationTime: 0
 --- !u!224 &7677097188827461294
 RectTransform:
   m_ObjectHideFlags: 0

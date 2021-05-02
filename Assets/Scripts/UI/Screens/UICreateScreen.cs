@@ -6,6 +6,7 @@ namespace Puzzled.UI
     class UICreateScreen : UIScreen
     {
         [SerializeField] private Button _closeButton = null;
+        [SerializeField] private Button _newWorldButton = null;
 
         [SerializeField] private UIWorldList _worldList = null;
         [SerializeField] private UIWorldListItem _worldListItemPrefab = null;
@@ -14,6 +15,21 @@ namespace Puzzled.UI
         {
             _closeButton.onClick.AddListener(() => {
                 UIManager.ShowMainScreen();
+            });
+
+            _newWorldButton.onClick.AddListener(() => {
+                UIManager.ShowNamePopup("", title: "New World", commit: "Create", placeholder: "Enter World Name...",
+                    onCommit: (value) => {
+                        if (name.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) != -1)
+                            return "Error: Name contains invalid characters";
+
+                        var worldEntry = WorldManager.NewWorld(value);
+                        if(null == worldEntry)
+                            return "Error: World with the same name already exists";
+
+                        UIManager.ShowEditWorldScreen(worldEntry);
+                        return null;
+                    });
             });
         }
 

@@ -28,5 +28,17 @@ namespace Puzzled
 
             return _nicifyBuilder.ToString();
         }
+
+        public static string GetNextName (this string name)
+        {
+            var lastSpace = name.LastIndexOf(' ');
+            if (lastSpace == -1)
+                return name + " 1";
+
+            if (int.TryParse(name.Substring(lastSpace + 1), out var value))
+                return name.Substring(0, lastSpace) + " " + (value + 1).ToString();
+
+            return name + " 1";
+        }
     }
 }

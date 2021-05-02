@@ -93,16 +93,18 @@ namespace Puzzled
             return World.Load(ientry);
         }
 
-        public static World NewWorld(string name)
+        public static IWorldEntry NewWorld(string name)
         {
             var fullPath = Path.Combine(DirectoryArchivePath, name);
+            if (File.Exists(fullPath))
+                return null;
 
-            // TODO: does the world exist already?
+            if (Directory.Exists(fullPath))
+                return null;
 
             Directory.CreateDirectory(fullPath);
 
-            //return World.New(new DirectoryWorldArchive(fullPath));r
-            return null;
+            return new WorldEntry { name = name, path = fullPath };
         }
 
         public static void ImportWorld()

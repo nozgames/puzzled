@@ -50,7 +50,6 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _debugToggle = null;
         [SerializeField] private GameObject _canvasControls = null;
 
-        [SerializeField] private UITooltipPopup _tooltip = null;
         [SerializeField] private GameObject _playControls = null;
 
         [Header("Gizmos")]
@@ -931,16 +930,6 @@ namespace Puzzled.Editor
         private void HideCameraEditor()
         {
             _cameraEditor.gameObject.SetActive(false);
-        }
-
-        public static void ShowTooltip (RectTransform rectTransform, string text, TooltipDirection direction)
-        {
-            instance._tooltip.Show(rectTransform, text, direction);
-        }
-
-        public static void HideTooltip ()
-        {
-            instance._tooltip.gameObject.SetActive(false);
         }
 
         /// <summary>

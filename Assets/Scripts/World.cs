@@ -83,16 +83,39 @@ namespace Puzzled
         {
             if (entry is PuzzleEntry puzzleEntry)
             {
-                IWorldArchiveEntry newEntry = _archive.CreateEntry(name);
+                IWorldArchiveEntry newEntry = _archive.CreateEntry($"{name}.puzzle");
                 IWorldArchiveEntry oldEntry = puzzleEntry.archiveEntry;
 
-                using var oldFile = puzzleEntry.archiveEntry.Open();
-                using var newFile = newEntry.Open();
-                oldFile.CopyTo(newFile);
+                using (var oldFile = puzzleEntry.archiveEntry.Open())
+                using (var newFile = newEntry.Open())
+                    oldFile.CopyTo(newFile);
 
                 puzzleEntry.archiveEntry = newEntry;
                 oldEntry.Delete();
             }
+        }
+
+        public IPuzzleEntry DuplicatePuzzleEntry (IPuzzleEntry entry)
+        {
+            var puzzleEntry = entry as PuzzleEntry;
+            if (null == puzzleEntry)
+                return null;
+
+            // Find the next name by adding numbers to it
+            var name = entry.name.GetNextName();
+            while(_archive.Contains(name + ".puzzle"))
+                name = name.GetNextName();
+
+            IWorldArchiveEntry newEntry = _archive.CreateEntry(name + ".puzzle");
+
+            using (var oldFile = puzzleEntry.archiveEntry.Open())
+            using (var newFile = newEntry.Open())
+                oldFile.CopyTo(newFile);
+
+            var newPuzzleEntry = new PuzzleEntry(this, newEntry);
+            _puzzles.Add(newPuzzleEntry);
+
+            return newPuzzleEntry;
         }
 
         public void DeletePuzzleEntry(IPuzzleEntry entry)
@@ -156,6 +179,12 @@ namespace Puzzled
                 }
             }
         }
+
+        public bool Contains(string name) =>
+            puzzles.Any(p => 0 == string.Compare(name, p.name, true));
+
+        public int IndexOf(IPuzzleEntry puzzleEntry) =>
+            _puzzles.IndexOf(puzzleEntry as PuzzleEntry);
 
         public void Dispose()
         {

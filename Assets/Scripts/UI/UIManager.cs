@@ -33,6 +33,10 @@ namespace Puzzled.UI
         [SerializeField] private UIScreen _playScreen = null;
         [SerializeField] private UIEditWorldScreen _editWorldScreen = null;
 
+        [Header("Popups")]
+        [SerializeField] private UINamePopup _namePopup = null;
+        [SerializeField] private UIConfirmPopup _confirmPopup = null;
+
         [Header("Cursors")]
         [SerializeField] private CursorInfo[] _cursors = null;
 
@@ -170,6 +174,16 @@ namespace Puzzled.UI
                 Tween.Scale(0, 1).Key("Item").Duration(0.25f).EaseInOutElastic(1, 3).Start(_instance._hudPlayerItem.gameObject);
                 _instance._hudPlayerItemIcon.texture = DatabaseManager.GetPreview(tile.guid);
             }
+        }
+
+        public static void ShowNamePopup (string value = null, string title = null, string commit = null, string placeholder = null, Func<string,string> onCommit = null, Action onCancel = null)
+        {
+            _instance._namePopup.Show(value, title, commit, placeholder, onCommit, onCancel);
+        }
+
+        public static void ShowConfirmPopup(string message = null, string title = null, string confirm = null, Action onConfirm = null, Action onCancel = null)
+        {
+            _instance._confirmPopup.Show(message, title, confirm, onConfirm, onCancel);
         }
     }
 }

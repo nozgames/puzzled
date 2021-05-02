@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Puzzled.Editor
+namespace Puzzled.UI
 {
     public class UITooltip : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
@@ -17,27 +12,43 @@ namespace Puzzled.Editor
         [SerializeField] private float _delay = 0.0f;
 
         private Coroutine _delayCoroutine = null;
-
+        private UITooltipPopup _popup = null;
+        
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if(_delay > 0.0f)
+            if (_delay > 0.0f)
                 _delayCoroutine = StartCoroutine(DoDelay());
             else
-                UIPuzzleEditor.ShowTooltip(GetComponent<RectTransform>(), _text, _direction);
+                ShowPopup();                
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             if(null != _delayCoroutine)
                 StopCoroutine(_delayCoroutine);
+
             _delayCoroutine = null;
-            UIPuzzleEditor.HideTooltip();
+
+            if(null != _popup)
+                _popup.Hide();
         }
 
         private IEnumerator DoDelay ()
         {
             yield return new WaitForSeconds(_delay);
-            UIPuzzleEditor.ShowTooltip(GetComponent<RectTransform>(), _text, _direction);
+            ShowPopup();
+        }
+
+        private void ShowPopup()
+        {
+            if (_popup == null)
+            {
+                _popup = GetComponentInParent<UITooltipPopup>();
+                if (null == _popup)
+                    return;
+            }
+                
+            _popup.Show(GetComponent<RectTransform>(), _text, _direction);
         }
     }
 }
