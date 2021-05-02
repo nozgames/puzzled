@@ -422,6 +422,9 @@ namespace Puzzled.Editor
 
         public void Save()
         {
+            if (!_puzzle.isModified)
+                return;
+
             _puzzleEntry.Save(_puzzle);
 
             // Add a star to the end of the puzzle name

@@ -36,6 +36,10 @@ namespace Puzzled.UI
 
             _puzzleList.onSelectionChanged += (selection) => UpdateButtons();
 
+            _editPuzzleButton.onClick.AddListener(() => {
+                Editor.UIPuzzleEditor.Initialize((_puzzleList.selectedItem as UIPuzzleListItem).puzzleEntry);
+            });
+
             _newPuzzleButton.onClick.AddListener(() => {
                 UIManager.ShowNamePopup("", title: "New Puzzle", commit: "Create", placeholder: "Enter Puzzle Name",
                     onCommit: (name) => {
@@ -110,8 +114,7 @@ namespace Puzzled.UI
 
         private void OnEnable()
         {            
-            UpdateWorld();
-            UpdateButtons();
+            UpdateWorld();            
         }
 
         private void UpdateWorld ()
@@ -131,6 +134,8 @@ namespace Puzzled.UI
                     Editor.UIPuzzleEditor.Initialize(entry);
                 });
             }
+
+            UpdateButtons();
         }
 
         private void UpdateButtons()
@@ -139,7 +144,7 @@ namespace Puzzled.UI
             _editPuzzleButton.interactable = selected;
             _duplicatePuzzleButton.interactable = selected;
             _renamePuzzleButton.interactable = selected;
-            _deletePuzzleButton.interactable = selected;
+            _deletePuzzleButton.interactable = selected;            
         }
 
         private void Select(World.IPuzzleEntry puzzleEntry)

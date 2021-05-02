@@ -242,10 +242,10 @@ RectTransform:
   m_Father: {fileID: 965584427212123115}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 846, y: -5}
+  m_SizeDelta: {x: 1692, y: 10}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1156917328380102046
 MonoBehaviour:
@@ -629,6 +629,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3530778343672320281, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}
+      propertyPath: m_Interactable
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4864051089908670187, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}
       propertyPath: m_Name
       value: RenameButton
@@ -756,6 +760,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 293372196207904498, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3530778343672320281, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}
+      propertyPath: m_Interactable
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4864051089908670187, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}
@@ -932,13 +940,17 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8491365868247930787}
     m_Modifications:
-    - target: {fileID: 1611937635513011497, guid: 3fe4a9d613b6ac54ea2c701941ddcb39, type: 3}
-      propertyPath: m_AnchorMax.x
+    - target: {fileID: 1291525723064871534, guid: 3fe4a9d613b6ac54ea2c701941ddcb39, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1611937635513011497, guid: 3fe4a9d613b6ac54ea2c701941ddcb39, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1611937635513011497, guid: 3fe4a9d613b6ac54ea2c701941ddcb39, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2039636940549363087, guid: 3fe4a9d613b6ac54ea2c701941ddcb39, type: 3}
       propertyPath: m_AnchorMax.x
@@ -1249,6 +1261,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3530778343672320281, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}
+      propertyPath: m_Interactable
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4864051089908670187, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}
       propertyPath: m_Name
       value: DeleteButton
@@ -1376,6 +1392,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 293372196207904498, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3530778343672320281, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}
+      propertyPath: m_Interactable
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4864051089908670187, guid: 78c35267c6bfcac41a93be9b5a88dd80, type: 3}

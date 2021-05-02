@@ -92,6 +92,8 @@ namespace Puzzled
             _instance = null;
         }
 
+        public static void ForceUpdate() => _instance.LateUpdate();
+
         private void LateUpdate()
         {
             if (_instance == null)

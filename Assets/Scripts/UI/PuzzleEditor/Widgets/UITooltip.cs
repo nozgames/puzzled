@@ -13,7 +13,14 @@ namespace Puzzled.UI
 
         private Coroutine _delayCoroutine = null;
         private UITooltipPopup _popup = null;
-        
+        private bool _popupVisible = false;
+
+        private void OnDisable()
+        {
+            if (_popupVisible)
+                HidePopup();
+        }
+
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (_delay > 0.0f)
@@ -24,13 +31,7 @@ namespace Puzzled.UI
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if(null != _delayCoroutine)
-                StopCoroutine(_delayCoroutine);
-
-            _delayCoroutine = null;
-
-            if(null != _popup)
-                _popup.Hide();
+            HidePopup();
         }
 
         private IEnumerator DoDelay ()
@@ -47,8 +48,22 @@ namespace Puzzled.UI
                 if (null == _popup)
                     return;
             }
-                
+
+            _popupVisible = true;
             _popup.Show(GetComponent<RectTransform>(), _text, _direction);
+        }
+        
+        private void HidePopup()
+        {
+            if (null != _delayCoroutine)
+                StopCoroutine(_delayCoroutine);
+
+            _delayCoroutine = null;
+
+            if (null != _popup)
+                _popup.Hide();
+
+            _popupVisible = false;
         }
     }
 }

@@ -5,9 +5,31 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    public static class WorldManager
+    public class WorldManager : MonoBehaviour
     {
         private const string WorldExtension = ".world";
+
+        [SerializeField] private Camera _previewCamera = null;
+
+        private static WorldManager _instance = null;
+
+        private static string directoryArchivePath =>
+#if UNITY_EDITOR
+            Path.Combine(Application.dataPath, "../Worlds");
+#else
+            Path.Combine(Application.persistentDataPath, "MyWorlds");
+#endif
+
+        private static string internalZipArchivePath =>
+            Path.Combine(Application.streamingAssetsPath, "Worlds");
+
+        private static string externalZipArchivePath =>
+            Path.Combine(Application.persistentDataPath, "Worlds");
+
+        private void Awake()
+        {
+            _instance = this;
+        }
 
         public interface IWorldEntry
         {
@@ -38,15 +60,6 @@ namespace Puzzled
 
         private static bool IsZipArchive(string path) => Path.GetExtension(path) == WorldExtension;
 
-#if UNITY_EDITOR
-        private static readonly string DirectoryArchivePath = Path.Combine(Application.dataPath, "../Worlds");
-#else
-        private static readonly string DirectoryArchivePath = Path.Combine(Application.persistentDataPath, "MyWorlds");
-#endif
-
-        private static readonly string InternalZipArchivePath = Path.Combine(Application.streamingAssetsPath, "Worlds");
-        private static readonly string ExternalZipArchivePath = Path.Combine(Application.persistentDataPath, "Worlds");
-
         public static bool DoesEditableWorldExist(string path)
         {
             return false;
@@ -59,19 +72,19 @@ namespace Puzzled
 
         public static IEnumerable<IWorldEntry> GetPlayableWorldEntries()
         {
-            foreach (var entry in FindZipWorldArchives(InternalZipArchivePath))
+            foreach (var entry in FindZipWorldArchives(internalZipArchivePath))
                 yield return entry;
 
-            foreach (var entry in FindZipWorldArchives(ExternalZipArchivePath))
+            foreach (var entry in FindZipWorldArchives(externalZipArchivePath))
                 yield return entry;
         }
 
         public static IEnumerable<IWorldEntry> GetEditableWorldEntries()
         {
-            if (!Directory.Exists(DirectoryArchivePath))
+            if (!Directory.Exists(directoryArchivePath))
                 yield break;
 
-            foreach (var path in Directory.GetDirectories(DirectoryArchivePath))
+            foreach (var path in Directory.GetDirectories(directoryArchivePath))
                 yield return new WorldEntry { path = path, name = Path.GetFileNameWithoutExtension(path) };
         }
 
@@ -95,7 +108,7 @@ namespace Puzzled
 
         public static IWorldEntry NewWorld(string name)
         {
-            var fullPath = Path.Combine(DirectoryArchivePath, name);
+            var fullPath = Path.Combine(directoryArchivePath, name);
             if (File.Exists(fullPath))
                 return null;
 
@@ -123,12 +136,12 @@ namespace Puzzled
             var directoryArchive = new DirectoryWorldArchive(entry.path);
             var archivePath =
 #if UNITY_EDITOR
-                InternalZipArchivePath;
+                internalZipArchivePath;
 #else
-                ExternalZipArchivePAth;
+                externalZipArchivePath;
 #endif
 
-            var zipArchive = new ZipWorldArchive(File.Create(Path.Combine(InternalZipArchivePath, $"{entry.name}.{WorldExtension}")));
+            var zipArchive = new ZipWorldArchive(File.Create(Path.Combine(archivePath, $"{entry.name}.{WorldExtension}")));
 
             foreach(var sourceEntry in directoryArchive.entries)
             {
@@ -137,6 +150,51 @@ namespace Puzzled
                 using var targetStream = targetEntry.Open();
                 sourceStream.CopyTo(targetStream);
             }
+        }
+
+        public static Texture2D CreatePreview (World.IPuzzleEntry puzzleEntry)
+        {
+            try
+            {
+                var camera = _instance._previewCamera;
+
+                if (GameManager.puzzle != null)
+                    GameManager.puzzle.Destroy();
+
+                GameManager.puzzle = puzzleEntry.Load();
+                GameManager.Play();
+                Tile.Tick();
+                //Tile.Tick();
+                //Tile.Tick();
+                //Tile.Tick();
+                CameraManager.ForceUpdate();
+
+
+                // Copy the main camera transform
+                camera.transform.position = CameraManager.camera.transform.position;
+                camera.transform.localRotation = CameraManager.camera.transform.localRotation;
+                camera.transform.localScale = CameraManager.camera.transform.localScale;
+
+                camera.Render();
+
+                var t = new Texture2D(camera.targetTexture.width, camera.targetTexture.height, TextureFormat.ARGB32, false, true);
+                t.filterMode = FilterMode.Bilinear;
+                t.wrapMode = TextureWrapMode.Clamp;
+
+                RenderTexture.active = camera.targetTexture;
+                t.ReadPixels(new Rect(0, 0, t.width, t.height), 0, 0);
+                t.Apply();
+
+                GameManager.Stop();
+                GameManager.UnloadPuzzle();
+
+                return t;
+            } 
+            catch
+            {
+                return null;
+            }
+
         }
     }
 }
