@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.IO.Compression;
 using UnityEngine;
 
@@ -18,7 +19,6 @@ namespace Puzzled
             }
 
             public string name => entry.Name;
-            public string path => entry.FullName;
 
             public Stream Open()
             {
@@ -52,6 +52,9 @@ namespace Puzzled
         {
             return new ZipWorldArchiveEntry(zipArchive.CreateEntry(name));
         }
+
+        public bool Contains(string name) =>
+            zipArchive.Entries.Any(e => string.Compare(e.Name, name, true) == 0);
 
         public void Dispose()
         {

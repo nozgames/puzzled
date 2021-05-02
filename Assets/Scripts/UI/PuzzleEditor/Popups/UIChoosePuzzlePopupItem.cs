@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Puzzled.UI;
 
 namespace Puzzled.Editor
 {

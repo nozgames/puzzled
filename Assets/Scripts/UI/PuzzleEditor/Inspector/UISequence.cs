@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using Puzzled.Editor;
 
-namespace Puzzled
+using Puzzled.UI;
+
+namespace Puzzled.Editor
 {
     public class UISequence : MonoBehaviour
     {

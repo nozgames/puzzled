@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using Puzzled.UI;
 
 namespace Puzzled.Editor    
 {

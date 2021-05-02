@@ -3,7 +3,7 @@ using NoZ;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Puzzled
+namespace Puzzled.UI
 {
     public class UIManager : MonoBehaviour
     {
@@ -31,6 +31,7 @@ namespace Puzzled
         [SerializeField] private UIScreen _pauseScreen = null;
         [SerializeField] private UIScreen _createScreen = null;
         [SerializeField] private UIScreen _playScreen = null;
+        [SerializeField] private UIEditWorldScreen _editWorldScreen = null;
 
         [Header("Cursors")]
         [SerializeField] private CursorInfo[] _cursors = null;
@@ -105,7 +106,14 @@ namespace Puzzled
         public static void ShowCreateScreen() => SetActiveScreen(_instance._createScreen);
 
         public static void ShowPlayScreen() => SetActiveScreen(_instance._playScreen);
-       
+
+        public static void ShowEditWorldScreen(WorldManager.IWorldEntry worldEntry = null)
+        {
+            if(worldEntry != null)
+                _instance._editWorldScreen.world = WorldManager.LoadWorld(worldEntry);
+            SetActiveScreen(_instance._editWorldScreen);
+        }
+
         public static void HideMenu ()
         {
             if (null == _instance.activeScreen)

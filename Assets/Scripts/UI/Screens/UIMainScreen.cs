@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEditor;
 #endif
 
-namespace Puzzled
+namespace Puzzled.UI
 {
     class UIMainScreen : UIScreen
     {

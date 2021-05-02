@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Puzzled
+namespace Puzzled.UI
 {
     public class UIPopupText : UIPopup
     {

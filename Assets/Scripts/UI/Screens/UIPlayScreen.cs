@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Puzzled
+namespace Puzzled.UI
 {
     class UIPlayScreen : UIScreen
     {

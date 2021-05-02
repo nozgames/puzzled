@@ -3,7 +3,7 @@ using NoZ;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Puzzled
+namespace Puzzled.UI
 {
     public class UIKeypadPopup : UIPopup
     {

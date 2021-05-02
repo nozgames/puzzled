@@ -21,7 +21,6 @@ namespace Puzzled
         private Player _player;
         private bool _pendingDestroy;
         private string _path;
-        private string _worldName;
         private bool _started;
         private PuzzleProperties _properties;
         private Dictionary<Type, object> _sharedComponentData = new Dictionary<Type, object>();
@@ -102,27 +101,7 @@ namespace Puzzled
         /// Trash can
         /// </summary>
         public Transform trash => _trash;
-
-        /// <summary>
-        /// Puzzle file path
-        /// </summary>
-        public string path => _path;
-
-        /// <summary>
-        /// World the puzzle belongs to
-        /// </summary>
-        public string worldName => _worldName;
-
-        /// <summary>
-        /// Return the puzzle filename 
-        /// </summary>
-        public string filename => Path.GetFileNameWithoutExtension(_path);
-
-        /// <summary>
-        /// True if the puzzle has a valid path
-        /// </summary>
-        public bool hasPath => !string.IsNullOrEmpty(_path);
-
+        
         /// <summary>
         /// Returns the active camera in the puzzle.  Note that this may be null if there are no cameras in the level
         /// </summary>
@@ -274,27 +253,15 @@ namespace Puzzled
         }
 
         /// <summary>
-        /// Save the puzzle using its existing path
-        /// </summary>
-        public void Save() => Save(_path);
-
-        /// <summary>
         /// Save the puzzle using a new path
         /// </summary>
         /// <param name="path">Path to save file with</param>
-        public void Save(string path)
+        public void Save(Stream stream)
         {
-            if (string.IsNullOrEmpty(path))
-                throw new ArgumentException("path");
-
-            _path = path;
-            _worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(_path));
-
             isModified = false;
 
             // Save the file using the given path
-            using (var file = File.Create(_path))
-            using (var writer = new BinaryWriter(file))
+            using (var writer = new BinaryWriter(stream))
                 Save(_tiles.GetTiles(), writer);
         }
 
@@ -309,8 +276,7 @@ namespace Puzzled
                 throw new ArgumentException("path");
 
             _path = path;
-            _worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(_path));
-
+            
             isModified = false;
 
             // Save the file using the given path
@@ -514,18 +480,19 @@ namespace Puzzled
             }
         }
 
+#if false
         /// <summary>
         /// Load a puzzle from the given path
         /// </summary>
         /// <param name="path">Puzzle path</param>
         /// <returns>Loaded puzzle or null if the puzzle failed to load</returns>
-        public static Puzzle Load(string path)
+        public static Puzzle Load(World.IPuzzleEntry puzzleEntry)
         {
             var puzzle = GameManager.InstantiatePuzzle();
             puzzle.isLoading = true;
             try
             {
-                using (var file = File.OpenRead(path))
+                using (var stream = puzzleEntry.Op File.OpenRead(path))
                 using (var reader = new BinaryReader(file))
                     puzzle.Load(reader);
 
@@ -544,6 +511,7 @@ namespace Puzzled
 
             return puzzle;
         }
+#endif
 
         /// <summary>
         /// Load a puzzle from the file stream
@@ -551,7 +519,7 @@ namespace Puzzled
         /// <param name="file">Puzzle file stream</param>
         /// <param name="path">Puzzle path</param>
         /// <returns>Loaded puzzle or null if the puzzle failed to load</returns>
-        public static Puzzle Load(Stream file, string path)
+        public static Puzzle Load(Stream file)
         {
             var puzzle = GameManager.InstantiatePuzzle();
             puzzle.isLoading = true;
@@ -560,8 +528,7 @@ namespace Puzzled
                 using (var reader = new BinaryReader(file))
                     puzzle.Load(reader);
 
-                puzzle._path = path;
-                puzzle._worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(puzzle._path));
+                puzzle._path = "";
                 puzzle.isLoading = false;
 
                 Debug.Log($"Puzzled Loaded: [{puzzle._tiles.transform.childCount} tiles, {puzzle._wires.transform.childCount} wires]");

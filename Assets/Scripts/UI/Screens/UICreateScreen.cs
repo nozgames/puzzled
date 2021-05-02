@@ -1,22 +1,34 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace Puzzled
+namespace Puzzled.UI
 {
     class UICreateScreen : UIScreen
     {
         [SerializeField] private Button _closeButton = null;
-        [SerializeField] private Button _tempButton = null;
+
+        [SerializeField] private UIWorldList _worldList = null;
+        [SerializeField] private UIWorldListItem _worldListItemPrefab = null;
 
         private void Awake()
         {
             _closeButton.onClick.AddListener(() => {
                 UIManager.ShowMainScreen();
             });
+        }
 
-            _tempButton.onClick.AddListener(() => {
-                UIPuzzleEditor.Initialize();
-            });
+        private void OnEnable()
+        {
+            _worldList.transform.DetachAndDestroyChildren();
+
+            foreach(var entry in WorldManager.GetEditableWorldEntries())
+            {
+                var item = Instantiate(_worldListItemPrefab.gameObject, _worldList.transform).GetComponent<UIWorldListItem>();
+                item.worldEntry = entry;
+                item.onDoubleClick.AddListener(() => {
+                    UIManager.ShowEditWorldScreen(entry);
+                });
+            }
         }
     }
 }

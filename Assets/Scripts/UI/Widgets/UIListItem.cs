@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
-namespace Puzzled.Editor
+namespace Puzzled.UI
 {
     public class UIListItem : MonoBehaviour, IPointerDownHandler, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
     {
@@ -13,7 +14,8 @@ namespace Puzzled.Editor
         [SerializeField] private GameObject _dragVisuals = null;
 
         [Tooltip("True if the item can be reordered")]
-        [SerializeField] private bool _reoder = false;
+        [FormerlySerializedAs("_reoder")]
+        [SerializeField] private bool _reorder = false;
 
 
         private UIList list = null;
@@ -110,7 +112,7 @@ namespace Puzzled.Editor
 
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (!_reoder)
+            if (!_reorder)
                 return;
 
             if(_dragVisuals != null)
@@ -121,7 +123,7 @@ namespace Puzzled.Editor
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            if (!_reoder)
+            if (!_reorder)
                 return;
 
             if (_dragVisuals != null)
@@ -139,7 +141,7 @@ namespace Puzzled.Editor
 
         public void OnDrag(PointerEventData eventData)
         {
-            if (!_reoder)
+            if (!_reorder)
                 return;
 
             int index = PositionToItemIndex(eventData);

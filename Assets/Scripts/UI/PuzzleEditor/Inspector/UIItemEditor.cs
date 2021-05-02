@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using Puzzled.UI;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
     public class UIItemEditor : UIPropertyEditor
     {

@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Puzzled.UI;
 
 namespace Puzzled.Editor
 {

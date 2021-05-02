@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using Puzzled.UI;
+
 namespace Puzzled.Editor    
 {
     class UIStringArrayEditor : UIPropertyEditor, IInspectorStateProvider

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 using Puzzled.Editor;
 using Puzzled.UI;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
     public partial class UIPuzzleEditor : UIScreen, KeyboardManager.IKeyboardHandler
     {
@@ -30,6 +30,8 @@ namespace Puzzled
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
         [SerializeField] private Button playButton = null;
         [SerializeField] private Button stopButton = null;
+        [SerializeField] private Button _saveButton = null;
+        [SerializeField] private Button _closeButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
         [SerializeField] private RectTransform _canvasCenter = null;
         [SerializeField] private Slider _zoomSlider = null;
@@ -88,6 +90,7 @@ namespace Puzzled
         private Mode _mode = Mode.Unknown;
 
         private Puzzle _puzzle = null;
+        private World.IPuzzleEntry _puzzleEntry = null;
         private bool playing;
         private Action<Tile> _chooseTileCallback;
         private Action<Decal> _chooseDecalCallback;
@@ -138,12 +141,16 @@ namespace Puzzled
             }
         }
 
-        public static void Initialize()
+        public static void Initialize(World.IPuzzleEntry puzzleEntry)
         {
+            if (null == puzzleEntry)
+                return;
+
             UIManager.loading = true;
             UIManager.HideMenu();
             SceneManager.LoadSceneAsync("Editor", LoadSceneMode.Additive).completed += (handle) => {
                 UIManager.loading = false;
+                instance.Load(puzzleEntry);
             };
         }
 
@@ -157,7 +164,7 @@ namespace Puzzled
             instance.gameObject.SetActive(false);
             SceneManager.UnloadSceneAsync("Editor");
 
-            UIManager.ShowMainScreen();
+            UIManager.ShowEditWorldScreen();
         }
 
         private void UpdateMode()
@@ -210,6 +217,12 @@ namespace Puzzled
 
             inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
 
+            _saveButton.onClick.AddListener(Save);
+            _closeButton.onClick.AddListener(() => {
+                Save();
+                Shutdown();
+            });
+
             _zoomSlider.minValue = CameraManager.MinZoom;
             _zoomSlider.maxValue = MaxZoom;
             _zoomSlider.value = _cameraZoom;
@@ -252,7 +265,7 @@ namespace Puzzled
 
             _chooseFilePopup.onCancel += () => HidePopup();
             _chooseFilePopup.onOpenPuzzle += (filename) => {
-                Load(filename);
+                //Load(filename);
                 HidePopup();
             };
             _chooseFilePopup.onSaveFile += (filename) => {
@@ -304,10 +317,10 @@ namespace Puzzled
             _selectionGizmo.gameObject.SetActive(false);
 
             // Start off with an empty puzzle
-            NewPuzzle();
+            //NewPuzzle();
 
-            mode = Mode.Draw;
-            drawTool.isOn = true;
+//            mode = Mode.Draw;
+            //drawTool.isOn = true;
 
             ClearUndo();
 
@@ -386,21 +399,13 @@ namespace Puzzled
             UpdateCursor();
         }
 
-        public void OnSaveButton()
-        {
-            if (!_puzzle.hasPath)
-                OnSaveAsButton();
-            else
-            {
-                Save();
-                HidePopup();
-            }
-        }
 
         public void OnSaveAsButton()
         {
+#if false
             ShowPopup(_chooseFilePopup.gameObject);
             _chooseFilePopup.SavePuzzle(_puzzle.path);
+#endif
         }
 
         public void OnCancelPopup()
@@ -410,66 +415,30 @@ namespace Puzzled
 
         public void SaveAs(string filename)
         {
+#if false
             _puzzle.Save(filename);
             puzzleName.text = _puzzle.filename;
+#endif
         }
 
         public void Save()
         {
-            if (!_puzzle.hasPath)
-                return;
-
-            _puzzle.Save();
+            _puzzleEntry.Save(_puzzle);
 
             // Add a star to the end of the puzzle name
             if (instance.puzzleName.text.EndsWith("*"))
                 instance.puzzleName.text = instance.puzzleName.text.Substring(0, instance.puzzleName.text.Length - 1);
-        }
 
-        private void NewPuzzle()
-        {
-            if (_puzzle != null && _puzzle.isModified)
-                Save();
-
-            if (_puzzle != null)
-                _puzzle.Destroy();
-
-            _puzzle = GameManager.InstantiatePuzzle();
-            _puzzle.isEditing = true;
-            _puzzle.showGrid = _gridToggle.isOn;
-            Puzzle.current = _puzzle;
-
-            // Default puzzle name to unnamed
-            puzzleName.text = "Unnamed";
-
-            ClearSelection();
-
-            // Reset the camera back to zero,zero
-            Center(new Cell(0, 0), DefaultZoom);
-            ClearUndo();
             HidePopup();
-
-            mode = Mode.Draw;
         }
 
-        public void OnExitButton()
-        {
-            if (_puzzle != null && _puzzle.isModified)
-                Save();
-
-            Shutdown();
-        }
-
-        public void OnNewButton()
-        {
-            NewPuzzle();
-        }
-
+#if false
         public void OnLoadButton()
         {
             ShowPopup(_chooseFilePopup.gameObject);
             _chooseFilePopup.OpenPuzzle();            
         }
+#endif
 
         public static void Stop() => instance.OnStopButton();
 
@@ -491,13 +460,6 @@ namespace Puzzled
             // Do not allow playing if already playing
             if (playing)
                 return;
-
-            // Prompt for saving if it has not yet been saved
-            if (!_puzzle.hasPath)
-            {
-                OnSaveAsButton();
-                return;
-            }
 
             // We have to save the puzzle before we can play because
             // play will load the puzzle
@@ -521,7 +483,7 @@ namespace Puzzled
             ClearSelection();
 
             // Load the puzzle and play
-            GameManager.LoadPuzzle(_puzzle.path);
+            GameManager.LoadPuzzle(_puzzleEntry);
             GameManager.Play();
 
             if (isDebugging)
@@ -595,21 +557,25 @@ namespace Puzzled
 
         }
 
-        public void Load(string path)
+        public void Load(World.IPuzzleEntry puzzleEntry)
         {
             try
             {
                 if (_puzzle != null)
                     _puzzle.Destroy();
 
-                _puzzle = GameManager.LoadPuzzle(path, true);
+                _puzzleEntry = puzzleEntry;
+                _puzzle = puzzleEntry.Load();
+                _puzzle.isEditing = true;
                 _puzzle.showGrid = _gridToggle.isOn;
+                _puzzle.name = puzzleEntry.name;
+                Puzzle.current = _puzzle;
 
                 mode = Mode.Logic;
 
                 ClearSelection();
 
-                puzzleName.text = _puzzle.filename;
+                puzzleName.text = _puzzle.name;
 
                 Vector3 targetPosition;
 
@@ -641,7 +607,7 @@ namespace Puzzled
             } catch (Exception e)
             {
                 Debug.LogException(e);
-                NewPuzzle();
+                //NewPuzzle();
                 return;
             }
 
@@ -943,6 +909,7 @@ namespace Puzzled
             UpdateCursor();
         }
 
+#if false
         public void UpgradeAllFiles()
         {
             var files = Directory.GetFiles(Path.Combine(Application.dataPath, "Puzzles"), "*.puzzle", SearchOption.AllDirectories);
@@ -953,6 +920,7 @@ namespace Puzzled
                 puzzle.Destroy();
             }
         }
+#endif
 
         private void ShowCameraEditor(GameCamera gameCamera)
         {

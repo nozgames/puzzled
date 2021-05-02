@@ -1,5 +1,6 @@
 ﻿using NoZ;
 using UnityEngine;
+using Puzzled.UI;
 
 namespace Puzzled
 {

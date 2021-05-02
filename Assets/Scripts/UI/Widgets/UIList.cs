@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Puzzled.Editor
+namespace Puzzled.UI
 {
     class UIList : MonoBehaviour
     {

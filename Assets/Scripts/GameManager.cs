@@ -2,6 +2,8 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Puzzled.UI;
+using Puzzled.Editor;
 
 namespace Puzzled
 {
@@ -76,18 +78,6 @@ namespace Puzzled
             }
         }
 
-        public static Puzzle GetPuzzleFromPath (string path)
-        {
-            for(int i=0; i<_instance._puzzles.childCount; i++)
-            {
-                var puzzle = _instance._puzzles.GetChild(i).GetComponent<Puzzle>();
-                if (!puzzle.isEditing && puzzle.path == path)
-                    return puzzle;                
-            }
-
-            return null;
-        }
-
         private void Awake()
         {
             if(null != _instance)
@@ -151,15 +141,14 @@ namespace Puzzled
         /// </summary>
         /// <param name="path">Puzzle path</param>
         /// <returns>Loaded puzzle</returns>
-        public static Puzzle LoadPuzzle(string path, bool editing=false)
+        public static Puzzle LoadPuzzle(World.IPuzzleEntry puzzleEntry)
         {
             // Disable the puzzle first to ensure two puzzles are never enabled at the same time
             var oldPuzzle = Puzzle.current;
             Puzzle.current = null;
 
             // Load and set the new puzzle
-            var puzzle = Puzzle.Load(path);
-            puzzle.isEditing = editing;
+            var puzzle = puzzleEntry.Load();
             Puzzle.current = puzzle;
 
             // If the new puzzle failed to load then set the old puzzle back to active

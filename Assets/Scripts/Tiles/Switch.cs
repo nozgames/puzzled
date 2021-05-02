@@ -78,6 +78,7 @@ namespace Puzzled
                 _on = value;
 
                 // Update the global setting
+#if false
                 if (isGlobal && !isLoading)
                 {
                     PlayerPrefs.SetInt(globalKey, _on ? 1 : 0);
@@ -87,6 +88,7 @@ namespace Puzzled
                             if (globalSwitch.isOn != _on && 0 == string.Compare(globalSwitch.globalId, globalId, true))
                                 globalSwitch.isOn = _on;
                 }
+#endif
 
                 UpdateAnimation();
 
@@ -101,10 +103,12 @@ namespace Puzzled
         /// </summary>
         private bool isGlobal => !string.IsNullOrWhiteSpace(globalId);
 
+#if false
         /// <summary>
         /// Returns the global key for the switch
         /// </summary>
         private string globalKey => $"{puzzle.worldName}.{puzzle.name}.{globalId}";
+#endif
 
         [Editable(placeholder = "None")]
         private string globalId {
@@ -148,9 +152,11 @@ namespace Puzzled
 
                 shared.global.Add(this);
 
+#if false
                 var saved = PlayerPrefs.GetInt(globalKey, -1);
                 if (saved != -1)
                     _on = saved == 1;
+#endif
             }
 
             _default = _on;

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
     public partial class UIPuzzleEditor
     {

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using Puzzled.UI;
+
 namespace Puzzled.Editor    
 {
     class UIDecalArrayEditor : UIPropertyEditor, IInspectorStateProvider
@@ -112,10 +114,6 @@ namespace Puzzled.Editor
         {
             var editor = Instantiate(_itemPrefab, _items.transform).GetComponent<UIDecalArrayEditorItem>();
             editor.value = decal;
-            editor.onValueChanged += (d) => {
-                _decals[editor.transform.GetSiblingIndex()] = d;
-                target.SetValue(_decals.ToArray());
-            };
             editor.onDeleted += (item) => RemoveDecal(item.transform.GetSiblingIndex());
             return editor;
         }

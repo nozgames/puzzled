@@ -1,5 +1,7 @@
 using System.Collections;
 using UnityEngine;
+using Puzzled.UI;
+using Puzzled.Editor;
 
 namespace Puzzled
 {

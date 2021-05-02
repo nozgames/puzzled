@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 
-namespace Puzzled
+namespace Puzzled.UI
 {
     public class UIPopup : MonoBehaviour
     {

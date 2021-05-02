@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
     class UISequenceStep : MonoBehaviour, IPointerClickHandler
     {

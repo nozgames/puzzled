@@ -16,6 +16,7 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
+#if false
             if (!saveState)
                 GameManager.UnloadPuzzle();
 
@@ -34,6 +35,7 @@ namespace Puzzled
                     Debug.LogException(e);
                 }                
             }
+#endif
         }
     }
 }

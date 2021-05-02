@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using Puzzled.Editor;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
     public class UIInspectorFoldout : MonoBehaviour, IPointerClickHandler, IInspectorStateProvider
     {

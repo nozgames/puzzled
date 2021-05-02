@@ -1,11 +1,8 @@
 ﻿using UnityEngine;
-
-using Puzzled.Editor;
-using System;
 using System.Linq;
-using System.Collections.Generic;
+using Puzzled.UI;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
     public partial class UIPuzzleEditor
     {

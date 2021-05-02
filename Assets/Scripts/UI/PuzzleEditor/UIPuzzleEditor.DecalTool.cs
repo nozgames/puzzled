@@ -3,7 +3,7 @@ using UnityEngine;
 
 using Puzzled.Editor;
 
-namespace Puzzled
+namespace Puzzled.Editor
 {
     public partial class UIPuzzleEditor
     {

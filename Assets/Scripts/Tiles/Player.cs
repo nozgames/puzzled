@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using NoZ;
+using Puzzled.UI;
 
 namespace Puzzled
 {
@@ -12,9 +13,12 @@ namespace Puzzled
         private Cell moveFromCell;
         private Cell moveToCell;
         private float queuedMoveTime = float.MinValue;
+
+#if false
         private string _tooltip;
         private Cell _tooltipCell = Cell.invalid;
         private float _tooltipElapsed;
+#endif
 
         public Tile inventory { get; private set; }
 
@@ -477,9 +481,11 @@ namespace Puzzled
 
         private void HideTooltip()
         {
+#if false
             _tooltip = null;
             _tooltipCell = Cell.invalid;
             UIManager.HideTooltip();
+#endif
         }
 
         private void UpdateTooltip()

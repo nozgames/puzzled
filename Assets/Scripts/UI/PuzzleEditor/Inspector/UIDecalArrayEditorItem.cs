@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
+using Puzzled.UI;
 
 namespace Puzzled.Editor
 {
@@ -10,7 +11,6 @@ namespace Puzzled.Editor
         [SerializeField] private TMPro.TextMeshProUGUI _index = null;
         [SerializeField] private Button _deleteButton = null;
 
-        public event Action<Decal> onValueChanged;
         public event Action<UIDecalArrayEditorItem> onDeleted;
 
         public Decal value {

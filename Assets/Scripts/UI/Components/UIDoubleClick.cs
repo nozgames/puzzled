@@ -1,9 +1,8 @@
-﻿using Puzzled.Editor;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-namespace Puzzled
+namespace Puzzled.UI
 {
     public class UIDoubleClick : MonoBehaviour, IPointerClickHandler, IPointerDownHandler
     {
