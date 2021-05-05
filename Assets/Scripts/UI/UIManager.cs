@@ -78,6 +78,8 @@ namespace Puzzled.UI
 
             _instance._cursor = CursorType.ArrowWithMinus;
             cursor = CursorType.Arrow;
+
+            loading = true;
         }
 
         public static void Shutdown ()

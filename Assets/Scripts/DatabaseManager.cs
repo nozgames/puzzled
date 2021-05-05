@@ -271,5 +271,11 @@ namespace Puzzled
                     throw new NotImplementedException();
             }
         }
+
+        public static void GeneratePreviews ()
+        {
+            foreach (var tile in _instance._tiles)
+                GetPreview(tile);
+        }
     }
 }

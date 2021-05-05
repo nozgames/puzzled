@@ -9,11 +9,7 @@ namespace Puzzled
     {
         void Start()
         {
-            //StartCoroutine(Initialize());
-            DatabaseManager.Initialize();
-            GameManager.Initialize();
-            UIManager.Initialize();
-            UIManager.loading = false;
+            StartCoroutine(Initialize());
         }
 
         private void OnApplicationQuit()
@@ -24,14 +20,17 @@ namespace Puzzled
             GameManager.Shutdown();
         }
 
-#if false
         private IEnumerator Initialize()
         {
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Restart();
+            UIManager.loading = true;
             DatabaseManager.Initialize();
             GameManager.Initialize();
             UIManager.Initialize();
+            DatabaseManager.GeneratePreviews();
+            yield return new WaitForSeconds(1.0f - (stopwatch.ElapsedMilliseconds / 1000.0f));
             UIManager.loading = false;
         }
-#endif
     }
 }
