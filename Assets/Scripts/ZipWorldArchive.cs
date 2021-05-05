@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using System.IO.Compression;
 using UnityEngine;
+using System;
 
 namespace Puzzled
 {
-    public class ZipWorldArchive : IWorldArchive
+    public class ZipWorldArchive : IWorldArchive, IDisposable
     {
         public class ZipWorldArchiveEntry : IWorldArchiveEntry
         {
@@ -33,7 +34,7 @@ namespace Puzzled
 
         public ZipWorldArchive(Stream stream)
         {
-            zipArchive = new ZipArchive(stream);
+            zipArchive = new ZipArchive(stream, ZipArchiveMode.Update);
         }
 
         private ZipArchive zipArchive;

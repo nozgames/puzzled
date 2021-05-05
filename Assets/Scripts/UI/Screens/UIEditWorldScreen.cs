@@ -12,6 +12,8 @@ namespace Puzzled.UI
         [SerializeField] private Button _renamePuzzleButton = null;
         [SerializeField] private Button _deletePuzzleButton = null;
         [SerializeField] private Button _duplicatePuzzleButton = null;
+        [SerializeField] private Button _playPuzzleButton = null;
+        [SerializeField] private Button _exportPuzzleButton = null;
         [SerializeField] private ScrollRect _scrollRect = null;
 
         [SerializeField] private UIPuzzleList _puzzleList = null;
@@ -82,6 +84,24 @@ namespace Puzzled.UI
                 Select(puzzleEntry);
             });
 
+            _playPuzzleButton.onClick.AddListener(() =>
+            {
+                // FIXME
+            });
+
+            _exportPuzzleButton.onClick.AddListener(() =>
+            {
+                if (_world != null)
+                {
+                    _world.Export();
+
+                    UIManager.ShowConfirmPopup(
+                        message: "World Exported.",
+                        title: "Export",
+                        confirm: "Ok");
+                }
+            });
+
             _deletePuzzleButton.onClick.AddListener(() => {
                 UIManager.ShowConfirmPopup(
                     message: "Are you sure you want to delete this puzzle?",
@@ -144,7 +164,9 @@ namespace Puzzled.UI
             _editPuzzleButton.interactable = selected;
             _duplicatePuzzleButton.interactable = selected;
             _renamePuzzleButton.interactable = selected;
-            _deletePuzzleButton.interactable = selected;            
+            _deletePuzzleButton.interactable = selected;
+            _playPuzzleButton.interactable = true;
+            _exportPuzzleButton.interactable = true;
         }
 
         private void Select(World.IPuzzleEntry puzzleEntry)

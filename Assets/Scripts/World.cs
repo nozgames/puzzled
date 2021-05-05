@@ -191,5 +191,10 @@ namespace Puzzled
             if (_archive != null)
                 _archive.Dispose();
         }
+
+        public void Export()
+        {
+            WorldManager.ExportWorld(_worldEntry);
+        }
     }
 }

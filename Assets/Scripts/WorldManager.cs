@@ -52,7 +52,7 @@ namespace Puzzled
             public IWorldArchive OpenArchive()
             {
                 if (IsZipArchive(path))
-                    return new ZipWorldArchive(File.Open(path, FileMode.Create));
+                    return new ZipWorldArchive(File.Open(path, FileMode.OpenOrCreate));
                 else
                     return new DirectoryWorldArchive(path);
             }
@@ -141,7 +141,10 @@ namespace Puzzled
                 externalZipArchivePath;
 #endif
 
-            var zipArchive = new ZipWorldArchive(File.Create(Path.Combine(archivePath, $"{entry.name}.{WorldExtension}")));
+            string zipFilePath = Path.Combine(archivePath, $"{entry.name}{WorldExtension}");
+            
+            Directory.CreateDirectory(Path.GetDirectoryName(zipFilePath));
+            using var zipArchive = new ZipWorldArchive(File.Create(zipFilePath));
 
             foreach(var sourceEntry in directoryArchive.entries)
             {

@@ -31,6 +31,7 @@ namespace Puzzled.UI
         [SerializeField] private UIScreen _pauseScreen = null;
         [SerializeField] private UIScreen _createScreen = null;
         [SerializeField] private UIScreen _playScreen = null;
+        [SerializeField] private UIPlayWorldScreen _playWorldScreen = null;
         [SerializeField] private UIEditWorldScreen _editWorldScreen = null;
 
         [Header("Popups")]
@@ -112,6 +113,14 @@ namespace Puzzled.UI
         public static void ShowCreateScreen() => SetActiveScreen(_instance._createScreen);
 
         public static void ShowPlayScreen() => SetActiveScreen(_instance._playScreen);
+
+        public static void ShowPlayWorldScreen(WorldManager.IWorldEntry worldEntry = null)
+        {
+            if (worldEntry != null)
+                _instance._playWorldScreen.worldEntry = worldEntry;
+
+            SetActiveScreen(_instance._playWorldScreen);
+        }
 
         public static void ShowEditWorldScreen(WorldManager.IWorldEntry worldEntry = null)
         {
