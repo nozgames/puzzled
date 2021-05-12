@@ -1407,7 +1407,7 @@ MonoBehaviour:
   _closeButton: {fileID: 1493222019}
   _scrollRect: {fileID: 715291461}
   _puzzleList: {fileID: 1463359102}
-  _puzzleListItemPrefab: {fileID: 6971130123098030663, guid: 8a104e6c6c57387469741bf4702d30b9, type: 3}
+  _puzzleListItemPrefab: {fileID: 6479940661098476854, guid: 93ce8afc97bd1d949b36278cf4ee74c8, type: 3}
   _worldNameText: {fileID: 506782420}
 --- !u!222 &324332034
 CanvasRenderer:
@@ -5585,12 +5585,12 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 1
-  m_Spacing: 0
+  m_ChildAlignment: 0
+  m_Spacing: 5
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
-  m_ChildControlWidth: 0
-  m_ChildControlHeight: 0
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
@@ -5612,7 +5612,7 @@ MonoBehaviour:
   m_PreferredWidth: -1
   m_PreferredHeight: -1
   m_FlexibleWidth: -1
-  m_FlexibleHeight: 1
+  m_FlexibleHeight: -1
   m_LayoutPriority: 1
 --- !u!1 &1483105449
 GameObject:
@@ -6946,7 +6946,7 @@ MonoBehaviour:
   _exportPuzzleButton: {fileID: 31381245}
   _scrollRect: {fileID: 74661814}
   _puzzleList: {fileID: 8236758680192031651}
-  _puzzleListItemPrefab: {fileID: 6971130123098030663, guid: 8a104e6c6c57387469741bf4702d30b9, type: 3}
+  _puzzleListItemPrefab: {fileID: 6479940661098476854, guid: 28dc68a0fb788934f81d8da2e9c94a6b, type: 3}
   _worldNameText: {fileID: 7034158035753777838}
 --- !u!1001 &446390592414524791
 PrefabInstance:
@@ -7577,30 +7577,6 @@ MonoBehaviour:
   _direction: 1
   _text: Duplicate Puzzle
   _delay: 0
---- !u!114 &1222387248028419227
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4284678302323687381}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a8695521f0d02e499659fee002a26c2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 30
-    m_Bottom: 0
-  m_ChildAlignment: 1
-  m_StartCorner: 0
-  m_StartAxis: 0
-  m_CellSize: {x: 300, y: 275}
-  m_Spacing: {x: 20, y: 20}
-  m_Constraint: 0
-  m_ConstraintCount: 2
 --- !u!114 &1429496737204439270
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8666,8 +8642,8 @@ GameObject:
   m_Component:
   - component: {fileID: 667695702969727270}
   - component: {fileID: 1156917329235580542}
-  - component: {fileID: 1222387248028419227}
   - component: {fileID: 8236758680192031651}
+  - component: {fileID: 4284678302323687382}
   m_Layer: 5
   m_Name: GameObject
   m_TagString: Untagged
@@ -8675,6 +8651,32 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &4284678302323687382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4284678302323687381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 5
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 1
+  m_ChildControlWidth: 1
+  m_ChildControlHeight: 1
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1001 &4317523752310183371
 PrefabInstance:
   m_ObjectHideFlags: 0
