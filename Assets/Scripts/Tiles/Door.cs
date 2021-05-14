@@ -80,11 +80,12 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnUse(UseEvent evt)
         {
-            // Always report we were used, even if the use fails
-            evt.IsHandled = true;
-
+            // When the door is open you should be able to use things through it 
             if (_open)
                 return;
+
+            // Always report we were used, even if the use fails
+            evt.IsHandled = true;
 
             if (!requiresKey)
                 return;
