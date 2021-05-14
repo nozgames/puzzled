@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -272,10 +273,13 @@ namespace Puzzled
             }
         }
 
-        public static void GeneratePreviews ()
+        public static IEnumerator GeneratePreviews ()
         {
             foreach (var tile in _instance._tiles)
-                GetPreview(tile);
+            {
+                Debug.Log($"Generating preview '{tile.name}'");
+                yield return null;
+            }
         }
     }
 }

@@ -75,35 +75,6 @@ namespace Puzzled
                     UIManager.ShowHud(false);
 
                 onPuzzleChanged?.Invoke(_instance._puzzle);
-
-
-#if true
-                if(value != null)
-                {
-                    var texture = new Texture2D(512, 512);
-                    texture.filterMode = FilterMode.Bilinear;
-                    for (int x = 0; x < 511; x++)
-                        for (int y = 0; y < 511; y++)
-                        {
-                            var xx = x / 2 - 128;
-                            var yy = y / 2 - 128;
-
-                            texture.SetPixel(x, y, value.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black);
-
-                            texture.SetPixel(x + 1, y, 
-                                ((value.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black) +
-                                ((value.grid.CellToTile(new Cell(xx + 1, yy), TileLayer.Floor) != null ? Color.white : Color.black)) * 0.5f));
-                            texture.SetPixel(x + 1, y + 1,
-                                ((value.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black) +
-                                ((value.grid.CellToTile(new Cell(xx + 1, yy + 1), TileLayer.Floor) != null ? Color.white : Color.black)) * 0.5f));
-                            texture.SetPixel(x, y + 1,
-                                ((value.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black) +
-                                ((value.grid.CellToTile(new Cell(xx, yy + 1), TileLayer.Floor) != null ? Color.white : Color.black)) * 0.5f));
-                        }
-                    texture.Apply();
-                    Shader.SetGlobalTexture("_void_texture", texture);
-                }
-#endif
             }
         }
 
@@ -129,6 +100,14 @@ namespace Puzzled
             _instance._cameraManager.Initialize();
 
             //WorldManager.UpdateWorlds();
+
+            // TODO: move this to a better place
+            var texture = new Texture2D(512, 512);
+            var colors = new Color[512 * 512];
+            for (int i = 0; i < colors.Length; i++)
+                colors[i] = Color.white;
+            texture.Apply();
+            Shader.SetGlobalTexture("_void_texture", texture);
         }
 
         public static void Shutdown()
@@ -247,6 +226,35 @@ namespace Puzzled
 
             if (!UIPuzzleEditor.isOpen)
                 KeyboardManager.Push(_instance);
+
+#if true
+            // TODO: this needs to be done in a better place
+            if (puzzle != null)
+            {
+                var texture = new Texture2D(512, 512);
+                texture.filterMode = FilterMode.Bilinear;
+                for (int x = 0; x < 511; x++)
+                    for (int y = 0; y < 511; y++)
+                    {
+                        var xx = x / 2 - 128;
+                        var yy = y / 2 - 128;
+
+                        texture.SetPixel(x, y, puzzle.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black);
+
+                        texture.SetPixel(x + 1, y,
+                            ((puzzle.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black) +
+                            ((puzzle.grid.CellToTile(new Cell(xx + 1, yy), TileLayer.Floor) != null ? Color.white : Color.black)) * 0.5f));
+                        texture.SetPixel(x + 1, y + 1,
+                            ((puzzle.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black) +
+                            ((puzzle.grid.CellToTile(new Cell(xx + 1, yy + 1), TileLayer.Floor) != null ? Color.white : Color.black)) * 0.5f));
+                        texture.SetPixel(x, y + 1,
+                            ((puzzle.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black) +
+                            ((puzzle.grid.CellToTile(new Cell(xx, yy + 1), TileLayer.Floor) != null ? Color.white : Color.black)) * 0.5f));
+                    }
+                texture.Apply();
+                Shader.SetGlobalTexture("_void_texture", texture);
+            }
+#endif
         }
 
         public static void Stop ()
@@ -258,7 +266,14 @@ namespace Puzzled
                 KeyboardManager.Pop();
 
             UIManager.ClosePopup();
-            
+
+            // TODO: this needs to be done in a better place, like saving the light map with the puzzle
+            var texture = new Texture2D(512, 512);
+            var colors = new Color[512 * 512];
+            for (int i = 0; i < colors.Length; i++) colors[i] = Color.white;
+            texture.Apply();
+            Shader.SetGlobalTexture("_void_texture", texture);
+
             paused = true;
         }
 

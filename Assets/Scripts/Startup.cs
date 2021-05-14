@@ -28,7 +28,7 @@ namespace Puzzled
             DatabaseManager.Initialize();
             GameManager.Initialize();
             UIManager.Initialize();
-            DatabaseManager.GeneratePreviews();
+            yield return DatabaseManager.GeneratePreviews();
             yield return new WaitForSeconds(1.0f - (stopwatch.ElapsedMilliseconds / 1000.0f));
             UIManager.loading = false;
         }
