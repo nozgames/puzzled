@@ -6,8 +6,8 @@ namespace Puzzled.UI
     class UIPuzzleListItem : UIListItem
     {
         [SerializeField] private TMPro.TextMeshProUGUI _nameText = null;
-        [SerializeField] private RawImage _previewImage = null;
         [SerializeField] private Image _finishedImage = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _indexText = null;
 
         private World.IPuzzleEntry _puzzleEntry;
 
@@ -35,9 +35,10 @@ namespace Puzzled.UI
                 _nameText.text = _puzzleEntry.name;
 
             if (_finishedImage != null)
-                _finishedImage.enabled = _puzzleEntry.isCompleted; // FIXME: set this to the puzzle finished state once we have it
+                _finishedImage.enabled = _puzzleEntry.isCompleted;
 
-            //            _previewImage.texture = WorldManager.CreatePreview(_puzzleEntry);
+            if (_indexText != null)
+                _indexText.text = (transform.GetSiblingIndex() + 1).ToString();
         }
     }
 }
