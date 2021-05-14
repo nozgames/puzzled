@@ -128,7 +128,7 @@ namespace Puzzled
             // Initialize the camera manager
             _instance._cameraManager.Initialize();
 
-            WorldManager.UpdateWorlds();
+            //WorldManager.UpdateWorlds();
         }
 
         public static void Shutdown()
