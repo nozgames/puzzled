@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using NoZ;
 using Puzzled.UI;
+using UnityEngine.Scripting;
+using Puzzled.Editor;
 
 namespace Puzzled
 {
@@ -551,7 +553,6 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnLevelExit (LevelExitEvent evt)
         {
-            BeginBusy();
             PlayAnimation("Exit");
 
             Tween.Wait(2.0f).OnStop(() => GameManager.PuzzleComplete()).Start(gameObject);
@@ -606,6 +607,35 @@ namespace Puzzled
             }).Start(gameObject);
 
             // Indicate we took the item
+            evt.IsHandled = true;
+        }
+
+        [ActorEventHandler]
+        private void OnLevelExitEvent (LevelExitEvent evt)
+        {
+            BeginBusy();
+            PlayAnimation("Exit");
+
+            var itemVisuals = evt.exit.CloneVisuals(transform);
+            itemVisuals.transform.localPosition = new Vector3(0, 1.1f, 0);
+
+            Tween.Wait(0.75f).OnStop(() => {
+                Destroy(itemVisuals);
+                PlayAnimation("Idle");
+                EndBusy();
+
+                if (UIPuzzleEditor.isOpen)
+                    UIPuzzleEditor.Stop();
+                else
+                {
+                    puzzle.MarkCompleted();
+                    GameManager.Stop();
+                    GameManager.UnloadPuzzle();
+                    UIManager.ShowPlayWorldScreen();
+                }
+
+            }).Start(gameObject);
+
             evt.IsHandled = true;
         }
 

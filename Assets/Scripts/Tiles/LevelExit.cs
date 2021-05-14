@@ -1,23 +1,26 @@
-﻿using NoZ;
-using UnityEngine;
+﻿using UnityEngine;
+using NoZ;
 
 namespace Puzzled
 {
-    class LevelExit : TileComponent
+    public class LevelExit : TileComponent
     {
-        [ActorEventHandler]
-        private void OnEnter(EnterCellEvent evt)
-        {
-            SendToCell(new LevelExitEvent(), tile.cell);
-            tile.gameObject.SetActive(false);
-        }
+        [SerializeField] private GameObject _visuals = null;
+        [SerializeField] private AudioClip _pickupSound = null;
 
         [ActorEventHandler]
-        private void OnQueryMove(QueryMoveEvent evt)
+        private void OnUse(UseEvent evt)
         {
-            // Is player?
-            if(evt.source == puzzle.player.tile)
-                evt.result = false;
+            evt.IsHandled = true;
+            evt.user.Send(new LevelExitEvent(this));
+            tile.Destroy();
+        }
+
+        public GameObject CloneVisuals(Transform parent)
+        {
+            var cloned = Instantiate(_visuals, parent);
+            cloned.GetComponent<Floating>().enabled = false;
+            return cloned;
         }
     }
 }

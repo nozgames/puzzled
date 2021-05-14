@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 8;
+        private const int FileVersion = 9;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -18,9 +18,9 @@ namespace Puzzled
         [SerializeField] private GameObject _wirePrefab = null;
         [SerializeField] private PuzzleProperties _propertiesPrefab = null;
 
+        private Guid _guid;
         private Player _player;
         private bool _pendingDestroy;
-        private string _path;
         private bool _started;
         private PuzzleProperties _properties;
         private Dictionary<Type, object> _sharedComponentData = new Dictionary<Type, object>();
@@ -274,9 +274,7 @@ namespace Puzzled
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException("path");
-
-            _path = path;
-            
+          
             isModified = false;
 
             // Save the file using the given path
@@ -296,6 +294,9 @@ namespace Puzzled
 
             // Write the current version
             writer.Write(FileVersion);
+
+            // Write the guid
+            writer.Write(_guid);
 
             // Write the tiles
             writer.Write(tiles.Length);
@@ -513,6 +514,31 @@ namespace Puzzled
         }
 #endif
 
+        public class Meta
+        {
+            public Guid guid;
+            public int version;
+            public int tileCount;
+            public int wireCount;
+        }
+
+        public static Meta LoadMeta (Stream file)
+        {
+            using var reader = new BinaryReader(file);
+            if (!reader.ReadFourCC('P', 'U', 'Z', 'L'))
+                // TODO: read from json
+                throw new InvalidDataException();
+
+            var meta = new Meta();
+            meta.version = reader.ReadInt32();
+            if (meta.version >= 9)
+                meta.guid = reader.ReadGuid();
+
+            meta.tileCount = reader.ReadInt32();
+            meta.wireCount = reader.ReadInt32();
+            return meta;
+        }
+
         /// <summary>
         /// Load a puzzle from the file stream
         /// </summary>
@@ -528,7 +554,6 @@ namespace Puzzled
                 using (var reader = new BinaryReader(file))
                     puzzle.Load(reader);
 
-                puzzle._path = "";
                 puzzle.isLoading = false;
 
                 Debug.Log($"Puzzled Loaded: [{puzzle._tiles.transform.childCount} tiles, {puzzle._wires.transform.childCount} wires]");
@@ -557,6 +582,11 @@ namespace Puzzled
             // Write the current version
             var version = reader.ReadInt32();
 
+            if (version >= 9)
+                _guid = reader.ReadGuid();
+            else
+                _guid = Guid.NewGuid();
+
             switch (version)
             {
                 case 3:
@@ -568,6 +598,7 @@ namespace Puzzled
                 case 6:
                 case 7:
                 case 8:
+                case 9:
                     LoadV5(reader, version);
                     break;
 
@@ -1134,6 +1165,12 @@ namespace Puzzled
             }
 
             return raycast;
-        }        
+        }
+
+        public static bool IsCompleted(Guid guid) => PlayerPrefs.GetInt($"{guid.ToString()}_COMPLETED") != 0;
+
+        public static void MarkCompleted (Guid guid) => PlayerPrefs.SetInt($"{guid.ToString()}_COMPLETED", 1);
+
+        public void MarkCompleted() => MarkCompleted(_guid);
     }
 }

@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Puzzled
 {
-    public interface IWorldArchive
+    public interface IWorldArchive : IDisposable
     {
         public int entryCount { get; }
         public IEnumerable<IWorldArchiveEntry> entries { get; }

@@ -18,10 +18,13 @@ namespace Puzzled
 
         public interface IPuzzleEntry
         {
+            bool isCompleted { get; }
             string name { get; }
             World world { get; }
 
             Puzzle Load();
+            Puzzle.Meta LoadMeta();
+            void MarkCompleted();
 
             void Save(Puzzle puzzle);
         }
@@ -32,15 +35,30 @@ namespace Puzzled
             {
                 archiveEntry = entry;
                 this.world = world;
+                meta = world.LoadPuzzleMeta(this);
             }
 
             public IWorldArchiveEntry archiveEntry { get; set; }
             public string name => Path.GetFileNameWithoutExtension(archiveEntry.name);
             public World world { get; private set; }
+            public Puzzle.Meta meta { get; private set; }
+            public Guid guid => meta.guid;
 
             public Puzzle Load() => world.LoadPuzzle(this);
 
+            public Puzzle.Meta LoadMeta() => world.LoadPuzzleMeta(this);
+
             public void Save(Puzzle puzzle) => world.SavePuzzle(this, puzzle);
+
+            /// <summary>
+            /// Returns true if the puzzle has been marked as completed
+            /// </summary>
+            public bool isCompleted => Puzzle.IsCompleted(guid);
+
+            /// <summary>
+            /// Mark the puzzle as completed
+            /// </summary>
+            public void MarkCompleted() => Puzzle.MarkCompleted(guid);
         };
 
         List<PuzzleEntry> _puzzles;
@@ -156,6 +174,23 @@ namespace Puzzled
                     return Puzzle.Load(file);
                 }
                 catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+
+            return null;
+        }
+
+        private Puzzle.Meta LoadPuzzleMeta(IPuzzleEntry entry)
+        {
+            if (entry is PuzzleEntry puzzleEntry)
+            {
+                try
+                {
+                    using var file = puzzleEntry.archiveEntry.Open();
+                    return Puzzle.LoadMeta(file);
+                } catch (Exception e)
                 {
                     Debug.LogException(e);
                 }

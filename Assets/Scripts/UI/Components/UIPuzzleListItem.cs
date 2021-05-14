@@ -7,7 +7,7 @@ namespace Puzzled.UI
     {
         [SerializeField] private TMPro.TextMeshProUGUI _nameText = null;
         [SerializeField] private RawImage _previewImage = null;
-        [SerializeField] private RawImage _finishedImage = null;
+        [SerializeField] private Image _finishedImage = null;
 
         private World.IPuzzleEntry _puzzleEntry;
 
@@ -35,7 +35,7 @@ namespace Puzzled.UI
                 _nameText.text = _puzzleEntry.name;
 
             if (_finishedImage != null)
-                _finishedImage.enabled = true; // FIXME: set this to the puzzle finished state once we have it
+                _finishedImage.enabled = _puzzleEntry.isCompleted; // FIXME: set this to the puzzle finished state once we have it
 
             //            _previewImage.texture = WorldManager.CreatePreview(_puzzleEntry);
         }

@@ -25,8 +25,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3921009965438099891}
   - component: {fileID: 2140767317745827920}
-  - component: {fileID: 3475431085417252917}
-  - component: {fileID: -8244366326260256593}
+  - component: {fileID: 5631867192256601731}
   m_Layer: 0
   m_Name: LevelExit
   m_TagString: Untagged
@@ -62,7 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: 192883ba43f5de8458de553dce164945, type: 2}
---- !u!114 &3475431085417252917
+--- !u!114 &5631867192256601731
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71,24 +70,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7680977818543006660}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 496647bee4f7889418a476ad0a5c50d0, type: 3}
+  m_Script: {fileID: 11500000, guid: 057cf91c1c096c34286989b01df917d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _visuals: {fileID: 3407780781411290644}
   _pickupSound: {fileID: 8300000, guid: 066cf1634a5542947a9a9fac4b679b15, type: 3}
---- !u!114 &-8244366326260256593
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7680977818543006660}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _text: Pickup
 --- !u!1001 &2561342303434273605
 PrefabInstance:
   m_ObjectHideFlags: 0

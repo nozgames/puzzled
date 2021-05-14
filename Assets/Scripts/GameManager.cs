@@ -77,7 +77,7 @@ namespace Puzzled
                 onPuzzleChanged?.Invoke(_instance._puzzle);
 
 
-#if false
+#if true
                 if(value != null)
                 {
                     var texture = new Texture2D(512, 512);
@@ -127,6 +127,8 @@ namespace Puzzled
 
             // Initialize the camera manager
             _instance._cameraManager.Initialize();
+
+            WorldManager.UpdateWorlds();
         }
 
         public static void Shutdown()

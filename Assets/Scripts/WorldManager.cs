@@ -197,7 +197,21 @@ namespace Puzzled
             {
                 return null;
             }
+        }
 
+        // This function is used to force all worlds to update to the latest version
+        public static void UpdateWorlds ()
+        {
+            foreach(var worldEntry in GetEditableWorldEntries())
+            {
+                using var world = World.Load(worldEntry);
+                foreach(var puzzleEntry in world.puzzles)
+                {
+                    var puzzle = puzzleEntry.Load();
+                    puzzleEntry.Save(puzzle);
+                    puzzle.Destroy();
+                }
+            }
         }
     }
 }
