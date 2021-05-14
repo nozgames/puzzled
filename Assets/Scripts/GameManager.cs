@@ -75,6 +75,35 @@ namespace Puzzled
                     UIManager.ShowHud(false);
 
                 onPuzzleChanged?.Invoke(_instance._puzzle);
+
+
+#if false
+                if(value != null)
+                {
+                    var texture = new Texture2D(512, 512);
+                    texture.filterMode = FilterMode.Bilinear;
+                    for (int x = 0; x < 511; x++)
+                        for (int y = 0; y < 511; y++)
+                        {
+                            var xx = x / 2 - 128;
+                            var yy = y / 2 - 128;
+
+                            texture.SetPixel(x, y, value.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black);
+
+                            texture.SetPixel(x + 1, y, 
+                                ((value.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black) +
+                                ((value.grid.CellToTile(new Cell(xx + 1, yy), TileLayer.Floor) != null ? Color.white : Color.black)) * 0.5f));
+                            texture.SetPixel(x + 1, y + 1,
+                                ((value.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black) +
+                                ((value.grid.CellToTile(new Cell(xx + 1, yy + 1), TileLayer.Floor) != null ? Color.white : Color.black)) * 0.5f));
+                            texture.SetPixel(x, y + 1,
+                                ((value.grid.CellToTile(new Cell(xx, yy), TileLayer.Floor) != null ? Color.white : Color.black) +
+                                ((value.grid.CellToTile(new Cell(xx, yy + 1), TileLayer.Floor) != null ? Color.white : Color.black)) * 0.5f));
+                        }
+                    texture.Apply();
+                    Shader.SetGlobalTexture("_void_texture", texture);
+                }
+#endif
             }
         }
 
