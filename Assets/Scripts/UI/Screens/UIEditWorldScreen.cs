@@ -14,6 +14,7 @@ namespace Puzzled.UI
         [SerializeField] private Button _duplicatePuzzleButton = null;
         [SerializeField] private Button _playPuzzleButton = null;
         [SerializeField] private Button _exportPuzzleButton = null;
+        [SerializeField] private Button _worldOptionsButton = null;
         [SerializeField] private ScrollRect _scrollRect = null;
 
         [SerializeField] private UIPuzzleList _puzzleList = null;
@@ -38,6 +39,10 @@ namespace Puzzled.UI
 
             _puzzleList.onSelectionChanged += (selection) => UpdateButtons();
             _puzzleList.onReorderItem += OnPuzzleListReorderItem;
+
+            _worldOptionsButton.onClick.AddListener(() => {
+                UIManager.ShowEditWorldPropertiesScreen(_world);
+            });
 
             _editPuzzleButton.onClick.AddListener(() => {
                 Editor.UIPuzzleEditor.Initialize((_puzzleList.selectedItem as UIPuzzleListItem).puzzleEntry);
@@ -151,7 +156,7 @@ namespace Puzzled.UI
 
         private void OnDisable()
         {
-            if (_world.isModified)
+            if (null != _world && _world.isModified)
                 _world.Save();
         }
 
@@ -183,6 +188,7 @@ namespace Puzzled.UI
             _duplicatePuzzleButton.interactable = selected;
             _renamePuzzleButton.interactable = selected;
             _deletePuzzleButton.interactable = selected;
+            _worldOptionsButton.interactable = true;
             _playPuzzleButton.interactable = true;
             _exportPuzzleButton.interactable = true;
         }

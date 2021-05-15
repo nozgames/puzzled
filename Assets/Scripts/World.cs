@@ -50,7 +50,7 @@ namespace Puzzled
             public void MarkCompleted() => Puzzle.MarkCompleted(guid);
         };
 
-        private const int Version = 1;
+        private const int Version = 2;
         private const string WorldInfoFilename = "world.info";
         private const string PuzzleExtension = ".puzzle";
 
@@ -64,6 +64,15 @@ namespace Puzzled
         public IEnumerable<IPuzzleEntry> puzzles => _puzzles;
 
         public bool isModified { get; private set; }
+
+        private bool _test = false;
+        public bool test {
+            get => _test;
+            set {
+                _test = value;
+                isModified = true;
+            }
+        }
 
         private World(WorldManager.IWorldEntry worldEntry)
         {
@@ -145,6 +154,7 @@ namespace Puzzled
             writer.Write(Version);
             writer.Write(puzzleCount);
             writer.Write(_displayName ?? "");
+            writer.Write(_test);
 
             foreach (var puzzle in _puzzles)
                 writer.Write(puzzle.guid);
@@ -171,6 +181,9 @@ namespace Puzzled
             var puzzleCount = reader.ReadInt32();
 
             _displayName = reader.ReadString();
+
+            if (version > 1)
+                _test = reader.ReadBoolean();
 
             // Reorder the puzzles based on the world info order
             for (var puzzleIndex = 0; puzzleIndex < puzzleCount; puzzleIndex++)

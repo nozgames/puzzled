@@ -33,6 +33,7 @@ namespace Puzzled.UI
         [SerializeField] private UIScreen _playScreen = null;
         [SerializeField] private UIPlayWorldScreen _playWorldScreen = null;
         [SerializeField] private UIEditWorldScreen _editWorldScreen = null;
+        [SerializeField] private UIEditWorldPropertiesScreen _editWorldPropertiesScreen = null;
 
         [Header("Popups")]
         [SerializeField] private UINamePopup _namePopup = null;
@@ -127,6 +128,12 @@ namespace Puzzled.UI
             if(worldEntry != null)
                 _instance._editWorldScreen.world = WorldManager.LoadWorld(worldEntry);
             SetActiveScreen(_instance._editWorldScreen);
+        }
+
+        public static void ShowEditWorldPropertiesScreen(World _world)
+        {
+            _instance._editWorldPropertiesScreen.world = _world;
+            SetActiveScreen(_instance._editWorldPropertiesScreen);
         }
 
         public static void HideMenu ()
