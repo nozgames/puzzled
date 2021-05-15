@@ -40,6 +40,11 @@ namespace Puzzled
             set => GameManager.puzzle = value;
         }
 
+        /// <summary>
+        /// Return the unique identifier of the puzzle
+        /// </summary>
+        public Guid guid => _guid;
+
         public PuzzleProperties properties {
             get {
                 if (_properties == null)
@@ -296,6 +301,9 @@ namespace Puzzled
             writer.Write(FileVersion);
 
             // Write the guid
+            if (_guid == Guid.Empty)
+                _guid = Guid.NewGuid();
+
             writer.Write(_guid);
 
             // Write the tiles
@@ -531,8 +539,7 @@ namespace Puzzled
 
             var meta = new Meta();
             meta.version = reader.ReadInt32();
-            if (meta.version >= 9)
-                meta.guid = reader.ReadGuid();
+            meta.guid = reader.ReadGuid();
 
             meta.tileCount = reader.ReadInt32();
             meta.wireCount = reader.ReadInt32();
@@ -581,25 +588,12 @@ namespace Puzzled
 
             // Write the current version
             var version = reader.ReadInt32();
-
-            if (version >= 9)
-                _guid = reader.ReadGuid();
-            else
-                _guid = Guid.NewGuid();
+            _guid = reader.ReadGuid();
 
             switch (version)
             {
-                case 3:
-                case 4:
-                    LoadV3(reader, version);
-                    break;
-
-                case 5:
-                case 6:
-                case 7:
-                case 8:
                 case 9:
-                    LoadV5(reader, version);
+                    LoadV9(reader, version);
                     break;
 
                 default:
@@ -607,212 +601,7 @@ namespace Puzzled
             }
         }
 
-        private void LoadV3 (BinaryReader reader, int version)
-        {
-            // Create the tile array
-            var tiles = new Tile[reader.ReadInt32()];
-
-            // Instantiate all the wires
-            var wires = new Wire[reader.ReadInt32()];
-            for (int wireIndex = 0; wireIndex < wires.Length; wireIndex++)
-            {
-                wires[wireIndex] = Instantiate(_wirePrefab, _wires).GetComponent<Wire>();
-                wires[wireIndex].puzzle = this;
-            }
-
-            // Instantiate the tiles
-            for (int tileIndex = 0; tileIndex < tiles.Length; tileIndex++)
-            {
-                var guid = reader.ReadGuid();
-                var size = reader.ReadInt32();
-                var start = reader.BaseStream.Position;
-
-                // Find the tile prefab and if it doesnt exist skip the tile
-                var prefab = DatabaseManager.GetTile(guid);
-                if (null == prefab)
-                {
-                    reader.BaseStream.Position = start + size;
-                    continue;
-                }
-
-                // Create the tile and if it fails skip the tile
-                var cell = reader.ReadCell(version);
-                var tile = InstantiateTile(prefab, cell);
-                if (tile == null)
-                {
-                    reader.BaseStream.Position = start + size;
-                    continue;
-                }
-
-                if (version == 4 && reader.ReadBoolean())
-                    tile.name = reader.ReadString();
-
-                tiles[tileIndex] = tile;
-
-                // Fish for the puzzle properties
-                var puzzleProperties = tile.GetComponent<PuzzleProperties>();
-                if (null != puzzleProperties)
-                    _properties = puzzleProperties;
-
-                // Read the tile properties
-                while (true)
-                {
-                    // Last property should be an Unknown
-                    var type = (TilePropertyType)reader.ReadByte();
-                    if (type == TilePropertyType.Unknown)
-                        break;
-
-                    // Read the property value
-                    var name = reader.ReadString();
-                    var value = (object)null;
-
-                    switch (type)
-                    {
-                        case TilePropertyType.Int:
-                            value = reader.ReadInt32();
-                            break;
-
-                        case TilePropertyType.Cell:
-                            value = new Cell(reader.ReadInt32(), reader.ReadInt32());
-                            break;
-
-                        case TilePropertyType.Sound:
-                        {
-                            var sound = DatabaseManager.GetSound(reader.ReadGuid());
-                            value = sound;
-                            break;
-                        }
-
-                        case TilePropertyType.IntArray:
-                        {
-                            var intArray = new int[reader.ReadInt32()];
-                            for (int i = 0; i < intArray.Length; i++)
-                                intArray[i] = reader.ReadInt32();
-                            value = intArray;
-                            break;
-                        }
-
-                        case TilePropertyType.Bool:
-                            value = reader.ReadBoolean();
-                            break;
-
-                        case TilePropertyType.String:
-                            value = reader.ReadString();
-                            break;
-
-                        case TilePropertyType.StringArray:
-                        {
-                            var sarray = new string[reader.ReadInt32()];
-                            for (int i = 0; i < sarray.Length; i++)
-                                sarray[i] = reader.ReadString();
-                            value = sarray;
-                            break;
-                        }
-
-                        case TilePropertyType.Guid:
-                            value = reader.ReadGuid();
-                            break;
-
-                        case TilePropertyType.Background:
-                        {
-                            var background = DatabaseManager.GetBackground(reader.ReadGuid());
-                            value = background;
-                            break;
-                        }
-
-                        case TilePropertyType.Decal:
-                        {
-                            var decal = DatabaseManager.GetDecal(reader.ReadGuid());
-                            if (version > 1)
-                                decal.flags = (DecalFlags)reader.ReadInt32();
-
-                            value = decal;
-                            break;
-                        }
-
-                        case TilePropertyType.DecalArray:
-                        {
-                            var decals = new Decal[reader.ReadInt32()];
-                            for (int i = 0; i < decals.Length; i++)
-                            {
-                                var decal = DatabaseManager.GetDecal(reader.ReadGuid());
-                                var flags = (DecalFlags)reader.ReadInt32();
-
-                                decal.flags = flags;
-                                decals[i] = decal;
-                            }
-
-                            value = decals;
-                            break;
-                        }
-
-                        case TilePropertyType.Tile:
-                            value = DatabaseManager.GetTile(reader.ReadGuid());
-                            break;
-
-                        case TilePropertyType.Port:
-                        {
-                            var port = tile.GetPropertyValue<Port>(name);
-                            var portWireCount = reader.ReadInt32();
-                            if (null == port)
-                            {
-                                for (int i = 0; i < portWireCount; i++)
-                                    reader.ReadInt32();
-                                continue;
-                            }
-
-                            var portWires = new List<Wire>(portWireCount);
-                            for (int i = 0; i < portWireCount; i++)
-                            {
-                                var wireIndex = reader.ReadInt32();
-                                var wire = wires[wireIndex];
-                                if (port.flow == PortFlow.Input)
-                                    wire.to.port = port;
-                                else
-                                    wire.from.port = port;
-
-                                portWires.Add(wire);
-                            }
-                            port.wires.AddRange(portWires);
-                            continue;
-                        }
-
-                        default:
-                            throw new NotImplementedException();
-                    }
-
-                    tile.SetPropertyValue(name, value);
-                }
-            }
-
-            foreach(var wire in wires)
-            {
-                var fromOptionCount = (int)reader.ReadByte();
-                var fromOptions = fromOptionCount == 0 ? null : new int[fromOptionCount];
-                if (fromOptions != null)
-                    for (int i = 0; i < fromOptionCount; i++)
-                        fromOptions[i] = reader.ReadInt32();
-
-                var toOptionCount = (int)reader.ReadByte();
-                var toOptions = toOptionCount == 0 ? null : new int[toOptionCount];
-                if (toOptions != null)
-                    for (int i = 0; i < toOptionCount; i++)
-                        toOptions[i] = reader.ReadInt32();
-
-                // If the wire isnt valid then just remove it
-                if (wire.from.port == null || wire.to.port == null)
-                {
-                    wire.Destroy();
-                    continue;
-                }
-
-                wire.from.SetOptions(fromOptions);
-                wire.to.SetOptions(toOptions);
-                wire.UpdatePositions();
-            }
-        }
-
-        private void LoadV5(BinaryReader reader, int version)
+        private void LoadV9(BinaryReader reader, int version)
         {
             // Create the tile array
             var tiles = new Tile[reader.ReadInt32()];
@@ -832,20 +621,10 @@ namespace Puzzled
                 var cell = reader.ReadCell(version);
                 var name = (string)null;
 
-                if(version == 5)
-                {
-                    name = reader.ReadBoolean() ? reader.ReadString() : null;
-                }
-                else
-                {
-                    var flags = (SerializedTileFlags)reader.ReadByte();
-                    if ((flags & SerializedTileFlags.HasName) == SerializedTileFlags.HasName)
-                        name = reader.ReadString();
-
-                    if (version < 7 && (flags & SerializedTileFlags.HasCellEdge) == SerializedTileFlags.HasCellEdge)
-                        cell = new Cell(CellCoordinateSystem.SharedEdge, cell.x, cell.y, (CellEdge)reader.ReadByte());
-                }
-
+                var flags = (SerializedTileFlags)reader.ReadByte();
+                if ((flags & SerializedTileFlags.HasName) == SerializedTileFlags.HasName)
+                    name = reader.ReadString();
+                
                 var prefab = DatabaseManager.GetTile(guid);
                 if (null == prefab)
                     continue;
@@ -1039,6 +818,22 @@ namespace Puzzled
                 wire.to.SetOptions(toOptions);
                 wire.UpdatePositions();
             }
+        }
+
+        /// <summary>
+        /// Duplicate a puzzle from one stream to another
+        /// </summary>
+        /// <param name="from">Source stream</param>
+        /// <param name="to">Target stream</param>
+        public static void Duplicate (Stream from, Stream to)
+        {
+            var puzzle = Load(from);
+            if (null == puzzle)
+                return;
+
+            puzzle._guid = Guid.NewGuid();
+            puzzle.Save(to);
+            puzzle.Destroy();
         }
 
         /// <summary>

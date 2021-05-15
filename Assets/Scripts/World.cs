@@ -7,15 +7,8 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    public class World : IDisposable
+    public class World
     {
-        private string _displayName;
-
-        IWorldArchive _archive;
-        WorldManager.IWorldEntry _worldEntry;
-
-        public string displayName => string.IsNullOrEmpty(_displayName) ? Path.GetFileNameWithoutExtension(_worldEntry.name) : _displayName;
-
         public interface IPuzzleEntry
         {
             bool isCompleted { get; }
@@ -23,7 +16,6 @@ namespace Puzzled
             World world { get; }
 
             Puzzle Load();
-            Puzzle.Meta LoadMeta();
             void MarkCompleted();
 
             void Save(Puzzle puzzle);
@@ -31,22 +23,19 @@ namespace Puzzled
 
         private class PuzzleEntry : IPuzzleEntry
         {
-            public PuzzleEntry(World world, IWorldArchiveEntry entry)
+            public PuzzleEntry(World world, string path, Guid guid)
             {
-                archiveEntry = entry;
+                this.path = path;
                 this.world = world;
-                meta = world.LoadPuzzleMeta(this);
+                this.guid = guid;
             }
 
-            public IWorldArchiveEntry archiveEntry { get; set; }
-            public string name => Path.GetFileNameWithoutExtension(archiveEntry.name);
+            public string path { get; set; }
+            public string name => Path.GetFileNameWithoutExtension(path);
             public World world { get; private set; }
-            public Puzzle.Meta meta { get; private set; }
-            public Guid guid => meta.guid;
+            public Guid guid { get; private set; }
 
             public Puzzle Load() => world.LoadPuzzle(this);
-
-            public Puzzle.Meta LoadMeta() => world.LoadPuzzleMeta(this);
 
             public void Save(Puzzle puzzle) => world.SavePuzzle(this, puzzle);
 
@@ -61,19 +50,39 @@ namespace Puzzled
             public void MarkCompleted() => Puzzle.MarkCompleted(guid);
         };
 
-        List<PuzzleEntry> _puzzles;
+        private const int Version = 1;
+        private const string WorldInfoFilename = "world.info";
+        private const string PuzzleExtension = ".puzzle";
+
+        private string _displayName;
+        private WorldManager.IWorldEntry _worldEntry;
+        private List<PuzzleEntry> _puzzles;
+
+        public string displayName => string.IsNullOrEmpty(_displayName) ? Path.GetFileNameWithoutExtension(_worldEntry.name) : _displayName;
 
         public int puzzleCount => _puzzles.Count;
         public IEnumerable<IPuzzleEntry> puzzles => _puzzles;
 
+        public bool isModified { get; private set; }
+
         private World(WorldManager.IWorldEntry worldEntry)
         {
             _worldEntry = worldEntry;
-            _archive = _worldEntry.OpenArchive();
             _puzzles = new List<PuzzleEntry>();
 
-            foreach (IWorldArchiveEntry entry in _archive.entries.Where(e => (Path.GetExtension(e.name) == ".puzzle")))
-                _puzzles.Add(new PuzzleEntry(this, entry));
+            // Load the puzzle list from the archive
+            using var archive = _worldEntry.OpenArchive();
+            foreach (IWorldArchiveEntry entry in archive.entries.Where(e => (Path.GetExtension(e.name) == PuzzleExtension)))
+            {
+                var meta = LoadPuzzleMeta(archive, entry.name);
+                if (null == meta)
+                    continue;
+
+                _puzzles.Add(new PuzzleEntry(this, entry.name, meta.guid));
+            }
+
+            // Load the world info from the archive
+            LoadWorldInfo(archive);
         }
 
         public static World New(WorldManager.IWorldEntry worldEntry)
@@ -88,27 +97,131 @@ namespace Puzzled
 
         public void Save() 
         {
-            // TODO: save world info
+            using var archive = _worldEntry.OpenArchive();
+            SaveWorldInfo(archive);
         }
 
+        /// <summary>
+        /// Get the world info archive entry within the given archive and optionally create one if none exists
+        /// </summary>
+        /// <param name="archive">Archive to retrieve entry from</param>
+        /// <param name="createIfNotExist">True if an archive entry should be created if one was not found</param>
+        /// <returns>World info archive entry or null if not found</returns>
+        private IWorldArchiveEntry GetWorldInfoArchiveEntry (IWorldArchive archive, bool createIfNotExist = false)
+        {
+            var infoEntry = archive.entries.Where(e => e.name == WorldInfoFilename).FirstOrDefault();
+            if (infoEntry == null && createIfNotExist)
+                infoEntry = archive.CreateEntry(WorldInfoFilename);
+
+            return infoEntry;
+        }
+
+        /// <summary>
+        /// Returns the puzzle entry that matches the given globaly unique identifier
+        /// </summary>
+        /// <param name="guid">Globaly unique identifier to search for</param>
+        /// <returns>Puzzle entry that matches the globaly unique identifier or null if not found</returns>
+        public IPuzzleEntry GetPuzzleEntry(Guid guid) => _puzzles.FirstOrDefault(e => e.guid == guid);
+
+        /// <summary>
+        /// Returns the puzzle entry at the given index
+        /// </summary>
+        /// <param name="index">Puzzle index</param>
+        /// <returns>Puzzle entry at the given inddex</returns>
+        public IPuzzleEntry GetPuzzleEntry(int index) => _puzzles[index];
+
+        /// <summary>
+        /// Save the world information to the given archive
+        /// </summary>
+        /// <param name="archive">Target archive</param>
+        private void SaveWorldInfo (IWorldArchive archive)
+        {
+            var infoEntry = GetWorldInfoArchiveEntry(archive, true);
+
+            using var stream = infoEntry.Open();
+            using var writer = new BinaryWriter(stream);
+
+            writer.WriteFourCC('W', 'R', 'L', 'D');
+            writer.Write(Version);
+            writer.Write(puzzleCount);
+            writer.Write(_displayName ?? "");
+
+            foreach (var puzzle in _puzzles)
+                writer.Write(puzzle.guid);
+
+            isModified = false;
+        }
+
+        /// <summary>
+        /// Load the puzzle world info from the given archive
+        /// </summary>
+        /// <param name="archive">Source archive</param>
+        private void LoadWorldInfo(IWorldArchive archive)
+        {
+            var infoEntry = GetWorldInfoArchiveEntry(archive);
+            if(null == infoEntry)
+                return;
+
+            using var stream = infoEntry.Open();
+            using var reader = new BinaryReader(stream);
+            if (!reader.ReadFourCC('W', 'R', 'L', 'D'))
+                throw new InvalidDataException();
+
+            var version = reader.ReadInt32();
+            var puzzleCount = reader.ReadInt32();
+
+            _displayName = reader.ReadString();
+
+            // Reorder the puzzles based on the world info order
+            for (var puzzleIndex = 0; puzzleIndex < puzzleCount; puzzleIndex++)
+            {
+                var guid = reader.ReadGuid();
+                var puzzleEntry = GetPuzzleEntry(guid);
+                if (null == puzzleEntry)
+                {
+                    Debug.LogWarning($"{guid}: world.info references puzzle that does not exist in the archive");
+                    continue;
+                }
+
+                SetPuzzleEntryIndex(puzzleEntry, puzzleIndex);
+            }
+
+            isModified = false;
+        }
+
+        /// <summary>
+        /// Return the index of the given puzzle entry within the list of puzzles.
+        /// </summary>
+        /// <param name="entry">Puzzle entry</param>
+        /// <returns>Index of the entry within the puzzle list or -1 if not found</returns>
+        public int GetPuzzleEntryIndex(IPuzzleEntry entry) => _puzzles.IndexOf(entry as PuzzleEntry);
+
+        /// <summary>
+        /// Set the index of the given puzzle entry within the list of puzzles.
+        /// </summary>
+        /// <param name="entry">Puzzle entry</param>
+        /// <param name="index">New index</param>
         public void SetPuzzleEntryIndex(IPuzzleEntry entry, int index)
         {
             _puzzles.Remove(entry as PuzzleEntry);
             _puzzles.Insert(index, entry as PuzzleEntry);
+
+            isModified = true;
         }
 
         public void RenamePuzzleEntry(IPuzzleEntry entry, string name)
         {
             if (entry is PuzzleEntry puzzleEntry)
             {
-                IWorldArchiveEntry newEntry = _archive.CreateEntry($"{name}.puzzle");
-                IWorldArchiveEntry oldEntry = puzzleEntry.archiveEntry;
-
-                using (var oldFile = puzzleEntry.archiveEntry.Open())
+                using var archive = _worldEntry.OpenArchive();
+                IWorldArchiveEntry newEntry = archive.CreateEntry($"{name}{PuzzleExtension}");
+                IWorldArchiveEntry oldEntry = archive.entries.FirstOrDefault(e => e.name == puzzleEntry.path);
+                
+                using (var oldFile = oldEntry.Open())
                 using (var newFile = newEntry.Open())
                     oldFile.CopyTo(newFile);
 
-                puzzleEntry.archiveEntry = newEntry;
+                puzzleEntry.path = newEntry.name;
                 oldEntry.Delete();
             }
         }
@@ -121,17 +234,23 @@ namespace Puzzled
 
             // Find the next name by adding numbers to it
             var name = entry.name.GetNextName();
-            while(_archive.Contains(name + ".puzzle"))
+            using var archive = _worldEntry.OpenArchive();
+            while(archive.Contains(name + PuzzleExtension))
                 name = name.GetNextName();
 
-            IWorldArchiveEntry newEntry = _archive.CreateEntry(name + ".puzzle");
+            var oldEntry = archive.entries.FirstOrDefault(e => e.name == puzzleEntry.path);
+            var newEntry = archive.CreateEntry(name + PuzzleExtension);
 
-            using (var oldFile = puzzleEntry.archiveEntry.Open())
+            using (var oldFile = oldEntry.Open())
             using (var newFile = newEntry.Open())
-                oldFile.CopyTo(newFile);
+            {
+                Puzzle.Duplicate(oldFile, newFile);
+            }
 
-            var newPuzzleEntry = new PuzzleEntry(this, newEntry);
+            var newPuzzleEntry = new PuzzleEntry(this, newEntry.name, LoadPuzzleMeta(archive, newEntry.name).guid);
             _puzzles.Add(newPuzzleEntry);
+
+            isModified = true;
 
             return newPuzzleEntry;
         }
@@ -140,28 +259,36 @@ namespace Puzzled
         {
             if (entry is PuzzleEntry puzzleEntry)
             {
-                puzzleEntry.archiveEntry.Delete();
+                using var archive = _worldEntry.OpenArchive();
+                var archiveEntry = archive.entries.FirstOrDefault(e => e.name == puzzleEntry.path);
+                archiveEntry.Delete();
                 _puzzles.Remove(puzzleEntry);
+
+                isModified = true;
             }
         }
 
         public IPuzzleEntry NewPuzzleEntry(string name)
         {
-            name = $"{name}.puzzle";
+            name = $"{name}{PuzzleExtension}";
 
-            if (_archive.Contains(name))
+            using var archive = _worldEntry.OpenArchive();
+            if (archive.Contains(name))
                 return null;
 
-            IWorldArchiveEntry entry = _archive.CreateEntry(name);
-            PuzzleEntry newPuzzle = new PuzzleEntry(this, entry);
-
             var puzzle = GameManager.InstantiatePuzzle();
-            SavePuzzle(newPuzzle, puzzle);
+            var entry = archive.CreateEntry(name);
+            using var stream = entry.Open();
+            puzzle.Save(stream);
+
+            var puzzleEntry = new PuzzleEntry(this, entry.name, puzzle.guid);
+            _puzzles.Add(puzzleEntry);
+
             puzzle.Destroy();
 
-            _puzzles.Add(newPuzzle);
+            isModified = true;
 
-            return newPuzzle;
+            return puzzleEntry;
         }
 
         private Puzzle LoadPuzzle(IPuzzleEntry entry)
@@ -170,7 +297,8 @@ namespace Puzzled
             {
                 try
                 {
-                    using var file = puzzleEntry.archiveEntry.Open();
+                    using var archive = _worldEntry.OpenArchive();
+                    using var file = archive.entries.FirstOrDefault(e => e.name == puzzleEntry.path).Open();
                     return Puzzle.Load(file);
                 }
                 catch (Exception e)
@@ -182,18 +310,16 @@ namespace Puzzled
             return null;
         }
 
-        private Puzzle.Meta LoadPuzzleMeta(IPuzzleEntry entry)
+        private static Puzzle.Meta LoadPuzzleMeta(IWorldArchive archive, string path)
         {
-            if (entry is PuzzleEntry puzzleEntry)
+            try
             {
-                try
-                {
-                    using var file = puzzleEntry.archiveEntry.Open();
-                    return Puzzle.LoadMeta(file);
-                } catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
+                var archiveEntry = archive.entries.Where(e => e.name == path).FirstOrDefault();
+                using var file = archiveEntry.Open();
+                return Puzzle.LoadMeta(file);
+            } catch (Exception e)
+            {
+                Debug.LogException(e);
             }
 
             return null;
@@ -205,8 +331,10 @@ namespace Puzzled
             {
                 try
                 {
-                    using (var file = puzzleEntry.archiveEntry.Open())
-                        puzzle.Save(file);
+                    using var archive = _worldEntry.OpenArchive();
+                    var archiveEntry = archive.entries.Where(e => e.name == puzzleEntry.path).FirstOrDefault();
+                    using var file = archiveEntry.Open();
+                    puzzle.Save(file);
                 }
                 catch (Exception e)
                 {
@@ -221,15 +349,26 @@ namespace Puzzled
         public int IndexOf(IPuzzleEntry puzzleEntry) =>
             _puzzles.IndexOf(puzzleEntry as PuzzleEntry);
 
-        public void Dispose()
-        {
-            if (_archive != null)
-                _archive.Dispose();
-        }
-
         public void Export()
         {
             WorldManager.ExportWorld(_worldEntry);
+        }
+
+        public static void Clone (WorldManager.IWorldEntry worldEntry, IWorldArchive target)
+        {
+            var world = new World(worldEntry);
+            world.SaveWorldInfo(target);
+            foreach (var puzzleEntry in world.puzzles)
+            {
+                var puzzle = puzzleEntry.Load();
+                if (null == puzzle)
+                    continue;
+
+                var targetEntry = target.CreateEntry((puzzleEntry as PuzzleEntry).path);
+                using var targetStream = targetEntry.Open();
+                puzzle.Save(targetStream);
+                puzzle.Destroy();
+            }
         }
     }
 }

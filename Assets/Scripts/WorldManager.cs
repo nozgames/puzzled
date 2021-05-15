@@ -106,6 +106,11 @@ namespace Puzzled
             return World.Load(ientry);
         }
 
+        /// <summary>
+        /// Create a new world with the given name
+        /// </summary>
+        /// <param name="name">Name of the new world</param>
+        /// <returns>New world entry or null if the world failed to create</returns>
         public static IWorldEntry NewWorld(string name)
         {
             var fullPath = Path.Combine(directoryArchivePath, name);
@@ -144,15 +149,10 @@ namespace Puzzled
             string zipFilePath = Path.Combine(archivePath, $"{entry.name}{WorldExtension}");
             
             Directory.CreateDirectory(Path.GetDirectoryName(zipFilePath));
+
             using var zipArchive = new ZipWorldArchive(File.Create(zipFilePath));
 
-            foreach(var sourceEntry in directoryArchive.entries)
-            {
-                var targetEntry = zipArchive.CreateEntry(sourceEntry.name);
-                using var sourceStream = sourceEntry.Open();
-                using var targetStream = targetEntry.Open();
-                sourceStream.CopyTo(targetStream);
-            }
+            World.Clone(ientry, zipArchive);
         }
 
         public static Texture2D CreatePreview (World.IPuzzleEntry puzzleEntry)
@@ -199,12 +199,14 @@ namespace Puzzled
             }
         }
 
-        // This function is used to force all worlds to update to the latest version
+        /// <summary>
+        /// Updates all known worlds to the latest puzzle file version
+        /// </summary>
         public static void UpdateWorlds ()
         {
             foreach(var worldEntry in GetEditableWorldEntries())
             {
-                using var world = World.Load(worldEntry);
+                var world = World.Load(worldEntry);
                 foreach(var puzzleEntry in world.puzzles)
                 {
                     var puzzle = puzzleEntry.Load();

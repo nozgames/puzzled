@@ -37,6 +37,7 @@ namespace Puzzled.UI
             });
 
             _puzzleList.onSelectionChanged += (selection) => UpdateButtons();
+            _puzzleList.onReorderItem += OnPuzzleListReorderItem;
 
             _editPuzzleButton.onClick.AddListener(() => {
                 Editor.UIPuzzleEditor.Initialize((_puzzleList.selectedItem as UIPuzzleListItem).puzzleEntry);
@@ -121,6 +122,17 @@ namespace Puzzled.UI
             });
         }
 
+        private void OnPuzzleListReorderItem(int fromIndex, int toIndex)
+        {
+            var puzzleEntry = _world.GetPuzzleEntry(fromIndex);
+            _world.SetPuzzleEntryIndex(puzzleEntry, toIndex);
+            _puzzleList.ClearSelection();
+            _puzzleList.Select(toIndex);
+
+            for (int i = 0; i < _puzzleList.itemCount; i++)
+                (_puzzleList.GetItem(i) as UIPuzzleListItem).UpdateIndex();
+        }
+
         private string ValidateName (string name)
         {
             if (name.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) != -1)
@@ -137,6 +149,12 @@ namespace Puzzled.UI
             UpdateWorld();            
         }
 
+        private void OnDisable()
+        {
+            if (_world.isModified)
+                _world.Save();
+        }
+
         private void UpdateWorld ()
         {
             if (_world == null || !isActiveAndEnabled)
@@ -146,7 +164,7 @@ namespace Puzzled.UI
 
             _puzzleList.transform.DetachAndDestroyChildren();
 
-            foreach (var entry in _world.puzzles.OrderBy(e => e.name))
+            foreach (var entry in _world.puzzles)
             {
                 var item = Instantiate(_puzzleListItemPrefab.gameObject, _puzzleList.transform).GetComponent<UIPuzzleListItem>();
                 item.puzzleEntry = entry;

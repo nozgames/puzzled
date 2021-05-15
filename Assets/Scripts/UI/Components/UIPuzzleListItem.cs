@@ -37,6 +37,11 @@ namespace Puzzled.UI
             if (_finishedImage != null)
                 _finishedImage.enabled = _puzzleEntry.isCompleted;
 
+            UpdateIndex();
+        }
+
+        public void UpdateIndex ()
+        {
             if (_indexText != null)
                 _indexText.text = (transform.GetSiblingIndex() + 1).ToString();
         }

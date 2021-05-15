@@ -277,7 +277,6 @@ namespace Puzzled
         {
             foreach (var tile in _instance._tiles)
             {
-                Debug.Log($"Generating preview '{tile.name}'");
                 yield return null;
             }
         }

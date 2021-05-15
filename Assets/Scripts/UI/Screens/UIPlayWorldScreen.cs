@@ -52,11 +52,6 @@ namespace Puzzled.UI
 
         private void OnDisable()
         {
-            if (_world != null)
-            {
-                _world.Dispose();
-                _world = null;
-            }
         }
 
         private void UpdateWorld ()
@@ -64,14 +59,12 @@ namespace Puzzled.UI
             if (_worldEntry == null || !isActiveAndEnabled)
                 return;
 
-            if (_world == null)
-                _world = WorldManager.LoadWorld(_worldEntry);
-
+            _world = WorldManager.LoadWorld(_worldEntry);
             _worldNameText.text = _world.displayName;
 
             _puzzleList.transform.DetachAndDestroyChildren();
 
-            foreach (var entry in _world.puzzles.OrderBy(e => e.name))
+            foreach (var entry in _world.puzzles)
             {
                 var item = Instantiate(_puzzleListItemPrefab.gameObject, _puzzleList.transform).GetComponent<UIPuzzleListItem>();
                 item.puzzleEntry = entry;
