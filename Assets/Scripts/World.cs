@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using UnityEngine;
 
@@ -9,16 +8,43 @@ namespace Puzzled
 {
     public class World
     {
+        public enum PuzzleUnlockType
+        {
+            None,
+            Sequential,
+            Rules
+        }
+
+        public enum PuzzleUnlockRuleType
+        {
+            Unknown,
+            Completed,
+            AnyOf,
+            AllOf
+        }
+
+        public class PuzzleUnlockRule
+        {
+            public PuzzleUnlockRuleType type;
+            public Guid guid;
+        }
+
         public interface IPuzzleEntry
         {
             bool isCompleted { get; }
+            bool isLocked { get; }
             string name { get; }
             World world { get; }
+
+            bool hideWhenLocked { get; set; }
+            PuzzleUnlockType unlockType { get; set; }
 
             Puzzle Load();
             void MarkCompleted();
 
             void Save(Puzzle puzzle);
+
+            public List<PuzzleUnlockRule> unlockRules { get; }
         }
 
         private class PuzzleEntry : IPuzzleEntry
@@ -34,6 +60,10 @@ namespace Puzzled
             public string name => Path.GetFileNameWithoutExtension(path);
             public World world { get; private set; }
             public Guid guid { get; private set; }
+            public PuzzleUnlockType unlockType { get; set; } = PuzzleUnlockType.None;
+            public bool hideWhenLocked { get; set; }
+
+            public List<PuzzleUnlockRule> unlockRules { get; private set; } = new List<PuzzleUnlockRule>();
 
             public Puzzle Load() => world.LoadPuzzle(this);
 
@@ -44,13 +74,15 @@ namespace Puzzled
             /// </summary>
             public bool isCompleted => Puzzle.IsCompleted(guid);
 
+            public bool isLocked => !IsPuzzleUnlocked(this);
+
             /// <summary>
             /// Mark the puzzle as completed
             /// </summary>
             public void MarkCompleted() => Puzzle.MarkCompleted(guid);
         };
 
-        private const int Version = 2;
+        private const int Version = 1;
         private const string WorldInfoFilename = "world.info";
         private const string PuzzleExtension = ".puzzle";
 
@@ -64,6 +96,8 @@ namespace Puzzled
         public IEnumerable<IPuzzleEntry> puzzles => _puzzles;
 
         public bool isModified { get; private set; }
+
+        public void SetModified() => isModified = true;
 
         private bool _test = false;
         public bool test {
@@ -157,7 +191,17 @@ namespace Puzzled
             writer.Write(_test);
 
             foreach (var puzzle in _puzzles)
+            {
                 writer.Write(puzzle.guid);
+                writer.Write(puzzle.hideWhenLocked);
+                writer.Write((byte)puzzle.unlockType);
+                writer.Write(puzzle.unlockRules.Count);
+                foreach (var rule in puzzle.unlockRules)
+                {
+                    writer.Write((byte)rule.type);
+                    writer.Write(rule.guid);
+                }
+            }
 
             isModified = false;
         }
@@ -182,14 +226,13 @@ namespace Puzzled
 
             _displayName = reader.ReadString();
 
-            if (version > 1)
-                _test = reader.ReadBoolean();
+            _test = reader.ReadBoolean();
 
             // Reorder the puzzles based on the world info order
             for (var puzzleIndex = 0; puzzleIndex < puzzleCount; puzzleIndex++)
             {
                 var guid = reader.ReadGuid();
-                var puzzleEntry = GetPuzzleEntry(guid);
+                var puzzleEntry = GetPuzzleEntry(guid) as PuzzleEntry;
                 if (null == puzzleEntry)
                 {
                     Debug.LogWarning($"{guid}: world.info references puzzle that does not exist in the archive");
@@ -197,6 +240,20 @@ namespace Puzzled
                 }
 
                 SetPuzzleEntryIndex(puzzleEntry, puzzleIndex);
+
+                puzzleEntry.hideWhenLocked = reader.ReadBoolean();
+                puzzleEntry.unlockType = (PuzzleUnlockType)reader.ReadByte();
+
+                var ruleCount = reader.ReadInt32();
+                puzzleEntry.unlockRules.Clear();
+                puzzleEntry.unlockRules.Capacity = ruleCount;
+                for(var ruleIndex=0; ruleIndex<ruleCount; ruleIndex++)
+                {
+                    var rule = new PuzzleUnlockRule();
+                    rule.type = (PuzzleUnlockRuleType)reader.ReadByte();
+                    rule.guid = reader.ReadGuid();
+                    puzzleEntry.unlockRules.Add(rule);
+                }
             }
 
             isModified = false;
@@ -382,6 +439,75 @@ namespace Puzzled
                 puzzle.Save(targetStream);
                 puzzle.Destroy();
             }
+        }
+
+        /// <summary>
+        /// Returns true if the given puzzle entry is currently unlocked
+        /// </summary>
+        /// <param name="puzzleEntry">Puzzle entry</param>
+        /// <returns>True if the puzzle is unlocked, false if not</returns>
+        private static bool IsPuzzleUnlocked(PuzzleEntry puzzleEntry)
+        {
+            if (puzzleEntry.unlockType == PuzzleUnlockType.None)
+                return true;
+
+            if(true || puzzleEntry.unlockType == PuzzleUnlockType.Sequential)
+            {
+                for (var puzzleIndex = puzzleEntry.world.GetPuzzleEntryIndex(puzzleEntry) - 1; puzzleIndex >= 0; puzzleIndex--)
+                    if (!puzzleEntry.world.GetPuzzleEntry(puzzleIndex).isCompleted)
+                        return false;
+
+                return true;
+            }
+
+            if (puzzleEntry.unlockRules.Count == 0)
+                return true;
+
+            var parentRule = PuzzleUnlockRuleType.Unknown;
+            var parentResult = false;
+            var childCount = 0;
+            foreach(var rule in puzzleEntry.unlockRules)
+            {
+                var childResult = false;
+                switch (rule.type)
+                {
+                    case PuzzleUnlockRuleType.Completed:
+                        childResult = Puzzle.IsCompleted(rule.guid);
+                        childCount++;
+                        break;
+
+                    case PuzzleUnlockRuleType.AllOf:
+                    case PuzzleUnlockRuleType.AnyOf:
+                        // If the previous parent rule failed then fail
+                        if(parentRule != PuzzleUnlockRuleType.Unknown && childCount >= 0 && !parentResult)
+                            return false;                            
+
+                        // Start a new parent rule
+                        parentRule = rule.type;
+                        parentResult = false;
+                        continue;
+                }
+
+                // Handle the child result depending on the current parent rule
+                switch (parentRule)
+                {
+                    case PuzzleUnlockRuleType.AllOf:
+                    default:
+                        if (!childResult)
+                            return false;
+                        parentResult = true;
+                        break;
+
+                    case PuzzleUnlockRuleType.AnyOf:
+                        parentResult = true;
+                        break;
+                }
+            }
+
+            if (parentRule != PuzzleUnlockRuleType.Unknown && childCount > 0)
+                return parentResult;
+
+            return true;
         }
     }
 }
