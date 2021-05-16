@@ -15,6 +15,7 @@ namespace Puzzled.UI
         [SerializeField] private Button _playPuzzleButton = null;
         [SerializeField] private Button _exportPuzzleButton = null;
         [SerializeField] private Button _worldOptionsButton = null;
+        [SerializeField] private Button _puzzleOptionsButton = null;
         [SerializeField] private ScrollRect _scrollRect = null;
 
         [SerializeField] private UIPuzzleList _puzzleList = null;
@@ -36,6 +37,10 @@ namespace Puzzled.UI
 
         private void Awake()
         {
+            _puzzleOptionsButton.onClick.AddListener(() => {
+                //UIManager.ShowPuzzleOptionsScreen();
+            });
+
             _puzzlePopup.onCancel.AddListener(() => {
                 _puzzlePopup.gameObject.SetActive(false);
             });
