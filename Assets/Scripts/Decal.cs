@@ -16,7 +16,7 @@ namespace Puzzled
     {
         public static readonly Decal none = new Decal(Guid.Empty, null) { scale = 1.0f, color = Color.white, flags = DecalFlags.AutoColor };
 
-        public string name => texture == null ? "None" : texture.name.Substring(5);
+        public string name { get; private set; }
 
         public Guid guid { get; private set; }
 
@@ -108,6 +108,13 @@ namespace Puzzled
             rotation = 0.0f;
             flags = DecalFlags.AutoColor;
             color = Color.white;
+
+            if (texture == null)
+                name = "None";
+            else if (texture.name.StartsWith("Decal"))
+                name = texture.name.Substring(5);
+            else
+                name = texture.name;
         }        
     }
 }
