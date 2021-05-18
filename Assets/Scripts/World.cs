@@ -741,6 +741,9 @@ namespace Puzzled
                         parentRule = rule.type;
                         parentResult = false;
                         continue;
+
+                    default:
+                        continue;
                 }
 
                 // Handle the child result depending on the current parent rule
