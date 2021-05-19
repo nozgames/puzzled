@@ -34,6 +34,7 @@ namespace Puzzled.UI
         [SerializeField] private UIPlayWorldScreen _playWorldScreen = null;
         [SerializeField] private UIEditWorldScreen _editWorldScreen = null;
         [SerializeField] private UIEditWorldPropertiesScreen _editWorldPropertiesScreen = null;
+        [SerializeField] private UIWorldTransitionScreen _worldTransitionScreen = null;
 
         [Header("Popups")]
         [SerializeField] private UINamePopup _namePopup = null;
@@ -134,6 +135,13 @@ namespace Puzzled.UI
         {
             _instance._editWorldPropertiesScreen.world = _world;
             SetActiveScreen(_instance._editWorldPropertiesScreen);
+        }
+
+        public static void ShowWorldTransitionScreen(World.Transition transition, Action callback)
+        {
+            _instance._worldTransitionScreen.transition = transition;
+            _instance._worldTransitionScreen.callback = callback;
+            SetActiveScreen(_instance._worldTransitionScreen);
         }
 
         public static void HideMenu ()

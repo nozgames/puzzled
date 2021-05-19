@@ -11,10 +11,10 @@ namespace Puzzled
     {
         public enum PuzzleUnlockRuleType
         {
-            Unknown,
-            Completed,
-            AnyOf,
-            AllOf
+            Unknown,        // 0
+            Completed,      // 1
+            AnyOf,          // 2
+            AllOf           // 3
         }
 
         [Serializable]
@@ -32,11 +32,20 @@ namespace Puzzled
         }
 
         [Serializable]
+        private class SerializedTransition
+        {
+            public string text;
+            public string texture;
+        }
+
+        [Serializable]
         private class WorldMeta
         {
             public string guid;
             public bool test;
             public string[] order;
+            public SerializedTransition transitionIn;
+            public SerializedTransition transitionOut;
         }
 
         [Serializable]
@@ -45,6 +54,8 @@ namespace Puzzled
             public string guid;
             public bool hideWhenLocked;
             public PuzzleUnlockRule[] unlock;
+            public SerializedTransition transitionIn;
+            public SerializedTransition transitionOut;
         }
 
         private class TextureEntry
@@ -55,7 +66,11 @@ namespace Puzzled
             public bool hasColor;
         }
 
-
+        public class Transition
+        {
+            public Texture2D texture;
+            public string text;
+        }
 
         public interface IPuzzleEntry
         {
@@ -68,6 +83,9 @@ namespace Puzzled
 
             Puzzle Load();
             void MarkCompleted();
+
+            Transition transitionIn { get; }
+            Transition transitionOut { get; }
 
             void Save(Puzzle puzzle);
 
@@ -111,9 +129,15 @@ namespace Puzzled
             /// Key used to save completed state in the player preferences
             /// </summary>
             private string completedKey => $"{world.guid}_{guid}_COMPLETED";
+
+            public SerializedTransition serializedTransitionIn { get; set; }
+            public SerializedTransition serializedTransitionOut { get; set; }
+
+            public Transition transitionIn => world.LoadTransition(serializedTransitionIn);
+
+            public Transition transitionOut => world.LoadTransition(serializedTransitionOut);
         };
 
-        private const int Version = 1;
         private const string WorldInfoFilename = "world.info";
         private const string PuzzleExtension = ".puzzle";
         private const string MetaExtension = ".meta";
@@ -123,6 +147,8 @@ namespace Puzzled
         private WorldManager.IWorldEntry _worldEntry;
         private List<PuzzleEntry> _puzzles;
         private List<TextureEntry> _textures;
+        private SerializedTransition _serializedTransitionIn;
+        private SerializedTransition _serializedTransitionOut;
 
         public string displayName => string.IsNullOrEmpty(_displayName) ? Path.GetFileNameWithoutExtension(_worldEntry.name) : _displayName;
 
@@ -135,9 +161,23 @@ namespace Puzzled
         public void SetModified() => isModified = true;
 
         /// <summary>
+        /// Returns true if this is the first time playing this world
+        /// </summary>
+        public bool isFirstPlay => PlayerPrefs.GetInt($"{guid}_PLAYED") != 0;
+
+        /// <summary>
+        /// Mark this world as being played for the first time
+        /// </summary>
+        public void MarkFirstPlay () => PlayerPrefs.SetInt($"{guid}_PLAYED", 1);
+
+        /// <summary>
         /// Returns all loaded textures as decals
         /// </summary>
         public IEnumerable<Decal> decals => _textures.Where(t => t.cached != null).Select(t => GetDecal(null, t));
+
+        public Transition transitionIn => LoadTransition(_serializedTransitionIn);
+
+        public Transition transitionOut => LoadTransition(_serializedTransitionOut);
 
         /// <summary>
         /// THIS IS JUST FOR TESTING, REMOVE WHEN THERE ARE REAL PROPERTIES
@@ -219,7 +259,9 @@ namespace Puzzled
             SaveMeta(archive, MetaExtension, new WorldMeta {
                 guid = guid.ToString(),
                 test = test,
-                order = _puzzles.Select(p => p.guid.ToString()).ToArray()
+                order = _puzzles.Select(p => p.guid.ToString()).ToArray(),
+                transitionIn = _serializedTransitionIn,
+                transitionOut = _serializedTransitionOut
             });
 
             isModified = false;
@@ -240,6 +282,8 @@ namespace Puzzled
             }
 
             test = meta.test;
+            _serializedTransitionIn = meta.transitionIn;
+            _serializedTransitionOut = meta.transitionOut;
 
             // Fix invalid guids
             if (!Guid.TryParse(meta.guid, out var metaGuid) || metaGuid == Guid.Empty)
@@ -342,7 +386,9 @@ namespace Puzzled
             SaveMeta(archive, entry.path + MetaExtension, new PuzzleMeta {
                 guid = entry.guid.ToString(),
                 hideWhenLocked = entry.hideWhenLocked,
-                unlock = entry.unlockRules?.ToArray()
+                unlock = entry.unlockRules?.ToArray(),
+                transitionIn = entry.serializedTransitionIn,
+                transitionOut = entry.serializedTransitionOut
             });
 
         /// <summary>
@@ -389,6 +435,9 @@ namespace Puzzled
 
         private Texture2D LoadTexture (IWorldArchive archive, TextureEntry textureEntry)
         {
+            if (textureEntry == null)
+                return null;
+
             // If no archive is given then open the archive just for this call.
             if(archive == null)
             {
@@ -647,7 +696,9 @@ namespace Puzzled
 
                     var puzzleEntry = new PuzzleEntry(this, e.name, metaGuid) {
                         hideWhenLocked = meta.hideWhenLocked,
-                        unlockRules = meta.unlock?.ToList()
+                        unlockRules = meta.unlock?.ToList(),
+                        serializedTransitionIn = meta.transitionIn,
+                        serializedTransitionOut = meta.transitionOut
                     };
 
                     if (archiveEntry == null)
@@ -690,6 +741,19 @@ namespace Puzzled
         public void Export()
         {
             WorldManager.ExportWorld(_worldEntry);
+        }
+
+        private Transition LoadTransition (SerializedTransition serializedTransition)
+        {
+            if (string.IsNullOrEmpty(serializedTransition.text) && string.IsNullOrEmpty(serializedTransition.texture))
+                return null;
+
+            var transition = new Transition();
+            if(Guid.TryParse(serializedTransition.texture, out var textureGuid))
+                transition.texture = GetTexture(textureGuid);
+
+            transition.text = serializedTransition.text;
+            return transition;
         }
 
         public static void Clone (WorldManager.IWorldEntry worldEntry, IWorldArchive target)

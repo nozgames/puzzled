@@ -551,14 +551,6 @@ namespace Puzzled
         }
 
         [ActorEventHandler]
-        private void OnLevelExit (LevelExitEvent evt)
-        {
-            PlayAnimation("Exit");
-
-            Tween.Wait(2.0f).OnStop(() => GameManager.PuzzleComplete()).Start(gameObject);
-        }        
-
-        [ActorEventHandler]
         private void OnGiveItem (GiveItemEvent evt)
         {
             var drop = inventory;
@@ -631,7 +623,12 @@ namespace Puzzled
                     puzzle.MarkCompleted();
                     GameManager.Stop();
                     GameManager.UnloadPuzzle();
-                    UIManager.ShowPlayWorldScreen();
+
+                    var transition = puzzle.entry.transitionOut;
+                    if (transition != null)
+                        UIManager.ShowWorldTransitionScreen(transition, () => {
+                            UIManager.ShowPlayWorldScreen();
+                        });
                 }
 
             }).Start(gameObject);

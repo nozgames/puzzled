@@ -79,7 +79,11 @@ namespace Puzzled.UI
                         GameManager.LoadPuzzle(item.puzzleEntry);
                         GameManager.Play();
 
-                        UIManager.HideMenu();
+                        var transitionIn = item.puzzleEntry.transitionIn;
+                        if (transitionIn != null)
+                            UIManager.ShowWorldTransitionScreen(transitionIn, () => UIManager.HideMenu());
+                        else
+                            UIManager.HideMenu();
                     });
             }
 
