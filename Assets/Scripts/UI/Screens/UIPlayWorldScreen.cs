@@ -15,20 +15,21 @@ namespace Puzzled.UI
         [SerializeField] private TMPro.TextMeshProUGUI _worldNameText = null;
 
         private World _world;
-        private IWorldEntry _worldEntry;
-
-        public IWorldEntry worldEntry {
-            get => _worldEntry;
-            set {
-                _worldEntry = value;
-                UpdateWorld();
-            }
+        public World world
+        {
+            get => _world;
+            set => _world = value;
         }
+
+        public bool isDebugging;
 
         private void Awake()
         {
             _closeButton.onClick.AddListener(() => {
-                UIManager.ShowPlayScreen();
+                if (isDebugging)
+                    UIManager.ShowCreateScreen();
+                else
+                    UIManager.ShowPlayScreen();
             });
 
             _puzzleList.onSelectionChanged += (selection) => UpdateButtons();
@@ -56,10 +57,9 @@ namespace Puzzled.UI
 
         private void UpdateWorld ()
         {
-            if (_worldEntry == null || !isActiveAndEnabled)
+            if (_world == null || !isActiveAndEnabled)
                 return;
 
-            _world = WorldManager.LoadWorld(_worldEntry);
             _worldNameText.text = _world.displayName;
 
             _puzzleList.transform.DetachAndDestroyChildren();

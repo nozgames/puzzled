@@ -627,8 +627,10 @@ namespace Puzzled
                     var transition = puzzle.entry.transitionOut;
                     if (transition != null)
                         UIManager.ShowWorldTransitionScreen(transition, () => {
-                            UIManager.ShowPlayWorldScreen();
+                            UIManager.ReturnToPlayWorldScreen();
                         });
+                    else
+                        UIManager.ReturnToPlayWorldScreen();
                 }
 
             }).Start(gameObject);

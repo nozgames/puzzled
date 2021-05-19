@@ -13,7 +13,7 @@ namespace Puzzled.UI
         {
             GameManager.Stop();
             GameManager.UnloadPuzzle();
-            UIManager.ShowMainScreen();
+            UIManager.ReturnToPlayWorldScreen();
         }
     }
 }

@@ -116,18 +116,35 @@ namespace Puzzled.UI
 
         public static void ShowPlayScreen() => SetActiveScreen(_instance._playScreen);
 
-        public static void ShowPlayWorldScreen(WorldManager.IWorldEntry worldEntry = null)
+        public static void EnterPlayWorldScreen(World world, bool isDebugging = false)
         {
-            if (worldEntry != null)
-                _instance._playWorldScreen.worldEntry = worldEntry;
+            if (world != null)
+                _instance._playWorldScreen.world = world;
+
+            _instance._playWorldScreen.isDebugging = isDebugging;
 
             SetActiveScreen(_instance._playWorldScreen);
         }
 
-        public static void ShowEditWorldScreen(WorldManager.IWorldEntry worldEntry = null)
+        public static void ReturnToPlayWorldScreen()
         {
-            if(worldEntry != null)
-                _instance._editWorldScreen.world = WorldManager.LoadWorld(worldEntry);
+            Debug.Assert(_instance._playWorldScreen.world != null);
+
+            SetActiveScreen(_instance._playWorldScreen);
+        }
+
+        public static void EnterEditWorldScreen(World world)
+        {
+            if (world != null)
+                _instance._editWorldScreen.world = world;
+
+            SetActiveScreen(_instance._editWorldScreen);
+        }
+
+        public static void ReturnToEditWorldScreen()
+        {
+            Debug.Assert(_instance._editWorldScreen.world != null);
+
             SetActiveScreen(_instance._editWorldScreen);
         }
 

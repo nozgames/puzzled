@@ -12,8 +12,8 @@ namespace Puzzled.UI
         [SerializeField] private Button _renamePuzzleButton = null;
         [SerializeField] private Button _deletePuzzleButton = null;
         [SerializeField] private Button _duplicatePuzzleButton = null;
-        [SerializeField] private Button _playPuzzleButton = null;
-        [SerializeField] private Button _exportPuzzleButton = null;
+        [SerializeField] private Button _playWorldButton = null;
+        [SerializeField] private Button _exportWorldButton = null;
         [SerializeField] private Button _worldOptionsButton = null;
         [SerializeField] private Button _puzzleOptionsButton = null;
         [SerializeField] private ScrollRect _scrollRect = null;
@@ -26,13 +26,9 @@ namespace Puzzled.UI
         [SerializeField] private RectTransform _puzzlePopupButtons = null;
 
         private World _world;
-
         public World world {
             get => _world;
-            set {
-                _world = value;
-                UpdateWorld();
-            }
+            set => _world = value;
         }
 
         private void Awake()
@@ -105,12 +101,12 @@ namespace Puzzled.UI
                 Select(puzzleEntry);
             });
 
-            _playPuzzleButton.onClick.AddListener(() =>
+            _playWorldButton.onClick.AddListener(() =>
             {
-                // FIXME
+                UIManager.EnterPlayWorldScreen(world, isDebugging : true);
             });
 
-            _exportPuzzleButton.onClick.AddListener(() =>
+            _exportWorldButton.onClick.AddListener(() =>
             {
                 if (_world != null)
                 {
@@ -213,8 +209,8 @@ namespace Puzzled.UI
             _renamePuzzleButton.interactable = selected;
             _deletePuzzleButton.interactable = selected;
             _worldOptionsButton.interactable = true;
-            _playPuzzleButton.interactable = true;
-            _exportPuzzleButton.interactable = true;
+            _playWorldButton.interactable = true;
+            _exportWorldButton.interactable = true;
         }
 
         private void Select(World.IPuzzleEntry puzzleEntry)

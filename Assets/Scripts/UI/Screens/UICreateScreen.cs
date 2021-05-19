@@ -27,7 +27,9 @@ namespace Puzzled.UI
                         if(null == worldEntry)
                             return "Error: World with the same name already exists";
 
-                        UIManager.ShowEditWorldScreen(worldEntry);
+                        World world = WorldManager.LoadWorld(worldEntry);
+                        UIManager.EnterEditWorldScreen(world);
+
                         return null;
                     });
             });
@@ -42,7 +44,9 @@ namespace Puzzled.UI
                 var item = Instantiate(_worldListItemPrefab.gameObject, _worldList.transform).GetComponent<UIWorldListItem>();
                 item.worldEntry = entry;
                 item.onDoubleClick.AddListener(() => {
-                    UIManager.ShowEditWorldScreen(entry);
+
+                    World world = WorldManager.LoadWorld(entry);
+                    UIManager.EnterEditWorldScreen(world);
                 });
             }
         }
