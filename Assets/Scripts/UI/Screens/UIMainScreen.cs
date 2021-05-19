@@ -36,14 +36,5 @@ namespace Puzzled.UI
         {
             _playButton.Select();
         }
-
-#if false
-        public void OnStoryButton()
-        {
-            GameManager.LoadPuzzle(Path.Combine(Application.dataPath, "Puzzles", "Story", "IntroDream.puzzle"));
-            GameManager.Play();
-            UIManager.HideMenu();            
-        }
-#endif
     }
-    }
+}

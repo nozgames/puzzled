@@ -159,12 +159,22 @@ namespace Puzzled.UI
 
         public static void EnterPlayWorldScreen(World world, bool isDebugging = false)
         {
-            if (world != null)
-                _instance._playWorldScreen.world = world;
-
             _instance._playWorldScreen.isDebugging = isDebugging;
 
-            SetActiveScreen(_instance._playWorldScreen);
+            if (world != null)
+            {
+                _instance._playWorldScreen.world = world;
+
+                var transition = world.transitionIn;
+                if(transition != null)
+                {
+                    ShowWorldTransitionScreen(transition, () => {
+                        SetActiveScreen(_instance._playWorldScreen);
+                    });
+                }
+                else
+                    SetActiveScreen(_instance._playWorldScreen);
+            }
         }
 
         public static void ReturnToPlayWorldScreen()

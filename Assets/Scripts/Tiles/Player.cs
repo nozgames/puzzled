@@ -621,16 +621,27 @@ namespace Puzzled
                 else
                 {
                     puzzle.MarkCompleted();
-                    GameManager.Stop();
-                    GameManager.UnloadPuzzle();
+                    
+                    static void Done ()
+                    {
+                        GameManager.Stop();
+                        GameManager.UnloadPuzzle();
+                        UIManager.ReturnToPlayWorldScreen();
+                    }
 
+                    var worldTransition = puzzle.world.transitionOut;
                     var transition = puzzle.entry.transitionOut;
                     if (transition != null)
                         UIManager.ShowWorldTransitionScreen(transition, () => {
-                            UIManager.ReturnToPlayWorldScreen();
+                            if (worldTransition != null && puzzle.world.isCompleted)
+                                UIManager.ShowWorldTransitionScreen(worldTransition, Done);
+                            else
+                                Done();
                         });
+                    else if (worldTransition != null && puzzle.world.isCompleted)
+                        UIManager.ShowWorldTransitionScreen(worldTransition, Done);
                     else
-                        UIManager.ReturnToPlayWorldScreen();
+                        Done();
                 }
 
             }).Start(gameObject);

@@ -171,6 +171,19 @@ namespace Puzzled
         public void MarkFirstPlay () => PlayerPrefs.SetInt($"{guid}_PLAYED", 1);
 
         /// <summary>
+        /// Returns true if all puzzles in the world are completed.
+        /// </summary>
+        public bool isCompleted {
+            get {
+                foreach (var puzzle in _puzzles)
+                    if (!puzzle.isCompleted)
+                        return false;
+
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Returns all loaded textures as decals
         /// </summary>
         public IEnumerable<Decal> decals => _textures.Where(t => t.cached != null).Select(t => GetDecal(null, t));
