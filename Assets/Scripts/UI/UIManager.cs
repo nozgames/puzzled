@@ -1,6 +1,7 @@
 ﻿using System;
 using NoZ;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Puzzled.UI
@@ -22,7 +23,7 @@ namespace Puzzled.UI
         [SerializeField] private UITooltipPopup _tooltip = null;
 
         [Header("HUD")]
-        [SerializeField] private GameObject _hud = null;
+        [SerializeField] private UIScreen _hud = null;
         [SerializeField] private GameObject _hudPlayerItem = null;
         [SerializeField] private RawImage _hudPlayerItemIcon = null;
 
@@ -35,6 +36,15 @@ namespace Puzzled.UI
         [SerializeField] private UIEditWorldScreen _editWorldScreen = null;
         [SerializeField] private UIEditWorldPropertiesScreen _editWorldPropertiesScreen = null;
         [SerializeField] private UIWorldTransitionScreen _worldTransitionScreen = null;
+
+        [Header("Input Actions")]
+        [SerializeField] private InputActionReference upAction = null;
+        [SerializeField] private InputActionReference downAction = null;
+        [SerializeField] private InputActionReference leftAction = null;
+        [SerializeField] private InputActionReference rightAction = null;
+        [SerializeField] private InputActionReference confirmAction = null;
+        [SerializeField] private InputActionReference cancelAction = null;
+        [SerializeField] private InputActionReference menuAction = null;
 
         [Header("Popups")]
         [SerializeField] private UINamePopup _namePopup = null;
@@ -69,6 +79,22 @@ namespace Puzzled.UI
         private void Awake()
         {
             _instance = this;
+
+            upAction.action.performed += OnUpAction;
+            downAction.action.performed += OnDownAction;
+            leftAction.action.performed += OnLeftAction;
+            rightAction.action.performed += OnRightAction;
+            confirmAction.action.performed += OnConfirmAction;
+            cancelAction.action.performed += OnCancelAction;
+            menuAction.action.performed += OnMenuAction;
+
+            upAction.action.Enable();
+            downAction.action.Enable();
+            leftAction.action.Enable();
+            rightAction.action.Enable();
+            confirmAction.action.Enable();
+            cancelAction.action.Enable();
+            menuAction.action.Enable();
         }
 
         public static void Initialize ()
@@ -92,6 +118,14 @@ namespace Puzzled.UI
         private void OnDestroy()
         {
             _instance = null;
+
+            upAction.action.Disable();
+            downAction.action.Disable();
+            leftAction.action.Disable();
+            rightAction.action.Disable();
+            confirmAction.action.Disable();
+            cancelAction.action.Disable();
+            menuAction.action.Disable();
         }
 
         private static void SetActiveScreen (UIScreen screen)
@@ -107,6 +141,13 @@ namespace Puzzled.UI
                 _instance.activeScreen.gameObject.SetActive(true);
         }
 
+        public static void TogglePauseScreen()
+        {
+            if ((_instance.activeScreen == _instance._pauseScreen) && _instance._pauseScreen.gameObject.activeInHierarchy)
+                HideMenu();
+            else
+                SetActiveScreen(_instance._pauseScreen);
+        }
 
         public static void ShowPauseScreen() => SetActiveScreen(_instance._pauseScreen);
 
@@ -227,6 +268,66 @@ namespace Puzzled.UI
         public static void ShowConfirmPopup(string message = null, string title = null, string confirm = null, Action onConfirm = null, Action onCancel = null)
         {
             _instance._confirmPopup.Show(message, title, confirm, onConfirm, onCancel);
+        }
+
+        private void OnUpAction(InputAction.CallbackContext obj)
+        {
+            if ((activeScreen == null) || !activeScreen.gameObject.activeInHierarchy)
+                return;
+
+            activeScreen.HandleUpInput();
+        }
+
+        private void OnDownAction(InputAction.CallbackContext obj)
+        {
+            if ((activeScreen == null) || !activeScreen.gameObject.activeInHierarchy)
+                return;
+
+            activeScreen.HandleDownInput();
+        }
+
+        private void OnLeftAction(InputAction.CallbackContext obj)
+        {
+            if ((activeScreen == null) || !activeScreen.gameObject.activeInHierarchy)
+                return;
+
+            activeScreen.HandleLeftInput();
+        }
+
+        private void OnRightAction(InputAction.CallbackContext obj)
+        {
+            if ((activeScreen == null) || !activeScreen.gameObject.activeInHierarchy)
+                return;
+
+            activeScreen.HandleRightInput();
+        }
+
+        private void OnConfirmAction(InputAction.CallbackContext obj)
+        {
+            if ((activeScreen == null) || !activeScreen.gameObject.activeInHierarchy)
+                return;
+
+            activeScreen.HandleConfirmInput();
+        }
+
+        private void OnCancelAction(InputAction.CallbackContext obj)
+        {
+            if ((activeScreen == null) || !activeScreen.gameObject.activeInHierarchy)
+                return;
+
+            activeScreen.HandleCancelInput();
+        }
+
+        private void OnMenuAction(InputAction.CallbackContext obj)
+        {
+            if ((activeScreen != null) && activeScreen.gameObject.activeInHierarchy)
+            {
+                activeScreen.HandleMenuInput();
+                return;
+            }
+
+            if (_hud.gameObject.activeInHierarchy)
+                _hud.HandleMenuInput();
         }
     }
 }

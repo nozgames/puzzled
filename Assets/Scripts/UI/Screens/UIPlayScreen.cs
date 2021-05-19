@@ -9,11 +9,12 @@ namespace Puzzled.UI
 
         [SerializeField] private UIWorldList _worldList = null;
         [SerializeField] private UIWorldListItem _worldListItemPrefab = null;
+        [SerializeField] private ScrollRect _worldListScroll = null;
 
         private void Awake()
         {
             _closeButton.onClick.AddListener(() => {
-                UIManager.ShowMainScreen();
+                ExitScreen();
             });
         }
 
@@ -27,10 +28,49 @@ namespace Puzzled.UI
                 item.worldEntry = entry;
                 item.onDoubleClick.AddListener(() =>
                 {
-                    World world = WorldManager.LoadWorld(entry);
-                    UIManager.EnterPlayWorldScreen(world);
+                    PlayWorld(item);
                 });
             }
+
+            _worldList.Select(0);
+        }
+
+        private void PlayWorld(UIWorldListItem item)
+        {
+            World world = WorldManager.LoadWorld(item.worldEntry);
+            UIManager.EnterPlayWorldScreen(world);
+        }
+
+        private void ExitScreen()
+        {
+            UIManager.ShowMainScreen();
+        }
+
+        public override void HandleCancelInput()
+        {
+            ExitScreen();
+        }
+
+        public override void HandleUpInput()
+        {
+            int newSelection = Mathf.Max(_worldList.selected - 1, 0);
+            _worldList.Select(newSelection);
+
+            _worldListScroll.ScrollTo(_worldList.selectedItem.GetComponent<RectTransform>());
+        }
+
+        public override void HandleDownInput()
+        {
+            int newSelection = Mathf.Min(_worldList.selected + 1, _worldList.itemCount - 1);
+            _worldList.Select(newSelection);
+
+            _worldListScroll.ScrollTo(_worldList.selectedItem.GetComponent<RectTransform>());
+        }
+
+        public override void HandleConfirmInput()
+        {
+            UIWorldListItem item = _worldList.GetItem(_worldList.selected) as UIWorldListItem;
+            PlayWorld(item);
         }
     }
 }

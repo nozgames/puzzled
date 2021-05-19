@@ -7,7 +7,7 @@ using Puzzled.Editor;
 
 namespace Puzzled
 {
-    public class GameManager : MonoBehaviour, KeyboardManager.IKeyboardHandler
+    public class GameManager : MonoBehaviour
     {
         [Header("General")]
         [SerializeField] private float _tick = 0.25f;
@@ -38,7 +38,7 @@ namespace Puzzled
 
         private float elapsed = 0.0f;
 
-        private bool _paused = false;
+        private bool _isPlaying = false;
 
         private bool _gamepad = false;
 
@@ -139,10 +139,10 @@ namespace Puzzled
             }
         }
 
-        public static bool paused {
-            get => _instance._paused;
+        public static bool isPlaying {
+            get => _instance._isPlaying;
             set {
-                _instance._paused = value;
+                _instance._isPlaying = value;
             }
         }
 
@@ -196,7 +196,7 @@ namespace Puzzled
 
         private void Update()
         {
-            if (paused)
+            if (!isPlaying)
                 return;
 
             if (tick <= 0.01f)
@@ -212,7 +212,7 @@ namespace Puzzled
 
         public static void Play ()
         {            
-            paused = false;
+            isPlaying = true;
 
             CameraManager.ShowLetterbox(true);
             CameraManager.ShowGizmos(false);
@@ -223,9 +223,6 @@ namespace Puzzled
             CameraManager.ShowLayer(TileLayer.Static, true);
             CameraManager.ShowLayer(TileLayer.Logic, false);
             CameraManager.ShowLayer(TileLayer.Wall, true);
-
-            if (!UIPuzzleEditor.isOpen)
-                KeyboardManager.Push(_instance);
 
 #if true
             // TODO: this needs to be done in a better place
@@ -262,9 +259,6 @@ namespace Puzzled
             if (puzzle == null)
                 return;
 
-            if (!UIPuzzleEditor.isOpen)
-                KeyboardManager.Pop();
-
             UIManager.ClosePopup();
 
             // TODO: this needs to be done in a better place, like saving the light map with the puzzle
@@ -274,24 +268,12 @@ namespace Puzzled
             texture.Apply();
             Shader.SetGlobalTexture("_void_texture", texture);
 
-            paused = true;
+            isPlaying = false;
         }
 
         private void OnDeviceChanged(InputDevice inputDevice, InputDeviceChange deviceChange)
         {
             _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
-        }
-
-        public void OnKey(KeyCode keyCode)
-        {
-            if(keyCode == KeyCode.Escape)
-            {
-                UIManager.ShowPauseScreen();
-            }
-        }
-
-        public void OnModifiersChanged(bool shift, bool ctrl, bool alt)
-        {            
         }
     }
 }

@@ -42,7 +42,7 @@ namespace Puzzled.UI
             });
 
             _closeButton.onClick.AddListener(() => {
-                UIManager.ShowCreateScreen();
+                ExitScreen();
             });
 
             _puzzleList.onSelectionChanged += (selection) => UpdateButtons();
@@ -163,7 +163,9 @@ namespace Puzzled.UI
 
         private void OnEnable()
         {            
-            UpdateWorld();            
+            UpdateWorld();
+
+            _puzzleList.Select(0);
         }
 
         private void OnDisable()
@@ -186,7 +188,7 @@ namespace Puzzled.UI
                 var item = Instantiate(_puzzleListItemPrefab.gameObject, _puzzleList.transform).GetComponent<UIPuzzleListItem>();
                 item.puzzleEntry = entry;
                 item.onDoubleClick.AddListener(() => {
-                    Editor.UIPuzzleEditor.Initialize(entry);
+                    EditPuzzle(item);
                 });
                 item.onDrawerClick.AddListener((rect) => {
                     Select(entry);
@@ -227,5 +229,42 @@ namespace Puzzled.UI
         }
 
         private void HidePuzzlePopup () => _puzzlePopup.gameObject.SetActive(false);
+
+        private void ExitScreen()
+        {
+            UIManager.ShowCreateScreen();
+        }
+
+        private void EditPuzzle(UIPuzzleListItem item)
+        {
+            Editor.UIPuzzleEditor.Initialize(item.puzzleEntry);
+        }
+
+        public override void HandleCancelInput()
+        {
+            ExitScreen();
+        }
+
+        public override void HandleUpInput()
+        {
+            int newSelection = Mathf.Max(_puzzleList.selected - 1, 0);
+            _puzzleList.Select(newSelection);
+
+            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
+        }
+
+        public override void HandleDownInput()
+        {
+            int newSelection = Mathf.Min(_puzzleList.selected + 1, _puzzleList.itemCount - 1);
+            _puzzleList.Select(newSelection);
+
+            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
+        }
+
+        public override void HandleConfirmInput()
+        {
+            UIPuzzleListItem item = _puzzleList.GetItem(_puzzleList.selected) as UIPuzzleListItem;
+            EditPuzzle(item);
+        }
     }
 }

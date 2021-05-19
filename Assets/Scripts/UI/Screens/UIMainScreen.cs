@@ -32,6 +32,11 @@ namespace Puzzled.UI
             });
         }
 
+        private void OnEnable()
+        {
+            _playButton.Select();
+        }
+
 #if false
         public void OnStoryButton()
         {
@@ -41,4 +46,4 @@ namespace Puzzled.UI
         }
 #endif
     }
-}
+    }

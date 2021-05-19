@@ -26,13 +26,8 @@ namespace Puzzled.UI
         private void Awake()
         {
             _closeButton.onClick.AddListener(() => {
-                if (isDebugging)
-                    UIManager.ShowCreateScreen();
-                else
-                    UIManager.ShowPlayScreen();
+                ExitScreen();
             });
-
-            _puzzleList.onSelectionChanged += (selection) => UpdateButtons();
         }
 
         private string ValidateName (string name)
@@ -48,7 +43,9 @@ namespace Puzzled.UI
 
         private void OnEnable()
         {            
-            UpdateWorld();            
+            UpdateWorld();
+
+            _puzzleList.Select(0);
         }
 
         private void OnDisable()
@@ -75,23 +72,9 @@ namespace Puzzled.UI
 
                 if(!locked)
                     item.onDoubleClick.AddListener(() => {
-                        // Load the puzzle and play
-                        GameManager.LoadPuzzle(item.puzzleEntry);
-                        GameManager.Play();
-
-                        var transitionIn = item.puzzleEntry.transitionIn;
-                        if (transitionIn != null)
-                            UIManager.ShowWorldTransitionScreen(transitionIn, () => UIManager.HideMenu());
-                        else
-                            UIManager.HideMenu();
+                        PlayPuzzle(item);
                     });
             }
-
-            UpdateButtons();
-        }
-
-        private void UpdateButtons()
-        {
         }
 
         private void Select(World.IPuzzleEntry puzzleEntry)
@@ -105,6 +88,55 @@ namespace Puzzled.UI
                     _scrollRect.ScrollTo(puzzleItem .GetComponent<RectTransform>());
                 }
             }
+        }
+
+        private void ExitScreen()
+        {
+            if (isDebugging)
+                UIManager.ShowCreateScreen();
+            else
+                UIManager.ShowPlayScreen();
+        }
+
+        private void PlayPuzzle(UIPuzzleListItem item)
+        {
+            // Load the puzzle and play
+            GameManager.LoadPuzzle(item.puzzleEntry);
+            GameManager.Play();
+
+            var transitionIn = item.puzzleEntry.transitionIn;
+            if (transitionIn != null)
+                UIManager.ShowWorldTransitionScreen(transitionIn, () => UIManager.HideMenu());
+            else
+                UIManager.HideMenu();
+
+        }
+
+        public override void HandleCancelInput()
+        {
+            ExitScreen();
+        }
+
+        public override void HandleUpInput()
+        {
+            int newSelection = Mathf.Max(_puzzleList.selected - 1, 0);
+            _puzzleList.Select(newSelection);
+
+            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
+        }
+
+        public override void HandleDownInput()
+        {
+            int newSelection = Mathf.Min(_puzzleList.selected + 1, _puzzleList.itemCount - 1);
+            _puzzleList.Select(newSelection);
+
+            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
+        }
+
+        public override void HandleConfirmInput()
+        {
+            UIPuzzleListItem item = _puzzleList.GetItem(_puzzleList.selected) as UIPuzzleListItem;
+            PlayPuzzle(item);
         }
     }
 }
