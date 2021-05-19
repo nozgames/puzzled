@@ -137,8 +137,10 @@ namespace Puzzled.UI
             SetActiveScreen(_instance._editWorldPropertiesScreen);
         }
 
-        public static void ShowWorldTransitionScreen()
+        public static void ShowWorldTransitionScreen(World.Transition transition, Action callback)
         {
+            _instance._worldTransitionScreen.transition = transition;
+            _instance._worldTransitionScreen.callback = callback;
             SetActiveScreen(_instance._worldTransitionScreen);
         }
 

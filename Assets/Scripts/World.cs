@@ -66,7 +66,7 @@ namespace Puzzled
             public bool hasColor;
         }
 
-        public struct Transition
+        public class Transition
         {
             public Texture2D texture;
             public string text;
@@ -135,7 +135,7 @@ namespace Puzzled
 
             public Transition transitionIn => world.LoadTransition(serializedTransitionIn);
 
-            public Transition transitionOut => world.LoadTransition(serializedTransitionIn);
+            public Transition transitionOut => world.LoadTransition(serializedTransitionOut);
         };
 
         private const string WorldInfoFilename = "world.info";
@@ -159,6 +159,16 @@ namespace Puzzled
         public bool isModified { get; private set; }
 
         public void SetModified() => isModified = true;
+
+        /// <summary>
+        /// Returns true if this is the first time playing this world
+        /// </summary>
+        public bool isFirstPlay => PlayerPrefs.GetInt($"{guid}_PLAYED") != 0;
+
+        /// <summary>
+        /// Mark this world as being played for the first time
+        /// </summary>
+        public void MarkFirstPlay () => PlayerPrefs.SetInt($"{guid}_PLAYED", 1);
 
         /// <summary>
         /// Returns all loaded textures as decals
@@ -735,6 +745,9 @@ namespace Puzzled
 
         private Transition LoadTransition (SerializedTransition serializedTransition)
         {
+            if (string.IsNullOrEmpty(serializedTransition.text) && string.IsNullOrEmpty(serializedTransition.texture))
+                return null;
+
             var transition = new Transition();
             if(Guid.TryParse(serializedTransition.texture, out var textureGuid))
                 transition.texture = GetTexture(textureGuid);
