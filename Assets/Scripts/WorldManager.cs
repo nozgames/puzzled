@@ -41,6 +41,27 @@ namespace Puzzled
             IWorldArchive OpenArchive();
         }
 
+        private class CachedWorldArchiveWrapper : IWorldArchive
+        {
+            private IWorldArchive _cached;
+
+            public int entryCount => _cached.entryCount;
+
+            public IEnumerable<IWorldArchiveEntry> entries => _cached.entries;
+
+            public bool isDisposed => _cached.isDisposed;
+
+            public bool Contains(string name) => _cached.Contains(name);
+
+            public IWorldArchiveEntry CreateEntry(string name) => _cached.CreateEntry(name);
+
+            public CachedWorldArchiveWrapper(IWorldArchive cached) => _cached = cached;
+
+            public void Dispose()
+            {
+            }
+        }
+
         private class WorldEntry : IWorldEntry
         {
             public string name { get; set; }
@@ -49,12 +70,19 @@ namespace Puzzled
             public bool isEditable => false;
             public bool isInternal => false;
 
+            private IWorldArchive _cachedArchive;
+
             public IWorldArchive OpenArchive()
             {
+                if (_cachedArchive != null && !_cachedArchive.isDisposed)
+                    return new CachedWorldArchiveWrapper(_cachedArchive);
+
                 if (IsZipArchive(path))
-                    return new ZipWorldArchive(File.Open(path, FileMode.OpenOrCreate));
+                    _cachedArchive = new ZipWorldArchive(File.Open(path, FileMode.OpenOrCreate));
                 else
-                    return new DirectoryWorldArchive(path);
+                    _cachedArchive = new DirectoryWorldArchive(path);
+
+                return _cachedArchive;
             }
         }
 

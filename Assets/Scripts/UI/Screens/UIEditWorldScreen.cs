@@ -15,11 +15,15 @@ namespace Puzzled.UI
         [SerializeField] private Button _playPuzzleButton = null;
         [SerializeField] private Button _exportPuzzleButton = null;
         [SerializeField] private Button _worldOptionsButton = null;
+        [SerializeField] private Button _puzzleOptionsButton = null;
         [SerializeField] private ScrollRect _scrollRect = null;
 
         [SerializeField] private UIPuzzleList _puzzleList = null;
         [SerializeField] private UIPuzzleListItem _puzzleListItemPrefab = null;
-        [SerializeField] private TMPro.TextMeshProUGUI _worldNameText = null;       
+        [SerializeField] private TMPro.TextMeshProUGUI _worldNameText = null;
+
+        [SerializeField] private UIInputBlocker _puzzlePopup = null;
+        [SerializeField] private RectTransform _puzzlePopupButtons = null;
 
         private World _world;
 
@@ -33,6 +37,14 @@ namespace Puzzled.UI
 
         private void Awake()
         {
+            _puzzleOptionsButton.onClick.AddListener(() => {
+                //UIManager.ShowPuzzleOptionsScreen();
+            });
+
+            _puzzlePopup.onCancel.AddListener(() => {
+                _puzzlePopup.gameObject.SetActive(false);
+            });
+
             _closeButton.onClick.AddListener(() => {
                 UIManager.ShowCreateScreen();
             });
@@ -45,6 +57,7 @@ namespace Puzzled.UI
             });
 
             _editPuzzleButton.onClick.AddListener(() => {
+                HidePuzzlePopup();
                 Editor.UIPuzzleEditor.Initialize((_puzzleList.selectedItem as UIPuzzleListItem).puzzleEntry);
             });
 
@@ -67,6 +80,7 @@ namespace Puzzled.UI
             });
 
             _renamePuzzleButton.onClick.AddListener(() => {
+                HidePuzzlePopup();
                 var puzzleEntry = (_puzzleList.selectedItem as UIPuzzleListItem).puzzleEntry;
                 UIManager.ShowNamePopup(
                     puzzleEntry.name,
@@ -84,6 +98,7 @@ namespace Puzzled.UI
             });
 
             _duplicatePuzzleButton.onClick.AddListener(() => {
+                HidePuzzlePopup();
                 var puzzleEntry = (_puzzleList.selectedItem as UIPuzzleListItem).puzzleEntry;
                 puzzleEntry = _world.DuplicatePuzzleEntry(puzzleEntry);
                 UpdateWorld();
@@ -109,6 +124,7 @@ namespace Puzzled.UI
             });
 
             _deletePuzzleButton.onClick.AddListener(() => {
+                HidePuzzlePopup();
                 UIManager.ShowConfirmPopup(
                     message: "Are you sure you want to delete this puzzle?",
                     title: "Delete Puzzle",
@@ -176,6 +192,14 @@ namespace Puzzled.UI
                 item.onDoubleClick.AddListener(() => {
                     Editor.UIPuzzleEditor.Initialize(entry);
                 });
+                item.onDrawerClick.AddListener((rect) => {
+                    Select(entry);
+                    _puzzlePopup.gameObject.SetActive(true);
+                    var bounds = rect.TransformBoundsTo(_puzzlePopup.transform);
+                    var prect = _puzzlePopup.GetComponent<RectTransform>().rect;
+                    _puzzlePopupButtons.anchorMin = _puzzlePopupButtons.anchorMax = 
+                    new Vector2(bounds.min.x / prect.width, bounds.center.y / prect.height);
+                });
             }
 
             UpdateButtons();
@@ -205,5 +229,7 @@ namespace Puzzled.UI
                 }
             }
         }
+
+        private void HidePuzzlePopup () => _puzzlePopup.gameObject.SetActive(false);
     }
 }

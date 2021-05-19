@@ -39,6 +39,8 @@ namespace Puzzled
 
         private ZipArchive zipArchive;
 
+        public bool isDisposed { get; private set; }
+
         public int entryCount => zipArchive.Entries.Count;
         public IEnumerable<IWorldArchiveEntry> entries 
         {           
@@ -60,6 +62,7 @@ namespace Puzzled
         public void Dispose()
         {
             zipArchive.Dispose();
+            isDisposed = true;
         }
     }
 

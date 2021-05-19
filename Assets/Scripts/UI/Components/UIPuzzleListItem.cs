@@ -1,13 +1,19 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 namespace Puzzled.UI
 {
     class UIPuzzleListItem : UIListItem
     {
         [SerializeField] private TMPro.TextMeshProUGUI _nameText = null;
-        [SerializeField] private Image _finishedImage = null;
         [SerializeField] private TMPro.TextMeshProUGUI _indexText = null;
+        [SerializeField] private Image _finishedImage = null;
+        [SerializeField] private Image _lockedImage = null;
+
+        [SerializeField] private Button _drawerButton = null;
+
+        public UnityEvent<RectTransform> onDrawerClick;
 
         private World.IPuzzleEntry _puzzleEntry;
 
@@ -17,6 +23,16 @@ namespace Puzzled.UI
                 _puzzleEntry = value;
                 UpdatePuzzleEntry();
             }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            if (_drawerButton != null)
+                _drawerButton.onClick.AddListener(() => {
+                    onDrawerClick?.Invoke(_drawerButton.GetComponent<RectTransform>());
+                });
         }
 
         protected override void OnEnable()
@@ -34,8 +50,11 @@ namespace Puzzled.UI
             if (_nameText != null)
                 _nameText.text = _puzzleEntry.name;
 
+            if (_lockedImage != null)
+                _lockedImage.enabled = _puzzleEntry.isLocked;
+
             if (_finishedImage != null)
-                _finishedImage.enabled = _puzzleEntry.isCompleted;
+                _finishedImage.enabled = _puzzleEntry.isCompleted && (null == _lockedImage || !_lockedImage.enabled);
 
             UpdateIndex();
         }

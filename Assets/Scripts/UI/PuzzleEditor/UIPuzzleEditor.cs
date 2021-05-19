@@ -5,7 +5,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 
-using Puzzled.Editor;
 using Puzzled.UI;
 
 namespace Puzzled.Editor
@@ -158,12 +157,18 @@ namespace Puzzled.Editor
             if (instance == null)
                 return;
 
+            instance._chooseDecalPalette.RemoveImportedDecals();
+            instance._decalPalette.RemoveImportedDecals();
+
             instance._pointerAction.action.performed -= instance.OnPointerMoved;
 
             instance.gameObject.SetActive(false);
             SceneManager.UnloadSceneAsync("Editor");
 
             UIManager.ShowEditWorldScreen();
+
+            if(null != instance._puzzleEntry)
+                instance._puzzleEntry.world.UnloadAllTextures();
         }
 
         private void UpdateMode()
@@ -606,10 +611,20 @@ namespace Puzzled.Editor
                 _cameraTarget = targetPosition;
                 UpdateCamera();
 
-            } catch (Exception e)
+                // Add the world decals to the decal palette.
+                instance._chooseDecalPalette.RemoveImportedDecals();
+                instance._decalPalette.RemoveImportedDecals();
+
+                _puzzleEntry.world.LoadAllTextures();
+                foreach(var decal in _puzzleEntry.world.decals)
+                {
+                    instance._chooseDecalPalette.AddDecal(decal);
+                    instance._decalPalette.AddDecal(decal);
+                }
+            } 
+            catch (Exception e)
             {
                 Debug.LogException(e);
-                //NewPuzzle();
                 return;
             }
 
@@ -972,15 +987,15 @@ namespace Puzzled.Editor
         {
             instance.ShowPopup(instance._importPopup.gameObject);
             instance._importPopup.Import((path) => {
-                // Re-add all of the world decals to the palette
-                //instance._chooseDecalPalette.RemoveImportedDecals();
-
-                var texture = new Texture2D(1, 1);
-                if (!texture.LoadImage(File.ReadAllBytes(path)))
+                var guid = instance._puzzleEntry.world.AddTexture(path, Path.GetFileName(path));
+                if (guid == Guid.Empty)
                     return;
 
-                instance._chooseDecalPalette.AddDecal(new Decal(Guid.NewGuid(), texture));
-                instance._decalPalette.AddDecal(new Decal(Guid.NewGuid(), texture));
+                var texture = instance._puzzleEntry.world.GetTexture(guid);
+                var decal = new Decal(guid, texture);
+
+                instance._chooseDecalPalette.AddDecal(decal);
+                instance._decalPalette.AddDecal(decal);
             });
         }
 

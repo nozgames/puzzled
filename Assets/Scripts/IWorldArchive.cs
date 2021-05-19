@@ -10,6 +10,7 @@ namespace Puzzled
         public IEnumerable<IWorldArchiveEntry> entries { get; }
         public IWorldArchiveEntry CreateEntry(string name);
         public bool Contains(string name);
+        public bool isDisposed { get; }
     }
 
     public interface IWorldArchiveEntry

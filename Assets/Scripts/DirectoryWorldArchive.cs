@@ -53,6 +53,8 @@ namespace Puzzled
             }
         }
 
+        public bool isDisposed => false;
+
         public IWorldArchiveEntry CreateEntry(string name)
         {
             // Look for duplicates before we create a new one
@@ -70,7 +72,6 @@ namespace Puzzled
 
         public void Dispose()
         {
-            // FIXME?
         }
     }
 }

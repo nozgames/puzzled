@@ -61,22 +61,22 @@ namespace Puzzled
             return new Color32(reader.ReadByte(), reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         }
 
-        public static Decal ReadDecal (this BinaryReader reader, int version)
+        public static Decal ReadDecal (this BinaryReader reader, World world, int version)
         {
-            var decal = DatabaseManager.GetDecal(reader.ReadGuid());
-            if (version > 1)
-                decal.flags = (DecalFlags)reader.ReadInt32();
+            var guid = reader.ReadGuid();
+            var decal = Decal.none;
+            if (world != null)
+                decal = world.GetDecal(guid);
 
-            if (version > 7)
-            {
-                decal.rotation = reader.ReadSingle();
-                decal.offset = new Vector2(reader.ReadSingle(), reader.ReadSingle());
-                decal.scale = reader.ReadSingle();
-                decal.smoothness = reader.ReadSingle();
-                decal.color = reader.ReadColor();
-            } else
-                decal.flags |= DecalFlags.AutoColor;
+            if (decal == Decal.none)
+                decal = DatabaseManager.GetDecal(guid);
 
+            decal.flags = (DecalFlags)reader.ReadInt32();
+            decal.rotation = reader.ReadSingle();
+            decal.offset = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+            decal.scale = reader.ReadSingle();
+            decal.smoothness = reader.ReadSingle();
+            decal.color = reader.ReadColor();
             return decal;
         }
     }

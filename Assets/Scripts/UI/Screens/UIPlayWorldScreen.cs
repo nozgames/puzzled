@@ -66,15 +66,21 @@ namespace Puzzled.UI
 
             foreach (var entry in _world.puzzles)
             {
+                var locked = entry.isLocked;
+                if (locked && entry.hideWhenLocked)
+                    continue;
+
                 var item = Instantiate(_puzzleListItemPrefab.gameObject, _puzzleList.transform).GetComponent<UIPuzzleListItem>();
                 item.puzzleEntry = entry;
-                item.onDoubleClick.AddListener(() => {
-                    // Load the puzzle and play
-                    GameManager.LoadPuzzle(item.puzzleEntry);
-                    GameManager.Play();
 
-                    UIManager.HideMenu();
-                });
+                if(!locked)
+                    item.onDoubleClick.AddListener(() => {
+                        // Load the puzzle and play
+                        GameManager.LoadPuzzle(item.puzzleEntry);
+                        GameManager.Play();
+
+                        UIManager.HideMenu();
+                    });
             }
 
             UpdateButtons();

@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 9;
+        private const int FileVersion = 10;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -18,7 +18,6 @@ namespace Puzzled
         [SerializeField] private GameObject _wirePrefab = null;
         [SerializeField] private PuzzleProperties _propertiesPrefab = null;
 
-        private Guid _guid;
         private Player _player;
         private bool _pendingDestroy;
         private bool _started;
@@ -40,11 +39,6 @@ namespace Puzzled
             set => GameManager.puzzle = value;
         }
 
-        /// <summary>
-        /// Return the unique identifier of the puzzle
-        /// </summary>
-        public Guid guid => _guid;
-
         public PuzzleProperties properties {
             get {
                 if (_properties == null)
@@ -63,6 +57,16 @@ namespace Puzzled
         /// Cell the active player is in
         /// </summary>
         public Cell playerCell => player != null ? player.tile.cell : Cell.invalid;
+
+        /// <summary>
+        /// Puzzle entry the world was loaded from
+        /// </summary>
+        public World.IPuzzleEntry entry { get; private set; }
+
+        /// <summary>
+        /// World the puzzle was loaded from
+        /// </summary>
+        public World world => entry?.world;
 
         /// <summary>
         /// Returns true if this puzzle is the current puzzle
@@ -300,12 +304,6 @@ namespace Puzzled
             // Write the current version
             writer.Write(FileVersion);
 
-            // Write the guid
-            if (_guid == Guid.Empty)
-                _guid = Guid.NewGuid();
-
-            writer.Write(_guid);
-
             // Write the tiles
             writer.Write(tiles.Length);
 
@@ -489,76 +487,21 @@ namespace Puzzled
             }
         }
 
-#if false
-        /// <summary>
-        /// Load a puzzle from the given path
-        /// </summary>
-        /// <param name="path">Puzzle path</param>
-        /// <returns>Loaded puzzle or null if the puzzle failed to load</returns>
-        public static Puzzle Load(World.IPuzzleEntry puzzleEntry)
-        {
-            var puzzle = GameManager.InstantiatePuzzle();
-            puzzle.isLoading = true;
-            try
-            {
-                using (var stream = puzzleEntry.Op File.OpenRead(path))
-                using (var reader = new BinaryReader(file))
-                    puzzle.Load(reader);
-
-                puzzle._path = path;
-                puzzle._worldName = Path.GetFileNameWithoutExtension(Path.GetDirectoryName(puzzle._path));
-                puzzle.isLoading = false;
-
-                Debug.Log($"Puzzled Loaded: [{puzzle._tiles.transform.childCount} tiles, {puzzle._wires.transform.childCount} wires]");
-            } 
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                puzzle.Destroy();
-                return null;
-            }
-
-            return puzzle;
-        }
-#endif
-
-        public class Meta
-        {
-            public Guid guid;
-            public int version;
-            public int tileCount;
-            public int wireCount;
-        }
-
-        public static Meta LoadMeta (Stream file)
-        {
-            using var reader = new BinaryReader(file);
-            if (!reader.ReadFourCC('P', 'U', 'Z', 'L'))
-                // TODO: read from json
-                throw new InvalidDataException();
-
-            var meta = new Meta();
-            meta.version = reader.ReadInt32();
-            meta.guid = reader.ReadGuid();
-
-            meta.tileCount = reader.ReadInt32();
-            meta.wireCount = reader.ReadInt32();
-            return meta;
-        }
-
         /// <summary>
         /// Load a puzzle from the file stream
         /// </summary>
         /// <param name="file">Puzzle file stream</param>
         /// <param name="path">Puzzle path</param>
         /// <returns>Loaded puzzle or null if the puzzle failed to load</returns>
-        public static Puzzle Load(Stream file)
+        public static Puzzle Load(World.IPuzzleEntry puzzleEntry, Stream stream)
         {
             var puzzle = GameManager.InstantiatePuzzle();
             puzzle.isLoading = true;
+            puzzle.entry = puzzleEntry;
+
             try
             {
-                using (var reader = new BinaryReader(file))
+                using (var reader = new BinaryReader(stream))
                     puzzle.Load(reader);
 
                 puzzle.isLoading = false;
@@ -588,11 +531,14 @@ namespace Puzzled
 
             // Write the current version
             var version = reader.ReadInt32();
-            _guid = reader.ReadGuid();
+
+            if (version < 10)
+                reader.ReadGuid();
 
             switch (version)
             {
                 case 9:
+                case 10:
                     LoadV9(reader, version);
                     break;
 
@@ -741,14 +687,14 @@ namespace Puzzled
                         }
 
                         case TilePropertyType.Decal:
-                            value = reader.ReadDecal(version);
+                            value = reader.ReadDecal(entry.world, version);
                             break;
 
                         case TilePropertyType.DecalArray:
                         {
                             var decals = new Decal[reader.ReadInt32()];
                             for (int i = 0; i < decals.Length; i++)
-                                decals[i] = reader.ReadDecal(version);
+                                decals[i] = reader.ReadDecal(entry.world, version);
 
                             value = decals;
                             break;
@@ -825,13 +771,12 @@ namespace Puzzled
         /// </summary>
         /// <param name="from">Source stream</param>
         /// <param name="to">Target stream</param>
-        public static void Duplicate (Stream from, Stream to)
+        public static void Duplicate (World.IPuzzleEntry entry, Stream from, Stream to)
         {
-            var puzzle = Load(from);
+            var puzzle = Load(entry, from);
             if (null == puzzle)
                 return;
 
-            puzzle._guid = Guid.NewGuid();
             puzzle.Save(to);
             puzzle.Destroy();
         }
@@ -962,10 +907,6 @@ namespace Puzzled
             return raycast;
         }
 
-        public static bool IsCompleted(Guid guid) => PlayerPrefs.GetInt($"{guid.ToString()}_COMPLETED") != 0;
-
-        public static void MarkCompleted (Guid guid) => PlayerPrefs.SetInt($"{guid.ToString()}_COMPLETED", 1);
-
-        public void MarkCompleted() => MarkCompleted(_guid);
+        public void MarkCompleted() => entry.MarkCompleted();
     }
 }
