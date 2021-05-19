@@ -55,7 +55,7 @@ namespace Puzzled.UI
         private void Awake()
         {
             _closeButton.onClick.AddListener(() => {
-                UIManager.ShowEditWorldScreen();
+                UIManager.ReturnToEditWorldScreen();
             });
         }
 

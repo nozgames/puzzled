@@ -165,7 +165,7 @@ namespace Puzzled.Editor
             instance.gameObject.SetActive(false);
             SceneManager.UnloadSceneAsync("Editor");
 
-            UIManager.ShowEditWorldScreen();
+            UIManager.ReturnToEditWorldScreen();
 
             if(null != instance._puzzleEntry)
                 instance._puzzleEntry.world.UnloadAllTextures();

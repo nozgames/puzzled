@@ -27,7 +27,8 @@ namespace Puzzled.UI
                 item.worldEntry = entry;
                 item.onDoubleClick.AddListener(() =>
                 {
-                    UIManager.ShowPlayWorldScreen(entry);
+                    World world = WorldManager.LoadWorld(entry);
+                    UIManager.EnterPlayWorldScreen(world);
                 });
             }
         }

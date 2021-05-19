@@ -631,7 +631,7 @@ namespace Puzzled
                     puzzle.MarkCompleted();
                     GameManager.Stop();
                     GameManager.UnloadPuzzle();
-                    UIManager.ShowPlayWorldScreen();
+                    UIManager.ReturnToPlayWorldScreen();
                 }
 
             }).Start(gameObject);
