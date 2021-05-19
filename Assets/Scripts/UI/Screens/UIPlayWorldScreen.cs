@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using static Puzzled.WorldManager;
 
 namespace Puzzled.UI
 {
@@ -30,19 +29,11 @@ namespace Puzzled.UI
             });
         }
 
-        private string ValidateName (string name)
-        {
-            if (name.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) != -1)
-                return "Error: Name contains invalid characters";
-
-            if(_world.Contains(name))
-                return "Error: Puzzle with the same name already exists";
-
-            return null;
-        }
-
         private void OnEnable()
-        {            
+        {
+            if (isDebugging)
+                SaveManager.BeginSandbox();
+
             UpdateWorld();
 
             _puzzleList.Select(0);
@@ -93,7 +84,10 @@ namespace Puzzled.UI
         private void ExitScreen()
         {
             if (isDebugging)
+            {
+                SaveManager.EndSandbox();
                 UIManager.ShowCreateScreen();
+            } 
             else
                 UIManager.ShowPlayScreen();
         }

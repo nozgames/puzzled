@@ -16,6 +16,7 @@ namespace Puzzled
         {
             UIPuzzleEditor.Shutdown();
             UIManager.Shutdown();
+            SaveManager.Shutdown();
             DatabaseManager.Shutdown();
             GameManager.Shutdown();
         }
@@ -27,6 +28,7 @@ namespace Puzzled
             UIManager.loading = true;
             DatabaseManager.Initialize();
             GameManager.Initialize();
+            SaveManager.Initialize();
             UIManager.Initialize();
             yield return DatabaseManager.GeneratePreviews();
             yield return new WaitForSeconds(1.0f - (stopwatch.ElapsedMilliseconds / 1000.0f));

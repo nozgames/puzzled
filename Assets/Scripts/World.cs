@@ -78,6 +78,7 @@ namespace Puzzled
             bool isLocked { get; }
             string name { get; }
             World world { get; }
+            Guid guid { get; }
 
             bool hideWhenLocked { get; set; }
 
@@ -118,12 +119,12 @@ namespace Puzzled
             /// <summary>
             /// Returns true if the puzzle has been marked as completed
             /// </summary>
-            public bool isCompleted => PlayerPrefs.GetInt(completedKey) != 0;
+            public bool isCompleted => SaveManager.GetBool(completedKey);
 
             /// <summary>
             /// Mark the puzzle as completed
             /// </summary>
-            public void MarkCompleted() => PlayerPrefs.SetInt(completedKey, 1);
+            public void MarkCompleted() => SaveManager.SetBool(completedKey, true);
 
             /// <summary>
             /// Key used to save completed state in the player preferences
@@ -163,12 +164,12 @@ namespace Puzzled
         /// <summary>
         /// Returns true if this is the first time playing this world
         /// </summary>
-        public bool isFirstPlay => PlayerPrefs.GetInt($"{guid}_PLAYED") != 0;
+        public bool isFirstPlay => !SaveManager.GetBool($"{guid}_PLAYED");
 
         /// <summary>
-        /// Mark this world as being played for the first time
+        /// Mark this world as played 
         /// </summary>
-        public void MarkFirstPlay () => PlayerPrefs.SetInt($"{guid}_PLAYED", 1);
+        public void MarkPlayed () => SaveManager.SetBool($"{guid}_PLAYED", true);
 
         /// <summary>
         /// Returns true if all puzzles in the world are completed.

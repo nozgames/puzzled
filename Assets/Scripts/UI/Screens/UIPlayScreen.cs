@@ -38,6 +38,7 @@ namespace Puzzled.UI
         private void PlayWorld(UIWorldListItem item)
         {
             World world = WorldManager.LoadWorld(item.worldEntry);
+            world.MarkPlayed();
             UIManager.EnterPlayWorldScreen(world);
         }
 
