@@ -767,21 +767,6 @@ namespace Puzzled
         }
 
         /// <summary>
-        /// Duplicate a puzzle from one stream to another
-        /// </summary>
-        /// <param name="from">Source stream</param>
-        /// <param name="to">Target stream</param>
-        public static void Duplicate (World.IPuzzleEntry entry, Stream from, Stream to)
-        {
-            var puzzle = Load(entry, from);
-            if (null == puzzle)
-                return;
-
-            puzzle.Save(to);
-            puzzle.Destroy();
-        }
-
-        /// <summary>
         /// Hide all wires
         /// </summary>
         public void HideWires() => ShowWires(false);

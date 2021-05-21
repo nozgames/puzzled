@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4872641024044638678}
   - component: {fileID: 8093818524819492775}
   - component: {fileID: -2291149781303544618}
+  - component: {fileID: 7537756394851870859}
   - component: {fileID: 5012027597144763067}
   - component: {fileID: 7348668001233074518}
   m_Layer: 0
@@ -83,6 +84,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _instanceId: 32
   _offset: 0.1
+--- !u!114 &7537756394851870859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1979402765203244668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 33
+  _renderer: {fileID: 7670852213737262207}
+  _materialIndex: 0
+  _propertyName: decal
+  _propertyDisplayName: Decal Front
 --- !u!114 &5012027597144763067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -96,10 +114,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _instanceId: 33
-  _renderer: {fileID: 1994496337487020903}
+  _renderer: {fileID: 4106706387994239582}
   _materialIndex: 0
-  _propertyName: 
-  _propertyDisplayName: 
+  _propertyName: decalBack
+  _propertyDisplayName: Decal Back
 --- !u!114 &7348668001233074518
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -156,21 +174,41 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -1660384031183063813, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: db0eab1de8a9d1b42b9fb5ed7935a3a5, type: 2}
     - target: {fileID: 919132149155446097, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
       propertyPath: m_Name
       value: DungeonWall01
       objectReference: {fileID: 0}
+    - target: {fileID: 7356661918407185308, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 490131e72ffbd7d43ac0e06b12852e54, type: 2}
+    - target: {fileID: 8175244947062625432, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 490131e72ffbd7d43ac0e06b12852e54, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
 --- !u!4 &857639989002156040 stripped
@@ -178,8 +216,13 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
   m_PrefabInstance: {fileID: 895172321690116067}
   m_PrefabAsset: {fileID: 0}
---- !u!23 &1994496337487020903 stripped
+--- !u!23 &4106706387994239582 stripped
 MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
+  m_CorrespondingSourceObject: {fileID: 3788013031483555261, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
+  m_PrefabInstance: {fileID: 895172321690116067}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7670852213737262207 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7356661918407185308, guid: 2e5ac4122928c844ca2c05adb1e5fddf, type: 3}
   m_PrefabInstance: {fileID: 895172321690116067}
   m_PrefabAsset: {fileID: 0}

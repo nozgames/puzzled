@@ -324,6 +324,8 @@ namespace Puzzled
                     SetPuzzleEntryIndex(puzzleEntry, index++);
                 }
             }
+
+            isModified = false;
         }
 
         /// <summary>
@@ -361,7 +363,7 @@ namespace Puzzled
 
             try
             {
-                using var metaStream = metaEntry.Open();
+                using var metaStream = metaEntry.OpenRead();
                 using var metaReader = new StreamReader(metaStream);
                 return JsonUtility.FromJson<T>(metaReader.ReadToEnd());
             }
@@ -379,7 +381,7 @@ namespace Puzzled
                 if (null == metaEntry)
                     metaEntry = archive.CreateEntry(metaPath);
 
-                using var metaStream = metaEntry.Open();
+                using var metaStream = metaEntry.OpenWrite();
                 using var metaWriter = new StreamWriter(metaStream);
                 metaWriter.Write(JsonUtility.ToJson(meta, true));
                 return true;
@@ -471,7 +473,7 @@ namespace Puzzled
                     return null;
 
                 // Load the texture
-                using var stream = archiveEntry.Open();
+                using var stream = archiveEntry.OpenRead();
 
                 textureEntry.cached = new Texture2D(1, 1);
                 if (!textureEntry.cached.LoadImage(stream.ReadAllBytes(), false))
@@ -543,7 +545,7 @@ namespace Puzzled
             }
 
             // Copy the texture to the archive
-            using var stream = archiveEntry.Open();
+            using var stream = archiveEntry.OpenWrite();
             var streamWriter = new StreamWriter(stream);
             streamWriter.Write(texture.EncodeToPNG());
 
@@ -579,20 +581,36 @@ namespace Puzzled
             isModified = true;
         }
 
+        private bool CopyArchiveEntry (IWorldArchive archive, string source, string target, bool move = false)
+        {
+            IWorldArchiveEntry sourceEntry = archive.entries.FirstOrDefault(e => e.name == source);
+            if (null == sourceEntry)
+                return false;
+
+            IWorldArchiveEntry targetEntry = archive.CreateEntry(target);
+            if (null == targetEntry)
+                return false;
+
+            using (var sourceStream = sourceEntry.OpenRead())
+            using (var targetStream = targetEntry.OpenWrite())
+                sourceStream.CopyTo(targetStream);
+
+            if(move)
+                sourceEntry.Delete();
+
+            return true;
+        }
+
         public void RenamePuzzleEntry(IPuzzleEntry entry, string name)
         {
             if (entry is PuzzleEntry puzzleEntry)
             {
                 using var archive = _worldEntry.OpenArchive();
-                IWorldArchiveEntry newEntry = archive.CreateEntry($"{name}{PuzzleExtension}");
-                IWorldArchiveEntry oldEntry = archive.entries.FirstOrDefault(e => e.name == puzzleEntry.path);
-                
-                using (var oldFile = oldEntry.Open())
-                using (var newFile = newEntry.Open())
-                    oldFile.CopyTo(newFile);
 
-                puzzleEntry.path = newEntry.name;
-                oldEntry.Delete();
+                if(CopyArchiveEntry(archive, puzzleEntry.path, name + PuzzleExtension, true))
+                    CopyArchiveEntry(archive, puzzleEntry.path + MetaExtension, name + PuzzleExtension + MetaExtension, true);
+
+                puzzleEntry.path = name + PuzzleExtension;
             }
         }
 
@@ -608,16 +626,9 @@ namespace Puzzled
             while(archive.Contains(name + PuzzleExtension))
                 name = name.GetNextName();
 
-            var oldEntry = archive.entries.FirstOrDefault(e => e.name == puzzleEntry.path);
-            var newEntry = archive.CreateEntry(name + PuzzleExtension);
+            CopyArchiveEntry(archive, puzzleEntry.path, name);            
 
-            using (var oldFile = oldEntry.Open())
-            using (var newFile = newEntry.Open())
-            {
-                Puzzle.Duplicate(puzzleEntry, oldFile, newFile);
-            }
-
-            var newPuzzleEntry = new PuzzleEntry(this, newEntry.name, Guid.NewGuid());
+            var newPuzzleEntry = new PuzzleEntry(this, name, Guid.NewGuid());
             _puzzles.Add(newPuzzleEntry);
 
             SavePuzzleMeta(archive, newPuzzleEntry);
@@ -627,15 +638,24 @@ namespace Puzzled
             return newPuzzleEntry;
         }
 
+        private void DeleteArchiveEntry (IWorldArchive archive, string path)
+        {
+            var archiveEntry = archive.entries.FirstOrDefault(e => e.name == path);
+            if (null == archiveEntry)
+                return;
+
+            archiveEntry.Delete();            
+        }
+
         public void DeletePuzzleEntry(IPuzzleEntry entry)
         {
             if (entry is PuzzleEntry puzzleEntry)
             {
                 using var archive = _worldEntry.OpenArchive();
-                var archiveEntry = archive.entries.FirstOrDefault(e => e.name == puzzleEntry.path);
-                archiveEntry.Delete();
-                _puzzles.Remove(puzzleEntry);
+                DeleteArchiveEntry(archive, puzzleEntry.path);
+                DeleteArchiveEntry(archive, puzzleEntry.path + MetaExtension);
 
+                _puzzles.Remove(puzzleEntry);
                 isModified = true;
             }
         }
@@ -650,7 +670,7 @@ namespace Puzzled
 
             var puzzle = GameManager.InstantiatePuzzle();
             var entry = archive.CreateEntry(name);
-            using var stream = entry.Open();
+            using var stream = entry.OpenWrite();
             puzzle.Save(stream);
 
             // Create the puzzle entry
@@ -673,7 +693,7 @@ namespace Puzzled
                 try
                 {
                     using var archive = _worldEntry.OpenArchive();
-                    using var file = archive.entries.FirstOrDefault(e => e.name == puzzleEntry.path).Open();
+                    using var file = archive.entries.FirstOrDefault(e => e.name == puzzleEntry.path).OpenRead();
                     return Puzzle.Load(entry, file);
                 }
                 catch (Exception e)
@@ -697,7 +717,7 @@ namespace Puzzled
 
                     if (archiveEntry != null)
                     {
-                        using var stream = archiveEntry.Open();
+                        using var stream = archiveEntry.OpenRead();
                         using var reader = new StreamReader(stream);
                         meta = JsonUtility.FromJson<PuzzleMeta>(reader.ReadToEnd());
                     } else
@@ -736,7 +756,7 @@ namespace Puzzled
                 {
                     using var archive = _worldEntry.OpenArchive();
                     var archiveEntry = archive.entries.Where(e => e.name == puzzleEntry.path).FirstOrDefault();
-                    using var file = archiveEntry.Open();
+                    using var file = archiveEntry.OpenWrite();
                     puzzle.Save(file);
                 }
                 catch (Exception e)
@@ -780,8 +800,8 @@ namespace Puzzled
             {
                 var targetEntry = target.CreateEntry(sourceEntry.name);
 
-                using var sourceStream = sourceEntry.Open();
-                using var targetStream = targetEntry.Open();
+                using var sourceStream = sourceEntry.OpenRead();
+                using var targetStream = targetEntry.OpenWrite();
                 sourceStream.CopyTo(targetStream);
             }
         }

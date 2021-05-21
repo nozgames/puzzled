@@ -20,9 +20,14 @@ namespace Puzzled
 
             public string name => Path.GetFileName(_path);
             
-            public Stream Open()
+            public Stream OpenRead()
             {
                 return File.Open(_path, FileMode.Open);
+            }
+
+            public Stream OpenWrite()
+            {
+                return File.Open(_path, FileMode.Create);
             }
 
             public void Delete()

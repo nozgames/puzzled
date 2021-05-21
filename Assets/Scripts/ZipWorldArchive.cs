@@ -21,7 +21,12 @@ namespace Puzzled
 
             public string name => entry.Name;
 
-            public Stream Open()
+            public Stream OpenRead()
+            {
+                return entry.Open();
+            }
+
+            public Stream OpenWrite()
             {
                 return entry.Open();
             }

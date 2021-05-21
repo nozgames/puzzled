@@ -17,7 +17,8 @@ namespace Puzzled
     {
         public string name { get; }
 
-        public Stream Open();
+        public Stream OpenRead();
+        public Stream OpenWrite();
         public void Delete();
     }
 }
