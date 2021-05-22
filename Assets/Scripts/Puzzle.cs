@@ -183,7 +183,7 @@ namespace Puzzled
             tile.puzzle = this;
             tile.guid = prefab.guid;
             tile.name = prefab.name;
-            tile.gameObject.SetChildLayers(CameraManager.TileLayerToObjectLayer(tile.layer));
+            tile.gameObject.SetChildLayers(CameraManager.TileLayerToObjectLayer(tile.layer), 0);
 
             // Send awake event before the tile is linked into the grid
             tile.Send(new AwakeEvent());

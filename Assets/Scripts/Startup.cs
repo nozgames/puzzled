@@ -17,6 +17,7 @@ namespace Puzzled
             UIPuzzleEditor.Shutdown();
             UIManager.Shutdown();
             SaveManager.Shutdown();
+            LightmapManager.Shutdown();
             DatabaseManager.Shutdown();
             GameManager.Shutdown();
         }
@@ -28,6 +29,7 @@ namespace Puzzled
             UIManager.loading = true;
             DatabaseManager.Initialize();
             GameManager.Initialize();
+            LightmapManager.Initialize();
             SaveManager.Initialize();
             UIManager.Initialize();
             yield return DatabaseManager.GeneratePreviews();
