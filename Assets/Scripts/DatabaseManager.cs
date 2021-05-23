@@ -181,10 +181,6 @@ namespace Puzzled
         /// </summary>
         private Texture2D GeneratePreview(Tile prefab)
         {
-            var puzzle = GameManager.puzzle;
-
-            GameManager.puzzle = _tilePreviewPuzzle;
-
             var tile = _tilePreviewPuzzle.InstantiateTile(prefab, _tilePreviewPuzzle.grid.LayerToCell(prefab.layer));
             tile.Send(new StartEvent());
             tile.Send(new PreviewStartEvent());
@@ -199,7 +195,7 @@ namespace Puzzled
             }
 
             // Position camera to frame the content
-            var extents = ((max - min));
+            var extents = (max - min);
             var size = Mathf.Max(extents.x, Mathf.Max(extents.y, extents.z));
             var rotation = new Vector3(tile.layer == TileLayer.Logic ? 90 : _tilePreviewCamera.transform.localEulerAngles.x, 0, 0);
             _tilePreviewCamera.transform.localEulerAngles = rotation;
@@ -223,8 +219,6 @@ namespace Puzzled
 
             tile.Destroy();
 
-            GameManager.puzzle = puzzle;
-
             return t;
         }
 
@@ -236,19 +230,8 @@ namespace Puzzled
         /// <summary>
         /// Returns the tile preview for a given tile guid
         /// </summary>
-        public static Texture2D GetPreview(Guid guid)
-        {
-            if (_instance._tilePreviews.TryGetValue(guid, out var preview))
-                return preview;
-
-            var tile = GetTile(guid);
-            if (null == tile)
-                return null;
-
-            preview = _instance.GeneratePreview(tile);
-            _instance._tilePreviews[guid] = preview;
-            return preview;
-        }
+        public static Texture2D GetPreview(Guid guid) => 
+            _instance._tilePreviews.TryGetValue(guid, out var preview) ? preview : null;
 
         /// <summary>
         /// Return the icon for the given port
@@ -275,10 +258,18 @@ namespace Puzzled
 
         public static IEnumerator GeneratePreviews ()
         {
+            var puzzle = GameManager.puzzle;
+            GameManager.puzzle = _instance._tilePreviewPuzzle;
+
+            LightmapManager.SetDefault();
+
             foreach (var tile in _instance._tiles)
             {
+                _instance._tilePreviews[tile.guid] = _instance.GeneratePreview(tile);
                 yield return null;
             }
+
+            GameManager.puzzle = puzzle;
         }
     }
 }

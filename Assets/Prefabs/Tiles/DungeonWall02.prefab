@@ -82,8 +82,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _instanceId: 0
-  _renderer: {fileID: 7834830341359918306}
-  _materialIndex: 0
+  _renderer: {fileID: 2117641833073513466}
+  _materialIndex: 1
   _propertyName: decal
   _propertyDisplayName: Decal Front
 --- !u!114 &2301813773554640288
@@ -99,8 +99,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _instanceId: 0
-  _renderer: {fileID: 4482010092133724867}
-  _materialIndex: 0
+  _renderer: {fileID: 2117641833073513466}
+  _materialIndex: 2
   _propertyName: decalBack
   _propertyDisplayName: Decal Back
 --- !u!114 &7817703542839881192
@@ -178,6 +178,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: c6830e0056c1ec140942c899bb56e456, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: ca302904f07170f468173b5a2e5e48bd, type: 2}
+    - target: {fileID: -7511558181221131132, guid: c6830e0056c1ec140942c899bb56e456, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 875459084ffd6e243af3fec39d2fe96b, type: 2}
+    - target: {fileID: -7511558181221131132, guid: c6830e0056c1ec140942c899bb56e456, type: 3}
+      propertyPath: m_Materials.Array.data[2]
+      value: 
+      objectReference: {fileID: 2100000, guid: b4d8177e8d7931b4e9dc2b3ec885a3ed, type: 2}
     - target: {fileID: -4928620466766067378, guid: c6830e0056c1ec140942c899bb56e456, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
@@ -205,13 +217,8 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c6830e0056c1ec140942c899bb56e456, type: 3}
   m_PrefabInstance: {fileID: 766444983534751614}
   m_PrefabAsset: {fileID: 0}
---- !u!23 &7834830341359918306 stripped
+--- !u!23 &2117641833073513466 stripped
 MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 7356661918407185308, guid: c6830e0056c1ec140942c899bb56e456, type: 3}
-  m_PrefabInstance: {fileID: 766444983534751614}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &4482010092133724867 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 3788013031483555261, guid: c6830e0056c1ec140942c899bb56e456, type: 3}
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: c6830e0056c1ec140942c899bb56e456, type: 3}
   m_PrefabInstance: {fileID: 766444983534751614}
   m_PrefabAsset: {fileID: 0}

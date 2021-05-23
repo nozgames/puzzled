@@ -9,7 +9,7 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: DungeonWall02
   m_Shader: {fileID: -6465566751694194690, guid: 92f0fc1e67747674083e33556bb784ed, type: 3}
-  m_ShaderKeywords: _METALLICSPECGLOSSMAP _NORMALMAP _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+  m_ShaderKeywords: LIGHTMAP _METALLICSPECGLOSSMAP _NORMALMAP _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
     _SPECULAR_SETUP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -111,6 +111,7 @@ Material:
     - DecalRotationBase: 180
     - DecalWidthMax: 0.568
     - DecalWidthMin: 0.084
+    - LIGHTMAP: 1
     - Vector1_8fd43fa9190e4a3d9ee6bd1fe5de8aec: 0
     - _AlphaClip: 0
     - _Blend: 0

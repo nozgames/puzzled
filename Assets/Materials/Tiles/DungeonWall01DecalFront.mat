@@ -85,6 +85,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _decal:
+        m_Texture: {fileID: 2800000, guid: dabd0dd129d7bba42b781734225697b6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _void_texture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -111,6 +115,7 @@ Material:
     - DecalRotationBase: 180
     - DecalWidthMax: 0.568
     - DecalWidthMin: 0.084
+    - LIGHTMAP: 1
     - Vector1_8fd43fa9190e4a3d9ee6bd1fe5de8aec: 0
     - _AlphaClip: 0
     - _Blend: 0
@@ -154,8 +159,8 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0, g: 0, b: 0, a: 1}
     - _decalCenter: {r: 0.38, g: 0.71, b: 0, a: 0}
-    - _decalColor: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 0.7490196}
-    - _decalScale: {r: 0.85, g: 0.85, b: 0, a: 0}
+    - _decalColor: {r: 0.09433959, g: 0.09433959, b: 0.09433959, a: 0.56078434}
+    - _decalScale: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &658318854063356498
 MonoBehaviour:

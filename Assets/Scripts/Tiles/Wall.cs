@@ -113,12 +113,9 @@ namespace Puzzled
             // Check if any wall is a higher priority
             var ownsCorner = _cornerPrefab != null;
 
-            // Smart corners means no corner when the wall is continuing in the same direction.
-            var continuedEdge = cornerWalls.Length == 1 && cornerWalls[0].tile.cell.edge == tile.cell.edge && (cornerWalls[0].tile.guid == tile.guid || cornerWalls[0]._cornerPrefab == _cornerPrefab);
-            if (_smartCorners && continuedEdge)
-                ownsCorner = false;
-
-            if(ownsCorner)
+            GameObject cornerPrefab = null;
+            if (ownsCorner)
+            {
                 foreach (var cornerWall in cornerWalls)
                 {
                     var compare = ComparePriority(cornerWall);
@@ -128,10 +125,21 @@ namespace Puzzled
                         break;
                     }
                 }
+            }
+
+            if (ownsCorner)
+            {
+                // Smart corners means no corner when the wall is continuing in the same direction.
+                var continuedEdge = cornerWalls.Length == 1 && cornerWalls[0].tile.cell.edge == tile.cell.edge && (cornerWalls[0].tile.guid == tile.guid);
+                if (continuedEdge && _separatorPrefab != null)
+                    cornerPrefab = _separatorPrefab;
+                // Place a corner prefab if this isnt a continued edge or smart corners is disabled
+                else if (!continuedEdge || !_smartCorners)
+                    cornerPrefab = _cornerPrefab;
+            }
 
             // Create the corner if needed
-            var corner = ownsCorner ? Instantiate(_cornerPrefab, _rotator) : 
-                ((continuedEdge && _separatorPrefab != null) ? Instantiate(_separatorPrefab, _rotator) : null);
+            var corner = cornerPrefab != null ? Instantiate(cornerPrefab, _rotator) : null;
 
             if (corner != null)
                 corner.transform.localPosition = offset;
