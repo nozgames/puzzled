@@ -5,6 +5,14 @@ namespace Puzzled
 {
     public class UIScreen : MonoBehaviour
     {
+        virtual public bool showNavigationBar => true;
+        virtual public bool showConfirmButton => false;
+        virtual public bool showCancelButton => false;
+        virtual public bool showOptionButton => false;
+        virtual public string confirmButtonText => "Select";
+        virtual public string cancelButtonText => "Back";
+        virtual public string optionButtonText => "Option";
+
         private void OnEnable()
         {
             IEnumerator EndOfFrameCoroutine()

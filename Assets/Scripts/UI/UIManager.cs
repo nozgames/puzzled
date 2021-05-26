@@ -23,6 +23,12 @@ namespace Puzzled.UI
         [SerializeField] private GameObject _loading = null;
         [SerializeField] private UITooltipPopup _tooltip = null;
 
+        [Header("Navigation Bar")]
+        [SerializeField] private GameObject _navigationBar = null;
+        [SerializeField] private UINavigationButton _confirmButton = null;
+        [SerializeField] private UINavigationButton _cancelButton = null;
+        [SerializeField] private UINavigationButton _optionButton = null;
+
         [Header("HUD")]
         [SerializeField] private UIScreen _hud = null;
         [SerializeField] private GameObject _hudPlayerItem = null;
@@ -99,6 +105,10 @@ namespace Puzzled.UI
             cancelAction.action.Enable();
             menuAction.action.Enable();
             optionAction.action.Enable();
+
+            _confirmButton.RegisterButtonClickHandler(() => { activeScreen.HandleConfirmInput(); });
+            _cancelButton.RegisterButtonClickHandler(() => { activeScreen.HandleCancelInput(); });
+            _optionButton.RegisterButtonClickHandler(() => { activeScreen.HandleOptionInput(); });
         }
 
         public static void Initialize ()
@@ -106,8 +116,7 @@ namespace Puzzled.UI
             foreach (var screen in _instance.GetComponentsInChildren<UIScreen>(true))
                 screen.gameObject.SetActive(false);
 
-            _instance.startScreen.gameObject.SetActive(true);
-            _instance.activeScreen = _instance.startScreen;
+            SetActiveScreen(_instance.startScreen);
 
             _instance._cursor = CursorType.ArrowWithMinus;
             cursor = CursorType.Arrow;
@@ -146,6 +155,8 @@ namespace Puzzled.UI
                 EventSystem.current.SetSelectedGameObject(null);
                 _instance.activeScreen.gameObject.SetActive(true);
             }
+
+            _instance.UpdateNavigationBar();
         }
 
         public static void TogglePauseScreen()
@@ -226,6 +237,8 @@ namespace Puzzled.UI
 
             _instance.activeScreen.gameObject.SetActive(false);
             _instance.activeScreen = null;
+
+            _instance.UpdateNavigationBar();
         }
 
         public static UIPopup ShowPopup(UIPopup popupPrefab, Action doneCallback = null)
@@ -358,6 +371,21 @@ namespace Puzzled.UI
 
             if (_hud.gameObject.activeInHierarchy)
                 _hud.HandleOptionInput();
+        }
+
+        private void UpdateNavigationBar()
+        {
+            if ((activeScreen == null) || (!activeScreen.showNavigationBar))
+            {
+                _navigationBar.SetActive(false);
+                return;
+            }
+
+            _navigationBar.SetActive(true);
+
+            _confirmButton.SetState(activeScreen.showConfirmButton, activeScreen.confirmButtonText);
+            _cancelButton.SetState(activeScreen.showCancelButton, activeScreen.cancelButtonText);
+            _optionButton.SetState(activeScreen.showOptionButton, activeScreen.optionButtonText);
         }
     }
 }

@@ -5,19 +5,18 @@ namespace Puzzled.UI
 {
     class UICreateScreen : UIScreen
     {
-        [SerializeField] private Button _closeButton = null;
         [SerializeField] private Button _newWorldButton = null;
 
         [SerializeField] private UIWorldList _worldList = null;
         [SerializeField] private UIWorldListItem _worldListItemPrefab = null;
         [SerializeField] private ScrollRect _worldListScroll = null;
 
+        override public bool showConfirmButton => true;
+        override public string confirmButtonText => "Edit World";
+        override public bool showCancelButton => true;
+
         private void Awake()
         {
-            _closeButton.onClick.AddListener(() => {
-                ExitScreen();
-            });
-
             _newWorldButton.onClick.AddListener(() => {
                 UIManager.ShowNamePopup("", title: "New World", commit: "Create", placeholder: "Enter World Name...",
                     onCommit: (value) => {

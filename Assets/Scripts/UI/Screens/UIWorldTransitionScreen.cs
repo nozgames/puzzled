@@ -21,6 +21,9 @@ namespace Puzzled.UI
             }
         }
 
+        override public bool showConfirmButton => true;
+        override public string confirmButtonText => "Continue";
+
         public void OnPointerDown(PointerEventData eventData)
         {
             HandleContinue();

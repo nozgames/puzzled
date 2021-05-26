@@ -6,12 +6,18 @@ namespace Puzzled.UI
 {
     class UIPlayWorldScreen : UIScreen
     {
-        [SerializeField] private Button _closeButton = null;
         [SerializeField] private ScrollRect _scrollRect = null;
 
         [SerializeField] private UIPuzzleList _puzzleList = null;
         [SerializeField] private UIPuzzleListItem _puzzleListItemPrefab = null;
         [SerializeField] private TMPro.TextMeshProUGUI _worldNameText = null;
+
+        override public bool showConfirmButton => true;
+        override public string confirmButtonText => "Play";
+        override public bool showOptionButton => isDebugging;
+        override public string optionButtonText => "Cheat Puzzle";
+
+        override public bool showCancelButton => true;
 
         private World _world;
         public World world
@@ -24,10 +30,6 @@ namespace Puzzled.UI
 
         private void Awake()
         {
-            _closeButton.onClick.AddListener(() => {
-                ExitScreen();
-            });
-
             _puzzleList.onSelectionChanged += HandleSelectionChange;
         }
 

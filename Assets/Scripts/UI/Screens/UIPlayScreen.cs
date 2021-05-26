@@ -5,18 +5,16 @@ namespace Puzzled.UI
 {
     class UIPlayScreen : UIScreen
     {
-        [SerializeField] private Button _closeButton = null;
-
         [SerializeField] private UIWorldList _worldList = null;
         [SerializeField] private UIWorldListItem _worldListItemPrefab = null;
         [SerializeField] private ScrollRect _worldListScroll = null;
 
+        override public bool showConfirmButton => true;
+        override public string confirmButtonText => "Enter World";
+        override public bool showCancelButton => true;
+
         private void Awake()
         {
-            _closeButton.onClick.AddListener(() => {
-                ExitScreen();
-            });
-
             _worldList.onSelectionChanged += HandleSelectionChange;
         }
 

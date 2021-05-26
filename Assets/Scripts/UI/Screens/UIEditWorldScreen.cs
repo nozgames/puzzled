@@ -6,7 +6,6 @@ namespace Puzzled.UI
 {
     class UIEditWorldScreen : UIScreen
     {
-        [SerializeField] private Button _closeButton = null;
         [SerializeField] private Button _newPuzzleButton = null;
         [SerializeField] private Button _editPuzzleButton = null;
         [SerializeField] private Button _renamePuzzleButton = null;
@@ -25,6 +24,12 @@ namespace Puzzled.UI
         [SerializeField] private UIInputBlocker _puzzlePopup = null;
         [SerializeField] private RectTransform _puzzlePopupButtons = null;
 
+        override public bool showConfirmButton => true;
+        override public string confirmButtonText => "Edit Puzzle";
+        override public bool showCancelButton => true;
+        override public bool showOptionButton => true;
+        override public string optionButtonText => "Test World";
+
         private World _world;
         public World world {
             get => _world;
@@ -39,10 +44,6 @@ namespace Puzzled.UI
 
             _puzzlePopup.onCancel.AddListener(() => {
                 _puzzlePopup.gameObject.SetActive(false);
-            });
-
-            _closeButton.onClick.AddListener(() => {
-                ExitScreen();
             });
 
             _puzzleList.onSelectionChanged += (selection) => UpdateButtons();
