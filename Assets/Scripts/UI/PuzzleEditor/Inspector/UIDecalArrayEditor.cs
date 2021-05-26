@@ -21,7 +21,7 @@ namespace Puzzled.Editor
                 if (index == -1)
                     _items.ClearSelection();
                 else
-                    _items.Select(index);
+                    _items.SelectItem(index);
             }
         }
 
@@ -89,7 +89,7 @@ namespace Puzzled.Editor
             UIPuzzleEditor.instance.ChooseDecal(Decal.none, (decal) => {
                 _decals.Add(decal);
                 AddDecal(decal);
-                _items.Select(_items.itemCount - 1);
+                _items.SelectItem(_items.itemCount - 1);
                 target.SetValue(_decals.ToArray());
             });
         }
@@ -99,14 +99,14 @@ namespace Puzzled.Editor
             var step = _decals[from];
             _decals.RemoveAt(from);
             _decals.Insert(to, step);
-            _items.Select(to);
+            _items.SelectItem(to);
             target.SetValue(_decals.ToArray());
         }
 
         private void RemoveDecal(int index)
         {
             _decals.RemoveAt(_items.selected);
-            _items.Select(Mathf.Min(_items.selected, _items.itemCount - 1));
+            _items.SelectItem(Mathf.Min(_items.selected, _items.itemCount - 1));
             target.SetValue(_decals.ToArray());
         }
 

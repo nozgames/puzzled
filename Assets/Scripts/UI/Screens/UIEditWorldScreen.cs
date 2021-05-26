@@ -103,7 +103,7 @@ namespace Puzzled.UI
 
             _playWorldButton.onClick.AddListener(() =>
             {
-                UIManager.EnterPlayWorldScreen(world, isDebugging : true);
+                TestWorld();
             });
 
             _exportWorldButton.onClick.AddListener(() =>
@@ -137,6 +137,13 @@ namespace Puzzled.UI
                     }
                     );
             });
+
+            _puzzleList.onSelectionChanged += HandleSelectionChange;
+        }
+
+        private void HandleSelectionChange(int obj)
+        {
+            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
         }
 
         private void OnPuzzleListReorderItem(int fromIndex, int toIndex)
@@ -144,7 +151,7 @@ namespace Puzzled.UI
             var puzzleEntry = _world.GetPuzzleEntry(fromIndex);
             _world.SetPuzzleEntryIndex(puzzleEntry, toIndex);
             _puzzleList.ClearSelection();
-            _puzzleList.Select(toIndex);
+            _puzzleList.SelectItem(toIndex);
 
             for (int i = 0; i < _puzzleList.itemCount; i++)
                 (_puzzleList.GetItem(i) as UIPuzzleListItem).UpdateIndex();
@@ -165,7 +172,8 @@ namespace Puzzled.UI
         {            
             UpdateWorld();
 
-            _puzzleList.Select(0);
+            _puzzleList.SelectItem(0);
+            _puzzleList.Select();
         }
 
         private void OnDisable()
@@ -222,7 +230,7 @@ namespace Puzzled.UI
                 var puzzleItem = _puzzleList.GetItem(i) as UIPuzzleListItem;
                 if(puzzleItem.puzzleEntry == puzzleEntry)
                 {
-                    _puzzleList.Select(i);
+                    _puzzleList.SelectItem(i);
                     _scrollRect.ScrollTo(puzzleItem .GetComponent<RectTransform>());
                 }
             }
@@ -240,31 +248,25 @@ namespace Puzzled.UI
             Editor.UIPuzzleEditor.Initialize(item.puzzleEntry);
         }
 
+        private void TestWorld()
+        {
+            UIManager.EnterPlayWorldScreen(world, isDebugging: true);
+        }
+
         public override void HandleCancelInput()
         {
             ExitScreen();
-        }
-
-        public override void HandleUpInput()
-        {
-            int newSelection = Mathf.Max(_puzzleList.selected - 1, 0);
-            _puzzleList.Select(newSelection);
-
-            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
-        }
-
-        public override void HandleDownInput()
-        {
-            int newSelection = Mathf.Min(_puzzleList.selected + 1, _puzzleList.itemCount - 1);
-            _puzzleList.Select(newSelection);
-
-            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
         }
 
         public override void HandleConfirmInput()
         {
             UIPuzzleListItem item = _puzzleList.GetItem(_puzzleList.selected) as UIPuzzleListItem;
             EditPuzzle(item);
+        }
+
+        override public void HandleOptionInput()
+        {
+            TestWorld();
         }
     }
 }

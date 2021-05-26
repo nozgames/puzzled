@@ -1,9 +1,34 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace Puzzled
 {
     public class UIScreen : MonoBehaviour
     {
+        private void OnEnable()
+        {
+            IEnumerator EndOfFrameCoroutine()
+            {
+                yield return new WaitForEndOfFrame();
+                OnScreenActivated();
+            }
+
+            StartCoroutine(EndOfFrameCoroutine());
+        }
+
+        private void OnDisable()
+        {
+            OnScreenDeactivated();
+        }
+
+        virtual protected void OnScreenActivated()
+        {
+        }
+
+        virtual protected void OnScreenDeactivated()
+        {
+        }
+
         virtual public void HandleUpInput()
         {
         }
@@ -29,6 +54,10 @@ namespace Puzzled
         }
 
         virtual public void HandleMenuInput()
+        {
+        }
+
+        virtual public void HandleOptionInput()
         {
         }
     }

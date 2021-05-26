@@ -1,9 +1,11 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace Puzzled.UI
 {
-    class UIList : MonoBehaviour
+    class UIList : Selectable
     {
         public int selected { get; private set; } = -1;
 
@@ -23,7 +25,7 @@ namespace Puzzled.UI
                 selected = transform.childCount - 1;
         }
 
-        public void Select(int index)
+        public void SelectItem(int index)
         {
             if(index < 0)
             {
@@ -63,6 +65,12 @@ namespace Puzzled.UI
         public void OnReorderItem(int from, int to)
         {
             onReorderItem?.Invoke(from, to);
+        }
+
+        override public void OnMove(AxisEventData eventData)
+        {
+            int newSelection = Mathf.Clamp(selected + ((eventData.moveDir == MoveDirection.Down) ? 1 : -1), 0, itemCount - 1);
+            SelectItem(newSelection);
         }
     }
 }

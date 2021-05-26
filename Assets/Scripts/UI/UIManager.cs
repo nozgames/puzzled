@@ -1,6 +1,7 @@
 ﻿using System;
 using NoZ;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -45,6 +46,7 @@ namespace Puzzled.UI
         [SerializeField] private InputActionReference confirmAction = null;
         [SerializeField] private InputActionReference cancelAction = null;
         [SerializeField] private InputActionReference menuAction = null;
+        [SerializeField] private InputActionReference optionAction = null;
 
         [Header("Popups")]
         [SerializeField] private UINamePopup _namePopup = null;
@@ -80,13 +82,14 @@ namespace Puzzled.UI
         {
             _instance = this;
 
-            upAction.action.performed += OnUpAction;
-            downAction.action.performed += OnDownAction;
-            leftAction.action.performed += OnLeftAction;
-            rightAction.action.performed += OnRightAction;
-            confirmAction.action.performed += OnConfirmAction;
-            cancelAction.action.performed += OnCancelAction;
-            menuAction.action.performed += OnMenuAction;
+            upAction.action.started += OnUpAction;
+            downAction.action.started += OnDownAction;
+            leftAction.action.started += OnLeftAction;
+            rightAction.action.started += OnRightAction;
+            confirmAction.action.started += OnConfirmAction;
+            cancelAction.action.started += OnCancelAction;
+            menuAction.action.started += OnMenuAction;
+            optionAction.action.started += OnOptionAction;
 
             upAction.action.Enable();
             downAction.action.Enable();
@@ -95,6 +98,7 @@ namespace Puzzled.UI
             confirmAction.action.Enable();
             cancelAction.action.Enable();
             menuAction.action.Enable();
+            optionAction.action.Enable();
         }
 
         public static void Initialize ()
@@ -138,7 +142,10 @@ namespace Puzzled.UI
 
             _instance.activeScreen = screen;
             if (_instance.activeScreen != null)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
                 _instance.activeScreen.gameObject.SetActive(true);
+            }
         }
 
         public static void TogglePauseScreen()
@@ -218,6 +225,7 @@ namespace Puzzled.UI
                 return;
 
             _instance.activeScreen.gameObject.SetActive(false);
+            _instance.activeScreen = null;
         }
 
         public static UIPopup ShowPopup(UIPopup popupPrefab, Action doneCallback = null)
@@ -338,6 +346,18 @@ namespace Puzzled.UI
 
             if (_hud.gameObject.activeInHierarchy)
                 _hud.HandleMenuInput();
+        }
+
+        private void OnOptionAction(InputAction.CallbackContext obj)
+        {
+            if ((activeScreen != null) && activeScreen.gameObject.activeInHierarchy)
+            {
+                activeScreen.HandleOptionInput();
+                return;
+            }
+
+            if (_hud.gameObject.activeInHierarchy)
+                _hud.HandleOptionInput();
         }
     }
 }

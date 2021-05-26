@@ -71,7 +71,7 @@ namespace Puzzled.UI
                     if (!value)
                         list.ClearSelection();
                     else
-                        list.Select(transform.GetSiblingIndex());
+                        list.SelectItem(transform.GetSiblingIndex());
                 } 
                 else if (value != _selected)
                 {

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -32,7 +33,7 @@ namespace Puzzled.UI
             });
         }
 
-        private void OnEnable()
+        override protected void OnScreenActivated()
         {
             _playButton.Select();
         }

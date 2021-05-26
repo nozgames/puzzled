@@ -437,6 +437,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "Option",
+                    "type": "Button",
+                    "id": "4970a0a9-dddd-4cee-8699-23a7b8005058",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -489,7 +497,7 @@
                     "id": "fd62c898-4b2d-483b-9792-5a9d7617a8fd",
                     "path": "<Gamepad>/leftStick/up",
                     "interactions": "",
-                    "processors": "AxisDeadzone",
+                    "processors": "AxisDeadzone(min=0.9,max=1)",
                     "groups": "",
                     "action": "Up",
                     "isComposite": false,
@@ -522,18 +530,7 @@
                     "id": "f0c0014e-1360-4668-87bb-e15996fed312",
                     "path": "<Gamepad>/leftStick/down",
                     "interactions": "",
-                    "processors": "AxisDeadzone",
-                    "groups": "",
-                    "action": "Down",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d6b9304e-eb30-40f6-afd7-86c6cdf475de",
-                    "path": "<Gamepad>/dpad/down",
-                    "interactions": "",
-                    "processors": "",
+                    "processors": "AxisDeadzone(min=0.9,max=1)",
                     "groups": "",
                     "action": "Down",
                     "isComposite": false,
@@ -635,6 +632,39 @@
                     "processors": "",
                     "groups": "",
                     "action": "Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d6b9304e-eb30-40f6-afd7-86c6cdf475de",
+                    "path": "<Gamepad>/dpad/down",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Down",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "47019709-3ca6-4a06-b8b5-ce58028c8e9a",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Option",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1a19f46e-41f6-47c6-b851-6af1588a36f6",
+                    "path": "<Keyboard>/backquote",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Option",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

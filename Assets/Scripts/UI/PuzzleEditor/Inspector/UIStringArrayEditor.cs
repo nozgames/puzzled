@@ -20,7 +20,7 @@ namespace Puzzled.Editor
                 if (index == -1)
                     _items.ClearSelection();
                 else
-                    _items.Select(index);
+                    _items.SelectItem(index);
             }
         }
 
@@ -44,7 +44,7 @@ namespace Puzzled.Editor
         {
             _values.Add("");
             AddValue("");
-            _items.Select(_items.itemCount - 1);
+            _items.SelectItem(_items.itemCount - 1);
             target.SetValue(_values.ToArray());
         }
 
@@ -52,7 +52,7 @@ namespace Puzzled.Editor
         {
             var index = item.transform.GetSiblingIndex();
             _values.RemoveAt(index);
-            _items.Select(Mathf.Min(index, _values.Count - 1));
+            _items.SelectItem(Mathf.Min(index, _values.Count - 1));
             target.SetValue(_values.ToArray());
         }
 
@@ -72,7 +72,7 @@ namespace Puzzled.Editor
                 _values[editor.transform.GetSiblingIndex()] = v;
                 UIPuzzleEditor.ExecuteCommand(
                     new Commands.TileSetPropertyCommand(option.tile, option.tileProperty.name, _values.ToArray()), false, (command) => {
-                        _items.Select(Mathf.Min(_items.selected, _items.itemCount - 1));
+                        _items.SelectItem(Mathf.Min(_items.selected, _items.itemCount - 1));
                     });
             };
             editor.onDeleted += (v) => RemoveItem(v);
