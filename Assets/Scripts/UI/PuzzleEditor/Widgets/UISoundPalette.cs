@@ -72,7 +72,7 @@ namespace Puzzled.Editor
             foreach (var sound in DatabaseManager.GetSounds())
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UISoundPaletteItem>().sound = sound;
 
-            _list.Select(0);
+            _list.SelectItem(0);
         }
 
         private void UpdateFilter()

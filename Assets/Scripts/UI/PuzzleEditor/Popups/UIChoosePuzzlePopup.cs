@@ -65,7 +65,7 @@ namespace Puzzled.Editor
                 item.data = world;
             }
 
-            _worlds.Select(0);
+            _worlds.SelectItem(0);
         }
 
         private void UpdatePuzzles(string world)
@@ -131,7 +131,7 @@ namespace Puzzled.Editor
                     for(int i=0; i<_worlds.itemCount; i++)
                         if(0 == string.Compare(((UIChoosePuzzlePopupItem)_worlds.GetItem(i)).text, world, false))
                         {
-                            _worlds.Select(i);
+                            _worlds.SelectItem(i);
                             break;
                         }
                 }

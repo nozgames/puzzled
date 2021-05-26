@@ -23,7 +23,7 @@ namespace Puzzled.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            callback?.Invoke();
+            HandleContinue();
         }
 
         private void OnEnable()
@@ -41,6 +41,16 @@ namespace Puzzled.UI
 
             _image.texture = _transition.texture;
             _image.gameObject.SetActive(_image.texture != null);
+        }
+
+        private void HandleContinue()
+        {
+            callback?.Invoke();
+        }
+
+        override public void HandleConfirmInput()
+        {
+            HandleContinue();
         }
     }
 }

@@ -28,14 +28,15 @@ namespace Puzzled.UI
             _quitButton.onClick.AddListener(Quit);
         }
 
-        private void OnEnable()
+        override protected void OnScreenActivated()
         {
             _resumeButton.Select();
             GameManager.busy++;
         }
 
-        private void OnDisable()
+        override protected void OnScreenDeactivated()
         {
+            //_quitButton.Select(); // FIXME: why do we need to do this?
             GameManager.busy--;
         }
 

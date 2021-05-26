@@ -143,7 +143,7 @@ namespace Puzzled.Editor
         private void OnEnable()
         {
             if (_list.selected == -1)
-                _list.Select(0);
+                _list.SelectItem(0);
 
             UpdatePreview();
         }

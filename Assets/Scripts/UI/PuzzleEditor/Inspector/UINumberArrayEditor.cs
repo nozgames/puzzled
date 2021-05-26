@@ -19,7 +19,7 @@ namespace Puzzled.Editor
                 if (index == -1)
                     _items.ClearSelection();
                 else
-                    _items.Select(index);
+                    _items.SelectItem(index);
             }
         }
 
@@ -51,7 +51,7 @@ namespace Puzzled.Editor
         {
             _values.Add(1);
             AddValue(1);
-            _items.Select(_items.itemCount - 1);
+            _items.SelectItem(_items.itemCount - 1);
             target.SetValue(_values.ToArray());
         }
 

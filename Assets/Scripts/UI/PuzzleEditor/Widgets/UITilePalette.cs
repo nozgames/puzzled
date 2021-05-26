@@ -93,7 +93,7 @@ namespace Puzzled.Editor
             foreach (var tile in DatabaseManager.GetTiles().Where(t => !t.info.isHidden))
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UITilePaletteItem>().tile = tile;
 
-            _list.Select(0);
+            _list.SelectItem(0);
 
             UpdateFilter();
 
