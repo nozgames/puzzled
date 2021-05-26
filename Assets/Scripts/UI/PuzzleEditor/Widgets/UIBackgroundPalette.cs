@@ -75,7 +75,7 @@ namespace Puzzled.Editor
             foreach (var background in DatabaseManager.GetBackgrounds())
                 Instantiate(_itemPrefab, _list.transform).GetComponent<UIBackgroundPaletteItem>().background = background;
 
-            _list.Select(0);
+            _list.SelectItem(0);
         }
 
         private void UpdateFilter()

@@ -27,6 +27,13 @@ namespace Puzzled.UI
             _closeButton.onClick.AddListener(() => {
                 ExitScreen();
             });
+
+            _puzzleList.onSelectionChanged += HandleSelectionChange;
+        }
+
+        private void HandleSelectionChange(int obj)
+        {
+            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
         }
 
         private void OnEnable()
@@ -36,7 +43,8 @@ namespace Puzzled.UI
 
             UpdateWorld();
 
-            _puzzleList.Select(0);
+            _puzzleList.SelectItem(0);
+            _puzzleList.Select();
         }
 
         private void OnDisable()
@@ -75,7 +83,7 @@ namespace Puzzled.UI
                 var puzzleItem = _puzzleList.GetItem(i) as UIPuzzleListItem;
                 if(puzzleItem.puzzleEntry == puzzleEntry)
                 {
-                    _puzzleList.Select(i);
+                    _puzzleList.SelectItem(i);
                     _scrollRect.ScrollTo(puzzleItem .GetComponent<RectTransform>());
                 }
             }
@@ -86,7 +94,7 @@ namespace Puzzled.UI
             if (isDebugging)
             {
                 SaveManager.EndSandbox();
-                UIManager.ShowCreateScreen();
+                UIManager.ReturnToEditWorldScreen();
             } 
             else
                 UIManager.ShowPlayScreen();
@@ -111,26 +119,23 @@ namespace Puzzled.UI
             ExitScreen();
         }
 
-        public override void HandleUpInput()
-        {
-            int newSelection = Mathf.Max(_puzzleList.selected - 1, 0);
-            _puzzleList.Select(newSelection);
-
-            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
-        }
-
-        public override void HandleDownInput()
-        {
-            int newSelection = Mathf.Min(_puzzleList.selected + 1, _puzzleList.itemCount - 1);
-            _puzzleList.Select(newSelection);
-
-            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
-        }
-
         public override void HandleConfirmInput()
         {
             UIPuzzleListItem item = _puzzleList.GetItem(_puzzleList.selected) as UIPuzzleListItem;
             PlayPuzzle(item);
+        }
+
+        public override void HandleOptionInput()
+        {
+            if (!isDebugging)
+                return;
+
+            int savedSelection = _puzzleList.selected;
+            UIPuzzleListItem item = _puzzleList.GetItem(savedSelection) as UIPuzzleListItem;
+            item.puzzleEntry.MarkCompleted();
+            UpdateWorld();
+
+            _puzzleList.SelectItem(savedSelection);
         }
     }
 }

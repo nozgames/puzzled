@@ -21,7 +21,7 @@ namespace Puzzled.Editor
 
         public int selection {
             get => _list.selected;
-            set => _list.Select(value);
+            set => _list.SelectItem(value);
         }
 
         public Tile tile {
@@ -46,7 +46,7 @@ namespace Puzzled.Editor
                     step.onDeleted += RemoveState;
                 }
 
-                _list.Select(0);
+                _list.SelectItem(0);
             }
         }
 
@@ -69,7 +69,7 @@ namespace Puzzled.Editor
             onStepMoved?.Invoke(from, to, group);
 
             UIPuzzleEditor.ExecuteCommand(group, false, (c) => {
-                _list.Select(to);
+                _list.SelectItem(to);
             });
         }
 
@@ -90,7 +90,7 @@ namespace Puzzled.Editor
             
             _steps.Add("New Step");
             var step = Instantiate(_stepPrefab, _list.transform).GetComponent<UISequenceStep>();
-            _list.Select(_list.itemCount - 1);
+            _list.SelectItem(_list.itemCount - 1);
             UIPuzzleEditor.ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(_tile, "steps", _steps.ToArray()));
         }
 
@@ -110,7 +110,7 @@ namespace Puzzled.Editor
             onStepRemoved?.Invoke(index, group);
 
             UIPuzzleEditor.ExecuteCommand(group, false, (c) => {
-                _list.Select(Mathf.Min(index, _steps.Count - 1));
+                _list.SelectItem(Mathf.Min(index, _steps.Count - 1));
             });
         }
     }
