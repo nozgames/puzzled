@@ -137,7 +137,8 @@ namespace Puzzled.UI
             item.puzzleEntry.MarkCompleted();
             UpdateWorld();
 
-            _puzzleList.SelectItem(savedSelection);
+            int newSelection = Mathf.Min(savedSelection + 1, _puzzleList.itemCount - 1);
+            _puzzleList.SelectItem(newSelection);
         }
     }
 }

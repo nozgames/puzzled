@@ -11,7 +11,6 @@ namespace Puzzled.UI
         [SerializeField] private Button _renamePuzzleButton = null;
         [SerializeField] private Button _deletePuzzleButton = null;
         [SerializeField] private Button _duplicatePuzzleButton = null;
-        [SerializeField] private Button _playWorldButton = null;
         [SerializeField] private Button _exportWorldButton = null;
         [SerializeField] private Button _worldOptionsButton = null;
         [SerializeField] private Button _puzzleOptionsButton = null;
@@ -100,11 +99,6 @@ namespace Puzzled.UI
                 puzzleEntry = _world.DuplicatePuzzleEntry(puzzleEntry);
                 UpdateWorld();
                 Select(puzzleEntry);
-            });
-
-            _playWorldButton.onClick.AddListener(() =>
-            {
-                TestWorld();
             });
 
             _exportWorldButton.onClick.AddListener(() =>
@@ -220,7 +214,6 @@ namespace Puzzled.UI
             _renamePuzzleButton.interactable = selected;
             _deletePuzzleButton.interactable = selected;
             _worldOptionsButton.interactable = true;
-            _playWorldButton.interactable = true;
             _exportWorldButton.interactable = true;
         }
 
