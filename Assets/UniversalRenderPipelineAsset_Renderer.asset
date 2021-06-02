@@ -94,7 +94,8 @@ MonoBehaviour:
   - {fileID: 1495271297953977600}
   - {fileID: -1870672114667584119}
   - {fileID: -2864223760983381072}
-  m_RendererFeatureMap: 005562bd5245c0148985027a9f090ae6b02b5a29aa3b40d8
+  - {fileID: 2654169210745864892}
+  m_RendererFeatureMap: 005562bd5245c0148985027a9f090ae6b02b5a29aa3b40d8bc4249b4d580d524
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   shaders:
@@ -143,3 +144,22 @@ MonoBehaviour:
     DirectLightingStrength: 0.387
     Radius: 0.2
     SampleCount: 8
+--- !u!114 &2654169210745864892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4641969ffd302f4ba2bcf2d83f19cb5, type: 3}
+  m_Name: CustomPostProc
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  settings:
+    renderersAfterOpaqueAndSky: []
+    renderersBeforePostProcess: []
+    renderersAfterPostProcess:
+    - BlackAndWhiteEffectRenderer, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
