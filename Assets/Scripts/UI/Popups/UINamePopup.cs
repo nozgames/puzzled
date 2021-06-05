@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Puzzled.UI
 {
-    class UINamePopup : MonoBehaviour
+    class UINamePopup : UIScreen
     {
         [SerializeField] private TMPro.TextMeshProUGUI _titleText = null;
         [SerializeField] private TMPro.TMP_InputField _nameField = null;
@@ -62,10 +62,7 @@ namespace Puzzled.UI
                 Commit(value);
             });
 
-            _closeButton.onClick.AddListener(() => {
-                gameObject.SetActive(false);
-                _onCancel?.Invoke();
-            });
+            _closeButton.onClick.AddListener(HandleCancelInput);
         }
 
         private void Commit(string value)
@@ -87,7 +84,7 @@ namespace Puzzled.UI
             _commitButton.interactable = value.Length > 0;
         }
 
-        public void Show (string value = null, string title = null, string commit = null, string placeholder = null, Func<string, string> onCommit = null, Action onCancel = null)
+        public void Initialize (string value = null, string title = null, string commit = null, string placeholder = null, Func<string, string> onCommit = null, Action onCancel = null)
         {
             this.value = value;
             this.commit = commit;
@@ -99,6 +96,12 @@ namespace Puzzled.UI
             UpdateCommitButton();
             gameObject.SetActive(true);
             _nameField.Select();
+        }
+
+        public override void HandleCancelInput()
+        {
+            UIManager.HidePopup();
+            _onCancel?.Invoke();
         }
     }
 }

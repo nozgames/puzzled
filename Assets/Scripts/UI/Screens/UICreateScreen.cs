@@ -57,7 +57,6 @@ namespace Puzzled.UI
             }
 
             _worldList.SelectItem(0);
-            _worldList.Select();
         }
 
         private void EditWorld(UIWorldListItem item)

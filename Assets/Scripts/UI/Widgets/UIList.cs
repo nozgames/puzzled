@@ -7,9 +7,9 @@ namespace Puzzled.UI
 {
     class UIList : Selectable
     {
-        public int selected { get; private set; } = -1;
+        public int selected => GetSelectedIndex();
 
-        public UIListItem selectedItem => selected == -1 ? null : GetItem(selected);
+        public UIListItem selectedItem => GetItem(GetSelectedIndex());
 
         public int itemCount => transform.childCount;
 
@@ -19,10 +19,15 @@ namespace Puzzled.UI
 
         public event Action<int,int> onReorderItem;
 
-        private void OnTransformChildrenChanged()
+        private int GetSelectedIndex ()
         {
-            if (selected >= transform.childCount)
-                selected = transform.childCount - 1;
+            for(int i=0; i<transform.childCount; i++)
+            {
+                if (transform.GetChild(i).GetComponent<UIListItem>().selected)
+                    return i;
+            }
+
+            return -1;
         }
 
         public void SelectItem(int index)
@@ -40,12 +45,6 @@ namespace Puzzled.UI
         {
             if (selected == index)
                 return;
-
-            var old = selected;
-            selected = index;
-
-            if (old >= 0)
-                GetItem(old).selected = false;
 
             if(index >=0)
                 GetItem(index).selected = true;

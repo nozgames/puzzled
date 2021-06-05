@@ -11,6 +11,8 @@ namespace Puzzled.UI
 
         private World.Transition _transition;
 
+        public override bool showNavigationBar => false;
+
         public System.Action callback { get; set; }
 
         public World.Transition transition {
@@ -52,6 +54,11 @@ namespace Puzzled.UI
         }
 
         override public void HandleConfirmInput()
+        {
+            HandleContinue();
+        }
+
+        public override void HandleCancelInput()
         {
             HandleContinue();
         }

@@ -51,10 +51,10 @@ namespace Puzzled.UI
                 _nameText.text = _puzzleEntry.name;
 
             if (_lockedImage != null)
-                _lockedImage.enabled = _puzzleEntry.isLocked;
+                _lockedImage.gameObject.SetActive(_puzzleEntry.isLocked);
 
             if (_finishedImage != null)
-                _finishedImage.enabled = _puzzleEntry.isCompleted && (null == _lockedImage || !_lockedImage.enabled);
+                _finishedImage.gameObject.SetActive(_puzzleEntry.isCompleted && (null == _lockedImage || !_lockedImage.gameObject.activeSelf));
 
             UpdateIndex();
         }

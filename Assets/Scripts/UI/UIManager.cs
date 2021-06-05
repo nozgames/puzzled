@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using NoZ;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -66,6 +67,8 @@ namespace Puzzled.UI
 
         private CursorType _cursor = CursorType.Arrow;
 
+        public List<UIScreen> _activeScreens = new List<UIScreen>();
+
         public static CursorType cursor {
             get => _instance._cursor;
             set {
@@ -80,7 +83,10 @@ namespace Puzzled.UI
 
         public static UIManager _instance { get; private set; }
 
-        public UIScreen activeScreen { get; private set; }
+        /// <summary>
+        /// Return the current active screen
+        /// </summary>
+        public UIScreen activeScreen => _activeScreens.Count > 0 ? _activeScreens[_activeScreens.Count-1] : null;
 
         public static bool loading {
             get => _instance._loading.activeSelf;
@@ -109,10 +115,10 @@ namespace Puzzled.UI
             menuAction.action.Enable();
             optionAction.action.Enable();
 
-            _gamepadConfirmButton.RegisterButtonClickHandler(() => { activeScreen.HandleConfirmInput(); });
-            _gamepadCancelButton.RegisterButtonClickHandler(() => { activeScreen.HandleCancelInput(); });
-            _gamepadOptionButton.RegisterButtonClickHandler(() => { activeScreen.HandleOptionInput(); });
-            _mouseCancelButton.RegisterButtonClickHandler(() => { activeScreen.HandleCancelInput(); });
+            _gamepadConfirmButton.RegisterButtonClickHandler(() => { OnConfirmAction(new InputAction.CallbackContext()); });
+            _gamepadCancelButton.RegisterButtonClickHandler(() => { OnCancelAction(new InputAction.CallbackContext()); });
+            _gamepadOptionButton.RegisterButtonClickHandler(() => { OnOptionAction(new InputAction.CallbackContext()); });
+            _mouseCancelButton.RegisterButtonClickHandler(() => { OnCancelAction(new InputAction.CallbackContext()); });
         }
 
         public static void Initialize ()
@@ -120,7 +126,7 @@ namespace Puzzled.UI
             foreach (var screen in _instance.GetComponentsInChildren<UIScreen>(true))
                 screen.gameObject.SetActive(false);
 
-            SetActiveScreen(_instance.startScreen);
+            _instance.SetScreen(_instance.startScreen);
 
             _instance._cursor = CursorType.ArrowWithMinus;
             cursor = CursorType.Arrow;
@@ -147,20 +153,37 @@ namespace Puzzled.UI
             menuAction.action.Disable();
         }
 
-        private static void SetActiveScreen (UIScreen screen)
+        private void SetScreen (UIScreen screen)
         {
-            if(_instance.activeScreen != null)
-            {
-                _instance.activeScreen.gameObject.SetActive(false);
-                _instance.activeScreen = null;
-            }
+            HideMenu();
 
-            _instance.activeScreen = screen;
-            if (_instance.activeScreen != null)
-            {
-                EventSystem.current.SetSelectedGameObject(null);
-                _instance.activeScreen.gameObject.SetActive(true);
-            }
+            if (null == screen)
+                return;
+
+            PushScreen(screen);
+        }
+
+        private void PushScreen (UIScreen screen)
+        {
+            if (null == screen)
+                return;
+
+            _activeScreens.Add(screen);
+
+            EventSystem.current.SetSelectedGameObject(null);
+            screen.gameObject.SetActive(true);
+
+            _instance.UpdateNavigationBar();
+        }
+
+        private void PopScreen ()
+        {
+            if (_activeScreens.Count == 0)
+                return;
+
+            var screen = _activeScreens[_activeScreens.Count - 1];
+            _activeScreens.RemoveAt(_activeScreens.Count - 1);
+            screen.gameObject.SetActive(false);
 
             _instance.UpdateNavigationBar();
         }
@@ -170,16 +193,16 @@ namespace Puzzled.UI
             if ((_instance.activeScreen == _instance._pauseScreen) && _instance._pauseScreen.gameObject.activeInHierarchy)
                 HideMenu();
             else
-                SetActiveScreen(_instance._pauseScreen);
+                _instance.SetScreen(_instance._pauseScreen);
         }
 
-        public static void ShowPauseScreen() => SetActiveScreen(_instance._pauseScreen);
+        public static void ShowPauseScreen() => _instance.SetScreen(_instance._pauseScreen);
 
-        public static void ShowMainScreen() => SetActiveScreen(_instance._mainScreen);
+        public static void ShowMainScreen() => _instance.SetScreen(_instance._mainScreen);
 
-        public static void ShowCreateScreen() => SetActiveScreen(_instance._createScreen);
+        public static void ShowCreateScreen() => _instance.SetScreen(_instance._createScreen);
 
-        public static void ShowPlayScreen() => SetActiveScreen(_instance._playScreen);
+        public static void ShowPlayScreen() => _instance.SetScreen(_instance._playScreen);
 
         public static void EnterPlayWorldScreen(World world, bool isDebugging = false)
         {
@@ -193,11 +216,11 @@ namespace Puzzled.UI
                 if(transition != null)
                 {
                     ShowWorldTransitionScreen(transition, () => {
-                        SetActiveScreen(_instance._playWorldScreen);
+                        _instance.SetScreen(_instance._playWorldScreen);
                     });
                 }
                 else
-                    SetActiveScreen(_instance._playWorldScreen);
+                    _instance.SetScreen(_instance._playWorldScreen);
             }
         }
 
@@ -205,7 +228,7 @@ namespace Puzzled.UI
         {
             Debug.Assert(_instance._playWorldScreen.world != null);
 
-            SetActiveScreen(_instance._playWorldScreen);
+            _instance.SetScreen(_instance._playWorldScreen);
         }
 
         public static void EnterEditWorldScreen(World world)
@@ -213,36 +236,36 @@ namespace Puzzled.UI
             if (world != null)
                 _instance._editWorldScreen.world = world;
 
-            SetActiveScreen(_instance._editWorldScreen);
+            _instance.SetScreen(_instance._editWorldScreen);
         }
 
         public static void ReturnToEditWorldScreen()
         {
             Debug.Assert(_instance._editWorldScreen.world != null);
 
-            SetActiveScreen(_instance._editWorldScreen);
+            _instance.SetScreen(_instance._editWorldScreen);
         }
 
         public static void ShowEditWorldPropertiesScreen(World _world)
         {
             _instance._editWorldPropertiesScreen.world = _world;
-            SetActiveScreen(_instance._editWorldPropertiesScreen);
+            _instance.SetScreen(_instance._editWorldPropertiesScreen);
         }
 
         public static void ShowWorldTransitionScreen(World.Transition transition, Action callback)
         {
             _instance._worldTransitionScreen.transition = transition;
             _instance._worldTransitionScreen.callback = callback;
-            SetActiveScreen(_instance._worldTransitionScreen);
+            _instance.SetScreen(_instance._worldTransitionScreen);
         }
 
         public static void HideMenu ()
         {
-            if (null == _instance.activeScreen)
-                return;
-
-            _instance.activeScreen.gameObject.SetActive(false);
-            _instance.activeScreen = null;
+            for (int i = _instance._activeScreens.Count - 1; i >= 0; --i)
+            {
+                _instance._activeScreens[i].gameObject.SetActive(false);
+                _instance._activeScreens.RemoveAt(i);
+            }
 
             _instance.UpdateNavigationBar();
         }
@@ -297,9 +320,12 @@ namespace Puzzled.UI
             }
         }
 
+        public static void HidePopup() => _instance.PopScreen();
+
         public static void ShowNamePopup (string value = null, string title = null, string commit = null, string placeholder = null, Func<string,string> onCommit = null, Action onCancel = null)
         {
-            _instance._namePopup.Show(value, title, commit, placeholder, onCommit, onCancel);
+            _instance._namePopup.Initialize(value, title, commit, placeholder, onCommit, onCancel);
+            _instance.PushScreen(_instance._namePopup);            
         }
 
         public static void ShowConfirmPopup(string message = null, string title = null, string confirm = null, string cancel = null, Action onConfirm = null, Action onCancel = null)

@@ -46,7 +46,6 @@ namespace Puzzled.UI
             UpdateWorld();
 
             _puzzleList.SelectItem(0);
-            _puzzleList.Select();
         }
 
         private void OnDisable()
@@ -71,10 +70,12 @@ namespace Puzzled.UI
                 var item = Instantiate(_puzzleListItemPrefab.gameObject, _puzzleList.transform).GetComponent<UIPuzzleListItem>();
                 item.puzzleEntry = entry;
 
-                if(!locked)
+                if (!locked)
                     item.onDoubleClick.AddListener(() => {
                         PlayPuzzle(item);
                     });
+                else
+                    item.interactable = false;
             }
         }
 
