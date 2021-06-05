@@ -6,7 +6,7 @@ namespace Puzzled
     public class LevelExit : TileComponent
     {
         [SerializeField] private GameObject _visuals = null;
-        [SerializeField] private AudioClip _pickupSound = null;
+        //[SerializeField] private AudioClip _pickupSound = null;
 
         [ActorEventHandler]
         private void OnUse(UseEvent evt)

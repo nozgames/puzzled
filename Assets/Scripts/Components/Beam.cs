@@ -1,6 +1,4 @@
 using UnityEngine;
-using NoZ;
-using System.Collections.Generic;
 using UnityEngine.VFX;
 
 namespace Puzzled
@@ -17,13 +15,8 @@ namespace Puzzled
         NorthWest
     }
 
-    public class Beam : TileComponent
+    public class Beam : MonoBehaviour
     {
-        private class SharedData
-        {
-            public List<Beam> beams = new List<Beam>();
-        }
-
         private static readonly Vector2Int[] _dirs = {
             new Vector2Int(0,1),   // North
             new Vector2Int(1,1),   // NorthEast
@@ -37,87 +30,30 @@ namespace Puzzled
 
         [SerializeField] private LineRenderer _line = null;
         [SerializeField] private VisualEffect _impactFX = null;
+        [SerializeField] private float _maxLength = 100;
+        [SerializeField] private LayerMask _collisionMask = (LayerMask)0x7FFFFFFF;
 
         private BeamDirection _direction;
-        private int _length = 1;
         private BeamTerminal _terminal = null;
-        private bool _powered = false;
+        private BeamEmitter _emitter = null;
 
         public BeamDirection direction {
             get => _direction;
             set {
-                if (_direction == value)
-                    return;
                 _direction = value;
-                UpdateBeam();
+                //Update();
             }
+        }
+
+        public BeamEmitter emitter {
+            get => _emitter;
+            set => _emitter = value;
         }
 
         public static Quaternion GetRotation (BeamDirection dir) =>
             Quaternion.LookRotation(_dirs[(int)dir].ToVector3Int().ToVector3().XYToXZ().normalized, Vector3.up);
 
-        public bool isPowered {
-            get => _powered;
-            set {
-                if (_powered == value)
-                    return;
-
-                _powered = value;
-                if(_terminal != null)
-                {
-                    _terminal.Disconnect(this);
-                    _terminal.Connect(this);
-                }
-            }
-        }
-
-        public int length {
-            get => _length;
-            set {
-                _length = Mathf.Clamp(value, 1, 100);
-                UpdateBeam();
-            }
-        }
-
-        [ActorEventHandler]
-        private void OnAwakeEvent(AwakeEvent evt)
-        {
-            _line.positionCount = 2;
-            _line.gameObject.SetActive(false);
-        }
-
-        [ActorEventHandler]
-        private void OnStart(StartEvent evt) => UpdateBeam();
-
-        [ActorEventHandler]
-        private void OnCellChangeEvent(CellChangedEvent evt) => UpdateBeam();
-
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-
-            var shared = GetSharedData<SharedData>();
-            if(null == shared)
-            {
-                shared = new SharedData();
-                SetSharedData(shared);
-            }
-
-            shared.beams.Add(this);
-
-            UpdateBeam();
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-
-            var shared = GetSharedData<SharedData>();
-            if (null != shared)
-                shared.beams.Remove(this);
-
-            Disconnect();
-        }
+        private void OnDisable() => Disconnect();
 
         public void Disconnect()
         {
@@ -129,60 +65,61 @@ namespace Puzzled
             terminal.Disconnect(this);
         }
 
-        private void UpdateBeam ()
+        private void Connect (BeamTerminal terminal)
         {
-            if (!isActiveAndEnabled)
+            if (null == terminal)
+            {
+                Disconnect();
+                return;
+            }
+
+            if (_terminal == terminal)
                 return;
 
-            var dir = _dirs[(int)_direction];
-            var raycast = puzzle.RayCast(tile.cell + dir, dir, _length);
-            var target = tile.cell + dir * _length;
-            if (null != raycast.hit)
-                target = raycast.hit.cell;
+            if (_terminal != null)
+                Disconnect();
 
-            var length = tile.cell.DistanceTo(target);
+            // Only one beam wins for any given direction on a terminal
+            if (terminal.GetBeam(direction) != null)
+                return;
+
+            _terminal = terminal;
+            _terminal.Connect(this);
+        }
+
+        public void Update()         
+        {
+            var dir = _dirs[(int)_direction].ToVector3Int().ToVector3().XYToXZ().normalized;
+            var length = _maxLength;
+
+            // Ray-cast the beam to see what it is currently hitting
+            if (Physics.Raycast(transform.position, dir, out var hit, _maxLength, _collisionMask))
+            {
+                length = hit.distance;
+
+                Connect(hit.collider.GetComponentInParent<BeamTerminal>());
+
+                if (_impactFX != null)
+                {
+                    _impactFX.transform.position = hit.point;
+                    _impactFX.transform.forward = hit.normal;
+                    _impactFX.gameObject.SetActive(true);
+                }
+            }
+            else 
+            {
+                Disconnect();
+
+                _impactFX.gameObject.SetActive(false);
+            }
+
             if (length == 0)
                 return;
 
-            var terminal = raycast.hit != null ? raycast.hit.GetComponent<BeamTerminal>() : null;
-            if (terminal != _terminal)
-                Disconnect();
-
-            if (null != terminal)
-            {
-                _terminal = terminal;
-                terminal.Connect(this);
-            }
-
             _line.gameObject.SetActive(true);
-            _line.positionCount = 1 + length;
-            _line.SetPosition(0, tile.transform.position + Vector3.up * _line.transform.localPosition.y);
-
-            var source = _line.GetPosition(0);
-            var dirv = dir.ToVector3Int().ToVector3().XYToXZ();
-            for (int i = 0; i < length - 1; i++)
-                _line.SetPosition(i + 1, source + dirv * (i + 1));
-
-            _line.SetPosition(_line.positionCount - 1, puzzle.grid.CellToWorldBounds(target).center + Vector3.up * _line.transform.localPosition.y - dirv * raycast.offset);
-
-            if (_impactFX != null)
-            {
-                _impactFX.transform.rotation = Quaternion.LookRotation(_line.GetPosition(0) - _line.GetPosition(1), Vector3.up);
-                _impactFX.transform.position = _line.GetPosition(_line.positionCount - 1);
-                _impactFX.gameObject.SetActive(raycast.hit != null);
-            }
-        }
-
-        public static void Refresh(Puzzle puzzle) => Refresh(puzzle, Cell.invalid);
-
-        public static void Refresh (Puzzle puzzle, Cell cell)
-        {
-            var shared = puzzle.GetSharedComponentData<SharedData>(typeof(Beam));
-            if (null == shared)
-                return;
-
-            for(int i=0; i<shared.beams.Count; i++)
-                shared.beams[i].UpdateBeam();
+            _line.positionCount = 2;
+            _line.SetPosition(0, transform.position);
+            _line.SetPosition(1, transform.position + dir * length);
         }
     }
 }

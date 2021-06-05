@@ -5,8 +5,6 @@ namespace Puzzled
 {
     public class Floor : TileComponent
     {
-        [SerializeField] private Transform _visual = null;
-
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => UpdateVisuals();
 

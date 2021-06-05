@@ -6,7 +6,7 @@ namespace Puzzled.UI
     class UIPauseScreen : UIScreen
     {
         [SerializeField] private Button _resumeButton = null;
-        [SerializeField] private Button _optionsButton = null;
+        //[SerializeField] private Button _optionsButton = null;
         [SerializeField] private Button _quitButton = null;
 
         private void Quit()

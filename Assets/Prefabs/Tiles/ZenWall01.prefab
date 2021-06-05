@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 4980225229906135306}
   - component: {fileID: 4872641024044638678}
   - component: {fileID: 8093818524819492775}
-  - component: {fileID: -2291149781303544618}
   m_Layer: 0
   m_Name: ZenWall01
   m_TagString: Untagged
@@ -59,25 +58,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 640988266fff0ea468569419c09fd86e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _rotator: {fileID: 5336390973434207493}
   _cornerPrefab: {fileID: 1979402765203244668, guid: 0ffb66916f02361498a67ad1951e5f96, type: 3}
+  _separatorPrefab: {fileID: 0}
   _cornerPriority: 3
   _smartCorners: 0
   _allowWallMounts: 1
   _thickness: 0.025
---- !u!114 &-2291149781303544618
-MonoBehaviour:
+--- !u!65 &6691419922587848374
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1979402765203244668}
+  m_GameObject: {fileID: 3129120689852022935}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b69f6ff003d33d64fac6763b3ddcb101, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _offset: 0.1
+  serializedVersion: 2
+  m_Size: {x: 0.054632, y: 1, z: 1}
+  m_Center: {x: 9.313226e-10, y: 0, z: 0.5}
 --- !u!1001 &5585609419587648238
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -138,5 +139,10 @@ PrefabInstance:
 --- !u!4 &5336390973434207493 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0003ee29c5856fe4ebd2d620d6e0bc20, type: 3}
+  m_PrefabInstance: {fileID: 5585609419587648238}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3129120689852022935 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -1807970279642858887, guid: 0003ee29c5856fe4ebd2d620d6e0bc20, type: 3}
   m_PrefabInstance: {fileID: 5585609419587648238}
   m_PrefabAsset: {fileID: 0}

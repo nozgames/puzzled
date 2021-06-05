@@ -9,7 +9,6 @@ namespace Puzzled.Editor
     public class UIImportPopup : MonoBehaviour
     {
         [SerializeField] private TMPro.TextMeshProUGUI _title = null;
-        [SerializeField] private UIListItem _itemPrefab = null;
         [SerializeField] private Button _okButton = null;
         [SerializeField] private Button _cancelButton = null;
         [SerializeField] private TMPro.TMP_InputField _path = null;

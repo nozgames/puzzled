@@ -61,7 +61,7 @@ namespace Puzzled
 
         [Header("Background")]
         [SerializeField] private Background _defaultBackground = null;
-        [SerializeField] private MeshRenderer _fog = null;
+        //[SerializeField] private MeshRenderer _fog = null;
 
         private static CameraManager _instance = null;
 

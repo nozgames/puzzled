@@ -13,7 +13,6 @@ namespace Puzzled
 
         [SerializeField] private Tile keyItem = null;
         [SerializeField] private AudioClip _unlockSound = null;
-        [SerializeField] private BlockRaycast _blockRaycast = null;
 
         [Editable]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]
@@ -46,9 +45,6 @@ namespace Puzzled
                     PlaySound(_openSound);
                 else
                     PlaySound(_closeSound);
-
-                if(null != _blockRaycast)
-                    _blockRaycast.enabled = !_open;
             }
         }
 
@@ -68,13 +64,6 @@ namespace Puzzled
         {
             evt.IsHandled = true;
             evt.result = _open;
-        }
-
-        [ActorEventHandler]
-        private void OnStart(StartEvent evt)
-        {
-            if (null != _blockRaycast)
-                _blockRaycast.enabled = !_open;
         }
 
         [ActorEventHandler]

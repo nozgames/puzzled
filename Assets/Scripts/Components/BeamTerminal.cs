@@ -1,21 +1,46 @@
 ﻿using System.Collections.Generic;
-using NoZ;
-using UnityEngine;
 
 namespace Puzzled
 {
     class BeamTerminal : TileComponent
     {
         private List<Beam> _beams = new List<Beam>();
-        private bool _powered = false;
-        private bool _hadPoweredBeam = false;
 
-        public int connectionCount => _beams.Count;
+        /// <summary>
+        /// Returns the number of connected beams
+        /// </summary>
+        public int beamCount => _beams.Count;
 
-        public Beam GetConnection(int index) => _beams[index];
+        /// <summary>
+        /// Returns a beam connection by index
+        /// </summary>
+        /// <param name="index">Beam connection index</param>
+        /// <returns>Beam at the given index</returns>
+        public Beam GetBeam(int index) => _beams[index];
 
-        public bool isPowered => _powered;
+        /// <summary>
+        /// Get the beam coming from the given direction
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns></returns>
+        public Beam GetBeam(BeamDirection direction)
+        {
+            foreach (var beam in _beams)
+                if (beam.direction == direction)
+                    return beam;
 
+            return null;
+        }
+
+        /// <summary>
+        /// Returns true if the terminal has at least one connected beams
+        /// </summary>
+        public bool hasBeams => _beams.Count > 0;
+
+        /// <summary>
+        /// Connect a new beam to the terminal
+        /// </summary>
+        /// <param name="beam">Beam to connect</param>
         public void Connect (Beam beam)
         {
             if (_beams.Contains(beam))
@@ -23,11 +48,13 @@ namespace Puzzled
 
             _beams.Add(beam);
 
-            UpdatePowered();
-
-            Send(new BeamChangedEvent(beam));
+            Send(new BeamChangedEvent(beam, true));
         }
 
+        /// <summary>
+        /// Disconnect a beam from the terminal
+        /// </summary>
+        /// <param name="beam">Beam to disconnect</param>
         public void Disconnect (Beam beam)
         {
             if (!_beams.Contains(beam))
@@ -35,30 +62,7 @@ namespace Puzzled
 
             _beams.Remove(beam);
 
-            UpdatePowered();
-
-            Send(new BeamChangedEvent(beam));
-        }
-
-        [ActorEventHandler]
-        private void OnDestroyEvent (DestroyEvent evt)
-        {
-            while (_beams.Count > 0)
-                _beams[_beams.Count - 1].Disconnect();
-        }
-
-        private void UpdatePowered()
-        {
-            _powered = false;
-            for(int i=0; i<_beams.Count && !_powered; i++)
-                _powered = _beams[i].isPowered;
-
-            if (!_powered && _beams.Count > 0 && !_hadPoweredBeam)
-            {
-                _powered = true;
-                _hadPoweredBeam = false;
-            } else
-                _hadPoweredBeam = _powered;
+            Send(new BeamChangedEvent(beam, false));
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Puzzled
         [SerializeField] private Transform _trash = null;
         [SerializeField] private GameObject _wirePrefab = null;
         [SerializeField] private PuzzleProperties _propertiesPrefab = null;
+        [SerializeField] private bool _preview = false;
 
         private Player _player;
         private bool _pendingDestroy;
@@ -77,6 +78,11 @@ namespace Puzzled
         /// True if the puzzle is being edited
         /// </summary>
         public bool isEditing { get; set; }
+
+        /// <summary>
+        /// True if the puzzle is the puzzle used to generate previews
+        /// </summary>
+        public bool isPreview => _preview;
 
         /// <summary>
         /// True if the puzzle is currently loading
@@ -858,38 +864,6 @@ namespace Puzzled
             if (component == null)
                 return null;
             return GetSharedComponentData<T>(component.GetType());
-        }
-
-        /// <summary>
-        /// Ray cast through tiles in a cardinal direction and stop at the first tile hit
-        /// </summary>
-        /// <param name="from"></param>
-        /// <param name="direction"></param>
-        /// <param name="distance"></param>
-        /// <returns></returns>
-        public RayCastEvent RayCast (Cell from, Vector2Int direction, int distance)
-        {
-            var cell = from;
-            var raycast = new RayCastEvent(direction);
-            var edge = Cell.DirectionToEdge(direction);
-
-            // TODO: diagonal
-
-            for(int i=0; i<distance; i++)
-            {
-                // Test the edge between the current cell and the next cell first
-                grid.SendToCell(raycast, new Cell(cell, edge), CellEventRouting.All);
-                if (raycast.hit != null)
-                    break;
-
-                // Now test the next cell in the direction
-                cell += direction;
-                grid.SendToCell(raycast, cell, CellEventRouting.All);
-                if (raycast.hit != null)
-                    break;
-            }
-
-            return raycast;
         }
 
         public void MarkCompleted() => entry.MarkCompleted();

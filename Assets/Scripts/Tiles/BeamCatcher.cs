@@ -22,9 +22,9 @@ namespace Puzzled
 
         private void UpdateState()
         {
-            powerOutPort.SetPowered(_terminal.isPowered);
-            _visualsOff.SetActive(!_terminal.isPowered);
-            _visualsOn.SetActive(_terminal.isPowered);
+            powerOutPort.SetPowered(_terminal.hasBeams);
+            _visualsOff.SetActive(!_terminal.hasBeams);
+            _visualsOn.SetActive(_terminal.hasBeams);
         }
     }
 }

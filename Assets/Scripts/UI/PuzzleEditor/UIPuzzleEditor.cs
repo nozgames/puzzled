@@ -32,7 +32,6 @@ namespace Puzzled.Editor
         [SerializeField] private Button _saveButton = null;
         [SerializeField] private Button _closeButton = null;
         [SerializeField] private GameObject dragWirePrefab = null;
-        [SerializeField] private RectTransform _canvasCenter = null;
         [SerializeField] private Slider _zoomSlider = null;
         [SerializeField] private Slider _pitchSlider = null;
         [SerializeField] private Slider _yawSlider = null;

@@ -138,7 +138,8 @@ namespace Puzzled.UI
 
         private void HandleSelectionChange(int obj)
         {
-            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
+            if(_puzzleList.selectedItem != null)
+                _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
         }
 
         private void OnPuzzleListReorderItem(int fromIndex, int toIndex)
