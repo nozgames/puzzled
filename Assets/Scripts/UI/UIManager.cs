@@ -25,9 +25,12 @@ namespace Puzzled.UI
 
         [Header("Navigation Bar")]
         [SerializeField] private GameObject _navigationBar = null;
-        [SerializeField] private UINavigationButton _confirmButton = null;
-        [SerializeField] private UINavigationButton _cancelButton = null;
-        [SerializeField] private UINavigationButton _optionButton = null;
+        [SerializeField] private GameObject _navigationGamepadButtons = null;
+        [SerializeField] private GameObject _navigationMouseButtons = null;
+        [SerializeField] private UINavigationButton _gamepadConfirmButton = null;
+        [SerializeField] private UINavigationButton _gamepadCancelButton = null;
+        [SerializeField] private UINavigationButton _gamepadOptionButton = null;
+        [SerializeField] private UINavigationButton _mouseCancelButton = null;
 
         [Header("HUD")]
         [SerializeField] private UIScreen _hud = null;
@@ -106,9 +109,10 @@ namespace Puzzled.UI
             menuAction.action.Enable();
             optionAction.action.Enable();
 
-            _confirmButton.RegisterButtonClickHandler(() => { activeScreen.HandleConfirmInput(); });
-            _cancelButton.RegisterButtonClickHandler(() => { activeScreen.HandleCancelInput(); });
-            _optionButton.RegisterButtonClickHandler(() => { activeScreen.HandleOptionInput(); });
+            _gamepadConfirmButton.RegisterButtonClickHandler(() => { activeScreen.HandleConfirmInput(); });
+            _gamepadCancelButton.RegisterButtonClickHandler(() => { activeScreen.HandleCancelInput(); });
+            _gamepadOptionButton.RegisterButtonClickHandler(() => { activeScreen.HandleOptionInput(); });
+            _mouseCancelButton.RegisterButtonClickHandler(() => { activeScreen.HandleCancelInput(); });
         }
 
         public static void Initialize ()
@@ -122,6 +126,8 @@ namespace Puzzled.UI
             cursor = CursorType.Arrow;
 
             loading = true;
+
+            GameManager.onGamepadChanged += (state) => _instance.UpdateNavigationBar();
         }
 
         public static void Shutdown ()
@@ -296,9 +302,9 @@ namespace Puzzled.UI
             _instance._namePopup.Show(value, title, commit, placeholder, onCommit, onCancel);
         }
 
-        public static void ShowConfirmPopup(string message = null, string title = null, string confirm = null, Action onConfirm = null, Action onCancel = null)
+        public static void ShowConfirmPopup(string message = null, string title = null, string confirm = null, string cancel = null, Action onConfirm = null, Action onCancel = null)
         {
-            _instance._confirmPopup.Show(message, title, confirm, onConfirm, onCancel);
+            _instance._confirmPopup.Show(message, title, confirm, cancel, onConfirm, onCancel);
         }
 
         private void OnUpAction(InputAction.CallbackContext obj)
@@ -383,9 +389,12 @@ namespace Puzzled.UI
 
             _navigationBar.SetActive(true);
 
-            _confirmButton.SetState(activeScreen.showConfirmButton, activeScreen.confirmButtonText);
-            _cancelButton.SetState(activeScreen.showCancelButton, activeScreen.cancelButtonText);
-            _optionButton.SetState(activeScreen.showOptionButton, activeScreen.optionButtonText);
+            _gamepadConfirmButton.SetState(activeScreen.showConfirmButton, activeScreen.confirmButtonText);
+            _gamepadCancelButton.SetState(activeScreen.showCancelButton, activeScreen.cancelButtonText);
+            _gamepadOptionButton.SetState(activeScreen.showOptionButton, activeScreen.optionButtonText);
+            _mouseCancelButton.SetState(activeScreen.showCancelButton, activeScreen.cancelButtonText);
+            _navigationGamepadButtons.SetActive(GameManager.isUsingGamepad);
+            _navigationMouseButtons.SetActive(!GameManager.isUsingGamepad);
         }
     }
 }

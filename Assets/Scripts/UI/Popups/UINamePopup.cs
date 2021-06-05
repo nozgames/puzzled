@@ -10,6 +10,7 @@ namespace Puzzled.UI
         [SerializeField] private TMPro.TMP_InputField _nameField = null;
         [SerializeField] private TMPro.TextMeshProUGUI _commitText = null;
         [SerializeField] private TMPro.TextMeshProUGUI _placeholderText = null;
+        [SerializeField] private GameObject _error = null;
         [SerializeField] private TMPro.TextMeshProUGUI _errorText = null;
 
         [SerializeField] private Button _commitButton = null;
@@ -42,7 +43,7 @@ namespace Puzzled.UI
             get => _errorText.text;
             set {
                 _errorText.text = value;
-                _errorText.gameObject.SetActive(!string.IsNullOrEmpty(value));
+                _error.gameObject.SetActive(!string.IsNullOrEmpty(value));
             }
         }
 

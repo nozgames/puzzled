@@ -119,7 +119,8 @@ namespace Puzzled.UI
                 UIManager.ShowConfirmPopup(
                     message: "Are you sure you want to delete this puzzle?",
                     title: "Delete Puzzle",
-                    confirm: "Delete",
+                    cancel: "No",
+                    confirm: "Yes",
                     onConfirm: () => {
                         var puzzleEntry = (_puzzleList.selectedItem as UIPuzzleListItem).puzzleEntry;
                         var index = _puzzleList.selected;
@@ -156,10 +157,10 @@ namespace Puzzled.UI
         private string ValidateName (string name)
         {
             if (name.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) != -1)
-                return "Error: Name contains invalid characters";
+                return "Name contains invalid characters";
 
             if(_world.Contains(name))
-                return "Error: Puzzle with the same name already exists";
+                return "Puzzle with the same name already exists";
 
             return null;
         }

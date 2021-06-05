@@ -2,14 +2,12 @@
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 namespace Puzzled.UI
 {
-    public class UIListItem : MonoBehaviour, IPointerDownHandler, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
+    public class UIListItem : Selectable, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
     {
-        [Tooltip("Object to enable when the item is selected")]
-        [SerializeField] private GameObject _selectedVisuals = null;
-
         [Tooltip("Object to enable when the item is dragging")]
         [SerializeField] private GameObject _dragVisuals = null;
 
@@ -17,74 +15,36 @@ namespace Puzzled.UI
         [FormerlySerializedAs("_reoder")]
         [SerializeField] private bool _reorder = false;
 
-
-        private UIList list = null;
-        private bool _selected = false;
+        private UIList _list = null;
         private int _dragStart = -1;
 
         public UnityEvent<bool> onSelectionChanged = new UnityEvent<bool>();
         
         public UnityEvent onDoubleClick = new UnityEvent();
 
-        protected virtual void Awake()
-        {
-            list = GetComponentInParent<UIList>();
-        }
-
-        protected virtual void OnEnable()
-        {
-            UpdateVisuals();
-            list = GetComponentInParent<UIList>();            
-        }
-
-        private void OnTransformParentChanged()
-        {
-            list = GetComponentInParent<UIList>();
-        }
-
-        public virtual void OnPointerDown(PointerEventData eventData)
-        {
-            if (null == list || eventData.button != PointerEventData.InputButton.Left)
-                return;
-
-            if(!selected)
-                selected = true;
-        }
-
         public bool selected {
-            get => list != null && list.selected == transform.GetSiblingIndex();
-            set {
-                if(list == null)
-                {
-                    list = GetComponentInParent<UIList>();
-                    if (list == null)
-                        return;
-                }
-
-                if (value == selected && value == _selected)
-                    return;
-
-                // If selected is being set by someone other than the list
-                // then the selected value will not match so we should tell the list first
-                if (value != selected)
-                {
-                    if (!value)
-                        list.ClearSelection();
-                    else
-                        list.SelectItem(transform.GetSiblingIndex());
-                } 
-                else if (value != _selected)
-                {
-                    _selected = value;
-                    UpdateVisuals();
-                    onSelectionChanged?.Invoke(selected);
-                }
-            }
+            get => currentSelectionState == SelectionState.Selected;
+            set => Select();
         }
 
-        private void UpdateVisuals()
+        protected override void Awake()
         {
-            _selectedVisuals.SetActive(_selected);
+            base.Awake();
+
+            _list = GetComponentInParent<UIList>();
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            _list = GetComponentInParent<UIList>();            
+        }
+
+        protected override void OnTransformParentChanged()
+        {
+            base.OnTransformParentChanged();
+
+            _list = GetComponentInParent<UIList>();
         }
 
         public virtual void OnPointerClick(PointerEventData eventData)
@@ -92,15 +52,15 @@ namespace Puzzled.UI
             if (eventData.clickCount == 2 && eventData.button == PointerEventData.InputButton.Left)
             {
                 onDoubleClick?.Invoke();
-                list.OnDoubleClickItem(transform.GetSiblingIndex());
+                _list.OnDoubleClickItem(transform.GetSiblingIndex());
             }
         }
 
         private int PositionToItemIndex (PointerEventData eventData)
         {
-            for (int i=0; i < list.transform.childCount; i++)
+            for (int i=0; i < _list.transform.childCount; i++)
             {
-                var rectTransform = list.transform.GetChild(i).GetComponent<RectTransform>();
+                var rectTransform = _list.transform.GetChild(i).GetComponent<RectTransform>();
                 var rect = rectTransform.rect;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, eventData.position, eventData.enterEventCamera, out var point);
                 if (point.x >= rect.min.x && point.x <= rect.max.x && point.y >= rect.min.y)
@@ -136,7 +96,7 @@ namespace Puzzled.UI
             transform.SetSiblingIndex(index);
 
             if(index != _dragStart)
-                list.OnReorderItem(_dragStart, index);
+                _list.OnReorderItem(_dragStart, index);
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -150,6 +110,20 @@ namespace Puzzled.UI
 
             if (transform.GetSiblingIndex() != index)
                 transform.SetSiblingIndex(index);
+        }
+
+        public override void OnSelect (BaseEventData eventData)
+        {
+            base.OnSelect(eventData);
+
+            onSelectionChanged?.Invoke(true);
+        }
+
+        public override void OnDeselect(BaseEventData eventData)
+        {
+            base.OnDeselect(eventData);
+
+            onSelectionChanged?.Invoke(false);
         }
     }
 }

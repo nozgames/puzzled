@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -20,8 +19,6 @@ namespace Puzzled
         {
             gameObject.SetActive(showButton);
             _text.text = text;
-
-            _gamepadIcon.SetActive(GameManager.isUsingGamepad);
         }
     }
 }

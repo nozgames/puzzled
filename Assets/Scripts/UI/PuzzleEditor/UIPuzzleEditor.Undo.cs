@@ -109,6 +109,8 @@ namespace Puzzled.Editor
             UpdateUndoButtons();
 
             instance.UpdateCursor(true);
+
+            _puzzle.isModified = true;
         }
 
         /// <summary>
@@ -137,6 +139,8 @@ namespace Puzzled.Editor
             UpdateUndoButtons();
 
             instance.UpdateCursor(true);
+
+            _puzzle.isModified = true;
         }
 
         /// <summary>

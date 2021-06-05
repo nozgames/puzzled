@@ -20,6 +20,11 @@ namespace Puzzled
         public static event Action<Puzzle> onPuzzleChanged;
 
         /// <summary>
+        /// Event fired when the gamepad state changes
+        /// </summary>
+        public static event Action<bool> onGamepadChanged;
+
+        /// <summary>
         /// True if there is an active gamepad
         /// </summary>
         public static bool isUsingGamepad => _instance._gamepad;
@@ -237,6 +242,7 @@ namespace Puzzled
         private void OnDeviceChanged(InputDevice inputDevice, InputDeviceChange deviceChange)
         {
             _gamepad = InputSystem.devices.Where(d => d.enabled && d is Gamepad).Any();
+            onGamepadChanged?.Invoke(_gamepad);
         }
     }
 }
