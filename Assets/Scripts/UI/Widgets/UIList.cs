@@ -54,7 +54,7 @@ namespace Puzzled.UI
 
         public void ClearSelection() => SetSelection(-1);
 
-        public UIListItem GetItem(int index) => transform.GetChild(index).GetComponent<UIListItem>();
+        public UIListItem GetItem(int index) => index < 0 ? null : transform.GetChild(index).GetComponent<UIListItem>();
 
         public void OnDoubleClickItem(int index)
         {

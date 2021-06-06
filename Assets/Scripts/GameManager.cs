@@ -27,7 +27,7 @@ namespace Puzzled
         /// <summary>
         /// True if there is an active gamepad
         /// </summary>
-        public static bool isUsingGamepad => _instance._gamepad;
+        public static bool isUsingGamepad => _instance == null ? false : _instance._gamepad;
 
         public static bool isValid => _instance != null;
 

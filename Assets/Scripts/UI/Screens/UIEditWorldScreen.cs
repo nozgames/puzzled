@@ -210,13 +210,13 @@ namespace Puzzled.UI
 
         private void UpdateButtons()
         {
+#if false
             var selected = _puzzleList.selected != -1;
             _editPuzzleButton.interactable = selected;
             _duplicatePuzzleButton.interactable = selected;
             _renamePuzzleButton.interactable = selected;
             _deletePuzzleButton.interactable = selected;
-            _worldOptionsButton.interactable = true;
-            _exportWorldButton.interactable = true;
+#endif
         }
 
         private void Select(World.IPuzzleEntry puzzleEntry)
