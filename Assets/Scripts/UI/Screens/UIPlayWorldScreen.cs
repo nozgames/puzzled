@@ -35,7 +35,10 @@ namespace Puzzled.UI
 
         private void HandleSelectionChange(int obj)
         {
-            _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
+            var selectedItem = _puzzleList.selectedItem;
+            if (null == selectedItem)
+                return;
+            _scrollRect.ScrollTo(selectedItem.GetComponent<RectTransform>());
         }
 
         private void OnEnable()

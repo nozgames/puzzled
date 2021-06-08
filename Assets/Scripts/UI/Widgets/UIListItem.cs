@@ -17,12 +17,19 @@ namespace Puzzled.UI
         private bool _selected = false;
         private bool _hover = false;
         private bool _pressed = false;
+        private bool _interactable = true;
 
         public UnityEvent<bool> onSelectionChanged = new UnityEvent<bool>();
         
         public UnityEvent onDoubleClick = new UnityEvent();
 
-        public bool interactable { get; set; }
+        public bool interactable {
+            get => _interactable;
+            set {
+                _interactable = value;
+                UpdateAnimatorState();
+            }
+        }
 
         public bool selected {
             get => _selected;
@@ -155,6 +162,7 @@ namespace Puzzled.UI
             if (null == _animator)
                 return;
 
+            _animator.SetBool("disabled", !_interactable);
             _animator.SetBool("hover", _hover);
             _animator.SetBool("pressed", _pressed);
             _animator.SetBool("selected", _selected);
