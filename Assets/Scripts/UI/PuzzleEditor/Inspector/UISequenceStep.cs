@@ -1,11 +1,12 @@
 ﻿using System;
+using Puzzled.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Puzzled.Editor
 {
-    class UISequenceStep : MonoBehaviour, IPointerClickHandler
+    class UISequenceStep : UIListItem, IPointerClickHandler
     {
         [SerializeField] private TMPro.TMP_InputField _input = null;
         [SerializeField] private TMPro.TextMeshProUGUI _text = null;
@@ -22,8 +23,10 @@ namespace Puzzled.Editor
             }
         }
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             _input.onEndEdit.AddListener(OnEndEdit);
             _input.onDeselect.AddListener(OnEndEdit);
 
@@ -32,15 +35,17 @@ namespace Puzzled.Editor
             });
         }
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             _input.gameObject.SetActive(false);
             _text.gameObject.SetActive(true);
             _index.text = transform.GetSiblingIndex().ToString();
         }
 
-        public void OnPointerClick(PointerEventData eventData)
-        {
+        public override void OnPointerClick(PointerEventData eventData)
+        {            
             if (eventData.clickCount == 2 && !_input.gameObject.activeSelf)
             {
                 _input.text = _text.text;
@@ -48,6 +53,8 @@ namespace Puzzled.Editor
                 _text.gameObject.SetActive(false);
                 EventSystem.current.SetSelectedGameObject(_input.gameObject);
             }
+            else
+                base.OnPointerClick(eventData);
         }
 
         private void OnEndEdit(string value)

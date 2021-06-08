@@ -45,6 +45,7 @@ namespace Puzzled.UI
 
             UpdateWorld();
 
+            _puzzleList.Select();
             _puzzleList.SelectItem(0);
         }
 

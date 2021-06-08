@@ -169,8 +169,8 @@ namespace Puzzled.UI
         {            
             UpdateWorld();
 
-            _puzzleList.SelectItem(0);
             _puzzleList.Select();
+            _puzzleList.SelectItem(0);
         }
 
         private void OnDisable()

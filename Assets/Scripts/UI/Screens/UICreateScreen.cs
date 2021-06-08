@@ -39,7 +39,11 @@ namespace Puzzled.UI
 
         private void HandleSelectionChange(int obj)
         {
-            _worldListScroll.ScrollTo(_worldList.selectedItem.GetComponent<RectTransform>());
+            var selectedItem = _worldList.selectedItem;
+            if (selectedItem == null)
+                return;
+
+            _worldListScroll.ScrollTo(selectedItem.GetComponent<RectTransform>());
         }
 
         private void OnEnable()
@@ -51,11 +55,11 @@ namespace Puzzled.UI
                 var item = Instantiate(_worldListItemPrefab.gameObject, _worldList.transform).GetComponent<UIWorldListItem>();
                 item.worldEntry = entry;
                 item.onDoubleClick.AddListener(() => {
-
                     EditWorld(item);
                 });
             }
 
+            _worldList.Select();
             _worldList.SelectItem(0);
         }
 

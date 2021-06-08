@@ -168,6 +168,9 @@ namespace Puzzled.Editor
 
         private void UpdatePreview()
         {
+            if (selected == null)
+                return;
+
             _selectedPreview.texture = DatabaseManager.GetPreview(selected);
             _selectedName.text = _selected.name;
         }

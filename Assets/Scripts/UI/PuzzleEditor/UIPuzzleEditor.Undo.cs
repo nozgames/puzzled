@@ -10,10 +10,6 @@ namespace Puzzled.Editor
     {
         private const int MaxUndo = 256;
 
-        [Header("Undo")]
-        [SerializeField] private Button _undoButton = null;
-        [SerializeField] private Button _redoButton = null;
-
         private List<Command> _undo = new List<Command>();
         private List<Command> _redo = new List<Command>();
         private Dictionary<int, Transform> _trash = new Dictionary<int, Transform>();

@@ -43,13 +43,19 @@ namespace Puzzled.UI
 
         private void SetSelection(int index)
         {
-            if (selected == index)
+            var old = selected;
+            if (old == index)
                 return;
 
-            if(index >=0)
+            if (index >= 0)
                 GetItem(index).selected = true;
+            else if (old >= 0)
+                GetItem(old).selected = false;                
+        }
 
-            onSelectionChanged?.Invoke(index);
+        public void OnSelectionChanged ()
+        {
+            onSelectionChanged?.Invoke(selected);
         }
 
         public void ClearSelection() => SetSelection(-1);

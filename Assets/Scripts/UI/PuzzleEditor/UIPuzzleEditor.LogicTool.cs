@@ -25,7 +25,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIPropertyEditor cellEditorPrefab = null;
         [SerializeField] private UIPropertyEditor numberArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor portEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor portEmptyEditorPrefab = null;
+        //[SerializeField] private UIPropertyEditor portEmptyEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringMultilineEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringArrayEditorPrefab = null;
@@ -33,8 +33,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
-        [SerializeField] private UIRadio _inspectorFlip = null;
-        [SerializeField] private Button _inspectorRotation = null;
+        [SerializeField] private Button _inspectorRotateButton = null;
 
         private WireVisuals dragWire = null;
         private bool logicCycleSelection = false;
@@ -327,7 +326,7 @@ namespace Puzzled.Editor
                     case TilePropertyType.DecalArray: prefab = decalArrayEditorPrefab; break;
                     case TilePropertyType.Port:
                         if (property.GetValue<Port>(tile).wires.Count == 0)
-                            prefab = portEmptyEditorPrefab; 
+                            return null; //  prefab = portEmptyEditorPrefab; 
                         else
                             prefab = portEditorPrefab; 
                         break;

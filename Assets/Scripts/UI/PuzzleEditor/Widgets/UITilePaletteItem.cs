@@ -18,11 +18,13 @@ namespace Puzzled.Editor
 
                 if (_tile == null)
                 {
-                    _nameText.text = "None";
+                    if(_nameText != null)
+                        _nameText.text = "None";
                     _previewImage.gameObject.SetActive(false);
                 } else
                 {
-                    _nameText.text = _tile.gameObject.name;
+                    if(_nameText != null)
+                        _nameText.text = _tile.gameObject.name;
                     _previewImage.texture = DatabaseManager.GetPreview(_tile);
                     _previewImage.gameObject.SetActive(true);
                 }

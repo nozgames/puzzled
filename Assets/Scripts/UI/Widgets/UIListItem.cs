@@ -2,48 +2,80 @@
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
-using UnityEngine.UI;
 
 namespace Puzzled.UI
 {
-    public class UIListItem : Selectable, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler
+    public class UIListItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerDownHandler, IPointerUpHandler
     {
-        [Tooltip("Object to enable when the item is dragging")]
-        [SerializeField] private GameObject _dragVisuals = null;
-
         [Tooltip("True if the item can be reordered")]
         [FormerlySerializedAs("_reoder")]
         [SerializeField] private bool _reorder = false;
 
+        private Animator _animator = null;
         private UIList _list = null;
         private int _dragStart = -1;
+        private bool _selected = false;
+        private bool _hover = false;
+        private bool _pressed = false;
 
         public UnityEvent<bool> onSelectionChanged = new UnityEvent<bool>();
         
         public UnityEvent onDoubleClick = new UnityEvent();
 
+        public bool interactable { get; set; }
+
         public bool selected {
-            get => currentSelectionState == SelectionState.Selected;
-            set => Select();
+            get => _selected;
+            set {
+                if (value == _selected)
+                    return;
+
+                if(_list == null)
+                {
+                    _list = GetComponentInParent<UIList>();
+                    if (_list == null)
+                        return;
+                }
+
+                if (value)
+                {
+                    _list.ClearSelection();
+                    _selected = true;
+                } 
+                else
+                {
+                    _selected = false;
+                }
+
+                UpdateAnimatorState();
+
+                _list.OnSelectionChanged();
+                onSelectionChanged?.Invoke(_selected);
+            }
         }
 
-        protected override void Awake()
+        protected virtual void Awake()
         {
-            base.Awake();
+            _animator = GetComponent<Animator>();
 
             _list = GetComponentInParent<UIList>();
         }
 
-        protected override void OnEnable()
+        protected virtual void OnEnable()
         {
-            base.OnEnable();
-            _list = GetComponentInParent<UIList>();            
+            _list = GetComponentInParent<UIList>();
+
+            UpdateAnimatorState();
         }
 
-        protected override void OnTransformParentChanged()
+        protected virtual void OnDisable()
         {
-            base.OnTransformParentChanged();
+            _hover = false;
+            _pressed = false;
+        }
 
+        protected void OnTransformParentChanged()
+        {
             _list = GetComponentInParent<UIList>();
         }
 
@@ -75,9 +107,6 @@ namespace Puzzled.UI
             if (!_reorder)
                 return;
 
-            if(_dragVisuals != null)
-                _dragVisuals.SetActive(true);
-
             _dragStart = transform.GetSiblingIndex();
         }
 
@@ -85,9 +114,6 @@ namespace Puzzled.UI
         {
             if (!_reorder)
                 return;
-
-            if (_dragVisuals != null)
-                _dragVisuals.SetActive(false);
 
             int index = PositionToItemIndex(eventData);
             if (index == -1)
@@ -112,18 +138,42 @@ namespace Puzzled.UI
                 transform.SetSiblingIndex(index);
         }
 
-        public override void OnSelect (BaseEventData eventData)
+        public void OnPointerEnter(PointerEventData eventData)
         {
-            base.OnSelect(eventData);
-
-            onSelectionChanged?.Invoke(true);
+            _hover = true;
+            UpdateAnimatorState();
         }
 
-        public override void OnDeselect(BaseEventData eventData)
+        public void OnPointerExit(PointerEventData eventData)
         {
-            base.OnDeselect(eventData);
+            _hover = false;
+            UpdateAnimatorState();
+        }
 
-            onSelectionChanged?.Invoke(false);
+        private void UpdateAnimatorState()
+        {
+            if (null == _animator)
+                return;
+
+            _animator.SetBool("hover", _hover);
+            _animator.SetBool("pressed", _pressed);
+            _animator.SetBool("selected", _selected);
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            _pressed = true;
+            UpdateAnimatorState();
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            _pressed = false;
+
+            if (_hover && !selected)
+                selected = true;
+            else
+                UpdateAnimatorState();
         }
     }
 }

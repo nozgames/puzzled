@@ -210,7 +210,8 @@ namespace Puzzled.Editor
         private void UpdatePreview()
         {
             _selectedPreview.decal = _selected;
-            _selectedName.text = _selected.name;
+            if(_selectedName != null)
+                _selectedName.text = _selected.name;
             _decalProperties.target = new TargetProperty { _palette = this };
             _defaultsButton.transform.parent.gameObject.SetActive(_selected != Decal.none);
         }

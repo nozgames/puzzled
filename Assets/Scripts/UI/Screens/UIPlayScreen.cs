@@ -20,7 +20,11 @@ namespace Puzzled.UI
 
         private void HandleSelectionChange(int obj)
         {
-            _worldListScroll.ScrollTo(_worldList.selectedItem.GetComponent<RectTransform>());
+            var selectedItem = _worldList.selectedItem;
+            if (null == selectedItem)
+                return;
+
+            _worldListScroll.ScrollTo(selectedItem.GetComponent<RectTransform>());
         }
 
         private void OnEnable()
@@ -37,6 +41,7 @@ namespace Puzzled.UI
                 });
             }
 
+            _worldList.Select();
             _worldList.SelectItem(0);
         }
 

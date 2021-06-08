@@ -27,7 +27,7 @@ namespace Puzzled.Editor
         [Header("General")]
         [SerializeField] private UICanvas canvas = null;
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
-        [SerializeField] private Button playButton = null;
+        [SerializeField] private Button _playButton = null;
         [SerializeField] private Button stopButton = null;
         [SerializeField] private Button _saveButton = null;
         [SerializeField] private Button _closeButton = null;
@@ -56,14 +56,13 @@ namespace Puzzled.Editor
 
         [Header("Toolbar")]
         [SerializeField] private GameObject _toolbar = null;
-        [SerializeField] private UIRadio moveTool = null;
-        [SerializeField] private UIRadio drawTool = null;
-        [SerializeField] private UIRadio eraseTool = null;
-        [SerializeField] private UIRadio wireTool = null;
-        [SerializeField] private UIRadio decalTool = null;
-        [SerializeField] private GameObject moveToolOptions = null;
-        [SerializeField] private GameObject eraseToolOptions = null;
-        [SerializeField] private Toggle eraseToolAllLayers = null;        
+        [SerializeField] private UIRadio _moveTool = null;
+        [SerializeField] private UIRadio _drawTool = null;
+        [SerializeField] private UIRadio _eraseTool = null;
+        [SerializeField] private UIRadio _wireTool = null;
+        [SerializeField] private UIRadio _decalTool = null;
+        [SerializeField] private Button _undoButton = null;
+        [SerializeField] private Button _redoButton = null;
 
 
         [Header("Popups")]
@@ -118,19 +117,19 @@ namespace Puzzled.Editor
                 switch (_mode)
                 {
                     case Mode.Draw:
-                        drawTool.isOn = true;
+                        _drawTool.isOn = true;
                         break;
                     case Mode.Move:
-                        moveTool.isOn = true;
+                        _moveTool.isOn = true;
                         break;
                     case Mode.Erase:
-                        eraseTool.isOn = true;
+                        _eraseTool.isOn = true;
                         break;
                     case Mode.Logic:
-                        wireTool.isOn = true;
+                        _wireTool.isOn = true;
                         break;
                     case Mode.Decal:
-                        decalTool.isOn = true;
+                        _decalTool.isOn = true;
                         break;
                 }
 
@@ -249,22 +248,11 @@ namespace Puzzled.Editor
 
             _wireToggle.onValueChanged.AddListener((v) => CameraManager.ShowWires(v));
 
-            _inspectorRotation.onClick.AddListener(() => {
+            _inspectorRotateButton.onClick.AddListener(() => {
                 var rotation = selectedTile.GetProperty("rotation");
                 if (null != rotation)
                     ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(selectedTile, "rotation", rotation.GetValue<int>(selectedTile) + 1));
-            });
-
-            _inspectorFlip.onValueChanged.AddListener((v) => {
-                if (selectedTile == null)
-                    return;
-
-                var flip = selectedTile.GetProperty("flipped");
-                if (null == flip)
-                    return;
-
-                ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(selectedTile, "flipped", v));
-            });
+            });            
 
             _chooseFilePopup.onCancel += () => HidePopup();
             _chooseFilePopup.onOpenPuzzle += (filename) => {
@@ -296,11 +284,21 @@ namespace Puzzled.Editor
                 HidePopup();
             };
 
+            _undoButton.onClick.AddListener(Undo);
+            _redoButton.onClick.AddListener(Redo);
+            _playButton.onClick.AddListener(BeginPlay);
+
             _layerToggleWall.onValueChanged.AddListener((v) => UpdateCameraFlags());
             _layerToggleDynamic.onValueChanged.AddListener((v) => UpdateCameraFlags());
             _layerToggleLogic.onValueChanged.AddListener((v) => UpdateCameraFlags());
             _layerToggleStatic.onValueChanged.AddListener((v) => UpdateCameraFlags());
             _layerToggleFloor.onValueChanged.AddListener((v) => UpdateCameraFlags());
+
+            _moveTool.onValueChanged.AddListener((v) => OnToolChanged());
+            _decalTool.onValueChanged.AddListener((v) => OnToolChanged());
+            _drawTool.onValueChanged.AddListener((v) => OnToolChanged());
+            _wireTool.onValueChanged.AddListener((v) => OnToolChanged());
+            _eraseTool.onValueChanged.AddListener((v) => OnToolChanged());
         }
 
         private void OnEnable()
@@ -377,15 +375,15 @@ namespace Puzzled.Editor
             if (!GameManager.isValid)
                 return;
 
-            if (drawTool.isOn)
+            if (_drawTool.isOn)
                 mode = Mode.Draw;
-            else if (moveTool.isOn)
+            else if (_moveTool.isOn)
                 mode = Mode.Move;
-            else if (eraseTool.isOn)
+            else if (_eraseTool.isOn)
                 mode = Mode.Erase;
-            else if (wireTool.isOn)
+            else if (_wireTool.isOn)
                 mode = Mode.Logic;
-            else if (decalTool.isOn)
+            else if (_decalTool.isOn)
                 mode = Mode.Decal;
         }
 
@@ -449,7 +447,6 @@ namespace Puzzled.Editor
         public static void Stop() => instance.OnStopButton();
 
 
-        public void OnPlayButton() => BeginPlay();
         public void OnStopButton() => EndPlay();
         public void OnDebugButton()
         {
@@ -481,7 +478,7 @@ namespace Puzzled.Editor
 
             GameManager.busy = 0;
 
-            playButton.gameObject.SetActive(false);
+            _playButton.gameObject.SetActive(false);
             stopButton.gameObject.SetActive(true);
 
             playing = true;
@@ -511,7 +508,7 @@ namespace Puzzled.Editor
             inspector.SetActive(mode == Mode.Logic);
 
             playing = false;
-            playButton.gameObject.SetActive(true);
+            _playButton.gameObject.SetActive(true);
             stopButton.gameObject.SetActive(false);
             _canvasControls.SetActive(true);
 
@@ -857,6 +854,10 @@ namespace Puzzled.Editor
 
             switch (keyCode)
             {
+                case KeyCode.Space:
+                    BeginPlay();
+                    break;
+
                 case KeyCode.W:
                     mode = Mode.Logic;
                     break;

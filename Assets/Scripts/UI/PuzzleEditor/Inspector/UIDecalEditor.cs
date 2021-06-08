@@ -7,7 +7,6 @@ namespace Puzzled.Editor
     public class UIDecalEditor : UIPropertyEditor
     {
         [SerializeField] private UIDecalPreview _preview = null;
-        [SerializeField] private UIDecalPreview _decalButtonPreview = null;
         [SerializeField] private Button _decalButton = null;
         [SerializeField] private Button _rotateButton = null;
         [SerializeField] private UINumberRangeEditor _scale = null;
@@ -91,7 +90,6 @@ namespace Puzzled.Editor
 
             _boxedDecal = target.GetValue();
             _preview.decal = (Decal)_boxedDecal;
-            _decalButtonPreview.decal = new Decal(_preview.decal.guid, _preview.decal.texture);
 
             _scale.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("scale"), OnBoxedValueChanged) { range = new Vector2Int(1, 100) };
             _rotation.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("rotation"), OnBoxedValueChanged) { range = new Vector2Int(0, 360), floatScale = 1.0f };
@@ -106,7 +104,6 @@ namespace Puzzled.Editor
         private void OnBoxedValueChanged(bool commit)
         {
             _preview.decal = (Decal)_boxedDecal;
-            _decalButtonPreview.decal = new Decal(_preview.decal.guid, _preview.decal.texture);
             target.SetValue(_boxedDecal, commit);
             UpdateControls();
         }
@@ -121,7 +118,7 @@ namespace Puzzled.Editor
 
             var autoColor = ((Decal)_boxedDecal).isAutoColor;
             _color.gameObject.SetActive(!autoColor && hasDecal);
-            _smoothness.gameObject.SetActive(!autoColor && hasDecal);
+            _smoothness.gameObject.SetActive(false); //  !autoColor && hasDecal);
         }
     }
 }

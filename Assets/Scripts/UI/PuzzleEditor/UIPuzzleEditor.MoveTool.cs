@@ -48,8 +48,6 @@ namespace Puzzled.Editor
 
         private void EnableMoveTool ()
         {
-            moveToolOptions.SetActive(true);
-
             canvas.onLButtonDown = OnMoveToolLButtonDown;
             canvas.onLButtonUp = OnMoveToolLButtonUp;
             canvas.onLButtonDragBegin = OnMoveToolDragBegin;
@@ -71,8 +69,6 @@ namespace Puzzled.Editor
         {
             if (hasSelection && !selectedTile)
                 ClearSelection();
-
-            moveToolOptions.SetActive(false);
         }
 
         private void OnMoveToolLButtonDown(Vector2 position)

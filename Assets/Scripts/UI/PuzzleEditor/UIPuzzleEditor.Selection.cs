@@ -140,11 +140,7 @@ namespace Puzzled.Editor
                 _inspectorTileType.text = $"<{_selection.tile.info.displayName}>";
 
                 var rotation = _selection.tile.GetProperty("rotation");
-                _inspectorRotation.gameObject.SetActive(rotation != null);
-
-                var flipped = _selection.tile.GetProperty("flipped");
-                _inspectorFlip.gameObject.SetActive(flipped != null);
-                _inspectorFlip.isOn = (flipped != null && flipped.GetValue<bool>(_selection.tile));
+                _inspectorRotateButton.gameObject.SetActive(rotation != null);
 
                 _inspectorTilePreview.texture = DatabaseManager.GetPreview(tile.guid);
 

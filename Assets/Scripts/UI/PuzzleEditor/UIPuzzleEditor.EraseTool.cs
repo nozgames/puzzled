@@ -25,14 +25,11 @@ namespace Puzzled.Editor
 
             _getCursor = OnEraseGetCursor;
 
-            eraseToolOptions.SetActive(true);
-
             _lastEraseCell = Cell.invalid;
         }
 
         private void DisableEraseTool()
         {
-            eraseToolOptions.SetActive(false);
         }
 
         private void OnModifiersChangedErase(bool shift, bool ctrl, bool alt)
@@ -42,7 +39,7 @@ namespace Puzzled.Editor
         private void OnEraseToolLButtonDown(Vector2 position)
         {
             var tile = GetTopMostTile(_cursorCell);
-            _eraseLayerOnly = !eraseToolAllLayers.isOn && tile != null;
+            _eraseLayerOnly = tile != null;
             _eraseLayer = _eraseLayerOnly ? tile.layer : TileLayer.Logic;
             _eraseStarted = false;
             Erase(_cursorCell);
@@ -63,30 +60,15 @@ namespace Puzzled.Editor
 
             _lastEraseCell = cell;
 
-            if (eraseToolAllLayers.isOn)
-            {
-                for(int layer = (int)TileLayer.Logic; layer >= (int)TileLayer.Floor; layer --)
-                {
-                    var tile = GetTopMostTile(cell, (TileLayer)layer);
-                    if (null == tile)
-                        continue;
+            var tile = _eraseLayerOnly ? GetTopMostTile(cell,_eraseLayer) : GetTopMostTile(cell);
+            if (null == tile)
+                return;
 
-                    ExecuteCommand(Erase(tile), _eraseStarted);
-                    _eraseStarted = true;
-                }
-            } 
-            else
-            {
-                var tile = _eraseLayerOnly ? GetTopMostTile(cell,_eraseLayer) : GetTopMostTile(cell);
-                if (null == tile)
-                    return;
+            if (_eraseLayerOnly && tile.layer != _eraseLayer)
+                return;
 
-                if (_eraseLayerOnly && tile.layer != _eraseLayer)
-                    return;
-
-                ExecuteCommand(Erase(tile), _eraseStarted);
-                _eraseStarted = true;
-            }
+            ExecuteCommand(Erase(tile), _eraseStarted);
+            _eraseStarted = true;
         }
 
         private Editor.Commands.GroupCommand Erase (Tile tile, Editor.Commands.GroupCommand group = null, EraseFlags flags = EraseFlags.None)

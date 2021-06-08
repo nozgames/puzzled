@@ -24,6 +24,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)
         {
+            if (decals == null)
+                return;
+
             ++_decalIndex;
 
             if (_decalIndex >= decals.Length)

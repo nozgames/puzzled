@@ -17,6 +17,7 @@ namespace Puzzled
         [Header("Keys")]
         [SerializeField] private InputAction keyEscape = null;
         [SerializeField] private InputAction keyDelete = null;
+        [SerializeField] private InputAction keySpace = null;
         [SerializeField] private InputAction keyB = null;
         [SerializeField] private InputAction keyD = null;
         [SerializeField] private InputAction keyE = null;
@@ -70,6 +71,7 @@ namespace Puzzled
         {
             keyEscape.performed += (ctx) => SendKey(KeyCode.Escape);
             keyDelete.performed += (ctx) => SendKey(KeyCode.Delete);
+            keySpace.performed += (ctx) => SendKey(KeyCode.Space);
             key1.performed += (ctx) => SendKey(KeyCode.Alpha1);
             key2.performed += (ctx) => SendKey(KeyCode.Alpha2);
             key3.performed += (ctx) => SendKey(KeyCode.Alpha3);
@@ -96,6 +98,7 @@ namespace Puzzled
 
             keyEscape.Enable();
             keyDelete.Enable();
+            keySpace.Enable();
             key1.Enable();
             key2.Enable();
             key3.Enable();
@@ -117,6 +120,7 @@ namespace Puzzled
         {
             keyEscape.Disable();
             keyDelete.Disable();
+            keySpace.Disable();
             keyY.Disable();
             keyZ.Disable();
             keyShift.Disable();
