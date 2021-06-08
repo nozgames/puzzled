@@ -74,8 +74,15 @@ namespace Puzzled.UI
 
         override public void OnMove(AxisEventData eventData)
         {
-            int newSelection = Mathf.Clamp(selected + ((eventData.moveDir == MoveDirection.Down) ? 1 : -1), 0, itemCount - 1);
-            SelectItem(newSelection);
+            var dir = ((eventData.moveDir == MoveDirection.Down) ? 1 : -1);
+            for (int newSelection = selected + dir; newSelection >= 0 && newSelection < transform.childCount; newSelection += dir)
+            { 
+                if(GetItem(newSelection).interactable)
+                {
+                    SelectItem(newSelection);
+                    return;
+                }
+            }
         }
     }
 }
