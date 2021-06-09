@@ -68,7 +68,7 @@ namespace Puzzled.Editor
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
         [SerializeField] private Image _popupDarken = null;
-        [SerializeField] private GameObject fileMenuPopup = null;
+        [SerializeField] private GameObject _menu = null;
         [SerializeField] private UIChoosePuzzlePopup _chooseFilePopup = null;
         [SerializeField] private GameObject _chooseTilePopup = null;
         [SerializeField] private UITilePalette _chooseTilePalette = null;
@@ -219,7 +219,10 @@ namespace Puzzled.Editor
 
             inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
 
-            _saveButton.onClick.AddListener(Save);
+            _saveButton.onClick.AddListener(() => {
+                Save();
+                HidePopup();
+            });
             _closeButton.onClick.AddListener(() => {
                 Save();
                 Shutdown();
@@ -628,11 +631,6 @@ namespace Puzzled.Editor
             UpdateMode();
         }
 
-        public void OnFileMenuButton()
-        {
-            ShowPopup(fileMenuPopup);
-        }
-
         private void ShowPopup(GameObject popup, bool darken=true)
         {
             if (popup.transform.parent != popups.transform)
@@ -845,7 +843,7 @@ namespace Puzzled.Editor
                     if (playing)
                         OnStopButton();
                     else
-                        ShowPopup(fileMenuPopup);
+                        ShowPopup(_menu);
                     break;
             }
 

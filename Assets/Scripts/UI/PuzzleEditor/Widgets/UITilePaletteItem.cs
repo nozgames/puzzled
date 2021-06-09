@@ -8,6 +8,7 @@ namespace Puzzled.Editor
     {
         [SerializeField] private TMPro.TextMeshProUGUI _nameText = null;
         [SerializeField] private RawImage _previewImage = null;
+        [SerializeField] private UITooltip _tooltip = null;
 
         private Tile _tile;
 
@@ -18,12 +19,16 @@ namespace Puzzled.Editor
 
                 if (_tile == null)
                 {
-                    if(_nameText != null)
+                    if (_nameText != null)
                         _nameText.text = "None";
                     _previewImage.gameObject.SetActive(false);
-                } else
+                } 
+                else
                 {
-                    if(_nameText != null)
+                    if (_tooltip != null)
+                        _tooltip.text = _tile.name;
+
+                    if (_nameText != null)
                         _nameText.text = _tile.gameObject.name;
                     _previewImage.texture = DatabaseManager.GetPreview(_tile);
                     _previewImage.gameObject.SetActive(true);

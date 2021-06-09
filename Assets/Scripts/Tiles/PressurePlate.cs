@@ -52,7 +52,7 @@ namespace Puzzled
         private void OnUsableChanged(UsableChangedEvent evt)
         {
             _isUsable = evt.isUsable;
-            powerOutPort.SetPowered(false);
+            powerOutPort.SetPowered(_pressed && _isUsable);
         }
     }
 }
