@@ -14,7 +14,6 @@ namespace Puzzled.UI
         [SerializeField] private Button _exportWorldButton = null;
         [SerializeField] private Button _worldOptionsButton = null;
         [SerializeField] private Button _puzzleOptionsButton = null;
-        [SerializeField] private ScrollRect _scrollRect = null;
 
         [SerializeField] private UIPuzzleList _puzzleList = null;
         [SerializeField] private UIPuzzleListItem _puzzleListItemPrefab = null;

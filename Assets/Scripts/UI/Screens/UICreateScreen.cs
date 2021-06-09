@@ -9,7 +9,6 @@ namespace Puzzled.UI
 
         [SerializeField] private UIWorldList _worldList = null;
         [SerializeField] private UIWorldListItem _worldListItemPrefab = null;
-        [SerializeField] private ScrollRect _worldListScroll = null;
 
         override public bool showConfirmButton => true;
         override public string confirmButtonText => "Edit World";
