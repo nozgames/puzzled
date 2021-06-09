@@ -37,6 +37,20 @@ namespace Puzzled
 
         [SerializeField] private Animator _animator = null;
 
+        private int _rotationIndex = 0;
+        private int numRotations = 4;
+
+        [Editable(hidden = true)]
+        public int rotation
+        {
+            get => _rotationIndex;
+            set
+            {
+               this._rotationIndex = value % numRotations;
+               UpdateFacing();
+            }
+        }
+
         private bool isGrabbing = false;
 
         private bool isLeftHeld = false;
@@ -111,12 +125,7 @@ namespace Puzzled
         private void OnStart(StartEvent evt)
         {
             SendToCell(new EnterCellEvent(tile, tile.cell), tile.cell);
-
-            // TODO: option for intial facing
-            visualsLeft.SetActive(true);
-            //visualsRight.SetActive(false);
-            //visualsUp.SetActive(false);
-            //visualsDown.SetActive(false);            
+            UpdateFacing();
         }
 
         [ActorEventHandler]
@@ -175,6 +184,11 @@ namespace Puzzled
 
             _animator.SetBool("Grabbing", isGrabbing);
             UIManager.HideTooltip();
+        }
+
+        private void UpdateFacing()
+        {
+            UpdateVisuals((CellEdge)(rotation + 1));
         }
 
         private CellEdge GetYawRotatedEdge(CellEdge edge)
