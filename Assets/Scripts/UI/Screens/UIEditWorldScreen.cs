@@ -133,14 +133,6 @@ namespace Puzzled.UI
                     }
                     );
             });
-
-            _puzzleList.onSelectionChanged += HandleSelectionChange;
-        }
-
-        private void HandleSelectionChange(int obj)
-        {
-//            if(_puzzleList.selectedItem != null)
-  //              _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
         }
 
         private void OnPuzzleListReorderItem(int fromIndex, int toIndex)

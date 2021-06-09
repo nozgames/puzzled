@@ -28,19 +28,6 @@ namespace Puzzled.UI
 
         public bool isDebugging;
 
-        private void Awake()
-        {
-            _puzzleList.onSelectionChanged += HandleSelectionChange;
-        }
-
-        private void HandleSelectionChange(int obj)
-        {
-            var selectedItem = _puzzleList.selectedItem;
-            if (null == selectedItem)
-                return;
-            _scrollRect.ScrollTo(selectedItem.GetComponent<RectTransform>());
-        }
-
         private void OnEnable()
         {
             if (isDebugging)

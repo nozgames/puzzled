@@ -13,20 +13,6 @@ namespace Puzzled.UI
         override public string confirmButtonText => "Enter World";
         override public bool showCancelButton => true;
 
-        private void Awake()
-        {
-            _worldList.onSelectionChanged += HandleSelectionChange;
-        }
-
-        private void HandleSelectionChange(int obj)
-        {
-            var selectedItem = _worldList.selectedItem;
-            if (null == selectedItem)
-                return;
-
-            _worldListScroll.ScrollTo(selectedItem.GetComponent<RectTransform>());
-        }
-
         private void OnEnable()
         {
             _worldList.transform.DetachAndDestroyChildren();
