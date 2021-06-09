@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1784249378825888584}
   - component: {fileID: 5865390158968611877}
   - component: {fileID: 8197367742369685844}
+  - component: {fileID: 3557747274077294691}
   m_Layer: 5
   m_Name: Preview
   m_TagString: Untagged
@@ -72,6 +73,21 @@ MonoBehaviour:
     y: 0
     width: 1
     height: 1
+--- !u!114 &3557747274077294691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3361391515645564803}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 545cd2847c8fa3f46a415dcaa111080d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _direction: 1
+  _text: 
+  _delay: 0
 --- !u!1 &4642312077439141805
 GameObject:
   m_ObjectHideFlags: 0
@@ -144,36 +160,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2029dbeabad9f941b83ba13286e0774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 3
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Hover
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 0}
-  _dragVisuals: {fileID: 0}
   _reorder: 0
   onSelectionChanged:
     m_PersistentCalls:
@@ -183,6 +169,7 @@ MonoBehaviour:
       m_Calls: []
   _nameText: {fileID: 0}
   _previewImage: {fileID: 8197367742369685844}
+  _tooltip: {fileID: 3557747274077294691}
 --- !u!95 &769367289363832231
 Animator:
   serializedVersion: 3

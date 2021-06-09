@@ -15,6 +15,11 @@ namespace Puzzled.UI
         private UITooltipPopup _popup = null;
         private bool _popupVisible = false;
 
+        public string text {
+            get => _text;
+            set => _text = value;
+        }
+
         private void OnDisable()
         {
             if (_popupVisible)
