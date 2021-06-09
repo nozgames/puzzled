@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Puzzled
 {
-    [RequireComponent(typeof(Usable))]
     class Switch : TileComponent
     {
         private class SharedData
@@ -13,7 +12,6 @@ namespace Puzzled
         }
 
         [Header("General")]
-        [SerializeField] private bool _usable = true;
         [SerializeField] private Animator _animator = null;
         [SerializeField] private AudioClip _onSound = null;
         [SerializeField] private AudioClip _offSound = null;
@@ -129,12 +127,13 @@ namespace Puzzled
                 _animationOn = Animator.StringToHash("On");
                 _animationOff = Animator.StringToHash("Off");
             }
+
         }
 
         [ActorEventHandler()]
         private void OnAwake (AwakeEvent evt)
         {
-            if (_usable)
+            if (GetComponent<Usable>() != null)
                 RegisterHandler<UseEvent>();
         }
 
