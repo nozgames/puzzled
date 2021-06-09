@@ -26,8 +26,7 @@ namespace Puzzled
         [SerializeField] private AudioClip _openSound = null;
         [SerializeField] private AudioClip _closeSound = null;
 
-        [Editable]
-        public bool isOpen {
+        private bool isOpen {
             get => _open;
             set {
                 if (_open == value)
