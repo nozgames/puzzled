@@ -7,6 +7,8 @@ namespace Puzzled.UI
 {
     class UIList : Selectable
     {
+        [SerializeField] private ScrollRect _scrollRect = null;
+
         public int selected => GetSelectedIndex();
 
         public UIListItem selectedItem => GetItem(GetSelectedIndex());
@@ -72,14 +74,18 @@ namespace Puzzled.UI
             onReorderItem?.Invoke(from, to);
         }
 
-        override public void OnMove(AxisEventData eventData)
-        {
+        public override void OnMove(AxisEventData eventData)
+        {            
             var dir = ((eventData.moveDir == MoveDirection.Down) ? 1 : -1);
             for (int newSelection = selected + dir; newSelection >= 0 && newSelection < transform.childCount; newSelection += dir)
             { 
                 if(GetItem(newSelection).interactable)
                 {
                     SelectItem(newSelection);
+
+                    if(null != _scrollRect)
+                        _scrollRect.ScrollTo(selectedItem.GetComponent<RectTransform>());
+
                     return;
                 }
             }

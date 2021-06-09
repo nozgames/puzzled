@@ -139,8 +139,8 @@ namespace Puzzled.UI
 
         private void HandleSelectionChange(int obj)
         {
-            if(_puzzleList.selectedItem != null)
-                _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
+//            if(_puzzleList.selectedItem != null)
+  //              _scrollRect.ScrollTo(_puzzleList.selectedItem.GetComponent<RectTransform>());
         }
 
         private void OnPuzzleListReorderItem(int fromIndex, int toIndex)
@@ -227,7 +227,7 @@ namespace Puzzled.UI
                 if(puzzleItem.puzzleEntry == puzzleEntry)
                 {
                     _puzzleList.SelectItem(i);
-                    _scrollRect.ScrollTo(puzzleItem .GetComponent<RectTransform>());
+                    //_scrollRect.ScrollTo(puzzleItem .GetComponent<RectTransform>());
                 }
             }
         }

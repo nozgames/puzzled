@@ -37,13 +37,13 @@ namespace Puzzled.UI
             _worldList.onSelectionChanged += HandleSelectionChange;
         }
 
-        private void HandleSelectionChange(int obj)
+        private void HandleSelectionChange(int selection)
         {
             var selectedItem = _worldList.selectedItem;
             if (selectedItem == null)
                 return;
 
-            _worldListScroll.ScrollTo(selectedItem.GetComponent<RectTransform>());
+            //_worldListScroll.ScrollTo(selectedItem.GetComponent<RectTransform>());
         }
 
         private void OnEnable()
