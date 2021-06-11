@@ -142,7 +142,11 @@ namespace Puzzled.UI
                 index = _dragStart;
 
             if (transform.GetSiblingIndex() != index)
+            {
                 transform.SetSiblingIndex(index);
+
+                _list.ScrollTo(index);
+            }
         }
 
         public void OnPointerEnter(PointerEventData eventData)

@@ -15,10 +15,10 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnSelectUpdate(SelectUpdateEvent evt)
         {
-            if (isEditing || isLoading || decals == null)
+            if (isLoading || decals == null)
                 return;
 
-            if (evt.transientValue <= 0)
+            if (evt.transientValue < 0 || evt.transientValue >= decals.Length)
                 return;
 
             var surfaces = DecalSurface.FromCell(puzzle, tile.cell);

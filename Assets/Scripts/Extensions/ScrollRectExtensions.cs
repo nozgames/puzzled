@@ -66,7 +66,7 @@ namespace Puzzled
         /// </summary>
         /// <param name="scrollRect">Scroll rect to scroll</param>
         /// <param name="target">Element of the scroll rect's content to center vertically</param>
-        public static void ScrollTo(this ScrollRect scrollRect, RectTransform target)
+        public static void ScrollTo(this ScrollRect scrollRect, RectTransform target, int threshold=1)
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(target);
             Canvas.ForceUpdateCanvases();
@@ -77,8 +77,17 @@ namespace Puzzled
             // Calcualte the scroll offset in the view's space
             var viewRect = view.rect;
             var elementBounds = target.TransformBoundsTo(view);
-            var offset = viewRect.center.y - elementBounds.center.y;
+            var viewRectMin = viewRect.min.y + threshold * elementBounds.size.y;
+            var viewRectMax = viewRect.max.y - threshold * elementBounds.size.y;
 
+            var offset = 0.0f;
+            if (elementBounds.min.y < viewRectMin)
+                offset = viewRectMin - elementBounds.min.y;
+            else if (elementBounds.max.y > viewRectMax)
+                offset = viewRectMax - elementBounds.max.y;
+            else
+                return;
+           
             // Normalize and apply the calculated offset
             var scrollPos = Mathf.Clamp(scrollRect.verticalNormalizedPosition - scrollRect.NormalizeScrollDistance(1, offset), 0, 1);
             scrollRect.verticalNormalizedPosition = scrollPos;

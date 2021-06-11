@@ -82,13 +82,19 @@ namespace Puzzled.UI
                 if(GetItem(newSelection).interactable)
                 {
                     SelectItem(newSelection);
-
-                    if(null != _scrollRect)
-                        _scrollRect.ScrollTo(selectedItem.GetComponent<RectTransform>());
-
+                    ScrollTo(newSelection);
                     return;
                 }
             }
+        }
+
+        public void ScrollTo(int itemIndex)
+        {
+            if (itemIndex < 0 || itemIndex >= itemCount)
+                return;
+
+            if (null != _scrollRect)
+                _scrollRect.ScrollTo(GetItem(itemIndex).GetComponent<RectTransform>());
         }
     }
 }
