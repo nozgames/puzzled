@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Puzzled.UI;
 using Puzzled.Editor;
+using System.Collections.Generic;
 
 namespace Puzzled.Editor
 {
@@ -25,7 +26,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIPropertyEditor cellEditorPrefab = null;
         [SerializeField] private UIPropertyEditor numberArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor portEditorPrefab = null;
-        //[SerializeField] private UIPropertyEditor portEmptyEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor portEmptyEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringMultilineEditorPrefab = null;
         [SerializeField] private UIPropertyEditor stringArrayEditorPrefab = null;
@@ -285,6 +286,21 @@ namespace Puzzled.Editor
                         provider.inspectorState = state.value;
                 }
             }
+
+            // Sort the priorities
+            var priorities = new List<UIPriority>(_inspectorContent.transform.childCount);
+            for(int i=0; i< _inspectorContent.transform.childCount; i++)
+            {
+                var priority = _inspectorContent.transform.GetChild(i).GetComponent<UIPriority>();
+                if(null == priority)
+                    priority = _inspectorContent.transform.GetChild(i).gameObject.AddComponent<UIPriority>();
+
+                priorities.Add(priority);
+            }
+
+            priorities = priorities.OrderByDescending(p => p.priority).ToList();
+            for(int i=0; i<priorities.Count; i++)
+                priorities[i].transform.SetSiblingIndex(i);
         }
 
         /// <summary>
@@ -315,7 +331,6 @@ namespace Puzzled.Editor
                             prefab = numberEditorPrefab; 
                         break;
 
-
                     case TilePropertyType.Cell: prefab = cellEditorPrefab; break;
                     case TilePropertyType.IntArray: prefab = numberArrayEditorPrefab; break;
                     case TilePropertyType.Bool: prefab = boolEditorPrefab; break;
@@ -326,7 +341,7 @@ namespace Puzzled.Editor
                     case TilePropertyType.DecalArray: prefab = decalArrayEditorPrefab; break;
                     case TilePropertyType.Port:
                         if (property.GetValue<Port>(tile).wires.Count == 0)
-                            return null; //  prefab = portEmptyEditorPrefab; 
+                            prefab = portEmptyEditorPrefab; 
                         else
                             prefab = portEditorPrefab; 
                         break;
