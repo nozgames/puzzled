@@ -31,11 +31,6 @@ namespace Puzzled
         [SerializeField] private InputAction key3 = null;
         [SerializeField] private InputAction key4 = null;
 
-        [Header("Modifiers")]
-        [SerializeField] private InputAction keyShift = null;
-        [SerializeField] private InputAction keyAlt = null;
-        [SerializeField] private InputAction keyCtrl = null;
-
         private static KeyboardManager _instance = null;
 
         private bool shift = false;
@@ -43,29 +38,11 @@ namespace Puzzled
         private bool alt = false;
         private Stack<IKeyboardHandler> _handlers = new Stack<IKeyboardHandler>();
 
-        public static bool isShiftPressed {
-            get => _instance.shift;
-            private set {
-                _instance.shift = value;
-                _instance.UpdateModifiers();
-            }
-        }
+        public static bool isShiftPressed => Keyboard.current.shiftKey.ReadValue() > 0;
 
-        public static bool isCtrlPressed {
-            get => _instance.ctrl;
-            private set {
-                _instance.ctrl = value;
-                _instance.UpdateModifiers();
-            }
-        }
+        public static bool isCtrlPressed => Keyboard.current.ctrlKey.ReadValue() > 0;
 
-        public static bool isAltPressed {
-            get => _instance.alt;
-            private set {
-                _instance.alt = value;
-                _instance.UpdateModifiers();
-            }
-        }
+        public static bool isAltPressed => Keyboard.current.altKey.ReadValue() > 0; 
 
         private void Awake()
         {
@@ -83,13 +60,7 @@ namespace Puzzled
             keyD.performed += (ctx) => SendKey(KeyCode.D);
             keyV.performed += (ctx) => SendKey(KeyCode.V);
             keyZ.performed += (ctx) => SendKey(KeyCode.Z);
-            keyY.performed += (ctx) => SendKey(KeyCode.Y);
-            keyShift.started += (ctx) => isShiftPressed = true;
-            keyShift.canceled += (ctx) => isShiftPressed = false;
-            keyAlt.started += (ctx) => isAltPressed = true;
-            keyAlt.canceled += (ctx) => isAltPressed = false;
-            keyCtrl.started += (ctx) => isCtrlPressed = true;
-            keyCtrl.canceled += (ctx) => isCtrlPressed = false;
+            keyY.performed += (ctx) => SendKey(KeyCode.Y);            
         }
 
         private void OnEnable()
@@ -111,9 +82,6 @@ namespace Puzzled
             keyV.Enable();
             keyY.Enable();
             keyZ.Enable();
-            keyShift.Enable();
-            keyAlt.Enable();
-            keyCtrl.Enable();
         }
 
         private void OnDisable()
@@ -123,9 +91,6 @@ namespace Puzzled
             keySpace.Disable();
             keyY.Disable();
             keyZ.Disable();
-            keyShift.Disable();
-            keyAlt.Disable();
-            keyCtrl.Disable();
 
             _instance = null;
         }
@@ -136,8 +101,19 @@ namespace Puzzled
         }
 
         public static void Pop ()
-        {
+        {            
             _instance._handlers.Pop();
+        }
+
+        private void Update()
+        {
+            if (Keyboard.current.altKey.wasPressedThisFrame || 
+                Keyboard.current.altKey.wasReleasedThisFrame ||
+                Keyboard.current.ctrlKey.wasPressedThisFrame ||
+                Keyboard.current.ctrlKey.wasReleasedThisFrame ||
+                Keyboard.current.shiftKey.wasPressedThisFrame ||
+                Keyboard.current.shiftKey.wasReleasedThisFrame)
+                UpdateModifiers();
         }
 
         private IKeyboardHandler GetHandler()
