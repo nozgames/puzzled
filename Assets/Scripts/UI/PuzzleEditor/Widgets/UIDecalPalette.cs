@@ -91,7 +91,13 @@ namespace Puzzled.Editor
             _searchClearButton.gameObject.SetActive(false);
 
             _importButton.onClick.AddListener(() => {
-                UIPuzzleEditor.Import();
+                UIPuzzleEditor.Import((decal) => {
+                    if (decal != Decal.none)
+                    {
+                        _filterImported.isOn = true;
+                        SetSelected(decal, true);
+                    }
+                });
             });
 
             _defaultsButton.onClick.AddListener(() => {

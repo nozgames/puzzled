@@ -2,7 +2,6 @@
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using Puzzled.UI;
 
 namespace Puzzled.Editor
 {
@@ -31,9 +30,16 @@ namespace Puzzled.Editor
             UpdateButtons();
         }
 
+        private void OnDisable()
+        {
+            _callback?.Invoke(null);
+        }
+
         private void Done()
         {
-            _callback.Invoke(_path.text);
+            var callback = _callback;
+            _callback = null;
+            callback.Invoke(_path.text);
         }
 
         private void UpdateButtons()

@@ -79,7 +79,6 @@ namespace Puzzled.Editor
         [SerializeField] private UISoundPalette _chooseSoundPalette= null;
         [SerializeField] private UIPortSelector _choosePortPopup = null;
         [SerializeField] private UITileSelector _chooseTileConnectionPopup = null;
-        [SerializeField] private UIImportPopup _importPopup = null;
         [SerializeField] private UIColorPicker _colorPicker = null;
 
         private Mode _mode = Mode.Unknown;
@@ -951,20 +950,54 @@ namespace Puzzled.Editor
             return mask;
         }
 
-        public static void Import()
+        /// <summary>
+        /// Import a new custom decal
+        /// </summary>
+        /// <param name="callback">Callback to call with newly imported decal, or empty decal if none was imported</param>
+        public static void Import(Action<Decal> callback)
         {
-            instance.ShowPopup(instance._importPopup.gameObject);
-            instance._importPopup.Import((path) => {
+            var ofn = new OpenFileDialog.OpenFileName();
+            ofn.filter = "All Files\0*.*\0Images\0*.png\0\0";
+            ofn.file = new string(new char[256]);
+            ofn.maxFile = ofn.file.Length;
+            ofn.fileTitle = new string(new char[64]);
+            ofn.maxFileTitle = ofn.fileTitle.Length;
+            ofn.initialDir = Application.dataPath;
+            ofn.title = "Upload Image";
+            ofn.defExt = "PNG";
+            ofn.flags = OpenFileDialog.OFN_EXPLORER | 
+                OpenFileDialog.OFN_FILEMUSTEXIST | 
+                OpenFileDialog.OFN_PATHMUSTEXIST | 
+                OpenFileDialog.OFN_ALLOWMULTISELECT | 
+                OpenFileDialog.OFN_NOCHANGEDIR;
+
+            // Empty keyboard handler to make sure no keys are processed during this time
+            KeyboardManager.Push(null);
+            if (OpenFileDialog.GetOpenFileName(ofn))
+            {
+                var path = ofn.file;
+                Debug.Log(path);
+                if (null == path)
+                {
+                    callback?.Invoke(Decal.none);
+                    return;
+                }
+
                 var guid = instance._puzzleEntry.world.AddTexture(path, Path.GetFileName(path));
                 if (guid == Guid.Empty)
                     return;
 
-                var texture = instance._puzzleEntry.world.GetTexture(guid);
-                var decal = new Decal(guid, texture);
-
+                var decal = instance._puzzleEntry.world.GetDecal(guid);
                 instance._chooseDecalPalette.AddDecal(decal);
                 instance._decalPalette.AddDecal(decal);
-            });
+
+                callback?.Invoke(decal);
+            } else
+                callback?.Invoke(Decal.none);
+
+            // Force the input system to process any keys before popping the emoty keyboard handler off
+            UnityEngine.InputSystem.InputSystem.Update();
+            KeyboardManager.Pop();
         }
 
         public void ChooseColor (Color color, RectTransform rectTransform, Action<Color,bool> valueChanged)

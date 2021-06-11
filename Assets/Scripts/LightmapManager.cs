@@ -59,7 +59,10 @@ namespace Puzzled
         public static void Shutdown()
         {
             _instance = null;
+
+#if UNITY_EDITOR
             ResetWhite();
+#endif
         }
 
         public static void RenderDefault ()
