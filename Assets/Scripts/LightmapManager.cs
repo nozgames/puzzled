@@ -62,12 +62,7 @@ namespace Puzzled
             ResetWhite();
         }
 
-        public void LateUpdate()
-        {
-            Render();
-        }
-
-        public static void SetDefault ()
+        public static void RenderDefault ()
         {
             var color = _instance._camera.backgroundColor;
             _instance._camera.backgroundColor = Color.white;

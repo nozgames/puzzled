@@ -154,8 +154,8 @@ namespace Puzzled.Editor
             if (instance == null)
                 return;
 
-            instance._chooseDecalPalette.RemoveImportedDecals();
-            instance._decalPalette.RemoveImportedDecals();
+            instance._chooseDecalPalette.UnloadDecals();
+            instance._decalPalette.UnloadDecals();
 
             instance._pointerAction.action.performed -= instance.OnPointerMoved;
 
@@ -494,6 +494,8 @@ namespace Puzzled.Editor
             // Return to the saved mode
             mode = savedMode;
 
+            LightmapManager.Render();
+
             UpdateCameraFlags();
         }
 
@@ -583,16 +585,11 @@ namespace Puzzled.Editor
                 _cameraTarget = targetPosition;
                 UpdateCamera();
 
-                // Add the world decals to the decal palette.
-                instance._chooseDecalPalette.RemoveImportedDecals();
-                instance._decalPalette.RemoveImportedDecals();
-
                 _puzzleEntry.world.LoadAllTextures();
-                foreach(var decal in _puzzleEntry.world.decals)
-                {
-                    instance._chooseDecalPalette.AddDecal(decal);
-                    instance._decalPalette.AddDecal(decal);
-                }
+
+                // Add the world decals to the decal palette.
+                instance._chooseDecalPalette.LoadDecals(_puzzleEntry.world);
+                instance._decalPalette.LoadDecals(_puzzleEntry.world);
             } 
             catch (Exception e)
             {

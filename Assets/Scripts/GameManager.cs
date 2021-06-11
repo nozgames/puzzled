@@ -169,6 +169,8 @@ namespace Puzzled
             if (Puzzle.current == null)
                 Puzzle.current = oldPuzzle;
 
+            LightmapManager.Render();
+
             return Puzzle.current;
         }
 

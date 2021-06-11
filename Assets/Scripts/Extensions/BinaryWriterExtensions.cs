@@ -49,6 +49,9 @@ namespace Puzzled
         public static void Write(this BinaryWriter writer, Decal decal)
         {
             writer.Write(decal.guid);
+            if (decal.guid == Guid.Empty)
+                return;
+
             writer.Write((int)decal.flags);
             writer.Write(decal.rotation);
             writer.Write(decal.offset.x);

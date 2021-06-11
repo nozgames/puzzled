@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 10;
+        private const int FileVersion = 11;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -545,6 +545,7 @@ namespace Puzzled
             {
                 case 9:
                 case 10:
+                case 11:
                     LoadV9(reader, version);
                     break;
 

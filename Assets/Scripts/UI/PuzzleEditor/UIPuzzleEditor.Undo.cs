@@ -77,6 +77,8 @@ namespace Puzzled.Editor
                 instance.puzzleName.text = instance.puzzleName.text + "*";
 
             instance.UpdateCursor(true);
+
+            LightmapManager.Render();
         }
 
         /// <summary>
@@ -107,6 +109,8 @@ namespace Puzzled.Editor
             instance.UpdateCursor(true);
 
             _puzzle.isModified = true;
+
+            LightmapManager.Render();
         }
 
         /// <summary>
@@ -137,6 +141,8 @@ namespace Puzzled.Editor
             instance.UpdateCursor(true);
 
             _puzzle.isModified = true;
+
+            LightmapManager.Render();
         }
 
         /// <summary>

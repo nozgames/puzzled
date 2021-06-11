@@ -261,7 +261,7 @@ namespace Puzzled
             var puzzle = GameManager.puzzle;
             GameManager.puzzle = _instance._tilePreviewPuzzle;
 
-            LightmapManager.SetDefault();
+            LightmapManager.RenderDefault();
 
             foreach (var tile in _instance._tiles)
             {

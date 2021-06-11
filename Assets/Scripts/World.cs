@@ -504,7 +504,7 @@ namespace Puzzled
             if (null == textureEntry)
                 return Decal.none;
 
-            return new Decal(textureEntry.guid, LoadTexture(archive, textureEntry)) { isAutoColor = !textureEntry.hasColor, color = Color.white };
+            return new Decal(textureEntry.guid, LoadTexture(archive, textureEntry)) { isAutoColor = !textureEntry.hasColor, color = Color.white, isImported = true };
         }
 
         /// <summary>
@@ -546,12 +546,13 @@ namespace Puzzled
 
             // Copy the texture to the archive
             using var stream = archiveEntry.OpenWrite();
-            var streamWriter = new StreamWriter(stream);
+            using var streamWriter = new BinaryWriter(stream);
             streamWriter.Write(texture.EncodeToPNG());
 
             var textureEntry = new TextureEntry {
                 guid = Guid.NewGuid(),
-                cached = texture
+                cached = texture,
+                path = archiveEntry.name
             };
 
             _textures.Add(textureEntry);

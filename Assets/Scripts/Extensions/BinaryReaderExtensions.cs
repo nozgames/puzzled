@@ -64,6 +64,9 @@ namespace Puzzled
         public static Decal ReadDecal (this BinaryReader reader, World world, int version)
         {
             var guid = reader.ReadGuid();
+            if (version >= 11 && guid == Guid.Empty)
+                return Decal.none;
+
             var decal = Decal.none;
             if (world != null)
                 decal = world.GetDecal(guid);

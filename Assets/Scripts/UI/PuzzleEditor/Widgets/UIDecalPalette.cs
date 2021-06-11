@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Puzzled.UI;
+using System.Collections.Generic;
 
 namespace Puzzled.Editor
 {
@@ -33,6 +34,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _filterRune = null;
         [SerializeField] private UIRadio _filterNumber = null;
         [SerializeField] private UIRadio _filterLine = null;
+        [SerializeField] private UIRadio _filterImported = null;
 
         private Decal _selected = Decal.none;
         
@@ -121,18 +123,35 @@ namespace Puzzled.Editor
             _filterRune.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterLetter.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterLine.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
+            _filterImported.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
 
             UpdatePreview();
         }
 
-        public void RemoveImportedDecals ()
+        public void LoadDecals (World world)
         {
-            for(var childIndex = _list.transform.childCount - 1; childIndex >=0; childIndex--)
+            // None
+            if (allowNone)
             {
-                var item = GetItem(childIndex);
-                if (item.decal.isImported)
-                    Destroy(item.gameObject);
+                var none = new Decal(Guid.Empty, _noneTexture);
+                none.isAutoColor = false;
+                none.color = _noneColor;
+                Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = none;
             }
+
+            // Add all built-in decals 
+            foreach (var decal in DatabaseManager.GetDecals())
+                Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = decal;
+
+            // Add all the world decals
+            foreach (var decal in world.decals)
+                Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = decal;
+
+        }
+
+        public void UnloadDecals ()
+        {
+            _list.transform.DetachAndDestroyChildren();
         }
 
         public void AddDecal (Decal decal)
@@ -180,7 +199,7 @@ namespace Puzzled.Editor
                 regex = LetterRegex;
             else if (_filterLine.isOn)
                 regex = LineRegex;
-
+                
             for (int i = allowNone ? 1 : 0; i < _list.itemCount; i++)
             {
                 var item = _list.GetItem(i).GetComponent<UIDecalPaletteItem>();
@@ -190,6 +209,11 @@ namespace Puzzled.Editor
                 var active = true;
                 active &= !checkText || (spriteName.ToLower().Contains(text));
                 active &= (regex == null) || (regex.Match(spriteName).Success);
+
+                if (decal.isImported)
+                    active &= (_filterImported.isOn || _filterAll.isOn);
+                else
+                    active &= !_filterImported.isOn;
 
                 _list.GetItem(i).gameObject.SetActive(active);
             }

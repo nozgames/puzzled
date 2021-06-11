@@ -33,16 +33,13 @@ namespace Puzzled
 
         private static KeyboardManager _instance = null;
 
-        private bool shift = false;
-        private bool ctrl = false;
-        private bool alt = false;
         private Stack<IKeyboardHandler> _handlers = new Stack<IKeyboardHandler>();
 
-        public static bool isShiftPressed => Keyboard.current.shiftKey.ReadValue() > 0;
+        public static bool isShiftPressed => Keyboard.current.shiftKey.ReadValue() > 0.5f;
 
-        public static bool isCtrlPressed => Keyboard.current.ctrlKey.ReadValue() > 0;
+        public static bool isCtrlPressed => Keyboard.current.ctrlKey.ReadValue() > 0.5f;
 
-        public static bool isAltPressed => Keyboard.current.altKey.ReadValue() > 0; 
+        public static bool isAltPressed => Keyboard.current.altKey.ReadValue() > 0.5f; 
 
         private void Awake()
         {
@@ -136,6 +133,6 @@ namespace Puzzled
             GetHandler()?.OnKey(keyCode);
         }
 
-        private void UpdateModifiers() => GetHandler()?.OnModifiersChanged(_instance.shift, _instance.ctrl, _instance.alt);
+        private void UpdateModifiers() => GetHandler()?.OnModifiersChanged(isShiftPressed, isCtrlPressed, isAltPressed);
     }
 }
