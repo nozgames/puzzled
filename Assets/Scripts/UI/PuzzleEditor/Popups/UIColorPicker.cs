@@ -12,6 +12,7 @@ namespace Puzzled.Editor
         private Texture2D _textureV;
         private Texture2D _textureA;
 
+        [SerializeField] private RectTransform _popup = null;
         [SerializeField] private RectTransform _colorTransform = null;
 
         [SerializeField] private Button _previousButton = null;
@@ -36,6 +37,8 @@ namespace Puzzled.Editor
         [SerializeField] private TMPro.TMP_InputField _hex = null;
 
         public System.Action<Color,bool> onValueChanged;
+
+        public RectTransform popup => _popup;
 
         public Color value {
             get {

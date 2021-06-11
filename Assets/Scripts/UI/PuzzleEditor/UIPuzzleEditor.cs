@@ -69,7 +69,6 @@ namespace Puzzled.Editor
         [SerializeField] private GameObject popups = null;
         [SerializeField] private Image _popupDarken = null;
         [SerializeField] private GameObject _menu = null;
-        [SerializeField] private UIChoosePuzzlePopup _chooseFilePopup = null;
         [SerializeField] private GameObject _chooseTilePopup = null;
         [SerializeField] private UITilePalette _chooseTilePalette = null;
         [SerializeField] private GameObject _chooseDecalPopup = null;
@@ -257,16 +256,6 @@ namespace Puzzled.Editor
                     ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(selectedTile, "rotation", rotation.GetValue<int>(selectedTile) + 1));
             });            
 
-            _chooseFilePopup.onCancel += () => HidePopup();
-            _chooseFilePopup.onOpenPuzzle += (filename) => {
-                //Load(filename);
-                HidePopup();
-            };
-            _chooseFilePopup.onSaveFile += (filename) => {
-                SaveAs(filename);
-                HidePopup();
-            };
-
             _chooseSoundPalette.onDoubleClickSound += (background) => {
                 _chooseSoundCallback?.Invoke(background);
                 HidePopup();
@@ -404,14 +393,6 @@ namespace Puzzled.Editor
         }
 
 
-        public void OnSaveAsButton()
-        {
-#if false
-            ShowPopup(_chooseFilePopup.gameObject);
-            _chooseFilePopup.SavePuzzle(_puzzle.path);
-#endif
-        }
-
         public void OnCancelPopup()
         {
             HidePopup();
@@ -438,14 +419,6 @@ namespace Puzzled.Editor
 
             HidePopup();
         }
-
-#if false
-        public void OnLoadButton()
-        {
-            ShowPopup(_chooseFilePopup.gameObject);
-            _chooseFilePopup.OpenPuzzle();            
-        }
-#endif
 
         public static void Stop() => instance.OnStopButton();
 
@@ -999,8 +972,8 @@ namespace Puzzled.Editor
 
         public void ChooseColor (Color color, RectTransform rectTransform, Action<Color,bool> valueChanged)
         {
-            var parentTransform = (_colorPicker.transform.parent as RectTransform);
-            var pickerTransform = _colorPicker.transform as RectTransform;
+            var parentTransform = (_colorPicker.transform as RectTransform);
+            var pickerTransform = _colorPicker.popup.transform as RectTransform;
             var bounds = rectTransform.TransformBoundsTo(parentTransform);
             var min = (Vector2)bounds.min - parentTransform.rect.min;
             var max = (Vector2)bounds.max - parentTransform.rect.min;

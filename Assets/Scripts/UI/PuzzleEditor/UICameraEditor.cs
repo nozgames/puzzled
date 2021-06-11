@@ -111,7 +111,17 @@ namespace Puzzled.Editor
             {
                 var step = _rectTransform.rect.height / (_gameCamera.zoomLevel * 4 + 1);
                 var delta = (_dragStart - eventData.position) / step;
-                var offset = _offsetStart + new Vector2Int((int)delta.x, (int)delta.y);
+
+                var transformedDelta = _gameCamera.yawIndex switch
+                {                    
+                    0 => new Vector2Int((int)delta.x, (int)delta.y),
+                    1 => new Vector2Int((int)delta.y, (int)-delta.x),
+                    2 => new Vector2Int((int)-delta.x, (int)-delta.y),
+                    3 => new Vector2Int((int)-delta.y, (int)delta.x),
+                    _ => new Vector2Int((int)delta.x, (int)delta.y)
+                };
+
+                var offset = _offsetStart + transformedDelta;
                 if (offset != _gameCamera.offset)
                 {
                     UIPuzzleEditor.ExecuteCommand(new Commands.TileSetPropertyCommand(_gameCamera.tile, "offset", offset), _dragCombine);
