@@ -589,6 +589,8 @@ namespace Puzzled.Editor
                 // Add the world decals to the decal palette.
                 instance._chooseDecalPalette.LoadDecals(_puzzleEntry.world);
                 instance._decalPalette.LoadDecals(_puzzleEntry.world);
+
+                LightmapManager.Render();
             } 
             catch (Exception e)
             {

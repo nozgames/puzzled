@@ -26,7 +26,9 @@ namespace Puzzled
 
         public float rotation { get; set; }
 
-        public Vector2 offset { get; set; }
+        public float offsetX { get; set; }
+
+        public float offsetY { get; set; }
 
         public float scale { get; set; }
 
@@ -82,7 +84,8 @@ namespace Puzzled
                 color == other.color &&
                 rotation == other.rotation &&
                 scale == other.scale &&
-                offset == other.offset &&
+                offsetX == other.offsetX &&
+                offsetY == other.offsetY &&
                 flags == other.flags;
         }
 
@@ -102,7 +105,8 @@ namespace Puzzled
         {
             this.guid = guid;
             this.texture = texture;
-            offset = Vector2.zero;
+            offsetX = 0f;
+            offsetY = 0f;
             scale = 1.0f;
             smoothness = 0.0f;
             rotation = 0.0f;

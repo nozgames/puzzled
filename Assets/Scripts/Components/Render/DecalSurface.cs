@@ -54,6 +54,8 @@ namespace Puzzled
                         material.SetFloat("_decalSmoothness", _decal.smoothness);
                         material.SetVector("_decalScale", new Vector2(decal.scale * (_decal.isFlipped ? -1 : 1), decal.scale));
                         material.SetFloat("_decalRotation", _decal.rotation);
+                        material.SetFloat("_decalOffsetX", _decal.offsetX);
+                        material.SetFloat("_decalOffsetY", _decal.offsetY);
                     }
                 } else if (_renderer is SpriteRenderer spriteRenderer)
                     _renderer.enabled = false;

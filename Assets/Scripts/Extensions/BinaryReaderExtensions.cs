@@ -76,7 +76,8 @@ namespace Puzzled
 
             decal.flags = (DecalFlags)reader.ReadInt32();
             decal.rotation = reader.ReadSingle();
-            decal.offset = new Vector2(reader.ReadSingle(), reader.ReadSingle());
+            decal.offsetX = reader.ReadSingle();
+            decal.offsetY = reader.ReadSingle();
             decal.scale = reader.ReadSingle();
             decal.smoothness = reader.ReadSingle();
             decal.color = reader.ReadColor();

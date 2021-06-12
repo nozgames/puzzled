@@ -54,8 +54,8 @@ namespace Puzzled
 
             writer.Write((int)decal.flags);
             writer.Write(decal.rotation);
-            writer.Write(decal.offset.x);
-            writer.Write(decal.offset.y);
+            writer.Write(decal.offsetX);
+            writer.Write(decal.offsetY);
             writer.Write(decal.scale);
             writer.Write(decal.smoothness);
             writer.Write((Color32)decal.color);

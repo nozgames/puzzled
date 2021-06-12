@@ -12,6 +12,8 @@ namespace Puzzled.Editor
         [SerializeField] private UINumberRangeEditor _scale = null;
         [SerializeField] private UINumberRangeEditor _rotation = null;
         [SerializeField] private UINumberRangeEditor _smoothness = null;
+        [SerializeField] private UINumberRangeEditor _offsetX = null;
+        [SerializeField] private UINumberRangeEditor _offsetY = null;
         [SerializeField] private UIBoolEditor _flipped = null;
         [SerializeField] private UIBoolEditor _autoColor = null;
         [SerializeField] private UIColorEditor _color = null;
@@ -94,6 +96,8 @@ namespace Puzzled.Editor
             _scale.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("scale"), OnBoxedValueChanged) { range = new Vector2Int(1, 200) };
             _rotation.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("rotation"), OnBoxedValueChanged) { range = new Vector2Int(0, 360), floatScale = 1.0f };
             _smoothness.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("smoothness"), OnBoxedValueChanged) { range = new Vector2Int(0, 100) };
+            _offsetX.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("offsetX"), OnBoxedValueChanged) { range = new Vector2Int(-100, 100) };
+            _offsetY.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("offsetY"), OnBoxedValueChanged) { range = new Vector2Int(-100, 100) };
             _flipped.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("isFlipped"), OnBoxedValueChanged);
             _autoColor.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("isAutoColor"), OnBoxedValueChanged);
             _color.target = new DecalPropertyTarget(this, _boxedDecal.GetType().GetProperty("color"), OnBoxedValueChanged);
@@ -115,6 +119,8 @@ namespace Puzzled.Editor
             _rotation.gameObject.SetActive(hasDecal);
             _flipped.gameObject.SetActive(hasDecal);
             _autoColor.gameObject.SetActive(hasDecal);
+            _offsetX.gameObject.SetActive(hasDecal);
+            _offsetY.gameObject.SetActive(hasDecal);
 
             var autoColor = ((Decal)_boxedDecal).isAutoColor;
             _color.gameObject.SetActive(!autoColor && hasDecal);
