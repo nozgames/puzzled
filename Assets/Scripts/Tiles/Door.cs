@@ -14,17 +14,16 @@ namespace Puzzled
         [SerializeField] private Tile keyItem = null;
         [SerializeField] private AudioClip _unlockSound = null;
 
-        [Editable]
+        [Editable(hiddenIfTrue = "hasKey")]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]
         public Port powerInPort { get; set; }
-
-        [Editable]
-        [Port(PortFlow.Output, PortType.Power, legacy = true)]
-        public Port powerOutPort { get; set; }
 
         [SerializeField] private Animator _animator = null;
         [SerializeField] private AudioClip _openSound = null;
         [SerializeField] private AudioClip _closeSound = null;
+
+        [Editable(hidden = true, serialized = false)]
+        public bool hasKey => keyItem != null;
 
         private bool isOpen {
             get => _open;
