@@ -18,8 +18,8 @@ namespace Puzzled.Editor
 
         private void InitializeCursor()
         {
-            canvas.onEnter = OnPointerEnterCanvas;
-            canvas.onExit = OnPointerExitCanvas;
+            _canvas.onEnter = OnPointerEnterCanvas;
+            _canvas.onExit = OnPointerExitCanvas;
             _pointerAction.action.performed -= OnPointerMoved;
             _pointerAction.action.performed += OnPointerMoved;
         }
@@ -52,14 +52,14 @@ namespace Puzzled.Editor
             else if (mode == Mode.Erase && _eraseLayerOnly)
                 coordinateSystem = _puzzle.grid.LayerToCoordinateSystem(_eraseLayer);
 
-            if (updatePosition && canvas.isMouseOver)
+            if (updatePosition && _canvas.isMouseOver)
             {
                 var position = _pointerAction.action.ReadValue<Vector2>();
-                var cell = canvas.CanvasToCell(position, coordinateSystem);
+                var cell = _canvas.CanvasToCell(position, coordinateSystem);
                 if (cell == Cell.invalid)
                     return;
 
-                _cursorWorld = canvas.CanvasToWorld(position);
+                _cursorWorld = _canvas.CanvasToWorld(position);
 
                 // When moving a single tile around that is on an edge lock the edge to that edge
                 if (mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null && selectedTile.cell.edge != CellEdge.None)
@@ -148,7 +148,7 @@ namespace Puzzled.Editor
 
             UIManager.cursor = _getCursor?.Invoke(renderCell) ?? CursorType.Arrow;
 
-            _cursorGizmo.gameObject.SetActive(canvas.isMouseOver);
+            _cursorGizmo.gameObject.SetActive(_canvas.isMouseOver);
 
             var cursorBounds = puzzle.grid.CellToWorldBounds(renderCell);
             _cursorGizmo.min = cursorBounds.min;

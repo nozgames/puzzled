@@ -12,8 +12,8 @@ namespace Puzzled.Editor
 
         private void EnableDecalTool()
         {
-            canvas.onLButtonDown = OnDecalToolLButtonDown;
-            canvas.onLButtonDrag = OnDecalToolDrag;
+            _canvas.onLButtonDown = OnDecalToolLButtonDown;
+            _canvas.onLButtonDrag = OnDecalToolDrag;
 
             _getCursor = OnDecalGetCursor;
 
@@ -59,7 +59,7 @@ namespace Puzzled.Editor
         private void OnDecalToolDrag(Vector2 position, Vector2 delta) => DrawDecal(position);
 
         private void DrawDecal(Vector2 position) =>
-            SetDecal(canvas.CanvasToCell(position), KeyboardManager.isCtrlPressed ? Decal.none : _decalPalette.selected);
+            SetDecal(_canvas.CanvasToCell(position), KeyboardManager.isCtrlPressed ? Decal.none : _decalPalette.selected);
 
         /// <summary>
         /// Set a decal on a tile using undo/redo

@@ -14,6 +14,9 @@ namespace Puzzled
         [SerializeField] private Tile keyItem = null;
         [SerializeField] private AudioClip _unlockSound = null;
 
+        /// <summary>
+        /// Power in port used to open and close the door.  This port is disabled for keyed doors.
+        /// </summary>
         [Editable(hiddenIfTrue = "hasKey")]
         [Port(PortFlow.Input, PortType.Power, legacy = true)]
         public Port powerInPort { get; set; }

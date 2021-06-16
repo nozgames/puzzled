@@ -25,7 +25,7 @@ namespace Puzzled.Editor
         }
 
         [Header("General")]
-        [SerializeField] private UICanvas canvas = null;
+        [SerializeField] private UICanvas _canvas = null;
         [SerializeField] private TMPro.TextMeshProUGUI puzzleName = null;
         [SerializeField] private Button _playButton = null;
         [SerializeField] private Button stopButton = null;
@@ -174,7 +174,7 @@ namespace Puzzled.Editor
             _getCursor = null;
             _onKey = null;
 
-            canvas.UnregisterAll();
+            _canvas.UnregisterAll();
 
             DisableMoveTool();
             DisableDrawTool();
@@ -298,8 +298,8 @@ namespace Puzzled.Editor
 
             KeyboardManager.Push(this);
 
-            canvas.onScroll = OnScroll;
-            canvas.onRButtonDrag = OnPan;
+            _canvas.onScroll = OnScroll;
+            _canvas.onRButtonDrag = OnPan;
 
             GameManager.Stop();
             GameManager.busy++;
@@ -326,7 +326,7 @@ namespace Puzzled.Editor
 
         private void OnScroll(Vector2 position, Vector2 delta)
         {
-            if (playing || delta.y == 0 || !canvas.isMouseOver)
+            if (playing || delta.y == 0 || !_canvas.isMouseOver)
                 return;
 
             UpdateZoom(_cameraZoom + (delta.y > 0 ? -1 : 1));
@@ -384,7 +384,7 @@ namespace Puzzled.Editor
             if (playing)
                 return;
 
-            _cameraTarget += -(canvas.CanvasToWorld(position + delta) - canvas.CanvasToWorld(position));
+            _cameraTarget += -(_canvas.CanvasToWorld(position + delta) - _canvas.CanvasToWorld(position));
 
             UpdateCamera();
             UpdateSelectionGizmo();
@@ -446,10 +446,12 @@ namespace Puzzled.Editor
 
             _toolbar.SetActive(false);
             _playControls.SetActive(true);
+            
             savedMode = mode;
             mode = Mode.Unknown;
             inspector.SetActive(false);
             _canvasControls.SetActive(false);
+            _canvas.gameObject.SetActive(false);
 
             GameManager.busy = 0;
 
@@ -486,6 +488,7 @@ namespace Puzzled.Editor
             _playButton.gameObject.SetActive(true);
             stopButton.gameObject.SetActive(false);
             _canvasControls.SetActive(true);
+            _canvas.gameObject.SetActive(true);
 
             // Set our editing puzzle as active
             Puzzle.current = _puzzle;
