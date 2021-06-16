@@ -11,8 +11,8 @@ namespace Puzzled.Editor
 
         private void EnableDrawTool()
         {
-            canvas.onLButtonDown = OnDrawToolLButtonDown;
-            canvas.onLButtonDrag = OnDrawToolDrag;
+            _canvas.onLButtonDown = OnDrawToolLButtonDown;
+            _canvas.onLButtonDrag = OnDrawToolDrag;
 
             _getCursor = OnDrawGetCursor;
 
@@ -26,7 +26,7 @@ namespace Puzzled.Editor
 
         private CursorType OnDrawGetCursor(Cell cell)
         {
-            if (!canvas.isMouseOver)
+            if (!_canvas.isMouseOver)
                 return CursorType.Arrow;
 
             if (KeyboardManager.isAltPressed)

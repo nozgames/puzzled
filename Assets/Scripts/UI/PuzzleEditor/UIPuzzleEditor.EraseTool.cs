@@ -19,9 +19,9 @@ namespace Puzzled.Editor
 
         private void EnableEraseTool()
         {
-            canvas.onLButtonDown = OnEraseToolLButtonDown;
-            canvas.onLButtonUp = OnEraseToolLButtonUp;
-            canvas.onLButtonDrag = OnEraseToolDrag;
+            _canvas.onLButtonDown = OnEraseToolLButtonDown;
+            _canvas.onLButtonUp = OnEraseToolLButtonUp;
+            _canvas.onLButtonDrag = OnEraseToolDrag;
 
             _getCursor = OnEraseGetCursor;
 

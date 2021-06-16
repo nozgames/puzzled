@@ -44,11 +44,11 @@ namespace Puzzled.Editor
 
         private void EnableLogicTool()
         {
-            canvas.onLButtonDown = OnLogicLButtonDown;
-            canvas.onLButtonUp = OnLogicLButtonUp;
-            canvas.onLButtonDragBegin = OnLogicLButtonDragBegin;
-            canvas.onLButtonDrag = OnLogicLButtonDrag;
-            canvas.onLButtonDragEnd = OnLogicLButtonDragEnd;
+            _canvas.onLButtonDown = OnLogicLButtonDown;
+            _canvas.onLButtonUp = OnLogicLButtonUp;
+            _canvas.onLButtonDragBegin = OnLogicLButtonDragBegin;
+            _canvas.onLButtonDrag = OnLogicLButtonDrag;
+            _canvas.onLButtonDragEnd = OnLogicLButtonDragEnd;
 
             _onKey = OnLogicKey;
             _getCursor = OnLogicGetCursor;

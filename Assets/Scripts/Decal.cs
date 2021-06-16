@@ -101,6 +101,13 @@ namespace Puzzled
             guid = decal.guid;
         }
 
+        public Decal AddRotation (float rotation)
+        {
+            var result = this;
+            result.rotation += rotation;
+            return result;
+        }
+
         public Decal(Guid guid, Texture texture)
         {
             this.guid = guid;

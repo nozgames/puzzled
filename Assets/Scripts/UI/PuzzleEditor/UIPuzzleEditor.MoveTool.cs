@@ -48,11 +48,11 @@ namespace Puzzled.Editor
 
         private void EnableMoveTool ()
         {
-            canvas.onLButtonDown = OnMoveToolLButtonDown;
-            canvas.onLButtonUp = OnMoveToolLButtonUp;
-            canvas.onLButtonDragBegin = OnMoveToolDragBegin;
-            canvas.onLButtonDrag = OnMoveToolDrag;
-            canvas.onLButtonDragEnd = OnMoveToolDragEnd;
+            _canvas.onLButtonDown = OnMoveToolLButtonDown;
+            _canvas.onLButtonUp = OnMoveToolLButtonUp;
+            _canvas.onLButtonDragBegin = OnMoveToolDragBegin;
+            _canvas.onLButtonDrag = OnMoveToolDrag;
+            _canvas.onLButtonDragEnd = OnMoveToolDragEnd;
 
             inspector.SetActive(true);
 
