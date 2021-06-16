@@ -43,16 +43,19 @@ namespace Puzzled.UI
                     if (_list == null)
                         return;
                 }
-
-                if (value)
+                
+                if(value)
                 {
-                    _list.ClearSelection();
-                    _selected = true;
-                } 
-                else
-                {
-                    _selected = false;
+                    var oldItem = _list.selectedItem;
+                    if(oldItem != null)
+                    {
+                        oldItem._selected = false;
+                        oldItem.UpdateAnimatorState();
+                        oldItem.onSelectionChanged?.Invoke(false);
+                    }
                 }
+
+                _selected = value;
 
                 UpdateAnimatorState();
 

@@ -16,9 +16,6 @@ float remap (float value, float2 from, float2 to)
 
 void CalculateDecalUV_float (float2 UV, float2 Scale, float Rotation, float2 Offset, float BaseRotation, float MinWidth, float MaxWidth, float MinHeight, float MaxHeight, float2 Center, out float2 Out, out bool Clip) 
 {
-	float2 pos = float2(MinWidth,MinHeight);
-	float2 size = float2(MaxWidth - MinWidth, MaxHeight - MinHeight);
-
 	float c = cos(BaseRotation);
 	float s = sin(BaseRotation);
 	float2 o = float2(Offset.x * c - Offset.y * s, Offset.x * s + Offset.y * c);
@@ -26,7 +23,7 @@ void CalculateDecalUV_float (float2 UV, float2 Scale, float Rotation, float2 Off
 	c = cos (BaseRotation + Rotation);
 	s = sin (BaseRotation + Rotation);
 
-	float2 uv = (UV - (Center - size * 0.5 * Offset)) / (pos + size * 0.5 * Scale);
+	float2 uv = (UV - (Center - float2(MaxWidth, MaxHeight) * 0.5 * Offset)) / (float2(MaxWidth-MinWidth, MaxHeight-MinHeight) * Scale + float2(MinWidth, MinHeight));
 	Out.x = uv.x * c - uv.y * s;
 	Out.y = uv.x * s + uv.y * c;
 	Out += 0.5;

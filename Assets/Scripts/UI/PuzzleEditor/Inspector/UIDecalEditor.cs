@@ -109,7 +109,9 @@ namespace Puzzled.Editor
         {
             _preview.decal = (Decal)_boxedDecal;
             target.SetValue(_boxedDecal, commit);
-            UpdateControls();
+
+            if(commit)
+                UpdateControls();
         }
 
         private void UpdateControls()
