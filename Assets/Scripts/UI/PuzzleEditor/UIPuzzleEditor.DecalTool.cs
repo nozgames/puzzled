@@ -59,7 +59,7 @@ namespace Puzzled.Editor
         private void OnDecalToolDrag(Vector2 position, Vector2 delta) => DrawDecal(position);
 
         private void DrawDecal(Vector2 position) =>
-            SetDecal(_canvas.CanvasToCell(position), KeyboardManager.isCtrlPressed ? Decal.none : _decalPalette.selected);
+            SetDecal(_canvas.CanvasToCell(position), KeyboardManager.isCtrlPressed ? Decal.none : _decalPalette.selected.AddRotation(_yawSlider.value * 90.0f));
 
         /// <summary>
         /// Set a decal on a tile using undo/redo
