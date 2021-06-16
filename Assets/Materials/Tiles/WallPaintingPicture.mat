@@ -105,7 +105,13 @@ Material:
     - BOOLEAN_DECAL: 0
     - BOOLEAN_F45C64A4AB214595940B65A671B743A0: 0
     - DECAL: 0
-    - DecalRotationBase: 270
+    - DecalCenterX: 0.5
+    - DecalCenterY: 0.5
+    - DecalHeightMax: 1
+    - DecalHeightMin: 0.1
+    - DecalRotationBase: 90
+    - DecalWidthMax: 1
+    - DecalWidthMin: 0.1
     - ENUM_C33E9103007B48F99741EFEAD952D4F1: 0
     - Vector1_483c5ed396a94e72b9a01c7d3bdb2983: 1
     - Vector1_8fd43fa9190e4a3d9ee6bd1fe5de8aec: 0
@@ -139,6 +145,8 @@ Material:
     - _WorkflowMode: 0
     - _ZWrite: 1
     - _decalLight: 0
+    - _decalOffsetX: 0
+    - _decalOffsetY: 0
     - _decalRotation: 0
     - _decalSmoothness: 0
     m_Colors:
