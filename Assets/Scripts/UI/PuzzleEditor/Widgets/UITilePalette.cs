@@ -111,20 +111,26 @@ namespace Puzzled.Editor
                 UpdateFilter();
         }
 
+        private static readonly TileLayer[] _filterDynamicLayers = new[] { TileLayer.Dynamic };
+        private static readonly TileLayer[] _filterFloorLayers = new[] { TileLayer.Floor };
+        private static readonly TileLayer[] _filterLogicLayers = new[] { TileLayer.Logic };
+        private static readonly TileLayer[] _filterStaticLayers = new[] { TileLayer.Static };
+        private static readonly TileLayer[] _filterWallLayers = new[] { TileLayer.Wall, TileLayer.WallStatic };
+
         private void UpdateFilter()
         {
             var checkText = _searchInput.text.Length > 0;
             var text = _searchInput.text.ToLower();
             var checkLayer = !_filterAll.isOn;
-            var layer = TileLayer.Floor;
+            var layers = _filterFloorLayers;
             if (_filterDynamic.isOn)
-                layer = TileLayer.Dynamic;
+                layers = _filterDynamicLayers;
             else if (_filterLogic.isOn)
-                layer = TileLayer.Logic;
+                layers = _filterLogicLayers;
             else if (_filterStatic.isOn)
-                layer = TileLayer.Static;
+                layers = _filterStaticLayers;            
             else if (_filterWall.isOn)
-                layer = TileLayer.Wall;
+                layers = _filterWallLayers;
 
             for (int i = allowNone ? 1 : 0; i < _list.itemCount; i++)
             {
@@ -133,7 +139,7 @@ namespace Puzzled.Editor
 
                 var active = true;
                 active &= !checkText || tile.name.ToLower().Contains(text);
-                active &= !checkLayer || tile.layer == layer;
+                active &= !checkLayer || layers.Contains(tile.layer);
                 active &= (_componentFilter == null) || (tile.GetComponentInChildren(_componentFilter) != null);
                     
                 _list.GetItem(i).gameObject.SetActive(active);
