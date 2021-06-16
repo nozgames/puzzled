@@ -490,6 +490,8 @@ namespace Puzzled.Editor
             // Set our editing puzzle as active
             Puzzle.current = _puzzle;
 
+            _puzzle.StartAllTiles();
+
             // Return to the saved mode
             mode = savedMode;
 

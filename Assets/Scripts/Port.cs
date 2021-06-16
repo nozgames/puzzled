@@ -111,11 +111,16 @@ namespace Puzzled
         /// </summary>
         public bool hasPower {
             get {
-                foreach (var wire in wires)
-                    if (wire.hasPower)
-                        return true;
-                
-                return false;
+                if (flow == PortFlow.Input)
+                {
+                    foreach (var wire in wires)
+                        if (wire.hasPower)
+                            return true;
+
+                    return false;
+                }
+
+                return _desiredPowered;
             }
         }
 

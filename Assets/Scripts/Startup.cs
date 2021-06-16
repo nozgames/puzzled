@@ -14,6 +14,7 @@ namespace Puzzled
 
         private void OnApplicationQuit()
         {
+            PostProcManager.Shutdown();
             UIPuzzleEditor.Shutdown();
             UIManager.Shutdown();
             SaveManager.Shutdown();
@@ -32,6 +33,7 @@ namespace Puzzled
             LightmapManager.Initialize();
             SaveManager.Initialize();
             UIManager.Initialize();
+            PostProcManager.Initialize();
             yield return DatabaseManager.GeneratePreviews();
             yield return new WaitForSeconds(1.0f - (stopwatch.ElapsedMilliseconds / 1000.0f));
             UIManager.loading = false;

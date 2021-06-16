@@ -145,15 +145,18 @@ namespace Puzzled
                 }
 
                 isStarting = true;
-
-                // Send a start event to all tiles
-                var start = new StartEvent();
-                for (int i = 0; i < _tiles.transform.childCount; i++)
-                    _tiles.transform.GetChild(i).GetComponent<Tile>().Send(start);
-
+                StartAllTiles();
                 isStarting = false;
                 _started = true;
             }
+        }
+
+        public void StartAllTiles()
+        {
+            // Send a start event to all tiles
+            var start = new StartEvent();
+            for (int i = 0; i < _tiles.transform.childCount; i++)
+                _tiles.transform.GetChild(i).GetComponent<Tile>().Send(start);
         }
 
         /// <summary>

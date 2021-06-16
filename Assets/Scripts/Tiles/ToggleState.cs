@@ -23,8 +23,6 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnWirePowerChanged(WirePowerChangedEvent evt) => UpdatePower();
 
-        private void OnPowerChanged() => UpdatePower();
-
         private void UpdatePower()
         {
             var hasPower = powerInPort.hasPower;
