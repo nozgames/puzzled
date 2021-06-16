@@ -23,6 +23,10 @@ namespace Puzzled
 
         private Beam _beam = null;
 
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number)]
+        public Port valueOutPort { get; set; }
+
         [Editable(hidden = true)]
         public int rotation
         {
@@ -76,6 +80,7 @@ namespace Puzzled
                 _beam.direction = (BeamDirection)rotation;
 
             _beam.Update();
+            valueOutPort.SendValue(_rotationIndex, true);
         }
 
         public Beam InstantiateBeam (Transform parent, BeamDirection direction)

@@ -40,6 +40,10 @@ namespace Puzzled
             }
         }
 
+        [Editable]
+        [Port(PortFlow.Output, PortType.Number)]
+        public Port valueOutPort { get; set; }
+
         [ActorEventHandler]
         private void OnStart(StartEvent evt) => UpdateRotation();
 
@@ -48,6 +52,7 @@ namespace Puzzled
             float rotationStep = 360 / _numRotations;
             _rotator.localRotation = Quaternion.Euler(0, rotation * rotationStep, 0.0f);
 
+            valueOutPort.SendValue(_rotationIndex % 4, true);
             UpdateBeams();
         }
 
