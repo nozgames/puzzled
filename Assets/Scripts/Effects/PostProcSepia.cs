@@ -4,11 +4,11 @@ using UnityEngine.Rendering;
 
 namespace Puzzled
 {
-    public class PostProcBlackAndWhite : PostProcEffect
+    public class PostProcSepia : PostProcEffect
     {
         protected override void UpdatePostProc()
         {
-            PostProcManager.blackAndWhite.blend.value = strengthFraction * blendScale;
+            PostProcManager.sepia.blend.value = strengthFraction * blendScale;
         }
     }
 }

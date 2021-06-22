@@ -14,10 +14,12 @@ namespace Puzzled
         [SerializeField] private Volume _globalVolume;
 
         private BlackAndWhiteEffect _blackAndWhite;
+        private SepiaEffect _sepia;
 
         private static PostProcManager _instance = null;
 
         public static BlackAndWhiteEffect blackAndWhite => _instance._blackAndWhite;
+        public static SepiaEffect sepia => _instance._sepia;
 
         private void Awake()
         {
@@ -30,6 +32,7 @@ namespace Puzzled
             _instance = this;
 
             _blackAndWhite = new BlackAndWhiteEffect();
+            _sepia = new SepiaEffect();
         }
 
         public static void Initialize()
@@ -37,6 +40,7 @@ namespace Puzzled
             Debug.Assert(_instance != null);
 
             _instance._globalVolume.profile.TryGet<BlackAndWhiteEffect>(out _instance._blackAndWhite);
+            _instance._globalVolume.profile.TryGet<SepiaEffect>(out _instance._sepia);
         }
 
         public static void Shutdown()
