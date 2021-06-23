@@ -15,11 +15,13 @@ namespace Puzzled
 
         private BlackAndWhiteEffect _blackAndWhite;
         private SepiaEffect _sepia;
+        private HandDrawnEffect _handDrawn;
 
         private static PostProcManager _instance = null;
 
         public static BlackAndWhiteEffect blackAndWhite => _instance._blackAndWhite;
         public static SepiaEffect sepia => _instance._sepia;
+        public static HandDrawnEffect handDrawn => _instance._handDrawn;
 
         private void Awake()
         {
@@ -33,6 +35,7 @@ namespace Puzzled
 
             _blackAndWhite = new BlackAndWhiteEffect();
             _sepia = new SepiaEffect();
+            _handDrawn = new HandDrawnEffect();
         }
 
         public static void Initialize()
@@ -41,6 +44,7 @@ namespace Puzzled
 
             _instance._globalVolume.profile.TryGet<BlackAndWhiteEffect>(out _instance._blackAndWhite);
             _instance._globalVolume.profile.TryGet<SepiaEffect>(out _instance._sepia);
+            _instance._globalVolume.profile.TryGet<HandDrawnEffect>(out _instance._handDrawn);
         }
 
         public static void Shutdown()

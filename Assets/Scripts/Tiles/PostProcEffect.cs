@@ -7,7 +7,7 @@ namespace Puzzled
     public class PostProcEffect : TileComponent
     {
         [Editable(rangeMin = 0, rangeMax = 100)]
-        public int strength { get; private set; } = 100;
+        public int strength { get; private set; } = 0;
 
         public float strengthFraction => strength / 100.0f;
 
