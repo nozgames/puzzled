@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: DungeonWall01DecalFront
-  m_Shader: {fileID: -6465566751694194690, guid: 92f0fc1e67747674083e33556bb784ed, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 6a740c880a9bc6243a5feb8506ce3379, type: 3}
   m_ShaderKeywords: _METALLICSPECGLOSSMAP _NORMALMAP _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
     _SPECULAR_SETUP
   m_LightmapFlags: 4
@@ -21,7 +21,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - Texture2D_38563ac030f14d3697bd3393e2182870:
-        m_Texture: {fileID: 2800000, guid: 1bf0609cb9a67b14c9d96c505f56f401, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_3c203b799d25411e93da6989ac6e55f9:
@@ -29,7 +29,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_3f4fd7440df0437dbf5c7a5ff87363c2:
-        m_Texture: {fileID: 2800000, guid: b14cc05456225134590055f49bef27ca, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_8f696148f50947e0833bda7e72ce2cab:
@@ -37,7 +37,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_adfc85c991884a359fd38b9bc0001c19:
-        m_Texture: {fileID: 2800000, guid: ebf59d6e62313a64aaf193906acbdfac, type: 3}
+        m_Texture: {fileID: 2800000, guid: 824b1ff6fc617d94d90286b80af636f4, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
@@ -85,7 +85,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _decal:
-        m_Texture: {fileID: 2800000, guid: dabd0dd129d7bba42b781734225697b6, type: 3}
+        m_Texture: {fileID: 2800000, guid: fda5633914c33af46953fbe57eea8b21, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _void_texture:
@@ -107,14 +107,14 @@ Material:
     m_Ints: []
     m_Floats:
     - DECAL: 0
-    - DecalCenterX: 0.313
-    - DecalCenterY: 0.748
-    - DecalHeightMax: 0.527
-    - DecalHeightMin: 0.08
+    - DecalCenterX: 0.5
+    - DecalCenterY: 0.45
+    - DecalHeightMax: 0.655
+    - DecalHeightMin: 0.048
     - DecalLight: 0
-    - DecalRotationBase: 180
-    - DecalWidthMax: 0.568
-    - DecalWidthMin: 0.084
+    - DecalRotationBase: 0
+    - DecalWidthMax: 0.655
+    - DecalWidthMin: 0.048
     - LIGHTMAP: 1
     - Vector1_8fd43fa9190e4a3d9ee6bd1fe5de8aec: 0
     - _AlphaClip: 0
@@ -144,23 +144,36 @@ Material:
     - _WorkflowMode: 0
     - _ZWrite: 1
     - _decalLight: 0
+    - _decalOffsetX: 0
+    - _decalOffsetY: 0
     - _decalRotation: 0
     - _decalScale: 1
     - _decalSmoothness: 0
     m_Colors:
     - Color_95ae0f4f4c5a4131bdf3e1671d036b7f: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 0}
     - Color_c9818b7ab1214cb6be58514dcbe2e8b6: {r: 0, g: 0.11983681, b: 1, a: 0}
+    - DecalCenter: {r: 0, g: 0, b: 0, a: 0}
+    - DecalOffset: {r: 0, g: 0, b: 0, a: 0}
+    - DecalOffsetScale: {r: 1, g: 1, b: 0, a: 0}
+    - DecalRect: {r: 0.5, g: 0.45, b: 0.655, a: 0.655}
+    - DecalScaleBase: {r: 1, g: 1, b: 0, a: 0}
+    - DecalSize: {r: 0, g: 0, b: 0, a: 0}
     - DecalSizeMax: {r: 0.25, g: 0.25, b: 0, a: 0}
     - DecalSizeMin: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - GradientBottom: {r: 0.6117647, g: 0.6117647, b: 0.6117647, a: 1}
+    - GradientHeight: {r: 0, g: 0.5, b: 0, a: 0}
+    - GradientTop: {r: 1, g: 1, b: 1, a: 1}
     - Vector2_089f5323f8064f3cb7c2505b2e21e14f: {r: 0, g: 0, b: 0, a: 0}
     - Vector2_632c227d45144af6bf30404e1478b6ee: {r: 1, g: 1, b: 0, a: 0}
+    - Vector4: {r: 0, g: 0, b: 0, a: 0}
     - _BaseColor: {r: 0.6786519, g: 0.7573096, b: 0.8113208, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0, g: 0, b: 0, a: 1}
     - _decalCenter: {r: 0.38, g: 0.71, b: 0, a: 0}
     - _decalColor: {r: 0.09433959, g: 0.09433959, b: 0.09433959, a: 0.56078434}
-    - _decalScale: {r: 1, g: 1, b: 0, a: 0}
+    - _decalOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _decalScale: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &658318854063356498
 MonoBehaviour:

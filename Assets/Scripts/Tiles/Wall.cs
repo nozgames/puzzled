@@ -180,8 +180,9 @@ namespace Puzzled
             }
             else
             {
-                _cornerMin = AddCorner(cell, new Vector3(0.5f, 0), updateNeighbors);
-                _cornerMax = AddCorner(cell - Vector2Int.right, new Vector3(-0.5f, 0), updateNeighbors);
+                _rotator.transform.localEulerAngles = new Vector3(0, 180, 0);
+                _cornerMin = AddCorner(cell, new Vector3(-0.5f, 0), updateNeighbors);
+                _cornerMax = AddCorner(cell - Vector2Int.right, new Vector3(0.5f, 0), updateNeighbors);
             }
         }
 

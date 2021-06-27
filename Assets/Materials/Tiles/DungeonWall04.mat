@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: DungeonWall04
-  m_Shader: {fileID: -6465566751694194690, guid: 92f0fc1e67747674083e33556bb784ed, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 6a740c880a9bc6243a5feb8506ce3379, type: 3}
   m_ShaderKeywords: LIGHTMAP _METALLICSPECGLOSSMAP _NORMALMAP _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
     _SPECULAR_SETUP
   m_LightmapFlags: 4
@@ -37,7 +37,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_adfc85c991884a359fd38b9bc0001c19:
-        m_Texture: {fileID: 2800000, guid: e2e7de5e1422d494cbf267c00bddb5d8, type: 3}
+        m_Texture: {fileID: 2800000, guid: eaaea2f8b6a636e4ab09eb41e715dd71, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
@@ -140,14 +140,21 @@ Material:
     - _WorkflowMode: 0
     - _ZWrite: 1
     - _decalLight: 0
+    - _decalOffsetX: 0
+    - _decalOffsetY: 0
     - _decalRotation: 0
     - _decalScale: 1
     - _decalSmoothness: 0
     m_Colors:
     - Color_95ae0f4f4c5a4131bdf3e1671d036b7f: {r: 0.16981131, g: 0.16981131, b: 0.16981131, a: 0}
     - Color_c9818b7ab1214cb6be58514dcbe2e8b6: {r: 0, g: 0.11983681, b: 1, a: 0}
+    - DecalOffsetScale: {r: 1, g: 1, b: 0, a: 0}
+    - DecalRect: {r: 0, g: 0, b: 0, a: 0}
     - DecalSizeMax: {r: 0.25, g: 0.25, b: 0, a: 0}
     - DecalSizeMin: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - GradientBottom: {r: 0.6117647, g: 0.6117647, b: 0.6117647, a: 1}
+    - GradientHeight: {r: 0, g: 0.5, b: 0, a: 0}
+    - GradientTop: {r: 1, g: 1, b: 1, a: 1}
     - Vector2_089f5323f8064f3cb7c2505b2e21e14f: {r: 0, g: 0, b: 0, a: 0}
     - Vector2_632c227d45144af6bf30404e1478b6ee: {r: 1, g: 1, b: 0, a: 0}
     - _BaseColor: {r: 0.6786519, g: 0.7573096, b: 0.8113208, a: 1}
@@ -156,6 +163,7 @@ Material:
     - _SpecColor: {r: 0, g: 0, b: 0, a: 1}
     - _decalCenter: {r: 0.38, g: 0.71, b: 0, a: 0}
     - _decalColor: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 0.7490196}
+    - _decalOffset: {r: 0, g: 0, b: 0, a: 0}
     - _decalScale: {r: 0.85, g: 0.85, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &658318854063356498

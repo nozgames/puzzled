@@ -1,7 +1,4 @@
-﻿using NoZ;
-using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace Puzzled
@@ -33,18 +30,18 @@ namespace Puzzled
 
             _instance = this;
 
-            _blackAndWhite = new BlackAndWhiteEffect();
-            _sepia = new SepiaEffect();
-            _handDrawn = new HandDrawnEffect();
+            _blackAndWhite = ScriptableObject.CreateInstance<BlackAndWhiteEffect>();
+            _sepia = ScriptableObject.CreateInstance<SepiaEffect>();
+            _handDrawn = ScriptableObject.CreateInstance<HandDrawnEffect>();
         }
 
         public static void Initialize()
         {
             Debug.Assert(_instance != null);
 
-            _instance._globalVolume.profile.TryGet<BlackAndWhiteEffect>(out _instance._blackAndWhite);
-            _instance._globalVolume.profile.TryGet<SepiaEffect>(out _instance._sepia);
-            _instance._globalVolume.profile.TryGet<HandDrawnEffect>(out _instance._handDrawn);
+            _instance._globalVolume.profile.TryGet(out _instance._blackAndWhite);
+            _instance._globalVolume.profile.TryGet(out _instance._sepia);
+            _instance._globalVolume.profile.TryGet(out _instance._handDrawn);
         }
 
         public static void Shutdown()

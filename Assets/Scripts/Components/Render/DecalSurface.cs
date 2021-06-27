@@ -15,7 +15,6 @@ namespace Puzzled
 
         private Decal _decal = Decal.none;
         private float _light = 0.0f;
-        private float _defaultSmoothness = 0.5f;
         private Color _defaultColor = Color.white;
 
         public string decalName => _propertyName;
@@ -32,7 +31,6 @@ namespace Puzzled
                 if (_decal.isAutoColor)
                 {
                     _decal.color = _defaultColor;
-                    _decal.smoothness = _defaultSmoothness;
                 }
 
                 if (_decal != Decal.none)
@@ -48,12 +46,13 @@ namespace Puzzled
                     } else
                     {
                         var material = _renderer.materials[_materialIndex];
+                        var scale = Mathf.Max(decal.scale, 0.01f);
                         material.EnableKeyword("DECAL_ON");
                         material.SetTexture("_decal", _decal.texture);
                         material.SetColor("_decalColor", _decal.color);
-                        material.SetFloat("_decalSmoothness", _decal.smoothness);
-                        material.SetVector("_decalScale", new Vector2(decal.scale * (_decal.isFlipped ? -1 : 1), decal.scale));
+                        material.SetVector("_decalScale", new Vector2(scale * (_decal.isFlipped ? -1 : 1), scale));
                         material.SetFloat("_decalRotation", _decal.rotation);
+                        material.SetVector("_decalOffset", new Vector2(_decal.offsetX, _decal.offsetY));
                         material.SetFloat("_decalOffsetX", _decal.offsetX);
                         material.SetFloat("_decalOffsetY", _decal.offsetY);
                     }
@@ -85,7 +84,6 @@ namespace Puzzled
             else
             {
                 _defaultColor = _renderer.materials[_materialIndex].GetColor("_decalColor");
-                _defaultSmoothness = _renderer.materials[_materialIndex].GetFloat("_decalSmoothness");
             }
         }
 

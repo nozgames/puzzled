@@ -7,13 +7,15 @@ namespace Puzzled
     {
         [SerializeField] private Transform _target = null;
 
+        [SerializeField] private int _rotationCount = 4;
+
         private int _rotation = 0;
 
         [Editable]
         private int rotation {
             get => _rotation;
             set {
-                _rotation = value % 4;
+                _rotation = value % _rotationCount;
 
                 switch (_rotation)
                 {

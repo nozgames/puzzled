@@ -32,4 +32,21 @@ void CalculateDecalUV_float (float2 UV, float2 Scale, float Rotation, float2 Off
 	Clip = !(Out.x < 0 || Out.y < 0 || Out.x > 1.0 || Out.y > 1.0);
 }
 
+void CalculateDecalUV2_float (float2 UV, float2 Scale, float Rotation, float2 Offset, float BaseRotation, float2 Center, float2 Size, out float2 Out, out bool Clip) {
+	float c = cos (BaseRotation);
+	float s = sin (BaseRotation);
+	float2 o = float2(Offset.x * c - Offset.y * s, Offset.x * s + Offset.y * c);
+
+	c = cos (BaseRotation + Rotation);
+	s = sin (BaseRotation + Rotation);
+
+	float2 uv = (UV - (Center + Size * 0.5 * Offset)) / (Size * Scale);
+	Out.x = uv.x * c - uv.y * s;
+	Out.y = uv.x * s + uv.y * c;
+	Out += 0.5;
+
+	// Should the decal be clipped?
+	Clip = !(Out.x < 0 || Out.y < 0 || Out.x > 1.0 || Out.y > 1.0);
+}
+
 #endif // UNITY_CUSTOMFUNCTIONS_INCLUDED
