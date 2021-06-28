@@ -26,7 +26,7 @@ namespace Puzzled.UI
         override public string confirmButtonText => "Edit Puzzle";
         override public bool showCancelButton => true;
         override public bool showOptionButton => true;
-        override public string optionButtonText => "Test World";
+        override public string optionButtonText => "Puzzle Options";
 
         private World _world;
         public World world {
@@ -253,7 +253,8 @@ namespace Puzzled.UI
 
         override public void HandleOptionInput()
         {
-            TestWorld();
+            // TODO: Open the puzzle options menu
+            //TestWorld();
         }
     }
 }
