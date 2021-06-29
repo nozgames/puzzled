@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DungeonWall05
+  m_Name: DungeonWallCorner03
   m_Shader: {fileID: -6465566751694194690, guid: 6a740c880a9bc6243a5feb8506ce3379, type: 3}
-  m_ShaderKeywords: LIGHTMAP _METALLICSPECGLOSSMAP _NORMALMAP _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+  m_ShaderKeywords: _METALLICSPECGLOSSMAP _NORMALMAP _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
     _SPECULAR_SETUP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -21,15 +21,15 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - Texture2D_38563ac030f14d3697bd3393e2182870:
-        m_Texture: {fileID: 2800000, guid: 9a2775bfae45fe848ba732c13ac97222, type: 3}
+        m_Texture: {fileID: 2800000, guid: 4195e1515c916694ebd3226a380cad93, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_3c203b799d25411e93da6989ac6e55f9:
-        m_Texture: {fileID: 2800000, guid: fa239398ab9085a48b786ea3d09cb28a, type: 3}
+        m_Texture: {fileID: 2800000, guid: 4965d93f8e571794d900d310b6dbf759, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_3f4fd7440df0437dbf5c7a5ff87363c2:
-        m_Texture: {fileID: 2800000, guid: 59967ef7cb1f9294ca8d4f480f8357b3, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_8f696148f50947e0833bda7e72ce2cab:
@@ -37,7 +37,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_adfc85c991884a359fd38b9bc0001c19:
-        m_Texture: {fileID: 2800000, guid: 9d116fa770a5c0c4287af5a02ba7e55e, type: 3}
+        m_Texture: {fileID: 2800000, guid: 9dbf996d5787bb64f81d5c3bea1ba4ab, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
@@ -103,15 +103,14 @@ Material:
     m_Ints: []
     m_Floats:
     - DECAL: 0
-    - DecalCenterX: 0.317
-    - DecalCenterY: 0.746
-    - DecalHeightMax: 0.527
-    - DecalHeightMin: 0.08
+    - DecalCenterX: 0.5
+    - DecalCenterY: 0.5
+    - DecalHeightMax: 1
+    - DecalHeightMin: 0.1
     - DecalLight: 0
     - DecalRotationBase: 180
-    - DecalWidthMax: 0.568
-    - DecalWidthMin: 0.084
-    - LIGHTMAP: 1
+    - DecalWidthMax: 1
+    - DecalWidthMin: 0.1
     - Vector1_8fd43fa9190e4a3d9ee6bd1fe5de8aec: 0
     - _AlphaClip: 0
     - _Blend: 0
@@ -150,9 +149,9 @@ Material:
     - Color_c9818b7ab1214cb6be58514dcbe2e8b6: {r: 0, g: 0.11983681, b: 1, a: 0}
     - DecalOffsetScale: {r: 1, g: 1, b: 0, a: 0}
     - DecalRect: {r: 0, g: 0, b: 0, a: 0}
-    - DecalSizeMax: {r: 0.25, g: 0.25, b: 0, a: 0}
+    - DecalSizeMax: {r: 0.95, g: 0.95, b: 0, a: 0}
     - DecalSizeMin: {r: 0.1, g: 0.1, b: 0, a: 0}
-    - GradientBottom: {r: 0.8773585, g: 0.8773585, b: 0.8773585, a: 1}
+    - GradientBottom: {r: 0.9150943, g: 0.9150943, b: 0.9150943, a: 1}
     - GradientHeight: {r: 0, g: 0.5, b: 0, a: 0}
     - GradientTop: {r: 1, g: 1, b: 1, a: 1}
     - Vector2_089f5323f8064f3cb7c2505b2e21e14f: {r: 0, g: 0, b: 0, a: 0}
@@ -161,10 +160,10 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0, g: 0, b: 0, a: 1}
-    - _decalCenter: {r: 0.38, g: 0.71, b: 0, a: 0}
+    - _decalCenter: {r: 0.5, g: 0.5, b: 0, a: 0}
     - _decalColor: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 0.7490196}
     - _decalOffset: {r: 0, g: 0, b: 0, a: 0}
-    - _decalScale: {r: 0.85, g: 0.85, b: 0, a: 0}
+    - _decalScale: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &658318854063356498
 MonoBehaviour:

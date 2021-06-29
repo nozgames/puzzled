@@ -17,6 +17,8 @@ namespace Puzzled
         [SerializeField] private bool _allowWallMounts = true;
         [SerializeField] private float _thickness = 0.1f;
 
+        [SerializeField] private bool _allowMove = false;
+
         public float thickness => _thickness;
 
         /// <summary>
@@ -48,6 +50,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnQueryMoveEvent (QueryMoveEvent evt)
         {
+            if (_allowMove)
+                return;
+
             var edge = tile.cell.edge;
             if (evt.offset.x > 0 && edge == CellEdge.East)
                 evt.result = false;
