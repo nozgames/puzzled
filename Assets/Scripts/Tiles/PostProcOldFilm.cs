@@ -4,11 +4,11 @@ using UnityEngine.Rendering;
 
 namespace Puzzled
 {
-    public class PostProcHandDrawn : PostProcEffect
+    public class PostProcOldFilm : PostProcEffect
     {
         protected override void UpdatePostProc()
         {
-            PostProcManager.handDrawn.blend.value = strengthFraction * blendScale;
+            PostProcManager.oldFilm.blend.value = strengthFraction * blendScale;
         }
     }
 }
