@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1676290453114579449}
   - component: {fileID: 8486713041423907212}
   - component: {fileID: 233353016166666346}
-  m_Layer: 10
+  m_Layer: 11
   m_Name: Off
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -77,7 +77,7 @@ GameObject:
   - component: {fileID: 6136811213311698162}
   - component: {fileID: 8959860466073652518}
   - component: {fileID: 4709921132166603945}
-  m_Layer: 10
+  m_Layer: 11
   m_Name: Obelisk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -170,7 +170,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6630776577709841577}
   - component: {fileID: 8658685798566706454}
-  m_Layer: 10
+  m_Layer: 11
   m_Name: Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -277,7 +277,7 @@ GameObject:
   - component: {fileID: 415077611883482321}
   - component: {fileID: 6024537577823468676}
   - component: {fileID: 5645684840694163134}
-  m_Layer: 10
+  m_Layer: 11
   m_Name: On
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -343,7 +343,7 @@ GameObject:
   - component: {fileID: 416265608166931477}
   - component: {fileID: 5481866493504178474}
   - component: {fileID: 2909819234634297568}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -479,6 +479,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -7029948723529949830, guid: 11c222c04e8fc9943bfffd718b1cbb2b, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: -7029948723529949830, guid: 11c222c04e8fc9943bfffd718b1cbb2b, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
@@ -494,9 +498,25 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: e8051700f1d8d3143a2c41c912908081, type: 2}
+    - target: {fileID: -4364550315914870395, guid: 11c222c04e8fc9943bfffd718b1cbb2b, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 11c222c04e8fc9943bfffd718b1cbb2b, type: 3}
       propertyPath: m_Name
       value: obelisk
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 11c222c04e8fc9943bfffd718b1cbb2b, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 6000134960659659023, guid: 11c222c04e8fc9943bfffd718b1cbb2b, type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 8821623529969584324, guid: 11c222c04e8fc9943bfffd718b1cbb2b, type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 11c222c04e8fc9943bfffd718b1cbb2b, type: 3}

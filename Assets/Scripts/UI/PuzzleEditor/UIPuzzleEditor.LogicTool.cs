@@ -109,7 +109,7 @@ namespace Puzzled.Editor
             // Handle no selection or selecting a new tile
             if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
             {
-                SelectTile(GetTopMostTile(cell, TileLayer.Logic));
+                SelectTile(GetTopMostTile(cell, TileLayer.InvisibleStatic));
                 logicCycleSelection = false;
             }
             else

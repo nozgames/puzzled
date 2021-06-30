@@ -168,7 +168,7 @@ namespace Puzzled.Editor
         private void EyeDropper(Cell cell, bool cycle)
         {
             var selected = _tilePalette.selected;
-            var existing = GetTopMostTile(cell, (selected == null || !cycle) ? TileLayer.Logic : selected.layer);
+            var existing = GetTopMostTile(cell, (selected == null || !cycle) ? TileLayer.InvisibleStatic : selected.layer);
             if (cycle && existing != null && selected != null && existing.guid == selected.guid)
             {
                 if (existing.layer != TileLayer.Floor)
@@ -179,7 +179,7 @@ namespace Puzzled.Editor
 
             if (null == existing)
             {
-                existing = GetTopMostTile(cell, TileLayer.Logic);
+                existing = GetTopMostTile(cell, TileLayer.InvisibleStatic);
                 if (null == existing)
                     return;
             }
