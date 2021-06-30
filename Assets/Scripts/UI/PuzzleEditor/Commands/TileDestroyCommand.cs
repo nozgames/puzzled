@@ -20,6 +20,9 @@
         {
             UIPuzzleEditor.RestoreFromTrash(tile.gameObject);
             tile.cell = cell;
+
+            // Start again
+            tile.Send(new StartEvent());
         }
 
         protected override void OnRedo()

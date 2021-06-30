@@ -7,7 +7,7 @@ namespace Puzzled
     public class PostProcEffect : TileComponent
     {
         [Editable(rangeMin = 0, rangeMax = 100)]
-        public int strength { get; private set; } = 0;
+        public int strength { get; private set; } = 100;
 
         public float strengthFraction => strength / 100.0f;
 
@@ -41,11 +41,15 @@ namespace Puzzled
         {
             _blendScale = 0;
 
-            UpdatePower();
+            if (!tile.puzzle.isPreview)
+                UpdatePower();
+        }
 
-            if (powerInPort.wireCount == 0)
-                _blendScale = 1;
+        protected override void OnDisable()
+        {
+            base.OnDisable();
 
+            _blendScale = 0;
             UpdatePostProc();
         }
 
@@ -99,6 +103,11 @@ namespace Puzzled
                 _isUpdating = true;
                 RegisterHandler<ActorUpdateEvent>();
             }
+
+            if (powerInPort.wireCount == 0)
+                _blendScale = 1;
+
+            UpdatePostProc();
         }
     }
 }
