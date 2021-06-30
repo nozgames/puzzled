@@ -30,7 +30,11 @@ namespace Puzzled
         WallStatic,
 
         Static,
+
         Dynamic,
-        Logic
+
+        Logic,
+
+        InvisibleStatic
     }    
 }
