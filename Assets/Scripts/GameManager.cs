@@ -132,6 +132,7 @@ namespace Puzzled
         }
 
         private int _busy = 0;
+        private int _delayedRemoveBusy = 0;
 
         public static bool isBusy => _instance._busy > 0;
 
@@ -148,6 +149,14 @@ namespace Puzzled
             set {
                 _instance._isPlaying = value;
             }
+        }
+
+        public static void RemoveBusyDelayed ()
+        {
+            if (isPlaying)
+                _instance._delayedRemoveBusy++;
+            else
+                busy--;
         }
 
         /// <summary>
@@ -211,6 +220,10 @@ namespace Puzzled
             elapsed += Time.deltaTime;
             while (elapsed > tick)
             {
+                var delayedRemove = _delayedRemoveBusy;
+                _delayedRemoveBusy = 0;
+                busy -= delayedRemove;
+
                 Tile.Tick();
                 elapsed -= tick;
             }
@@ -239,6 +252,10 @@ namespace Puzzled
             UIManager.ClosePopup();
 
             isPlaying = false;
+
+            // Make sure any delayed busy removes are handled
+            _instance._busy -= _instance._delayedRemoveBusy;
+            _instance._delayedRemoveBusy = 0;
         }
 
         private void OnDeviceChanged(InputDevice inputDevice, InputDeviceChange deviceChange)

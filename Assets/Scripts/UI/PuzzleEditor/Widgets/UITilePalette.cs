@@ -114,7 +114,7 @@ namespace Puzzled.Editor
         private static readonly TileLayer[] _filterDynamicLayers = new[] { TileLayer.Dynamic };
         private static readonly TileLayer[] _filterFloorLayers = new[] { TileLayer.Floor };
         private static readonly TileLayer[] _filterLogicLayers = new[] { TileLayer.Logic };
-        private static readonly TileLayer[] _filterStaticLayers = new[] { TileLayer.Static };
+        private static readonly TileLayer[] _filterStaticLayers = new[] { TileLayer.Static, TileLayer.InvisibleStatic };
         private static readonly TileLayer[] _filterWallLayers = new[] { TileLayer.Wall, TileLayer.WallStatic };
 
         private void UpdateFilter()

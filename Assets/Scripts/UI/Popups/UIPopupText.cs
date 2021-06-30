@@ -49,5 +49,19 @@ namespace Puzzled.UI
 
             _text.text = _pages[pageIndex];
         }
+
+        private void OnEnable()
+        {
+            GameManager.busy++;
+        }
+
+        private void OnDisable()
+        {
+            GameManager.RemoveBusyDelayed();
+        }
+
+        public override void HandleConfirmInput() => Use();
+
+        public override void HandleCancelInput() => Close();
     }
 }
