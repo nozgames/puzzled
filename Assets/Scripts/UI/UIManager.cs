@@ -67,6 +67,8 @@ namespace Puzzled.UI
 
         private CursorType _cursor = CursorType.Arrow;
 
+        private UIPopup _lastPopup = null;
+
         public List<UIScreen> _activeScreens = new List<UIScreen>();
 
         public static CursorType cursor {
@@ -273,16 +275,17 @@ namespace Puzzled.UI
         public static UIPopup ShowPopup(UIPopup popupPrefab, Action doneCallback = null)
         {
             _instance.popups.gameObject.SetActive(true);
-            UIPopup popup = Instantiate(popupPrefab, _instance.popupCentered).GetComponent<UIPopup>();
-            popup.doneCallback = doneCallback;
+            _instance._lastPopup = Instantiate(popupPrefab, _instance.popupCentered).GetComponent<UIPopup>();
+            _instance._lastPopup.doneCallback = doneCallback;
 
-            return popup;
+            return _instance._lastPopup;
         }
 
         public static void ClosePopup()
         {
             _instance.popups.gameObject.SetActive(false);
             _instance.popupCentered.DetachAndDestroyChildren();
+            _instance._lastPopup = null;
         }
 
         public static void ShowTooltip(Vector3 position, string text, TooltipDirection direction)
@@ -365,8 +368,14 @@ namespace Puzzled.UI
             activeScreen.HandleRightInput();
         }
 
-        private void OnConfirmAction(InputAction.CallbackContext obj)
+        private void OnConfirmAction(InputAction.CallbackContext ctx)
         {
+            if (_lastPopup != null && _lastPopup.gameObject.activeInHierarchy)
+            {
+                _lastPopup.HandleConfirmInput();
+                return;
+            }
+
             if ((activeScreen == null) || !activeScreen.gameObject.activeInHierarchy)
                 return;
 
@@ -375,6 +384,12 @@ namespace Puzzled.UI
 
         private void OnCancelAction(InputAction.CallbackContext obj)
         {
+            if (_lastPopup != null && _lastPopup.gameObject.activeInHierarchy)
+            {
+                _lastPopup.HandleCancelInput();
+                return;
+            }
+
             if ((activeScreen == null) || !activeScreen.gameObject.activeInHierarchy)
                 return;
 

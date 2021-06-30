@@ -28,5 +28,13 @@ namespace Puzzled.UI
         {
             GameManager.busy--;
         }
+
+        public virtual void HandleConfirmInput ()
+        {
+        }
+
+        public virtual void HandleCancelInput()
+        {
+        }
     }
 }
