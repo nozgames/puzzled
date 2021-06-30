@@ -4,19 +4,19 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering.Universal.PostProcessing;
 
 // Define the Volume Component for the custom post processing effect 
-[System.Serializable, VolumeComponentMenu("Puzzled/HandDrawn")]
-public class HandDrawnEffect : VolumeComponent
+[System.Serializable, VolumeComponentMenu("Puzzled/OldFilm")]
+public class OldFilmEffect : VolumeComponent
 {
-    [Tooltip("Controls the blending between the original and the handdrawn color.")]
+    [Tooltip("Controls the blending between the original and the oldfilm color.")]
     public ClampedFloatParameter blend = new ClampedFloatParameter(0, 0, 1);
 }
 
 // Define the renderer for the custom post processing effect
-[CustomPostProcess("HandDrawn", CustomPostProcessInjectionPoint.AfterPostProcess)]
-public class HandDrawnEffectRenderer : CustomPostProcessRenderer
+[CustomPostProcess("OldFilm", CustomPostProcessInjectionPoint.AfterPostProcess)]
+public class OldFilmEffectRenderer : CustomPostProcessRenderer
 {
     // A variable to hold a reference to the corresponding volume component (you can define as many as you like)
-    private HandDrawnEffect m_VolumeComponent;
+    private OldFilmEffect m_VolumeComponent;
 
     // The postprocessing material (you can define as many as you like)
     private Material m_Material;
@@ -35,7 +35,7 @@ public class HandDrawnEffectRenderer : CustomPostProcessRenderer
     // so we use it to create our material
     public override void Initialize()
     {
-        m_Material = CoreUtils.CreateEngineMaterial("Shaders/HandDrawn");
+        m_Material = CoreUtils.CreateEngineMaterial("Shaders/OldFilm");
     }
 
     // Called for each camera/injection point pair on each frame. Return true if the effect should be rendered for this camera.
@@ -44,7 +44,7 @@ public class HandDrawnEffectRenderer : CustomPostProcessRenderer
         // Get the current volume stack
         var stack = VolumeManager.instance.stack;
         // Get the corresponding volume component
-        m_VolumeComponent = stack.GetComponent<HandDrawnEffect>();
+        m_VolumeComponent = stack.GetComponent<OldFilmEffect>();
         // if blend value > 0, then we need to render this effect. 
         return m_VolumeComponent.blend.value > 0;
     }
