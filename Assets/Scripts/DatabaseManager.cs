@@ -197,7 +197,7 @@ namespace Puzzled
             // Position camera to frame the content
             var extents = (max - min);
             var size = Mathf.Max(extents.x, Mathf.Max(extents.y, extents.z));
-            var rotation = new Vector3(tile.layer == TileLayer.Logic ? 90 : _tilePreviewCamera.transform.localEulerAngles.x, 0, 0);
+            var rotation = new Vector3((tile.layer == TileLayer.Logic || tile.layer == TileLayer.InvisibleStatic) ? 90 : _tilePreviewCamera.transform.localEulerAngles.x, 0, 0);
             _tilePreviewCamera.transform.localEulerAngles = rotation;
             _tilePreviewCamera.transform.position = CameraManager.Frame(
                 tile.transform.position + new Vector3(0, (max.y + min.y) * 0.5f, 0),

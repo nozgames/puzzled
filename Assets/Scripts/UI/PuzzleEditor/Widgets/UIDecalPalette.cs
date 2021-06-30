@@ -111,19 +111,6 @@ namespace Puzzled.Editor
                 UpdateFilter();
             });
 
-            // Add a none decal
-            if (allowNone)
-            {
-                var none = new Decal(Guid.Empty, _noneTexture);
-                none.isAutoColor = false;
-                none.color = _noneColor;                
-                Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = none;
-            }
-
-            // Add all decals to the palette
-            foreach (var decal in DatabaseManager.GetDecals())
-                Instantiate(_itemPrefab, _list.transform).GetComponent<UIDecalPaletteItem>().decal = decal;
-
             _filterAll.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterNumber.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterRune.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });

@@ -431,6 +431,7 @@ namespace Puzzled.Editor
             GameManager.puzzle.ShowWires(isDebugging);
             CameraManager.ShowWires(isDebugging);
             CameraManager.ShowLayer(TileLayer.Logic, isDebugging);
+            CameraManager.ShowLayer(TileLayer.InvisibleStatic, isDebugging);
         }
 
         private void BeginPlay()
@@ -632,7 +633,7 @@ namespace Puzzled.Editor
         /// <param name="propertyName">Name of property to search for</param>
         /// <param name="topLayer">Layer to start searching from</param>
         /// <returns>Topmost tile in the cell with the given property or null</returns>
-        public Tile GetTopMostTileWithProperty(Cell cell, string propertyName, TileLayer topLayer = TileLayer.Logic)
+        public Tile GetTopMostTileWithProperty(Cell cell, string propertyName, TileLayer topLayer = TileLayer.InvisibleStatic)
         {
             for (int i = (int)topLayer; i >= 0; i--)
             {
@@ -660,7 +661,7 @@ namespace Puzzled.Editor
         /// <param name="propertyType">Name of property to search for</param>
         /// <param name="topLayer">Layer to start searching from</param>
         /// <returns>Topmost tile in the cell with the given property or null</returns>
-        public Tile GetTopMostTileWithPropertyType(Cell cell, TilePropertyType propertyType, TileLayer topLayer = TileLayer.Logic)
+        public Tile GetTopMostTileWithPropertyType(Cell cell, TilePropertyType propertyType, TileLayer topLayer = TileLayer.InvisibleStatic)
         {
             for (int i = (int)topLayer; i >= 0; i--)
             {
@@ -681,7 +682,7 @@ namespace Puzzled.Editor
             return null;
         }
 
-        private Tile GetTopMostTile(Cell cell, TileLayer topLayer = TileLayer.Logic)
+        private Tile GetTopMostTile(Cell cell, TileLayer topLayer = TileLayer.InvisibleStatic)
         {
             for (int i = (int)topLayer; i >= 0; i--)
             {
@@ -711,19 +712,19 @@ namespace Puzzled.Editor
             
             cell = cell.ConvertTo(system);
 
-            var nextTile = GetTopMostTile(cell, layer != TileLayer.Floor ? (layer - 1) : TileLayer.Logic);
+            var nextTile = GetTopMostTile(cell, layer != TileLayer.Floor ? (layer - 1) : TileLayer.InvisibleStatic);
             if (null == nextTile)
             {
                 switch (cell.system)
                 {
                     case CellCoordinateSystem.Edge:
-                        return GetNextTile(cell, TileLayer.Logic, CellCoordinateSystem.SharedEdge);
+                        return GetNextTile(cell, TileLayer.InvisibleStatic, CellCoordinateSystem.SharedEdge);
 
                     case CellCoordinateSystem.SharedEdge:
-                        return GetNextTile(cell, TileLayer.Logic, CellCoordinateSystem.Grid);
+                        return GetNextTile(cell, TileLayer.InvisibleStatic, CellCoordinateSystem.Grid);
 
                     default:
-                        nextTile = GetTopMostTile(cell, TileLayer.Logic);
+                        nextTile = GetTopMostTile(cell, TileLayer.InvisibleStatic);
                         break;
                 }
             }                    
@@ -809,6 +810,7 @@ namespace Puzzled.Editor
             CameraManager.ShowLayer(TileLayer.Logic, _layerToggleLogic.isOn);
             CameraManager.ShowLayer(TileLayer.Floor, _layerToggleFloor.isOn);
             CameraManager.ShowLayer(TileLayer.Static, _layerToggleStatic.isOn);
+            CameraManager.ShowLayer(TileLayer.InvisibleStatic, _layerToggleStatic.isOn);
         }
 
         void KeyboardManager.IKeyboardHandler.OnKey(KeyCode keyCode)
@@ -951,7 +953,7 @@ namespace Puzzled.Editor
         public static uint GetVisibleLayerMask ()
         {
             uint mask = 0;
-            for (var layer = TileLayer.Floor; layer <= TileLayer.Logic; layer++)
+            for (var layer = TileLayer.Floor; layer <= TileLayer.InvisibleStatic; layer++)
                 mask |= (IsLayerVisible(layer) ? (1u << (int)layer) : 0u);
 
             return mask;

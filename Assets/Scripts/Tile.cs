@@ -463,7 +463,7 @@ namespace Puzzled
         /// <returns>True if a connection can be made</returns>
         public bool CanConnectTo(Cell cell, bool allowHidden = true)
         {
-            for (int i = (int)TileLayer.Logic; i >= 0; i--)
+            for (int i = (int)TileLayer.InvisibleStatic; i >= 0; i--)
                 if (CanConnectTo(puzzle.grid.CellToTile(cell, (TileLayer)i), allowHidden))
                     return true;
 
