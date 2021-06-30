@@ -8,7 +8,7 @@ namespace Puzzled
 {
     public class Puzzle : MonoBehaviour
     {
-        private const int FileVersion = 11;
+        private const int FileVersion = 12;
 
         [Header("General")]
         [SerializeField] private TileGrid _tiles = null;
@@ -404,6 +404,15 @@ namespace Puzzled
                             writer.Write(((Sound)value).guid);
                             break;
 
+                        case TilePropertyType.SoundArray:
+                        {
+                            var soundarray = (Sound[])value;
+                            writer.Write(soundarray.Length);
+                            foreach (var sound in soundarray)
+                                writer.Write(((Sound)sound).guid);
+                            break;
+                        }
+
                         case TilePropertyType.IntArray:
                         {
                             var intArray = (int[])value;
@@ -549,6 +558,7 @@ namespace Puzzled
                 case 9:
                 case 10:
                 case 11:
+                case 12:
                     LoadV9(reader, version);
                     break;
 
@@ -658,6 +668,16 @@ namespace Puzzled
                             value = sound;
                             break;
                         }
+
+                        case TilePropertyType.SoundArray:
+                            {
+                                var sounds = new Sound[reader.ReadInt32()];
+                                for (int i = 0; i < sounds.Length; i++)
+                                    sounds[i] = DatabaseManager.GetSound(reader.ReadGuid());
+
+                                value = sounds;
+                                break;
+                            }
 
                         case TilePropertyType.IntArray:
                         {
