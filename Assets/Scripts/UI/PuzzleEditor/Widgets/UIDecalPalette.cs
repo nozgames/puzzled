@@ -13,7 +13,8 @@ namespace Puzzled.Editor
         private readonly Regex LetterRegex = new Regex("(Letter).*", RegexOptions.IgnoreCase);
         private readonly Regex NumberRegex = new Regex("(Number).*", RegexOptions.IgnoreCase);
         private readonly Regex RuneRegex = new Regex("(Rune).*", RegexOptions.IgnoreCase);
-        private readonly Regex LineRegex = new Regex("(Arrow).*", RegexOptions.IgnoreCase);
+        private readonly Regex LineRegex = new Regex("(SolidLine|DashedLine).*", RegexOptions.IgnoreCase);
+        private readonly Regex SymbolRegex = new Regex("(Symbol).*", RegexOptions.IgnoreCase);
 
         [SerializeField] private Texture2D _noneTexture = null;
         [SerializeField] private Color _noneColor = Color.white;
@@ -34,6 +35,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _filterRune = null;
         [SerializeField] private UIRadio _filterNumber = null;
         [SerializeField] private UIRadio _filterLine = null;
+        [SerializeField] private UIRadio _filterSymbol = null;
         [SerializeField] private UIRadio _filterImported = null;
 
         private Decal _selected = Decal.none;
@@ -116,6 +118,7 @@ namespace Puzzled.Editor
             _filterRune.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterLetter.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterLine.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
+            _filterSymbol.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterImported.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
 
             UpdatePreview();
@@ -192,7 +195,9 @@ namespace Puzzled.Editor
                 regex = LetterRegex;
             else if (_filterLine.isOn)
                 regex = LineRegex;
-                
+            else if (_filterSymbol.isOn)
+                regex = SymbolRegex;
+
             for (int i = allowNone ? 1 : 0; i < _list.itemCount; i++)
             {
                 var item = _list.GetItem(i).GetComponent<UIDecalPaletteItem>();
@@ -221,6 +226,8 @@ namespace Puzzled.Editor
         public void FilterRunes() => _filterRune.isOn = true;
 
         public void FilterLine() => _filterLine.isOn = true;
+
+        public void FilterSymbol() => _filterSymbol.isOn = true;
 
         private UIDecalPaletteItem GetItem(int index) => _list.transform.GetChild(index).GetComponent<UIDecalPaletteItem>();
 
