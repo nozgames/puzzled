@@ -123,7 +123,7 @@ namespace Puzzled.Editor
             else if (_filterLogic.isOn)
                 category = TileCategory.Logic;
             else if (_filterPostProc.isOn)
-                category = TileCategory.PostProc;
+                category = TileCategory.FX;
             else if (_filterStatic.isOn)
                 category = TileCategory.Usable;
             else if (_filterWall.isOn)

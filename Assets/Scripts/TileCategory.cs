@@ -8,6 +8,6 @@ namespace Puzzled
         Wall,
         Logic,
         Usable,
-        PostProc
+        FX
     }
 }

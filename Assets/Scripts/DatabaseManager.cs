@@ -224,7 +224,9 @@ namespace Puzzled
 
             tile.Destroy();
 
-            return Sprite.Create(t, new Rect(0, 0, t.width, t.height), new Vector2(0.5f, 0.5f));
+            var sprite = Sprite.Create(t, new Rect(0, 0, t.width, t.height), new Vector2(0.5f, 0.5f));
+            sprite.name = "@";
+            return sprite;
         }
 
         /// <summary>
