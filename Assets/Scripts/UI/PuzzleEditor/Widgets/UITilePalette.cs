@@ -135,7 +135,7 @@ namespace Puzzled.Editor
                 var tile = item.tile;
 
                 var active = true;
-                active &= !checkText || tile.name.ToLower().Contains(text);
+                active &= !checkText || tile.displayName.ToLower().Contains(text);
                 active &= !checkCategory || tile.info.category == category;
                 active &= (_componentFilter == null) || (tile.GetComponentInChildren(_componentFilter) != null);
                     
