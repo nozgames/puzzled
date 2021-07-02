@@ -1,18 +1,19 @@
 using UnityEngine;
 using UnityEngine.UI;
-using Puzzled.UI;
 
 namespace Puzzled.Editor
 {
     public class UISoundEditor : UIPropertyEditor
     {
-        //[SerializeField] private Image _preview = null;
-        [SerializeField] private UIDoubleClick _doubleClick = null;
+        [SerializeField] private Image _preview = null;
+        [SerializeField] private Button _chooseButton = null;
         [SerializeField] private TMPro.TextMeshProUGUI _previewText = null;
+        [SerializeField] private Sprite _previewNone = null;
+        [SerializeField] private Sprite _previewSound = null;
 
         private void Awake()
         {
-            _doubleClick.onDoubleClick.AddListener(() => {
+            _chooseButton.onClick.AddListener(() => {
                 UIPuzzleEditor.instance.ChooseSound(
                     (sound) => {
                         target.SetValue(sound);
@@ -31,9 +32,7 @@ namespace Puzzled.Editor
         private void UpdatePreview()
         {
             var sound = target.GetValue<Sound>();
-            //_preview.color = sound != null ? sound.color : Color.clear;
-            //_preview.gameObject.SetActive(sound != null);
-
+            _preview.sprite = sound.clip != null ? _previewSound : _previewNone;
             _previewText.text = sound.clip != null ? sound.clip.name : "None";
         }
     }
