@@ -4,7 +4,7 @@
     {
         protected override void UpdatePostProc()
         {
-            PostProcManager.SetBlend(PostProcManager.sepia, strengthFraction * blendScale);
+            PostProcManager.sepia.blend.value = strengthFraction * blendScale;
         }
     }
 }

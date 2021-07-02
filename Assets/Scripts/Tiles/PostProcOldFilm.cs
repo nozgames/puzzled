@@ -4,7 +4,7 @@
     {
         protected override void UpdatePostProc()
         {
-            PostProcManager.SetBlend(PostProcManager.oldFilm, strengthFraction * blendScale);
+            PostProcManager.oldFilm.blend.value = strengthFraction * blendScale;
         }
     }
 }

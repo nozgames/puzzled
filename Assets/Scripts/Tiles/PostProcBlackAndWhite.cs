@@ -4,7 +4,7 @@
     {
         protected override void UpdatePostProc()
         {
-            PostProcManager.SetBlend(PostProcManager.blackAndWhite, strengthFraction * blendScale);
+            PostProcManager.blackAndWhite.blend.value = strengthFraction * blendScale;
         }
     }
 }

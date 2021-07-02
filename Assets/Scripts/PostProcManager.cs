@@ -13,7 +13,6 @@ namespace Puzzled
         private BlackAndWhiteEffect _blackAndWhite;
         private SepiaEffect _sepia;
         private OldFilmEffect _oldFilm;
-        private bool _disableAll;
 
         private static PostProcManager _instance = null;
 
@@ -21,16 +20,7 @@ namespace Puzzled
         public static SepiaEffect sepia => _instance._sepia;
         public static OldFilmEffect oldFilm => _instance._oldFilm;
 
-        public static bool disableAll 
-        {
-            get => _instance._disableAll;
-            set {
-                _instance._disableAll = value;
-                UpdateActive(blackAndWhite);
-                UpdateActive(sepia);
-                UpdateActive(oldFilm);
-            }
-        }
+        public static bool disableAll { get; set; }
 
         private void Awake()
         {
@@ -45,10 +35,6 @@ namespace Puzzled
             _blackAndWhite = ScriptableObject.CreateInstance<BlackAndWhiteEffect>();
             _sepia = ScriptableObject.CreateInstance<SepiaEffect>();
             _oldFilm = ScriptableObject.CreateInstance<OldFilmEffect>();
-
-            UpdateActive(blackAndWhite);
-            UpdateActive(sepia);
-            UpdateActive(oldFilm);
         }
 
         public static void Initialize()
@@ -62,17 +48,6 @@ namespace Puzzled
 
         public static void Shutdown()
         {
-        }
-
-        public static void SetBlend (BlendableVolumeComponent component, float blend)
-        {
-            component.blend.value = blend;
-            UpdateActive(component);
-        }
-
-        private static void UpdateActive(BlendableVolumeComponent component)
-        {
-            component.active = component.blend.value > 0.0f && !disableAll;
         }
     }
 }

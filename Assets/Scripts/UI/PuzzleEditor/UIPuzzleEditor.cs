@@ -57,6 +57,7 @@ namespace Puzzled.Editor
 
         [Header("Toolbar")]
         [SerializeField] private GameObject _toolbar = null;
+        [SerializeField] private Button _menuButton = null;
         [SerializeField] private UIRadio _moveTool = null;
         [SerializeField] private UIRadio _drawTool = null;
         [SerializeField] private UIRadio _eraseTool = null;
@@ -281,6 +282,8 @@ namespace Puzzled.Editor
             _undoButton.onClick.AddListener(Undo);
             _redoButton.onClick.AddListener(Redo);
             _playButton.onClick.AddListener(BeginPlay);
+
+            _menuButton.onClick.AddListener(() => ShowPopup(_menu));
 
             _layerToggleWall.onValueChanged.AddListener((v) => UpdateCameraFlags());
             _layerToggleDynamic.onValueChanged.AddListener((v) => UpdateCameraFlags());
