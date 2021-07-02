@@ -3,12 +3,16 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering.Universal.PostProcessing;
 
+public class BlendableVolumeComponent : VolumeComponent
+{
+    [Tooltip("Controls the blending of the component.")]
+    public ClampedFloatParameter blend = new ClampedFloatParameter(0, 0, 1);
+}
+
 // Define the Volume Component for the custom post processing effect 
 [System.Serializable, VolumeComponentMenu("Puzzled/BlackAndWhite")]
-public class BlackAndWhiteEffect : VolumeComponent
+public class BlackAndWhiteEffect : BlendableVolumeComponent
 {
-   [Tooltip("Controls the blending between the original and the BlackAndWhite color.")]
-   public ClampedFloatParameter blend = new ClampedFloatParameter(0, 0, 1);
 }
 
 // Define the renderer for the custom post processing effect

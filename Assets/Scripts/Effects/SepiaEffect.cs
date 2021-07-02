@@ -5,10 +5,8 @@ using UnityEngine.Rendering.Universal.PostProcessing;
 
 // Define the Volume Component for the custom post processing effect 
 [System.Serializable, VolumeComponentMenu("Puzzled/Sepia")]
-public class SepiaEffect : VolumeComponent
+public class SepiaEffect : BlendableVolumeComponent
 {
-    [Tooltip("Controls the blending between the original and the sepia color.")]
-    public ClampedFloatParameter blend = new ClampedFloatParameter(0, 0, 1);
 }
 
 // Define the renderer for the custom post processing effect

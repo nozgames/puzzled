@@ -1,14 +1,10 @@
-﻿using NoZ;
-using UnityEngine;
-using UnityEngine.Rendering;
-
-namespace Puzzled
+﻿namespace Puzzled
 {
     public class PostProcSepia : PostProcEffect
     {
         protected override void UpdatePostProc()
         {
-            PostProcManager.sepia.blend.value = strengthFraction * blendScale;
+            PostProcManager.SetBlend(PostProcManager.sepia, strengthFraction * blendScale);
         }
     }
 }

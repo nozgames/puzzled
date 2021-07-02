@@ -5,10 +5,8 @@ using UnityEngine.Rendering.Universal.PostProcessing;
 
 // Define the Volume Component for the custom post processing effect 
 [System.Serializable, VolumeComponentMenu("Puzzled/OldFilm")]
-public class OldFilmEffect : VolumeComponent
+public class OldFilmEffect : BlendableVolumeComponent
 {
-    [Tooltip("Controls the blending between the original and the oldfilm color.")]
-    public ClampedFloatParameter blend = new ClampedFloatParameter(0, 0, 1);
 }
 
 // Define the renderer for the custom post processing effect

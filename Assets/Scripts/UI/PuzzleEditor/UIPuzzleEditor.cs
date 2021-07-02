@@ -45,6 +45,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _layerToggleStatic = null;
         [SerializeField] private UIRadio _gridToggle = null;
         [SerializeField] private UIRadio _wireToggle = null;
+        [SerializeField] private UIRadio _postProcToggle = null;
         [SerializeField] private UIRadio _debugToggle = null;
         [SerializeField] private GameObject _canvasControls = null;
 
@@ -248,6 +249,8 @@ namespace Puzzled.Editor
             });
 
             _wireToggle.onValueChanged.AddListener((v) => CameraManager.ShowWires(v));
+
+            _postProcToggle.onValueChanged.AddListener((v) => PostProcManager.disableAll = !v); 
 
             _inspectorRotateButton.onClick.AddListener(() => {
                 var rotation = selectedTile.GetProperty("rotation");
@@ -469,6 +472,8 @@ namespace Puzzled.Editor
 
             if (isDebugging)
                 OnDebugButton();
+
+            PostProcManager.disableAll = false;
         }
 
         private void EndPlay ()
@@ -502,6 +507,8 @@ namespace Puzzled.Editor
             LightmapManager.Render();
 
             UpdateCameraFlags();
+
+            PostProcManager.disableAll = !_postProcToggle.isOn;
         }
 
         private void UpdateCamera()
