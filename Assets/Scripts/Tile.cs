@@ -10,6 +10,9 @@ namespace Puzzled
     {
         [SerializeField] private TileInfo _info = null;
 
+        [Tooltip("Optional preview override")]
+        [SerializeField] private Sprite _icon = null;
+
         private static List<Tile> _tick = new List<Tile>();
         private static TickEvent _tickEvent = new TickEvent();
         private static bool _isTickFrame = false;
@@ -30,6 +33,11 @@ namespace Puzzled
             get => _info;
             set => _info = value;
         }
+
+        /// <summary>
+        /// Returns the icon sprite for this tile
+        /// </summary>
+        public Sprite icon => _icon == null ? DatabaseManager.GetPreview(this) : _icon;
 
         /// <summary>
         /// True if the tile is being edited

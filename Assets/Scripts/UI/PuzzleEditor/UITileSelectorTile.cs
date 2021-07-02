@@ -20,7 +20,7 @@ namespace Puzzled.Editor
                 _nameText.text = _tile.name;
                 var texture = DatabaseManager.GetPreview(_tile);
                 if (texture != null)
-                    _preview.sprite = Sprite.Create(DatabaseManager.GetPreview(_tile), new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                    _preview.sprite = DatabaseManager.GetPreview(_tile);
                 else
                     _preview.sprite = null;
             }

@@ -130,6 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: 5e03fb682aaeb4448acac255a1fd7ab7, type: 2}
+  _icon: {fileID: 21300000, guid: 527bd5febfdca4043b6c5ec1938f9ec2, type: 3}
 --- !u!114 &-6039291075100552052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,7 +154,19 @@ PrefabInstance:
     - target: {fileID: 1029017615506813897, guid: b5ba53726877af84998bfd8858120c58, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 31160684934cba444abec1e2298312ad, type: 3}
+      objectReference: {fileID: 21300000, guid: 527bd5febfdca4043b6c5ec1938f9ec2, type: 3}
+    - target: {fileID: 3052534289070060108, guid: b5ba53726877af84998bfd8858120c58, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3052534289070060108, guid: b5ba53726877af84998bfd8858120c58, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3052534289070060108, guid: b5ba53726877af84998bfd8858120c58, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.8
+      objectReference: {fileID: 0}
     - target: {fileID: 6267957914096857403, guid: b5ba53726877af84998bfd8858120c58, type: 3}
       propertyPath: m_Name
       value: LogicVisuals

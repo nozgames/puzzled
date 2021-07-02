@@ -16,7 +16,7 @@ namespace Puzzled.Editor
         [SerializeField] private GameObject _inspectorHeader = null;
         [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
         [SerializeField] private TMPro.TextMeshProUGUI _inspectorTileType = null;
-        [SerializeField] private RawImage _inspectorTilePreview = null;
+        [SerializeField] private Image _inspectorTilePreview = null;
         [SerializeField] private UIPropertyEditor backgroundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor boolEditorPrefab = null;
         [SerializeField] private UIPropertyEditor decalEditorPrefab = null;

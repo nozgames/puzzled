@@ -12,7 +12,6 @@ namespace Puzzled.Editor
         [SerializeField] private UITilePaletteItem _itemPrefab = null;
         [SerializeField] private UIList _list = null;
         [SerializeField] private ScrollRect _scrollRect = null;
-        [SerializeField] private RawImage _selectedPreview = null;
         [SerializeField] private TMPro.TextMeshProUGUI _selectedName = null;
         [SerializeField] private bool allowNone = false;
         [SerializeField] private TMPro.TMP_InputField _searchInput = null;
@@ -24,6 +23,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _filterStatic = null;
         [SerializeField] private UIRadio _filterDynamic = null;
         [SerializeField] private UIRadio _filterLogic = null;
+        [SerializeField] private UIRadio _filterPostProc = null;
 
         private Type _componentFilter;
         private Tile _selected;
@@ -99,6 +99,7 @@ namespace Puzzled.Editor
 
             _filterAll.onValueChanged.AddListener(OnLayerValueChanged);
             _filterLogic.onValueChanged.AddListener(OnLayerValueChanged);
+            _filterPostProc.onValueChanged.AddListener(OnLayerValueChanged);
             _filterDynamic.onValueChanged.AddListener(OnLayerValueChanged);
             _filterStatic.onValueChanged.AddListener(OnLayerValueChanged);
             _filterFloor.onValueChanged.AddListener(OnLayerValueChanged);
@@ -111,26 +112,22 @@ namespace Puzzled.Editor
                 UpdateFilter();
         }
 
-        private static readonly TileLayer[] _filterDynamicLayers = new[] { TileLayer.Dynamic };
-        private static readonly TileLayer[] _filterFloorLayers = new[] { TileLayer.Floor };
-        private static readonly TileLayer[] _filterLogicLayers = new[] { TileLayer.Logic };
-        private static readonly TileLayer[] _filterStaticLayers = new[] { TileLayer.Static, TileLayer.InvisibleStatic };
-        private static readonly TileLayer[] _filterWallLayers = new[] { TileLayer.Wall, TileLayer.WallStatic };
-
         private void UpdateFilter()
         {
             var checkText = _searchInput.text.Length > 0;
             var text = _searchInput.text.ToLower();
-            var checkLayer = !_filterAll.isOn;
-            var layers = _filterFloorLayers;
+            var checkCategory = !_filterAll.isOn;
+            var category = TileCategory.Floor;
             if (_filterDynamic.isOn)
-                layers = _filterDynamicLayers;
+                category = TileCategory.Usable;
             else if (_filterLogic.isOn)
-                layers = _filterLogicLayers;
+                category = TileCategory.Logic;
+            else if (_filterPostProc.isOn)
+                category = TileCategory.PostProc;
             else if (_filterStatic.isOn)
-                layers = _filterStaticLayers;            
+                category = TileCategory.Usable;
             else if (_filterWall.isOn)
-                layers = _filterWallLayers;
+                category = TileCategory.Wall;
 
             for (int i = allowNone ? 1 : 0; i < _list.itemCount; i++)
             {
@@ -139,34 +136,10 @@ namespace Puzzled.Editor
 
                 var active = true;
                 active &= !checkText || tile.name.ToLower().Contains(text);
-                active &= !checkLayer || layers.Contains(tile.layer);
+                active &= !checkCategory || tile.info.category == category;
                 active &= (_componentFilter == null) || (tile.GetComponentInChildren(_componentFilter) != null);
                     
                 _list.GetItem(i).gameObject.SetActive(active);
-            }
-        }
-
-        public void FilterAll() => _filterAll.isOn = true;
-
-        public void FilterLayer(TileLayer layer)
-        {
-            switch (layer)
-            {
-                case TileLayer.Logic:
-                    _filterLogic.isOn = true;
-                    break;
-                case TileLayer.Dynamic:
-                    _filterDynamic.isOn = true;
-                    break;
-                case TileLayer.Floor:
-                    _filterFloor.isOn = true;
-                    break;
-                case TileLayer.Wall:
-                    _filterWall.isOn = true;
-                    break;
-                case TileLayer.Static:
-                    _filterStatic.isOn = true;
-                    break;
             }
         }
 
@@ -177,7 +150,6 @@ namespace Puzzled.Editor
             if (selected == null)
                 return;
 
-            _selectedPreview.texture = DatabaseManager.GetPreview(selected);
             _selectedName.text = _selected.name;
         }
     }
