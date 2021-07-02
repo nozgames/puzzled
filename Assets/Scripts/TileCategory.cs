@@ -7,7 +7,7 @@ namespace Puzzled
         Floor,
         Wall,
         Logic,
-        Usable,
+        Object,
         FX
     }
 }

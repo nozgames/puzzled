@@ -20,10 +20,9 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _filterAll = null;
         [SerializeField] private UIRadio _filterFloor = null;
         [SerializeField] private UIRadio _filterWall = null;
-        [SerializeField] private UIRadio _filterStatic = null;
-        [SerializeField] private UIRadio _filterDynamic = null;
+        [SerializeField] private UIRadio _filterObject = null;
+        [SerializeField] private UIRadio _filterFX = null;
         [SerializeField] private UIRadio _filterLogic = null;
-        [SerializeField] private UIRadio _filterPostProc = null;
 
         private Type _componentFilter;
         private Tile _selected;
@@ -99,9 +98,8 @@ namespace Puzzled.Editor
 
             _filterAll.onValueChanged.AddListener(OnLayerValueChanged);
             _filterLogic.onValueChanged.AddListener(OnLayerValueChanged);
-            _filterPostProc.onValueChanged.AddListener(OnLayerValueChanged);
-            _filterDynamic.onValueChanged.AddListener(OnLayerValueChanged);
-            _filterStatic.onValueChanged.AddListener(OnLayerValueChanged);
+            _filterFX.onValueChanged.AddListener(OnLayerValueChanged);
+            _filterObject.onValueChanged.AddListener(OnLayerValueChanged);
             _filterFloor.onValueChanged.AddListener(OnLayerValueChanged);
             _filterWall.onValueChanged.AddListener(OnLayerValueChanged);
         }
@@ -118,15 +116,13 @@ namespace Puzzled.Editor
             var text = _searchInput.text.ToLower();
             var checkCategory = !_filterAll.isOn;
             var category = TileCategory.Floor;
-            if (_filterDynamic.isOn)
-                category = TileCategory.Usable;
+            if (_filterObject.isOn)
+                category = TileCategory.Object;
             else if (_filterLogic.isOn)
                 category = TileCategory.Logic;
-            else if (_filterPostProc.isOn)
+            else if (_filterFX.isOn)
                 category = TileCategory.FX;
-            else if (_filterStatic.isOn)
-                category = TileCategory.Usable;
-            else if (_filterWall.isOn)
+           else if (_filterWall.isOn)
                 category = TileCategory.Wall;
 
             for (int i = allowNone ? 1 : 0; i < _list.itemCount; i++)
