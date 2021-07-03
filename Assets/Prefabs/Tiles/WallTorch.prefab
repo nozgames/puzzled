@@ -273,6 +273,8 @@ GameObject:
   - component: {fileID: 4173195309186135044}
   - component: {fileID: 5561431240504439164}
   - component: {fileID: 509625663928335849}
+  - component: {fileID: 2304711316986103969}
+  - component: {fileID: 4516421050726371493}
   m_Layer: 0
   m_Name: WallTorch
   m_TagString: Untagged
@@ -371,6 +373,36 @@ MonoBehaviour:
   _instanceId: 0
   _colored: {fileID: 4173195309186135044}
   _light: {fileID: 6652477115801425211}
+--- !u!114 &2304711316986103969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b4cb43c332e55747abf0e61db1602b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+--- !u!114 &4516421050726371493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0b48eded7d3abf4da127b05e37f4b93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+  _powerable: {fileID: 2304711316986103969}
+  _targets:
+  - {fileID: 4489517949926743383}
+  - {fileID: 40329992105843096}
 --- !u!1001 &2878764239354368109
 PrefabInstance:
   m_ObjectHideFlags: 0
