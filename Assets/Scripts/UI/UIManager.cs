@@ -36,7 +36,7 @@ namespace Puzzled.UI
         [Header("HUD")]
         [SerializeField] private UIScreen _hud = null;
         [SerializeField] private GameObject _hudPlayerItem = null;
-        [SerializeField] private RawImage _hudPlayerItemIcon = null;
+        [SerializeField] private Image _hudPlayerItemIcon = null;
 
         [Header("Screens")]
         [SerializeField] private UIScreen _mainScreen = null;
@@ -319,7 +319,7 @@ namespace Puzzled.UI
             {
                 _instance._hudPlayerItem.gameObject.SetActive(true);
                 Tween.Scale(0, 1).Key("Item").Duration(0.25f).EaseInOutElastic(1, 3).Start(_instance._hudPlayerItem.gameObject);
-                _instance._hudPlayerItemIcon.texture = DatabaseManager.GetPreview(tile.guid);
+                _instance._hudPlayerItemIcon.sprite = DatabaseManager.GetPreview(tile.guid);
             }
         }
 

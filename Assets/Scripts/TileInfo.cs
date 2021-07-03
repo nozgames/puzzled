@@ -15,6 +15,9 @@ namespace Puzzled
         [Tooltip("Layer the tile is linked to")]
         [SerializeField] private TileLayer _layer = TileLayer.Static;
 
+        [Tooltip("Category the tile is in")]
+        [SerializeField] private TileCategory _category = TileCategory.None;
+
         [Serializable]
         public class CustomPropertyEditor
         {
@@ -50,7 +53,9 @@ namespace Puzzled
 
         public CustomPropertyEditor[] customPropertyEditors => _customPropertyEditors;
         
-        public TileLayer layer => _layer;        
+        public TileLayer layer => _layer;
+
+        public TileCategory category => _category;
 
         /// <summary>
         /// Return the custom property editor for the given property

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using UnityEngine;
 
 namespace Puzzled
 {
@@ -30,6 +31,7 @@ namespace Puzzled
         /// </summary>
         TileComponent,
         SoundArray,
+        Color
     }
 
     public class TileProperty
@@ -134,6 +136,8 @@ namespace Puzzled
                 type = TilePropertyType.Tile;
             else if (info.PropertyType == typeof(Background))
                 type = TilePropertyType.Background;
+            else if (info.PropertyType == typeof(Color))
+                type = TilePropertyType.Color;
             else if (info.PropertyType == typeof(Port))
                 type = TilePropertyType.Port;
             else if (info.PropertyType == typeof(Sound))

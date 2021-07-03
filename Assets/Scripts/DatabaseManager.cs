@@ -39,7 +39,7 @@ namespace Puzzled
         private TileProperty[] _emptyProperties = new TileProperty[0];
         private Tile[] _tiles = null;
         private Dictionary<Guid, Tile> _tilesByGuid = new Dictionary<Guid, Tile>();
-        private Dictionary<Guid, Texture2D> _tilePreviews = new Dictionary<Guid, Texture2D>();
+        private Dictionary<Guid, Sprite> _tilePreviews = new Dictionary<Guid, Sprite>();
         private Dictionary<Guid, TileProperty[]> _tileProperties = new Dictionary<Guid, TileProperty[]>();
 
         private void Awake()
@@ -179,8 +179,12 @@ namespace Puzzled
         /// <summary>
         /// Generates a preview for a given tile
         /// </summary>
-        private Texture2D GeneratePreview(Tile prefab)
+        private Sprite GeneratePreview(Tile prefab)
         {
+            var icon = prefab.icon;
+            if (icon != null)
+                return icon;
+
             var tile = _tilePreviewPuzzle.InstantiateTile(prefab, _tilePreviewPuzzle.grid.LayerToCell(prefab.layer));
             tile.Send(new StartEvent());
             tile.Send(new PreviewStartEvent());
@@ -198,6 +202,7 @@ namespace Puzzled
             var extents = (max - min);
             var size = Mathf.Max(extents.x, Mathf.Max(extents.y, extents.z));
             var rotation = new Vector3((tile.layer == TileLayer.Logic || tile.layer == TileLayer.InvisibleStatic) ? 90 : _tilePreviewCamera.transform.localEulerAngles.x, 0, 0);
+
             _tilePreviewCamera.transform.localEulerAngles = rotation;
             _tilePreviewCamera.transform.position = CameraManager.Frame(
                 tile.transform.position + new Vector3(0, (max.y + min.y) * 0.5f, 0),
@@ -219,18 +224,20 @@ namespace Puzzled
 
             tile.Destroy();
 
-            return t;
+            var sprite = Sprite.Create(t, new Rect(0, 0, t.width, t.height), new Vector2(0.5f, 0.5f));
+            sprite.name = "@";
+            return sprite;
         }
 
         /// <summary>
         /// Returns the tile preview for a given tile
         /// </summary>
-        public static Texture2D GetPreview(Tile tile) => tile == null ? null : GetPreview(tile.guid);
+        public static Sprite GetPreview(Tile tile) => tile == null ? null : GetPreview(tile.guid);
 
         /// <summary>
         /// Returns the tile preview for a given tile guid
         /// </summary>
-        public static Texture2D GetPreview(Guid guid) => 
+        public static Sprite GetPreview(Guid guid) => 
             _instance._tilePreviews.TryGetValue(guid, out var preview) ? preview : null;
 
         /// <summary>

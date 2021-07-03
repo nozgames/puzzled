@@ -20,6 +20,8 @@ namespace Puzzled
         public static SepiaEffect sepia => _instance._sepia;
         public static OldFilmEffect oldFilm => _instance._oldFilm;
 
+        public static bool disableAll { get; set; }
+
         private void Awake()
         {
             if (null != _instance)
@@ -47,6 +49,5 @@ namespace Puzzled
         public static void Shutdown()
         {
         }
-
     }
 }

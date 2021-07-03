@@ -142,7 +142,7 @@ namespace Puzzled.Editor
                 var rotation = _selection.tile.GetProperty("rotation");
                 _inspectorRotateButton.gameObject.SetActive(rotation != null);
 
-                _inspectorTilePreview.texture = DatabaseManager.GetPreview(tile.guid);
+                _inspectorTilePreview.sprite = DatabaseManager.GetPreview(tile.guid);
 
                 // Update the selection
                 _selection.min = _selection.max = tile.cell;

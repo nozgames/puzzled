@@ -197,7 +197,13 @@ VisualEffect:
     m_Vector3f:
       m_Array: []
     m_Vector4f:
-      m_Array: []
+      m_Array:
+      - m_Value: {x: 0, y: 0, z: 0, w: 1}
+        m_Name: StartColor
+        m_Overridden: 1
+      - m_Value: {x: 0.16700001, y: 0.0023034497, z: 0.0023034497, w: 3.27}
+        m_Name: EndColor
+        m_Overridden: 1
     m_Uint:
       m_Array: []
     m_Int:
@@ -264,6 +270,11 @@ GameObject:
   - component: {fileID: 2819266254877709548}
   - component: {fileID: -8286699205250075377}
   - component: {fileID: 6047282338572007918}
+  - component: {fileID: 4173195309186135044}
+  - component: {fileID: 5561431240504439164}
+  - component: {fileID: 509625663928335849}
+  - component: {fileID: 2304711316986103969}
+  - component: {fileID: 4516421050726371493}
   m_Layer: 0
   m_Name: WallTorch
   m_TagString: Untagged
@@ -299,6 +310,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: e260c55eb34535e48aecf50499fa81c0, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &6047282338572007918
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,6 +326,83 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _instanceId: 0
   _visuals: {fileID: 3686624325138080281}
+--- !u!114 &4173195309186135044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bd283d0fe449b747b027b3396791a8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+  _color: {r: 1, g: 0.8833333, b: 0, a: 1}
+  _propertyName: 
+  _propertyDisplayName: 
+--- !u!114 &5561431240504439164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c80c71fc2aad3a4dbc36b95bdd9e018, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+  _colored: {fileID: 4173195309186135044}
+  _vfx: {fileID: 4591930256453666744}
+  _property: Color
+--- !u!114 &509625663928335849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13f6d43ac91ca1343a6a595fd9d26417, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+  _colored: {fileID: 4173195309186135044}
+  _light: {fileID: 6652477115801425211}
+--- !u!114 &2304711316986103969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b4cb43c332e55747abf0e61db1602b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+--- !u!114 &4516421050726371493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8922302472943703707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0b48eded7d3abf4da127b05e37f4b93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+  _powerable: {fileID: 2304711316986103969}
+  _targets:
+  - {fileID: 4489517949926743383}
+  - {fileID: 40329992105843096}
 --- !u!1001 &2878764239354368109
 PrefabInstance:
   m_ObjectHideFlags: 0

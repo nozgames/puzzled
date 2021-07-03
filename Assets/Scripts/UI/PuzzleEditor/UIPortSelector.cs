@@ -6,7 +6,7 @@ namespace Puzzled.Editor
 {
     public class UIPortSelector : MonoBehaviour
     {
-        [SerializeField] private RawImage _tilePreview = null; 
+        [SerializeField] private Image _tilePreview = null; 
         [SerializeField] private UIPortSelectorPort[] _ports = null;
 
         private Action<Port,Port> _callback;
@@ -28,7 +28,7 @@ namespace Puzzled.Editor
         {
             _callback = callback;
 
-            _tilePreview.texture = DatabaseManager.GetPreview(tileTo);
+            _tilePreview.sprite = DatabaseManager.GetPreview(tileTo);
 
             foreach (var port in _ports)
                 port.gameObject.SetActive(false);

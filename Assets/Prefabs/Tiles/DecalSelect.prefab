@@ -47,6 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: bb5ca5b0628f1fd489e52f9cc3c0c2f0, type: 2}
+  _icon: {fileID: 21300000, guid: d7bda922fcc7e784188bf1d48deaa50c, type: 3}
 --- !u!114 &3915186353181991856
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,6 +60,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2af2616caca29bc4fa281d66b71b6c77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
 --- !u!114 &-842394225268392959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -71,6 +73,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 509d19d0962a4a345a3d918bffac9bd5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
 --- !u!1001 &1222495336359484541
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -78,10 +81,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2819266254877709548}
     m_Modifications:
-    - target: {fileID: 1029017615506813897, guid: b5ba53726877af84998bfd8858120c58, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: d7bda922fcc7e784188bf1d48deaa50c, type: 3}
     - target: {fileID: 6267957914096857403, guid: b5ba53726877af84998bfd8858120c58, type: 3}
       propertyPath: m_Name
       value: LogicVisuals

@@ -104,11 +104,15 @@ namespace Puzzled.Editor
             // If this prefab does not allow multiples then destroy all other instances within the puzzle 
             if (!prefab.info.allowMultiple)
             {
-                existing = puzzle.grid.GetTiles().FirstOrDefault(t => t.info == prefab.info);
-                if (null != existing)
-                    Erase(existing, command);
+                var multipleInstance = puzzle.grid.GetTiles().FirstOrDefault(t => t.info == prefab.info);
+                if (null != multipleInstance)
+                    Erase(multipleInstance, command);
+
+                if (multipleInstance == existing)
+                    existing = null;
             } 
-            else if (existing != null)
+
+            if (existing != null)
             {
                 var eraseFlags = EraseFlags.None;
                 if (existing.layer == TileLayer.WallStatic)
