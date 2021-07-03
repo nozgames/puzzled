@@ -21,6 +21,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)
         {
+            valueOutPort.SendValue(valueIndex, true);
+            AudioManager.Instance.Play(sounds[valueIndex].clip);
+
             ++valueIndex;
 
             if (valueIndex >= sounds.Length)
@@ -30,16 +33,6 @@ namespace Puzzled
                 else
                     valueIndex = sounds.Length - 1;
             }
-        }
-
-        [ActorEventHandler]
-        private void OnCycleUpdate(CycleUpdateEvent evt)
-        {
-            if (sounds == null || sounds.Length == 0)
-                return;
-
-            valueOutPort.SendValue(valueIndex, true);
-            AudioManager.Instance.Play(sounds[valueIndex].clip);
         }
 
         [ActorEventHandler]
