@@ -33,6 +33,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIPropertyEditor stringArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor multilineStringArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor colorEditorPrefab = null;
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
         [SerializeField] private Button _inspectorRotateButton = null;
@@ -338,6 +339,7 @@ namespace Puzzled.Editor
                     case TilePropertyType.Background: prefab = backgroundEditorPrefab; break;
                     case TilePropertyType.Guid: prefab = tileEditorPrefab; break;
                     case TilePropertyType.Sound: prefab = soundEditorPrefab; break;
+                    case TilePropertyType.Color: prefab = colorEditorPrefab; break;
                     case TilePropertyType.SoundArray: prefab = soundArrayEditorPrefab; break;
                     case TilePropertyType.Decal: prefab = decalEditorPrefab; break;
                     case TilePropertyType.DecalArray: prefab = decalArrayEditorPrefab; break;

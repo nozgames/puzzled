@@ -438,6 +438,10 @@ namespace Puzzled
                             writer.Write(((Background)value)?.guid ?? Guid.Empty);
                             break;
 
+                        case TilePropertyType.Color:
+                            writer.Write((Color)value);
+                            break;
+
                         case TilePropertyType.Decal:
                             writer.Write((Decal)value);
                             break;
@@ -715,6 +719,10 @@ namespace Puzzled
                             value = background;
                             break;
                         }
+
+                        case TilePropertyType.Color:
+                            value = reader.ReadColor();
+                            break;
 
                         case TilePropertyType.Decal:
                             value = reader.ReadDecal(entry.world, version);
