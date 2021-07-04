@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 8749673068507387460}
   - component: {fileID: 7185220664383755604}
   - component: {fileID: 238413512966307042}
+  - component: {fileID: 8270889291241436410}
   m_Layer: 10
   m_Name: FloorGrass
   m_TagString: Untagged
@@ -77,6 +78,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _instanceId: 15
+  _footstepClip: {fileID: 8300000, guid: a1980a0d17312b34fbed82742ee81612, type: 3}
 --- !u!114 &7185220664383755604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -107,6 +109,20 @@ MonoBehaviour:
   _materialIndex: 1
   _propertyName: 
   _propertyDisplayName: 
+--- !u!114 &8270889291241436410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5227713672087370718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 963c396d425fb9b49b4857627f0f8a40, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 0
+  _footstepClip: {fileID: 0}
 --- !u!1001 &1305065259802832495
 PrefabInstance:
   m_ObjectHideFlags: 0
