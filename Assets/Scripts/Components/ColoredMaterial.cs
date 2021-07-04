@@ -10,18 +10,26 @@ namespace Puzzled
         [SerializeField] private int _submesh = 0;
 
         [ActorEventHandler]
+        private void OnAwakeEvent(AwakeEvent evt)
+        {
+            _colored.onColorChanged += (color) => UpdateColor();
+        }
+
+        [ActorEventHandler]
         private void OnStartEvent (StartEvent evt)
+        {
+            UpdateColor();
+        }
+
+        private void UpdateColor()
         {
             if (null == _renderer || null == _colored)
                 return;
 
-            if(_submesh < 0 || _submesh >= _renderer.sharedMaterials.Length)
-            {
-                Debug.LogError("Invalid submesh on ColoredMaterial");
+            if (_submesh < 0 || _submesh >= _renderer.materials.Length)
                 return;
-            }
 
-            _renderer.sharedMaterials[_submesh].color = _colored.color;
+            _renderer.materials[_submesh].color = _colored.color;
         }
     }
 }
