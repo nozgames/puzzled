@@ -8,7 +8,6 @@ namespace Puzzled
         [SerializeField] private Light _light = null;
         [SerializeField] private float _intensityMin = 0.5f;
         [SerializeField] private float _intensityMax = 1.0f;
-        [SerializeField] private float _speed = 1.0f;
         [SerializeField] private Vector2 _perlinScale = Vector2.zero;
 
         public void OnEnable()

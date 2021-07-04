@@ -10,18 +10,36 @@ namespace Puzzled
         [SerializeField] private string _propertyName = null;
         [SerializeField] private string _propertyDisplayName = null;
 
+        private Color _defaultColor = Color.white;
+        private bool _overrideColor = false;
+
         public Action<Color> onColorChanged;
 
+        private void Awake()
+        {
+            _defaultColor = _color;
+        }
+
         [Editable(dynamicName = "propertyName", dynamicDisplayName = "propertyDisplayName")]
+        private bool overrideColor {
+            get => _overrideColor;
+            set {
+                _overrideColor = value;
+                onColorChanged?.Invoke(color);
+            }
+        }
+
+        [Editable(hiddenIfFalse = "overrideColor", dynamicDisplayName = "hiddenDisplayName")]
         public Color color {
-            get => _color;
+            get => overrideColor ? _color : _defaultColor;
             set {
                 _color = value;
-                onColorChanged?.Invoke(_color);
+                onColorChanged?.Invoke(color);
             }
         }
 
         public string propertyName => _propertyName;
         public string propertyDisplayName => _propertyDisplayName;
+        public string hiddenDisplayName => " ";
     }
 }
