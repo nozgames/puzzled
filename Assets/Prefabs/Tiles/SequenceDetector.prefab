@@ -45,8 +45,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _info: {fileID: 11400000, guid: 23144f6d433305e4f8fb85b96d527727, type: 2}
+  _info: {fileID: 11400000, guid: 452797fdd84a1ef478757029b4a75ad6, type: 2}
   _icon: {fileID: 21300000, guid: 6782d0577d2bcd44fa84d05e4e0316db, type: 3}
+  _displayName: 
 --- !u!114 &-6937866125115951744
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,7 +60,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 113d364eeea7c694fbc7bd6cbb235c12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 233
 --- !u!1001 &775787584926741505
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -67,6 +68,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 4980225229906135306}
     m_Modifications:
+    - target: {fileID: 5177891914429280059, guid: b5ba53726877af84998bfd8858120c58, type: 3}
+      propertyPath: _instanceId
+      value: 234
+      objectReference: {fileID: 0}
     - target: {fileID: 6267957914096857403, guid: b5ba53726877af84998bfd8858120c58, type: 3}
       propertyPath: m_Name
       value: LogicVisuals

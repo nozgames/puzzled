@@ -48,7 +48,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _info: {fileID: 11400000, guid: 8747ef83a579ae742aba4ad7de832eab, type: 2}
+  _info: {fileID: 11400000, guid: 58eaa70fbd78f8b49911bfda5986b6df, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &8052131265172093978
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61,6 +63,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbbac6e862244704db52d2423a33af4e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 142
   _animator: {fileID: 4429761359786391767}
   _useSound: {fileID: 8300000, guid: 540ede20dd1ef1b40986b2aab697de76, type: 3}
 --- !u!114 &5213486758045515803
@@ -75,6 +78,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 143
   _text: Press
   _height: 0
 --- !u!114 &4780836120725317221
@@ -89,6 +93,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 144
 --- !u!114 &3357876553706007875
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,7 +106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ab130ebf49553541a9a64f7822f96db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotationIndex: 0
+  _instanceId: 145
   numRotations: 8
 --- !u!95 &4429761359786391767
 Animator:

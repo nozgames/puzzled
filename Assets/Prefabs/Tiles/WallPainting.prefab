@@ -81,6 +81,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: e3556300074291c49b94764c31ea7118, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &4465512585974558369
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -93,7 +95,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 85
   _text: Use
   _height: 0.8
 --- !u!114 &6047282338572007918
@@ -108,8 +110,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ebd54d6fdb2c8444a134d7f5eaa7177, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 86
   _visuals: {fileID: 3686624325138080281}
+  _height: 0.6
 --- !u!114 &2012016470472201665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -122,7 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 87
 --- !u!114 &6340957604200686050
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54a004c7c3bad234c8c7d2bb158c751c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 88
   isUsable: 1
   _popupPrefab: {fileID: 7830224496889995870, guid: dab1954387b55d540afcbfe665644602, type: 3}
 --- !u!114 &7858696174987380583
@@ -150,13 +153,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 89
   _renderer: {fileID: 3910005098492737183}
   _materialIndex: 1
-  _color: {r: 0.6509804, g: 0.57254905, b: 0.5019608, a: 1}
-  _smoothness: 0.1
-  _rotation: 90
-  _scale: 1
   _propertyName: 
   _propertyDisplayName: 
 --- !u!1001 &2414691680042265115
@@ -172,7 +171,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6cd84fdecb7a7014084ba12405956fe7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.63
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6cd84fdecb7a7014084ba12405956fe7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

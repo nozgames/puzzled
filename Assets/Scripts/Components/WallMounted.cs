@@ -6,6 +6,7 @@ namespace Puzzled
     class WallMounted : TileComponent
     {
         [SerializeField] private Transform _visuals = null;
+        [SerializeField] private float _height = 0.5f;
 
         [ActorEventHandler]
         private void OnStartEvent (StartEvent evt)
@@ -44,11 +45,15 @@ namespace Puzzled
                     break;
             }
 
+            // Do not adjust the height if in preview mode
+            if (puzzle.isPreview)
+                return;
+
             var wall = tile.grid.CellToComponent<Wall>(tile.cell.ConvertTo(CellCoordinateSystem.SharedEdge), TileLayer.Wall);
             if (wall != null)
                 _visuals.position = wall.tile.grid.CellToWorldBounds(wall.tile.cell).center + _visuals.forward * wall.thickness;
-            else
-                _visuals.position = transform.position + Vector3.up * 0.5f;
+
+            _visuals.position += Vector3.up * _height;
         }
     }
 }

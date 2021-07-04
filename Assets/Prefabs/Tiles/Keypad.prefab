@@ -42,6 +42,7 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -129,7 +130,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _info: {fileID: 11400000, guid: 29277d76dd48db745a2ad517b8409874, type: 2}
+  _info: {fileID: 11400000, guid: 58eaa70fbd78f8b49911bfda5986b6df, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &-347710796697769489
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -142,6 +145,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c87dd3c6ae5cec4c8b4a91237657c79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _visualLocked: {fileID: 0}
   _visualUnlocked: {fileID: 0}
   _popupPrefab: {fileID: 1247488093453790480, guid: bfa2cff040516b544a1e7fc2a74cec0c, type: 3}
@@ -157,6 +161,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
 --- !u!1 &3529365862182102574
 GameObject:
   m_ObjectHideFlags: 0
@@ -199,6 +204,7 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1

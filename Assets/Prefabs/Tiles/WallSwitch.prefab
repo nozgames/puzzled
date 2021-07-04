@@ -98,7 +98,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _info: {fileID: 11400000, guid: e260c55eb34535e48aecf50499fa81c0, type: 2}
+  _info: {fileID: 11400000, guid: e3556300074291c49b94764c31ea7118, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &3379083877432565206
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -111,7 +113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e8e01f84b1e3ae34fadeb01bea3233a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _usable: 1
+  _instanceId: 90
   _animator: {fileID: 3438179450414618106}
   _onSound: {fileID: 8300000, guid: d4a07388781c3fb4080aeb360640142d, type: 3}
   _offSound: {fileID: 8300000, guid: d4a07388781c3fb4080aeb360640142d, type: 3}
@@ -127,6 +129,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 91
   _text: Use
   _height: 0.8
 --- !u!114 &6047282338572007918
@@ -141,6 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ebd54d6fdb2c8444a134d7f5eaa7177, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 92
   _visuals: {fileID: 3686624325138080281}
 --- !u!114 &2012016470472201665
 MonoBehaviour:
@@ -154,6 +158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 93
 --- !u!1001 &4612912694648430726
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -167,7 +172,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9fe6fb2ff4dbf774984df8001d3f5e3d, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.55
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9fe6fb2ff4dbf774984df8001d3f5e3d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

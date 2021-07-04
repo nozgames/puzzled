@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7553527789580536935}
-  - component: {fileID: 7447172596293960908}
   - component: {fileID: 7728102356584961729}
+  - component: {fileID: 7447172596293960908}
   m_Layer: 11
   m_Name: Player
   m_TagString: Untagged
@@ -33,28 +33,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7447172596293960908
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7553527789580536928}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1de2c6088ab9ae40ad36180d2229cf4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _instanceId: 0
-  queuedInputThreshold: 0.25
-  moveDuration: 0.25
-  visualsLeft: {fileID: 7553527790216884996}
-  leftAction: {fileID: -7954358135529409293, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  rightAction: {fileID: -6062422605368451550, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  upAction: {fileID: -5542488664919307679, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  downAction: {fileID: -513603453005425030, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  useAction: {fileID: -6350611318213716487, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  _animator: {fileID: 3694165469306689820}
 --- !u!114 &7728102356584961729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,6 +46,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: bfa17b288b5d9a049ade7aeef65f5608, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
+--- !u!114 &7447172596293960908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7553527789580536928}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1de2c6088ab9ae40ad36180d2229cf4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 173
+  queuedInputThreshold: 0.25
+  moveDuration: 0.25
+  visualsLeft: {fileID: 7553527790216884996}
+  leftAction: {fileID: -7954358135529409293, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
+  rightAction: {fileID: -6062422605368451550, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
+  upAction: {fileID: -5542488664919307679, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
+  downAction: {fileID: -513603453005425030, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
+  useAction: {fileID: -6350611318213716487, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
+  _animator: {fileID: 3694165469306689820}
 --- !u!1 &7553527790216884996
 GameObject:
   m_ObjectHideFlags: 0

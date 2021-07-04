@@ -127,32 +127,6 @@ Transform:
   m_Father: {fileID: 4159468938204632237}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
---- !u!65 &7653163423507450779
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1386140351804300411}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.24619958, y: 0.3089565, z: 0.24122606}
-  m_Center: {x: 0.0071942033, y: -0.00033350123, z: 0.088570714}
---- !u!65 &6186649800983923023
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1386140351804300411}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.10035774, y: 0.15401986, z: 0.2837525}
-  m_Center: {x: 0.008704623, y: -0.0018877657, z: 0.3375672}
 --- !u!65 &4703531669748921767
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -166,6 +140,32 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.24619958, y: 0.24753001, z: 0.25216234}
   m_Center: {x: 0.0071942033, y: 0.00040961956, z: 0.5746067}
+--- !u!65 &6186649800983923023
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386140351804300411}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.10035774, y: 0.15401986, z: 0.2837525}
+  m_Center: {x: 0.008704623, y: -0.0018877657, z: 0.3375672}
+--- !u!65 &7653163423507450779
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1386140351804300411}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.24619958, y: 0.3089565, z: 0.24122606}
+  m_Center: {x: 0.0071942033, y: -0.00033350123, z: 0.088570714}
 --- !u!1 &1411880781983275188
 GameObject:
   m_ObjectHideFlags: 0
@@ -1294,7 +1294,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _info: {fileID: 11400000, guid: 5c6c3e8f738cc024bab1c372bc9a426a, type: 2}
+  _info: {fileID: 11400000, guid: 58eaa70fbd78f8b49911bfda5986b6df, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &-6327194840247934323
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1307,7 +1309,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 154
   _text: Spin
   _height: 0
 --- !u!114 &4430051005545181219
@@ -1322,7 +1324,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8783c7d152b5bef42832fc2305312040, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 155
   _rotator: {fileID: 2819266254877709548}
   _useSound: {fileID: 8300000, guid: 7faa803b984bba94396b4c8b84c2718b, type: 3}
 --- !u!114 &7182164151707916302
@@ -1337,7 +1339,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 156
 --- !u!114 &2039818082851359106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1350,7 +1352,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 157
   _renderer: {fileID: 3751343009086415554}
   _materialIndex: 0
   _propertyName: decal1
@@ -1367,7 +1369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 158
   _renderer: {fileID: 6879692323187769654}
   _materialIndex: 0
   _propertyName: decal2
@@ -1384,7 +1386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 159
   _renderer: {fileID: 6631877517939577792}
   _materialIndex: 0
   _propertyName: decal3
@@ -1401,7 +1403,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 160
   _renderer: {fileID: 4276642900870549401}
   _materialIndex: 0
   _propertyName: decal4
@@ -1418,7 +1420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bc12d4fdcdeb7e49a6cb67342624622, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 161
 --- !u!1001 &2362658425860458050
 PrefabInstance:
   m_ObjectHideFlags: 0

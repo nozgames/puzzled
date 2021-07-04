@@ -25,6 +25,11 @@ namespace Puzzled
             public UIPropertyEditor prefab;
         }
 
+        [Header("Preview")]
+        public float previewPitch = 45.0f;
+        public bool previewOrthographic = false;
+        public float previewSize = 1.0f;
+
         [Header("Editor")]
         [Tooltip("True if this tile can be added to a puzzled more than once")]
         [SerializeField] private bool _allowMultiple = true;
