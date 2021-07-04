@@ -16,11 +16,12 @@ namespace Puzzled.Editor
         [SerializeField] private GameObject _inspectorHeader = null;
         [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
         [SerializeField] private TMPro.TextMeshProUGUI _inspectorTileType = null;
-        [SerializeField] private RawImage _inspectorTilePreview = null;
+        [SerializeField] private Image _inspectorTilePreview = null;
         [SerializeField] private UIPropertyEditor backgroundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor boolEditorPrefab = null;
         [SerializeField] private UIPropertyEditor decalEditorPrefab = null;
         [SerializeField] private UIPropertyEditor decalArrayEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor soundArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor numberEditorPrefab = null;
         [SerializeField] private UIPropertyEditor numberRangeEditorPrefab = null;
         [SerializeField] private UIPropertyEditor cellEditorPrefab = null;
@@ -32,6 +33,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIPropertyEditor stringArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor multilineStringArrayEditorPrefab = null;
         [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
+        [SerializeField] private UIPropertyEditor colorEditorPrefab = null;
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
         [SerializeField] private Button _inspectorRotateButton = null;
@@ -108,7 +110,7 @@ namespace Puzzled.Editor
             // Handle no selection or selecting a new tile
             if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
             {
-                SelectTile(GetTopMostTile(cell, TileLayer.Logic));
+                SelectTile(GetTopMostTile(cell, TileLayer.InvisibleStatic));
                 logicCycleSelection = false;
             }
             else
@@ -337,6 +339,8 @@ namespace Puzzled.Editor
                     case TilePropertyType.Background: prefab = backgroundEditorPrefab; break;
                     case TilePropertyType.Guid: prefab = tileEditorPrefab; break;
                     case TilePropertyType.Sound: prefab = soundEditorPrefab; break;
+                    case TilePropertyType.Color: prefab = colorEditorPrefab; break;
+                    case TilePropertyType.SoundArray: prefab = soundArrayEditorPrefab; break;
                     case TilePropertyType.Decal: prefab = decalEditorPrefab; break;
                     case TilePropertyType.DecalArray: prefab = decalArrayEditorPrefab; break;
                     case TilePropertyType.Port:

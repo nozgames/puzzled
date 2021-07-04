@@ -2,22 +2,18 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering.Universal.PostProcessing;
+using Puzzled;
 
 // Define the Volume Component for the custom post processing effect 
 [System.Serializable, VolumeComponentMenu("Puzzled/BlackAndWhite")]
-public class BlackAndWhiteEffect : VolumeComponent
+public class BlackAndWhiteEffect : BlendableVolumeComponent
 {
-   [Tooltip("Controls the blending between the original and the BlackAndWhite color.")]
-   public ClampedFloatParameter blend = new ClampedFloatParameter(0, 0, 1);
 }
 
 // Define the renderer for the custom post processing effect
 [CustomPostProcess("BlackAndWhite", CustomPostProcessInjectionPoint.AfterPostProcess)]
-public class BlackAndWhiteEffectRenderer : CustomPostProcessRenderer
+public class BlackAndWhiteEffectRenderer : BlendablePostProcessRenderer<BlackAndWhiteEffect>
 {
-   // A variable to hold a reference to the corresponding volume component
-   private BlackAndWhiteEffect m_VolumeComponent;
-
    // The postprocessing material
    private Material m_Material;
 
@@ -38,37 +34,18 @@ public class BlackAndWhiteEffectRenderer : CustomPostProcessRenderer
    // so we use it to create our material
    public override void Initialize()
    {
+      base.Initialize();
       m_Material = CoreUtils.CreateEngineMaterial("Shader Graphs/BlackAndWhite");
    }
 
-   // Called for each camera/injection point pair on each frame. Return true if the effect should be rendered for this camera.
-   public override bool Setup(ref RenderingData renderingData, CustomPostProcessInjectionPoint injectionPoint)
-   {
-      // Get the current volume stack
-      var stack = VolumeManager.instance.stack;
-      // Get the corresponding volume component
-      m_VolumeComponent = stack.GetComponent<BlackAndWhiteEffect>();
-      // if blend value > 0, then we need to render this effect. 
-      return m_VolumeComponent.blend.value > 0;
-   }
-
-   // The actual rendering execution is done here
    public override void Render(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, ref RenderingData renderingData, CustomPostProcessInjectionPoint injectionPoint)
    {
       // set material properties
       if (m_Material != null)
       {
-         m_Material.SetFloat(ShaderIDs.Blend, m_VolumeComponent.blend.value);
+         m_Material.SetFloat(ShaderIDs.Blend, volumeComponent.blend.value);
       }
 
-      // Since we are using a shader graph, we cann't use CoreUtils.DrawFullScreen without modifying the vertex shader.
-      // So we go with the easy route and use CommandBuffer.Blit instead. The same goes if you want to use legacy image effect shaders.
-      // Note: don't forget to set pass to 0 (last argument in Blit) to make sure that extra passes are not drawn.
       cmd.Blit(source, destination, m_Material, 0);
-// 
-//       // set source texture
-//       cmd.SetGlobalTexture(ShaderIDs.Input, source);
-//       // draw a fullscreen triangle to the destination
-//       CoreUtils.DrawFullScreen(cmd, m_Material, destination);
    }
 }

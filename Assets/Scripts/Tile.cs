@@ -10,6 +10,12 @@ namespace Puzzled
     {
         [SerializeField] private TileInfo _info = null;
 
+        [Tooltip("Optional preview override")]
+        [SerializeField] private Sprite _icon = null;
+
+        [Tooltip("Optional tile display name")]
+        [SerializeField] private string _displayName = null;
+
         private static List<Tile> _tick = new List<Tile>();
         private static TickEvent _tickEvent = new TickEvent();
         private static bool _isTickFrame = false;
@@ -30,6 +36,16 @@ namespace Puzzled
             get => _info;
             set => _info = value;
         }
+
+        /// <summary>
+        /// Returns the icon sprite for this tile
+        /// </summary>
+        public Sprite icon => _icon == null ? DatabaseManager.GetPreview(this) : _icon;
+
+        /// <summary>
+        /// Tile display name
+        /// </summary>
+        public string displayName => string.IsNullOrEmpty(_displayName) ? DatabaseManager.GetTile(guid).name.NicifyName() : _displayName;
 
         /// <summary>
         /// True if the tile is being edited
@@ -463,7 +479,7 @@ namespace Puzzled
         /// <returns>True if a connection can be made</returns>
         public bool CanConnectTo(Cell cell, bool allowHidden = true)
         {
-            for (int i = (int)TileLayer.Logic; i >= 0; i--)
+            for (int i = (int)TileLayer.InvisibleStatic; i >= 0; i--)
                 if (CanConnectTo(puzzle.grid.CellToTile(cell, (TileLayer)i), allowHidden))
                     return true;
 

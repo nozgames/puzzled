@@ -284,7 +284,7 @@ namespace Puzzled
         {
             var index = GetIndex(cell);
 
-            for (var layer = (int)TileLayer.Logic; layer >= 0; layer--)
+            for (var layer = (int)TileLayer.InvisibleStatic; layer >= 0; layer--)
                 if(_layers[layer].system == cell.system)
                 {
                     var tile = _layers[layer].tiles[index];
@@ -391,7 +391,7 @@ namespace Puzzled
                 case CellEventRouting.All:
                 {
                     var handled = false;
-                    for (var layer = TileLayer.Logic; layer >= TileLayer.Floor; layer--)
+                    for (var layer = TileLayer.InvisibleStatic; layer >= TileLayer.Floor; layer--)
                     {
                         if (cell.system != _layers[(int)layer].system)
                             continue;
@@ -409,7 +409,7 @@ namespace Puzzled
 
                 case CellEventRouting.FirstHandled:
                 {
-                    for (var layer = TileLayer.Logic; layer >= TileLayer.Floor && !evt.IsHandled; layer--)
+                    for (var layer = TileLayer.InvisibleStatic; layer >= TileLayer.Floor && !evt.IsHandled; layer--)
                     {
                         if (cell.system != _layers[(int)layer].system)
                             continue;

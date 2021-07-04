@@ -2,22 +2,18 @@
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering.Universal.PostProcessing;
+using Puzzled;
 
 // Define the Volume Component for the custom post processing effect 
 [System.Serializable, VolumeComponentMenu("Puzzled/OldFilm")]
-public class OldFilmEffect : VolumeComponent
+public class OldFilmEffect : BlendableVolumeComponent
 {
-    [Tooltip("Controls the blending between the original and the oldfilm color.")]
-    public ClampedFloatParameter blend = new ClampedFloatParameter(0, 0, 1);
 }
 
 // Define the renderer for the custom post processing effect
 [CustomPostProcess("OldFilm", CustomPostProcessInjectionPoint.AfterPostProcess)]
-public class OldFilmEffectRenderer : CustomPostProcessRenderer
+public class OldFilmEffectRenderer : BlendablePostProcessRenderer<OldFilmEffect>
 {
-    // A variable to hold a reference to the corresponding volume component (you can define as many as you like)
-    private OldFilmEffect m_VolumeComponent;
-
     // The postprocessing material (you can define as many as you like)
     private Material m_Material;
 
@@ -35,27 +31,16 @@ public class OldFilmEffectRenderer : CustomPostProcessRenderer
     // so we use it to create our material
     public override void Initialize()
     {
+        base.Initialize();
         m_Material = CoreUtils.CreateEngineMaterial("Shaders/OldFilm");
     }
 
-    // Called for each camera/injection point pair on each frame. Return true if the effect should be rendered for this camera.
-    public override bool Setup(ref RenderingData renderingData, CustomPostProcessInjectionPoint injectionPoint)
-    {
-        // Get the current volume stack
-        var stack = VolumeManager.instance.stack;
-        // Get the corresponding volume component
-        m_VolumeComponent = stack.GetComponent<OldFilmEffect>();
-        // if blend value > 0, then we need to render this effect. 
-        return m_VolumeComponent.blend.value > 0;
-    }
-
-    // The actual rendering execution is done here
     public override void Render(CommandBuffer cmd, RenderTargetIdentifier source, RenderTargetIdentifier destination, ref RenderingData renderingData, CustomPostProcessInjectionPoint injectionPoint)
     {
         // set material properties
         if (m_Material != null)
         {
-            m_Material.SetFloat(ShaderIDs.Blend, m_VolumeComponent.blend.value);
+            m_Material.SetFloat(ShaderIDs.Blend, volumeComponent.blend.value);
         }
         // set source texture
         cmd.SetGlobalTexture(ShaderIDs.Input, source);

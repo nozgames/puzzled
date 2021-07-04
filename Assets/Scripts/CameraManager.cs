@@ -52,6 +52,7 @@ namespace Puzzled
         [Header("Layers")]
         [SerializeField] [Layer] private int floorLayer = 0;
         [SerializeField] [Layer] private int staticLayer = 0;
+        [SerializeField] [Layer] private int invisibleStaticLayer = 0;
         [SerializeField] [Layer] private int dynamicLayer = 0;
         [SerializeField] [Layer] private int logicLayer = 0;
         [SerializeField] [Layer] private int gizmoLayer = 0;
@@ -164,6 +165,9 @@ namespace Puzzled
 
                 case TileLayer.Static:
                     return _instance.staticLayer;
+
+                case TileLayer.InvisibleStatic:
+                    return _instance.invisibleStaticLayer;
 
                 case TileLayer.Dynamic:
                     return _instance.dynamicLayer;

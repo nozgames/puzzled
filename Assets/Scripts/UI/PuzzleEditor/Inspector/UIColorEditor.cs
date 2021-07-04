@@ -24,6 +24,7 @@ namespace Puzzled.Editor
         protected override void OnTargetChanged()
         {
             base.OnTargetChanged();
+
             UpdateColor(target.GetValue<Color>());
         }
 

@@ -24,6 +24,9 @@ namespace Puzzled
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)
         {
+            if (values == null)
+                return;
+
             ++valueIndex;
 
             if (valueIndex >= values.Length)

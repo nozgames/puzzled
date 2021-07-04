@@ -45,6 +45,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _layerToggleStatic = null;
         [SerializeField] private UIRadio _gridToggle = null;
         [SerializeField] private UIRadio _wireToggle = null;
+        [SerializeField] private UIRadio _postProcToggle = null;
         [SerializeField] private UIRadio _debugToggle = null;
         [SerializeField] private GameObject _canvasControls = null;
 
@@ -56,6 +57,7 @@ namespace Puzzled.Editor
 
         [Header("Toolbar")]
         [SerializeField] private GameObject _toolbar = null;
+        [SerializeField] private Button _menuButton = null;
         [SerializeField] private UIRadio _moveTool = null;
         [SerializeField] private UIRadio _drawTool = null;
         [SerializeField] private UIRadio _eraseTool = null;
@@ -249,6 +251,8 @@ namespace Puzzled.Editor
 
             _wireToggle.onValueChanged.AddListener((v) => CameraManager.ShowWires(v));
 
+            _postProcToggle.onValueChanged.AddListener((v) => PostProcManager.disableAll = !v); 
+
             _inspectorRotateButton.onClick.AddListener(() => {
                 var rotation = selectedTile.GetProperty("rotation");
                 if (null != rotation)
@@ -278,6 +282,8 @@ namespace Puzzled.Editor
             _undoButton.onClick.AddListener(Undo);
             _redoButton.onClick.AddListener(Redo);
             _playButton.onClick.AddListener(BeginPlay);
+
+            _menuButton.onClick.AddListener(() => ShowPopup(_menu));
 
             _layerToggleWall.onValueChanged.AddListener((v) => UpdateCameraFlags());
             _layerToggleDynamic.onValueChanged.AddListener((v) => UpdateCameraFlags());
@@ -431,6 +437,7 @@ namespace Puzzled.Editor
             GameManager.puzzle.ShowWires(isDebugging);
             CameraManager.ShowWires(isDebugging);
             CameraManager.ShowLayer(TileLayer.Logic, isDebugging);
+            CameraManager.ShowLayer(TileLayer.InvisibleStatic, isDebugging);
         }
 
         private void BeginPlay()
@@ -468,6 +475,8 @@ namespace Puzzled.Editor
 
             if (isDebugging)
                 OnDebugButton();
+
+            PostProcManager.disableAll = false;
         }
 
         private void EndPlay ()
@@ -501,6 +510,8 @@ namespace Puzzled.Editor
             LightmapManager.Render();
 
             UpdateCameraFlags();
+
+            PostProcManager.disableAll = !_postProcToggle.isOn;
         }
 
         private void UpdateCamera()
@@ -632,7 +643,7 @@ namespace Puzzled.Editor
         /// <param name="propertyName">Name of property to search for</param>
         /// <param name="topLayer">Layer to start searching from</param>
         /// <returns>Topmost tile in the cell with the given property or null</returns>
-        public Tile GetTopMostTileWithProperty(Cell cell, string propertyName, TileLayer topLayer = TileLayer.Logic)
+        public Tile GetTopMostTileWithProperty(Cell cell, string propertyName, TileLayer topLayer = TileLayer.InvisibleStatic)
         {
             for (int i = (int)topLayer; i >= 0; i--)
             {
@@ -660,7 +671,7 @@ namespace Puzzled.Editor
         /// <param name="propertyType">Name of property to search for</param>
         /// <param name="topLayer">Layer to start searching from</param>
         /// <returns>Topmost tile in the cell with the given property or null</returns>
-        public Tile GetTopMostTileWithPropertyType(Cell cell, TilePropertyType propertyType, TileLayer topLayer = TileLayer.Logic)
+        public Tile GetTopMostTileWithPropertyType(Cell cell, TilePropertyType propertyType, TileLayer topLayer = TileLayer.InvisibleStatic)
         {
             for (int i = (int)topLayer; i >= 0; i--)
             {
@@ -681,7 +692,7 @@ namespace Puzzled.Editor
             return null;
         }
 
-        private Tile GetTopMostTile(Cell cell, TileLayer topLayer = TileLayer.Logic)
+        private Tile GetTopMostTile(Cell cell, TileLayer topLayer = TileLayer.InvisibleStatic)
         {
             for (int i = (int)topLayer; i >= 0; i--)
             {
@@ -711,19 +722,19 @@ namespace Puzzled.Editor
             
             cell = cell.ConvertTo(system);
 
-            var nextTile = GetTopMostTile(cell, layer != TileLayer.Floor ? (layer - 1) : TileLayer.Logic);
+            var nextTile = GetTopMostTile(cell, layer != TileLayer.Floor ? (layer - 1) : TileLayer.InvisibleStatic);
             if (null == nextTile)
             {
                 switch (cell.system)
                 {
                     case CellCoordinateSystem.Edge:
-                        return GetNextTile(cell, TileLayer.Logic, CellCoordinateSystem.SharedEdge);
+                        return GetNextTile(cell, TileLayer.InvisibleStatic, CellCoordinateSystem.SharedEdge);
 
                     case CellCoordinateSystem.SharedEdge:
-                        return GetNextTile(cell, TileLayer.Logic, CellCoordinateSystem.Grid);
+                        return GetNextTile(cell, TileLayer.InvisibleStatic, CellCoordinateSystem.Grid);
 
                     default:
-                        nextTile = GetTopMostTile(cell, TileLayer.Logic);
+                        nextTile = GetTopMostTile(cell, TileLayer.InvisibleStatic);
                         break;
                 }
             }                    
@@ -809,6 +820,7 @@ namespace Puzzled.Editor
             CameraManager.ShowLayer(TileLayer.Logic, _layerToggleLogic.isOn);
             CameraManager.ShowLayer(TileLayer.Floor, _layerToggleFloor.isOn);
             CameraManager.ShowLayer(TileLayer.Static, _layerToggleStatic.isOn);
+            CameraManager.ShowLayer(TileLayer.InvisibleStatic, _layerToggleStatic.isOn);
         }
 
         void KeyboardManager.IKeyboardHandler.OnKey(KeyCode keyCode)
@@ -951,7 +963,7 @@ namespace Puzzled.Editor
         public static uint GetVisibleLayerMask ()
         {
             uint mask = 0;
-            for (var layer = TileLayer.Floor; layer <= TileLayer.Logic; layer++)
+            for (var layer = TileLayer.Floor; layer <= TileLayer.InvisibleStatic; layer++)
                 mask |= (IsLayerVisible(layer) ? (1u << (int)layer) : 0u);
 
             return mask;

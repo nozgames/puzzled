@@ -240,6 +240,7 @@ namespace Puzzled
             CameraManager.ShowLayer(TileLayer.Dynamic, true);
             CameraManager.ShowLayer(TileLayer.Floor, true);
             CameraManager.ShowLayer(TileLayer.Static, true);
+            CameraManager.ShowLayer(TileLayer.InvisibleStatic, false);
             CameraManager.ShowLayer(TileLayer.Logic, false);
             CameraManager.ShowLayer(TileLayer.Wall, true);
         }

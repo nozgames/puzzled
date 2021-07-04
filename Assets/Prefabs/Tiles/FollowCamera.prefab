@@ -42,6 +42,7 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -129,6 +130,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: 83c1b5adb32fe944896b1ac8d4818f72, type: 2}
+  _icon: {fileID: 21300000, guid: be415427cf2aa75499176c441e13c14f, type: 3}
 --- !u!114 &-7370636015193094509
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,8 +143,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0ae7b180d2f06140b721857669d9145, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 0
   _visualStartingCamera: {fileID: 6360778766850334395}
-  isInitialLocation: 0
 --- !u!1001 &6257353336197723457
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -150,26 +152,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2819266254877709548}
     m_Modifications:
-    - target: {fileID: 1029017615506813897, guid: b5ba53726877af84998bfd8858120c58, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 21300000, guid: be415427cf2aa75499176c441e13c14f, type: 3}
-    - target: {fileID: 1140416543144393883, guid: b5ba53726877af84998bfd8858120c58, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3052534289070060108, guid: b5ba53726877af84998bfd8858120c58, type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4183974535472429717, guid: b5ba53726877af84998bfd8858120c58, type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5765273339166819194, guid: b5ba53726877af84998bfd8858120c58, type: 3}
-      propertyPath: m_RootOrder
-      value: 2
-      objectReference: {fileID: 0}
     - target: {fileID: 6267957914096857403, guid: b5ba53726877af84998bfd8858120c58, type: 3}
       propertyPath: m_Name
       value: LogicVisuals

@@ -6,7 +6,7 @@ namespace Puzzled.Editor
 {
     public class UIItemEditor : UIPropertyEditor
     {
-        [SerializeField] private RawImage preview = null;
+        [SerializeField] private Image preview = null;
         [SerializeField] private UIDoubleClick _doubleClick = null;
         [SerializeField] private TMPro.TextMeshProUGUI _previewText = null;
 
@@ -32,8 +32,8 @@ namespace Puzzled.Editor
         private void UpdatePreview()
         {
             var tile = DatabaseManager.GetTile(target.GetValue<System.Guid>());
-            preview.texture = DatabaseManager.GetPreview(tile);
-            preview.gameObject.SetActive(preview.texture != null);
+            preview.sprite = DatabaseManager.GetPreview(tile);
+            preview.gameObject.SetActive(preview.sprite != null);
             _previewText.name = tile == null ? "None" : tile.name;
         }
     }

@@ -1,8 +1,4 @@
-﻿using NoZ;
-using UnityEngine;
-using UnityEngine.Rendering;
-
-namespace Puzzled
+﻿namespace Puzzled
 {
     public class PostProcSepia : PostProcEffect
     {

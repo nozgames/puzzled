@@ -8,6 +8,8 @@ namespace Puzzled.Editor
     {
         [SerializeField] private TMPro.TextMeshProUGUI _nameText = null;
         [SerializeField] private Image _previewImage = null;
+        [SerializeField] private Sprite _previewNone = null;
+        [SerializeField] private Sprite _previewSound = null;
 
         private Sound _sound;
 
@@ -19,12 +21,11 @@ namespace Puzzled.Editor
                 if (_sound.clip == null)
                 {
                     _nameText.text = "None";
-                    _previewImage.gameObject.SetActive(false);
+                    _previewImage.sprite = _previewNone;
                 } else
                 {
                     _nameText.text = _sound.clip.name;
-                    //_previewImage.sprite = _sound.sprite;
-                    //_previewImage.gameObject.SetActive(true);
+                    _previewImage.sprite = _previewSound;
                 }
             }
         }

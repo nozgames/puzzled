@@ -40,7 +40,7 @@ namespace Puzzled.Editor
         {
             var tile = GetTopMostTile(_cursorCell);
             _eraseLayerOnly = tile != null;
-            _eraseLayer = _eraseLayerOnly ? tile.layer : TileLayer.Logic;
+            _eraseLayer = _eraseLayerOnly ? tile.layer : TileLayer.InvisibleStatic;
             _eraseStarted = false;
             Erase(_cursorCell);
         }
