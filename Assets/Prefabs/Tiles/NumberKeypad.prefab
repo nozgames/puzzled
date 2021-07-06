@@ -42,6 +42,7 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -79,7 +80,7 @@ SpriteRenderer:
   m_Size: {x: 0.2, y: 0.2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1979402765203244668
@@ -128,7 +129,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _info: {fileID: 11400000, guid: 29277d76dd48db745a2ad517b8409874, type: 2}
+  _info: {fileID: 11400000, guid: 452797fdd84a1ef478757029b4a75ad6, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &-3955624517235091891
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,8 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e2b07a1a1a160e43b6944ed03a772bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _visualLocked: {fileID: 695338753208502271}
-  _visualUnlocked: {fileID: 3529365862182102574}
+  _instanceId: 128
   _popupPrefab: {fileID: 1247488093453790480, guid: bfa2cff040516b544a1e7fc2a74cec0c, type: 3}
   _numbers:
   - {fileID: 21300000, guid: bd812c6125ae1074b8ae3e8e01b72f7e, type: 3}
@@ -197,6 +199,7 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -234,6 +237,6 @@ SpriteRenderer:
   m_Size: {x: 0.2, y: 0.2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0

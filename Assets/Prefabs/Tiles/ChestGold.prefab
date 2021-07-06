@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4980225229906135306}
-  - component: {fileID: 7343415307982652580}
   - component: {fileID: 4872641024044638678}
+  - component: {fileID: 7343415307982652580}
   - component: {fileID: 5143691639266857915}
   - component: {fileID: 6408391160774905643}
   - component: {fileID: -5838121154552806265}
@@ -36,21 +36,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7343415307982652580
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1979402765203244668}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d68b1fb4a2b4c3e4a8a7926c78888f84, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  keyItem: {fileID: 716946652501344160, guid: 2364058b153d50e4393db0343fb8817a, type: 3}
-  _unlockSound: {fileID: 8300000, guid: f6f5b4eb0c8f128468696da76d4fb872, type: 3}
-  _animator: {fileID: 5143691639266857915}
 --- !u!114 &4872641024044638678
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -64,6 +49,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: 58eaa70fbd78f8b49911bfda5986b6df, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
+--- !u!114 &7343415307982652580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1979402765203244668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d68b1fb4a2b4c3e4a8a7926c78888f84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _instanceId: 114
+  keyItem: {fileID: 716946652501344160, guid: 2364058b153d50e4393db0343fb8817a, type: 3}
+  _unlockSound: {fileID: 8300000, guid: f6f5b4eb0c8f128468696da76d4fb872, type: 3}
+  _animator: {fileID: 5143691639266857915}
 --- !u!95 &5143691639266857915
 Animator:
   serializedVersion: 3
@@ -95,6 +98,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _instanceId: 115
   _text: Open
   _height: 0
 --- !u!114 &-5838121154552806265
@@ -109,7 +113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ab130ebf49553541a9a64f7822f96db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rotationIndex: 0
+  _instanceId: 116
   numRotations: 4
 --- !u!1001 &500037901885167154
 PrefabInstance:

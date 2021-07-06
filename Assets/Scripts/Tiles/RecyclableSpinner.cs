@@ -55,7 +55,7 @@ namespace Puzzled
 
         protected void UpdateDecals()
         {
-            if (decals.Length == 0)
+            if (decals.Length == 0 || tile.puzzle.isPreview)
                 return;
 
             UpdateDecalRenderer(rotateIndex, value);

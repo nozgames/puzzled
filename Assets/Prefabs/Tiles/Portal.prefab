@@ -80,6 +80,7 @@ VFXRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 0
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
@@ -294,6 +295,7 @@ SpriteRenderer:
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -346,11 +348,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36fbd674b755e764fab4ee0379b1b51f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 137
   _renderer: {fileID: 5954077645607251504}
   _materialIndex: 0
-  _color: {r: 1, g: 1, b: 1, a: 1}
-  _smoothness: 0.5
   _propertyName: 
   _propertyDisplayName: 
 --- !u!1 &7680977818543006660
@@ -404,7 +404,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e89d874073cbf843ba35fa2c8832fc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _info: {fileID: 11400000, guid: 28c45b2a255d1b147b0ce0a687a8fbfe, type: 2}
+  _info: {fileID: 11400000, guid: 58eaa70fbd78f8b49911bfda5986b6df, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &-4546490037876775820
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -417,7 +419,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9adf2b1a3e704cb4db8dc353960d1480, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 133
 --- !u!114 &-3448904349409468871
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -430,7 +432,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9458bab56d1e8e498d25bb6279f186a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 134
   _text: Enter
   _height: 0
 --- !u!114 &259947734059033116
@@ -445,7 +447,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbcb97059d47635429a321ab63fb4f7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 135
 --- !u!114 &-4360065198499441543
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -458,7 +460,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ab130ebf49553541a9a64f7822f96db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceId: 0
+  _instanceId: 136
   numRotations: 4
 --- !u!1001 &8137840309499924493
 PrefabInstance:

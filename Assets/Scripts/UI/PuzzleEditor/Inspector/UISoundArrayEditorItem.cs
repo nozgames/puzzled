@@ -11,6 +11,8 @@ namespace Puzzled.Editor
         [SerializeField] private TMPro.TextMeshProUGUI _name = null;
         [SerializeField] private UIDoubleClick _doubleClick = null;
         [SerializeField] private Button _deleteButton = null;
+        [SerializeField] private Image _previewNone = null;
+        [SerializeField] private Image _previewSound = null;
 
         public event Action<UISoundArrayEditorItem> onDeleted;
         public event Action<UISoundArrayEditorItem> onValueChanged;
@@ -26,6 +28,9 @@ namespace Puzzled.Editor
 
                 if (_name != null)
                     _name.text = (_soundValue.clip != null) ? _soundValue.clip.name : "None";
+
+                _previewNone.gameObject.SetActive(_soundValue.clip == null);
+                _previewSound.gameObject.SetActive(_soundValue.clip != null);
             }
         }
 

@@ -175,7 +175,7 @@ namespace Puzzled.UI
             _animator.SetBool("selected", _selected);
         }
 
-        public void OnPointerDown(PointerEventData eventData)
+        public virtual void OnPointerDown(PointerEventData eventData)
         {
             _pressed = true;
             UpdateAnimatorState();

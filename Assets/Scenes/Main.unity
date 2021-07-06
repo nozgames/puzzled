@@ -1240,7 +1240,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!20 &235807783
 Camera:
   m_ObjectHideFlags: 0
@@ -1267,7 +1267,7 @@ Camera:
   near clip plane: 0.01
   far clip plane: 100
   field of view: 10
-  orthographic: 0
+  orthographic: 1
   orthographic size: 6
   m_Depth: -1
   m_CullingMask:
@@ -10750,8 +10750,8 @@ MonoBehaviour:
   invisibleStaticLayer: 0
   dynamicLayer: 12
   logicLayer: 13
-  gizmoLayer: 0
-  wireLayer: 0
+  gizmoLayer: 7
+  wireLayer: 9
   fogLayer: 14
   wallLayer: 15
   _defaultBackground: {fileID: 11400000, guid: 368c5de005ec3e24aad93a40d2ee4c36, type: 2}

@@ -746,7 +746,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf1b37d4b9a55e9458c5b7efb2cee954, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gradientMaterial: {fileID: 2100000, guid: 21081150561033649b8221f90c21b595, type: 2}
 --- !u!114 &771362373
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -771,11 +770,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85d196800f7f2f04fb6e66125b58ac45, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  previewPuzzle: {fileID: 0}
-  previewCamera: {fileID: 0}
-  _powerPortIcon: {fileID: 21300000, guid: 3c8c999f4c4805e47b60324ed0a6a494, type: 3}
-  _signalPortIcon: {fileID: 21300000, guid: 0394c279063740344af8d89219d63ca5, type: 3}
-  _numberPortIcon: {fileID: 21300000, guid: 965f0229b6f0d09449a2f6115a2e2ac1, type: 3}
 --- !u!4 &866528858 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5480386470126576066, guid: 3df1c639a62fa6e40ba523206cac2d2b, type: 3}
@@ -1010,16 +1004,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e35cf789eab3eb64986ddd4823b86cd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cameraPlayer: {fileID: 1436441790}
-  _cameraEditor: {fileID: 1441406280}
-  _cameraEditorLogic: {fileID: 0}
+  _camera: {fileID: 0}
+  _letterbox: {fileID: 0}
   floorLayer: 10
   staticLayer: 11
+  invisibleStaticLayer: 0
   dynamicLayer: 12
   logicLayer: 13
+  gizmoLayer: 0
+  wireLayer: 0
+  fogLayer: 0
+  wallLayer: 0
   _defaultBackground: {fileID: 11400000, guid: 368c5de005ec3e24aad93a40d2ee4c36, type: 2}
-  _fog: {fileID: 1180602593}
-  _gridMaterial: {fileID: 2100000, guid: 1eb42e6de6bc95b40a4e5e33726b0d1e, type: 2}
 --- !u!4 &1078279821
 Transform:
   m_ObjectHideFlags: 0
@@ -1165,11 +1161,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ed764988e8705c34ba692bc0d5c003b4, type: 3}
---- !u!23 &1180602593 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: ed764988e8705c34ba692bc0d5c003b4, type: 3}
-  m_PrefabInstance: {fileID: 1180602592}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1180602594 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: ed764988e8705c34ba692bc0d5c003b4, type: 3}
@@ -1857,6 +1848,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -9.1567746e-11
       objectReference: {fileID: 0}
+    - target: {fileID: 6429175437720593177, guid: 53693a9d652afb1408c1b2364a33311c, type: 3}
+      propertyPath: m_Volume
+      value: 0.426
+      objectReference: {fileID: 0}
     - target: {fileID: 7553527789580536928, guid: 53693a9d652afb1408c1b2364a33311c, type: 3}
       propertyPath: m_Name
       value: Player
@@ -2160,6 +2155,14 @@ MonoBehaviour:
       m_Groups: 
       m_Action: Key Delete
       m_Flags: 0
+  keySpace:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
   keyB:
     m_Name: Key B
     m_Type: 0
@@ -2208,6 +2211,14 @@ MonoBehaviour:
       m_Groups: 
       m_Action: Key E
       m_Flags: 0
+  keyF:
+    m_Name: 
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings: []
   keyV:
     m_Name: Key V
     m_Type: 0
@@ -2335,54 +2346,6 @@ MonoBehaviour:
       m_Processors: 
       m_Groups: 
       m_Action: Key 4
-      m_Flags: 0
-  keyShift:
-    m_Name: Key Shift
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: 935421c8-91f8-4956-878a-e8e3215b3100
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings:
-    - m_Name: 
-      m_Id: 15177057-4a7e-4f8b-b943-9ea3121093e8
-      m_Path: <Keyboard>/shift
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Key Shift
-      m_Flags: 0
-  keyAlt:
-    m_Name: Key Alt
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: 37896753-a86d-4468-a4b9-da740994d724
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings:
-    - m_Name: 
-      m_Id: 46eac083-df45-4804-9b5e-def06025890a
-      m_Path: <Keyboard>/alt
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Key Alt
-      m_Flags: 0
-  keyCtrl:
-    m_Name: Key Ctrl
-    m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: cc159578-e2a6-46f8-85f2-d8d0e5b282a3
-    m_Processors: 
-    m_Interactions: 
-    m_SingletonActionBindings:
-    - m_Name: 
-      m_Id: bdccef4c-1e73-4b78-af49-5952f4be837b
-      m_Path: <Keyboard>/ctrl
-      m_Interactions: 
-      m_Processors: 
-      m_Groups: 
-      m_Action: Key Ctrl
       m_Flags: 0
 --- !u!1 &1825842604
 GameObject:
@@ -2665,6 +2628,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
@@ -2843,6 +2807,8 @@ MonoBehaviour:
   _grid: {fileID: 5801129563147287552}
   _trash: {fileID: 5801129563316718839}
   _wirePrefab: {fileID: 4802866844265590925, guid: ed1b2837c4d094e4a92f6958185103fc, type: 3}
+  _propertiesPrefab: {fileID: 0}
+  _preview: 0
 --- !u!1 &5801129563963201977
 GameObject:
   m_ObjectHideFlags: 0
