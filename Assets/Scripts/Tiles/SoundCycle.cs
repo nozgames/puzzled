@@ -20,19 +20,17 @@ namespace Puzzled
 
         [ActorEventHandler]
         private void OnCycleAdvance(CycleAdvanceEvent evt)
-        {
+        {          
+            if ((valueIndex >= sounds.Length) && !evt.isLooping)
+                return;
+
             valueOutPort.SendValue(valueIndex, true);
             AudioManager.Instance.Play(sounds[valueIndex].clip);
 
             ++valueIndex;
 
-            if (valueIndex >= sounds.Length)
-            {
-                if (evt.isLooping)
-                    valueIndex = 0;
-                else
-                    valueIndex = sounds.Length - 1;
-            }
+            if ((valueIndex >= sounds.Length) && evt.isLooping)
+                valueIndex = 0;
         }
 
         [ActorEventHandler]
