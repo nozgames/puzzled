@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Puzzled.UI;
+using UnityEngine.EventSystems;
+using NoZ;
 
 namespace Puzzled.Editor
 {
@@ -28,6 +30,14 @@ namespace Puzzled.Editor
                     _previewImage.sprite = _previewSound;
                 }
             }
+        }
+
+        public override void OnPointerClick(PointerEventData eventData)
+        {
+            base.OnPointerClick(eventData);
+
+            if (sound.clip != null && eventData.clickCount == 1)
+                AudioManager.Instance.Play(sound.clip);
         }
     }
 }
