@@ -5,6 +5,9 @@ namespace Puzzled.Editor
 {
     public partial class UIPuzzleEditor
     {
+        [Header("Selection")]
+        [SerializeField] private Color _selectionColor = Color.red;
+
         private struct Selection
         {
             public Cell min;
@@ -13,6 +16,8 @@ namespace Puzzled.Editor
             public Tile tile;
             public Wire wire;
         }
+
+        public static Color selectionColor => instance._selectionColor;
 
         private Selection _selection;
 
@@ -104,6 +109,10 @@ namespace Puzzled.Editor
             // Save the inspector state
             if (_selection.tile != null)
             {
+                var selected = _selection.tile.GetComponent<Selected>();
+                if (null != selected)
+                    Destroy(selected);
+
                 _selection.tile.ShowGizmos(false);
 
                 // Make sure the current edit box finishes before we clear the selected tile
@@ -119,6 +128,8 @@ namespace Puzzled.Editor
 
             if (tile == null)
             {
+                CameraManager.showSelection = false;
+
                 ClearSelection();
                 _inspectorContent.transform.DetachAndDestroyChildren();
                 _inspectorContent.SetActive(false);
@@ -133,6 +144,10 @@ namespace Puzzled.Editor
             } 
             else
             {
+                CameraManager.showSelection = true;
+
+                tile.gameObject.AddComponent<Selected>();
+
                 _inspectorEmpty.SetActive(false);
                 _inspectorContent.SetActive(true);
                 _inspectorHeader.SetActive(true);
@@ -147,7 +162,7 @@ namespace Puzzled.Editor
                 // Update the selection
                 _selection.min = _selection.max = tile.cell;
                 _selection.size = Vector2Int.one;
-                _selectionGizmo.gameObject.SetActive(true);
+                //_selectionGizmo.gameObject.SetActive(false);
                 UpdateSelectionGizmo();
 
                 // Hide all wires in case they were all visible previously and show the selected tiles wires
