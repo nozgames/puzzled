@@ -6,6 +6,7 @@ namespace Puzzled
     public class WallRotation : TileComponent
     {
         [SerializeField] private Transform _target = null;
+        [SerializeField] private Transform _target2 = null;
 
         [SerializeField] private int _rotationCount = 4;
 
@@ -35,6 +36,9 @@ namespace Puzzled
                         _target.transform.localScale = new Vector3(-1, 1, -1);
                         break;
                 }
+
+                if (_target2 != null)
+                    _target2.transform.localScale = _target.transform.localScale;
             }
         }
     }

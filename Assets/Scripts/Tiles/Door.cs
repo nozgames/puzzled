@@ -36,11 +36,7 @@ namespace Puzzled
 
                 _open = value;
 
-                if(_animator != null)
-                {
-                    _animator.enabled = true;
-                    _animator.Play(value ? _animationOpen : _animationClosed, 0, (isEditing||isLoading||isStarting) ? 1.0f : 0.0f);
-                }
+                UpdateAnimation();
 
                 if (value)
                     PlaySound(_openSound);
@@ -65,6 +61,12 @@ namespace Puzzled
         {
             evt.IsHandled = true;
             evt.result = _open;
+        }
+
+        [ActorEventHandler]
+        private void OnStartEvent(StartEvent evt)
+        {
+            UpdateAnimation();
         }
 
         [ActorEventHandler]
@@ -108,6 +110,15 @@ namespace Puzzled
         {
             if (null != _gizmos)
                 _gizmos.gameObject.SetActive(evt.show);
+        }
+
+        private void UpdateAnimation()
+        {
+            if (_animator == null)
+                return;
+
+            _animator.enabled = true;
+            _animator.Play(_open ? _animationOpen : _animationClosed, 0, (isEditing || isLoading || isStarting) ? 1.0f : 0.0f);
         }
     }
 }

@@ -9,7 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 638664271962108704}
-  m_Layer: 10
+  - component: {fileID: 3928537025235111656}
+  - component: {fileID: 6132748973169265330}
+  m_Layer: 11
   m_Name: DecalTransform
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31,6 +33,32 @@ Transform:
   m_Father: {fileID: 2819266254877709548}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &3928537025235111656
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6771034514617287270}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.5141679, y: 1, z: 0.10263821}
+  m_Center: {x: -0.0023866296, y: 0, z: 0.018854592}
+--- !u!65 &6132748973169265330
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6771034514617287270}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.17518315, y: 0.8943815, z: 0.08787194}
+  m_Center: {x: -0.0073429495, y: -0.93572795, z: 0.018827945}
 --- !u!1 &7241462922463812018
 GameObject:
   m_ObjectHideFlags: 0
@@ -42,7 +70,7 @@ GameObject:
   - component: {fileID: 6108000198214062490}
   - component: {fileID: 341619301312460381}
   - component: {fileID: 316117399464926798}
-  m_Layer: 10
+  m_Layer: 11
   m_Name: Decal
   m_TagString: Untagged
   m_Icon: {fileID: 0}

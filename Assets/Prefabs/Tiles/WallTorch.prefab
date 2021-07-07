@@ -143,6 +143,20 @@ Transform:
   m_Father: {fileID: 2819266254877709548}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &4434252939530074426
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3112555803494427964}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4749707353668628313, guid: 44e172689c39466469ab9a9784c81a3e, type: 3}
 --- !u!1 &4489517949926743383
 GameObject:
   m_ObjectHideFlags: 0
@@ -448,8 +462,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: WallTorch
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 44e172689c39466469ab9a9784c81a3e, type: 3}
+      propertyPath: m_Layer
+      value: 15
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 44e172689c39466469ab9a9784c81a3e, type: 3}
+--- !u!1 &3112555803494427964 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 44e172689c39466469ab9a9784c81a3e, type: 3}
+  m_PrefabInstance: {fileID: 2878764239354368109}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2340136432085890950 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 44e172689c39466469ab9a9784c81a3e, type: 3}

@@ -107,10 +107,17 @@ namespace Puzzled.Editor
                 return;
             }
 
+            var hit = Physics.RaycastAll(_cursorRay, 100.0f, (int)0x7FFFFFFF);
+            Tile hitTile = null;
+            if(hit.Length > 0)
+                hitTile = hit.Select(h => h.collider.GetComponentInParent<Tile>()).Where(t => t != null).FirstOrDefault();
+            if (hitTile == null)
+                hitTile = GetTopMostTile(cell, TileLayer.InvisibleStatic);
+
             // Handle no selection or selecting a new tile
-            if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
+            if (selectedTile == null || hitTile != selectedTile)  //  !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
             {
-                SelectTile(GetTopMostTile(cell, TileLayer.InvisibleStatic));
+                SelectTile(hitTile);
                 logicCycleSelection = false;
             }
             else

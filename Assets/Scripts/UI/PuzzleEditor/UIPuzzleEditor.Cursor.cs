@@ -14,6 +14,7 @@ namespace Puzzled.Editor
 
         private Cell _cursorCell = Cell.invalid;
         private Vector3 _cursorWorld = Vector3.zero;
+        private Ray _cursorRay;
         private Func<Cell, CursorType> _getCursor = null;
 
         private void InitializeCursor()
@@ -60,6 +61,7 @@ namespace Puzzled.Editor
                     return;
 
                 _cursorWorld = _canvas.CanvasToWorld(position);
+                _cursorRay = _canvas.CanvasToRay(position);
 
                 // When moving a single tile around that is on an edge lock the edge to that edge
                 if (mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null && selectedTile.cell.edge != CellEdge.None)
@@ -148,7 +150,7 @@ namespace Puzzled.Editor
 
             UIManager.cursor = _getCursor?.Invoke(renderCell) ?? CursorType.Arrow;
 
-            _cursorGizmo.gameObject.SetActive(_canvas.isMouseOver);
+            _cursorGizmo.gameObject.SetActive(_canvas.isMouseOver && mode == Mode.Draw);
 
             var cursorBounds = puzzle.grid.CellToWorldBounds(renderCell);
             _cursorGizmo.min = cursorBounds.min;

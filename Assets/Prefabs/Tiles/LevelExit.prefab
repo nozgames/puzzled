@@ -15,6 +15,19 @@ MonoBehaviour:
   _target: {fileID: 0}
   minHeight: 0.35
   maxHeight: 0.55
+--- !u!135 &1246421043470383804
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3407780781411290644}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.25
+  m_Center: {x: 0, y: 0.000000014901161, z: 0.19810724}
 --- !u!1 &7680977818543006660
 GameObject:
   m_ObjectHideFlags: 0
@@ -61,6 +74,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: 192883ba43f5de8458de553dce164945, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &5631867192256601731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -75,7 +90,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _instanceId: 0
   _visuals: {fileID: 3407780781411290644}
-  _pickupSound: {fileID: 8300000, guid: 066cf1634a5542947a9a9fac4b679b15, type: 3}
 --- !u!1001 &2561342303434273605
 PrefabInstance:
   m_ObjectHideFlags: 0

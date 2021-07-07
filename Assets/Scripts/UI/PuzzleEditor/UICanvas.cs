@@ -42,9 +42,11 @@ namespace Puzzled.Editor
             onLButtonDragEnd = null;
         }
 
+        public Ray CanvasToRay (Vector2 position) => CameraManager.camera.ScreenPointToRay(position);
+
         public Vector3 CanvasToWorld(Vector2 position)
         {
-            var ray = CameraManager.camera.ScreenPointToRay(position);
+            var ray = CanvasToRay(position);
             if ((new Plane(Vector3.up, Vector3.zero)).Raycast(ray, out float enter))
                 return ray.origin + ray.direction * enter;
 

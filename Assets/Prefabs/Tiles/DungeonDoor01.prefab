@@ -44,6 +44,20 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.7275257, y: 1.0607121, z: 0.07785237}
   m_Center: {x: 0.001911357, y: 0.036674753, z: 0.015823886}
+--- !u!64 &8370190449084671058
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147475311167817441}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -6360558719573625917, guid: 7ffbe60aeba115f4e82ede917836de2f, type: 3}
 --- !u!1 &1979402765203244668
 GameObject:
   m_ObjectHideFlags: 0
@@ -93,6 +107,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: 0d87f7f531199a145b2bc3e13baf8a0d, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &2665324356222441418
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -126,6 +142,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _instanceId: 56
   _target: {fileID: 1371473857304601692}
+  _target2: {fileID: 4320043204451260832}
   _rotationCount: 4
 --- !u!114 &6458328600690213968
 MonoBehaviour:
@@ -147,6 +164,7 @@ MonoBehaviour:
   _smartCorners: 0
   _allowWallMounts: 0
   _thickness: 0.1
+  _allowMove: 0
 --- !u!95 &1776262703814301414
 Animator:
   serializedVersion: 3
@@ -166,6 +184,51 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!1 &3016014000871299046
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4320043204451260832}
+  - component: {fileID: 3605615437214724806}
+  m_Layer: 6
+  m_Name: Collider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4320043204451260832
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3016014000871299046}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 8445407037679498932}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &3605615437214724806
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3016014000871299046}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2619086233303812490, guid: 679b0b32be82ba34aba32bb46ef85941, type: 3}
 --- !u!1 &3740527250929056116
 GameObject:
   m_ObjectHideFlags: 0
@@ -276,6 +339,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ffbe60aeba115f4e82ede917836de2f, type: 3}
+--- !u!1 &2147475311167817441 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7ffbe60aeba115f4e82ede917836de2f, type: 3}
+  m_PrefabInstance: {fileID: 1228414776298273712}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1623140599213595739 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 7ffbe60aeba115f4e82ede917836de2f, type: 3}
@@ -349,6 +417,11 @@ PrefabInstance:
 --- !u!4 &1989955391804771703 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 679b0b32be82ba34aba32bb46ef85941, type: 3}
+  m_PrefabInstance: {fileID: 2024091641859074716}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8445407037679498932 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7575925847243136040, guid: 679b0b32be82ba34aba32bb46ef85941, type: 3}
   m_PrefabInstance: {fileID: 2024091641859074716}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2110886916594644432

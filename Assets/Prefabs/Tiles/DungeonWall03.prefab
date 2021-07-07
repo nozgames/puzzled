@@ -1,18 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!65 &6188763826318422130
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 24651624884533454}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1.0093572, y: 0.56447184, z: 0.12794323}
-  m_Center: {x: -0.0004632473, y: 0.28643006, z: -0}
 --- !u!65 &979189131784268125
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -75,6 +62,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _info: {fileID: 11400000, guid: 82f716d205f32884b84e67e0d629c9e4, type: 2}
+  _icon: {fileID: 0}
+  _displayName: 
 --- !u!114 &8093818524819492775
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,6 +84,7 @@ MonoBehaviour:
   _smartCorners: 1
   _allowWallMounts: 0
   _thickness: 0.08
+  _allowMove: 0
 --- !u!114 &3594435314366237237
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,7 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _instanceId: 0
-  _renderer: {fileID: 1970158765735893275}
+  _renderer: {fileID: 1071840105020848344}
   _materialIndex: 1
   _propertyName: decal
   _propertyDisplayName: Decal Front
@@ -125,7 +115,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _instanceId: 0
-  _renderer: {fileID: 1970158765735893275}
+  _renderer: {fileID: 1071840105020848344}
   _materialIndex: 0
   _propertyName: decalBack
   _propertyDisplayName: Decal Back
@@ -170,67 +160,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6592168962573730142}
-  - {fileID: 800589777367769716}
   - {fileID: 2203628255730664375}
   m_Father: {fileID: 4980225229906135306}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &907190913597293983
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 7991460810829099217}
-    m_Modifications:
-    - target: {fileID: -8679921383154817045, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 919132149155446097, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-      propertyPath: m_Name
-      value: DungeonWall03
-      objectReference: {fileID: 0}
-    - target: {fileID: 919132149155446097, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
---- !u!1 &24651624884533454 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-  m_PrefabInstance: {fileID: 907190913597293983}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &800589777367769716 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-  m_PrefabInstance: {fileID: 907190913597293983}
-  m_PrefabAsset: {fileID: 0}
---- !u!23 &1970158765735893275 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: e9fa37b2016a4a04dad02266071cb5f7, type: 3}
-  m_PrefabInstance: {fileID: 907190913597293983}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1809995444481844316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -240,7 +173,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 22a5434afa1578f4893a5ff868809c91, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 22a5434afa1578f4893a5ff868809c91, type: 3}
       propertyPath: m_LocalPosition.x
@@ -272,6 +205,11 @@ GameObject:
 --- !u!4 &2203628255730664375 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 22a5434afa1578f4893a5ff868809c91, type: 3}
+  m_PrefabInstance: {fileID: 1809995444481844316}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1071840105020848344 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 22a5434afa1578f4893a5ff868809c91, type: 3}
   m_PrefabInstance: {fileID: 1809995444481844316}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6698734751557969589
