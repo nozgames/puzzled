@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Puzzled
 {
@@ -47,6 +48,7 @@ namespace Puzzled
 
         [Header("General")]
         [SerializeField] private Camera _camera = null;
+        [SerializeField] private Camera _selectionCamera = null;
         [SerializeField] private GameObject _letterbox = null;
 
         [Header("Layers")]
@@ -79,13 +81,28 @@ namespace Puzzled
 
         private GameCamera.State _blendedState;
         private bool _cameraIsBusy = false;
+        private int _screenWidth = 0;
+        private int _screenHeight = 0;
+        private bool _showSelection = false;
 
+        /// <summary>
+        /// True if the selection is visible
+        /// </summary>
+        public static bool showSelection {
+            get => _instance == null ? false : _instance._showSelection;
+            set {
+                _instance._showSelection = value;
+                _instance._selectionCamera.enabled = value;
+            }
+        }
 
         public void Initialize()
         {
             _instance = this;
-            //_fog.material.color = Color.white;
+
             camera.fieldOfView = FieldOfView;
+
+            UpdateSelectionTexture();
         }
 
         private void OnDisable()
@@ -114,6 +131,10 @@ namespace Puzzled
 
             camera.transform.position = CameraManager.Frame(_blendedState.targetPosition, _blendedState.pitch, _blendedState.yaw, _blendedState.zoomLevel, CameraManager.FieldOfView);
             camera.transform.rotation = Quaternion.Euler(_blendedState.pitch, _blendedState.yaw, 0);
+
+            // Update the selection texture if the height 
+            if (_screenHeight != Screen.height || _screenWidth != Screen.width)
+                UpdateSelectionTexture();
         }
 
         /// <summary>
@@ -235,6 +256,16 @@ namespace Puzzled
                 camera.cullingMask |= (1 << TileLayerToObjectLayer(layer));
             else
                 camera.cullingMask &= ~(1 << TileLayerToObjectLayer(layer));
+        }
+
+        private void UpdateSelectionTexture()
+        {
+            var renderTexture = new RenderTexture(new RenderTextureDescriptor(Screen.width, Screen.height, RenderTextureFormat.ARGB32));
+            Shader.SetGlobalTexture("_selection_texture", renderTexture);
+            _selectionCamera.targetTexture = renderTexture;
+
+            _screenWidth = Screen.width;
+            _screenHeight = Screen.height;
         }
     }
 }
