@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 7728102356584961729}
   - component: {fileID: 7447172596293960908}
   - component: {fileID: 6429175437720593177}
-  - component: {fileID: 6244444513211294733}
+  - component: {fileID: 2144662138860524364}
   m_Layer: 11
-  m_Name: Player
+  m_Name: PlayerNew
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -63,7 +63,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _instanceId: 187
-  _playerController: {fileID: 6244444513211294733}
+  _playerController: {fileID: 2144662138860524364}
   _visuals: {fileID: 7553527790216884996}
   _animator: {fileID: 3694165469306689820}
 --- !u!82 &6429175437720593177
@@ -162,7 +162,7 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &6244444513211294733
+--- !u!114 &2144662138860524364
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -171,16 +171,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 7553527789580536928}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a3d79903dd71b6a4394b46135688f1cf, type: 3}
+  m_Script: {fileID: 11500000, guid: 08253d333f2a42d4da8076c60a705409, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   useAction: {fileID: -6350611318213716487, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  leftAction: {fileID: -7954358135529409293, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  rightAction: {fileID: -6062422605368451550, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  upAction: {fileID: -5542488664919307679, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  downAction: {fileID: -513603453005425030, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
-  queuedInputThreshold: 0.25
-  moveDuration: 0.4
+  movementAction: {fileID: 5086200034214006036, guid: 8906b0849ac9dc145b3e4717cb1d01ae, type: 3}
+  movementSpeed: 3
 --- !u!1 &7553527790216884996
 GameObject:
   m_ObjectHideFlags: 0
@@ -403,7 +399,7 @@ PrefabInstance:
     - target: {fileID: -1750197354950549132, guid: 39c903f7496b84d4ebd27422ec525fe4, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 771aae98a4a4d564da420a9b74335190, type: 2}
+      objectReference: {fileID: 2100000, guid: 3235e88e2105598489674c7b3a08b5d0, type: 2}
     - target: {fileID: 919132149155446097, guid: 39c903f7496b84d4ebd27422ec525fe4, type: 3}
       propertyPath: m_Name
       value: Player
