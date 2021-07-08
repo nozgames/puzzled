@@ -13,7 +13,7 @@ namespace Puzzled.Editor
         private readonly Regex LetterRegex = new Regex("(Letter).*", RegexOptions.IgnoreCase);
         private readonly Regex NumberRegex = new Regex("(Number).*", RegexOptions.IgnoreCase);
         private readonly Regex RuneRegex = new Regex("(Rune).*", RegexOptions.IgnoreCase);
-        private readonly Regex LineRegex = new Regex("(SolidLine|DashedLine).*", RegexOptions.IgnoreCase);
+        private readonly Regex ShapeRegex = new Regex("(SolidLine|DashedLine|Shape).*", RegexOptions.IgnoreCase);
         private readonly Regex SymbolRegex = new Regex("(Symbol).*", RegexOptions.IgnoreCase);
 
         [SerializeField] private Texture2D _noneTexture = null;
@@ -34,7 +34,7 @@ namespace Puzzled.Editor
         [SerializeField] private UIRadio _filterLetter = null;
         [SerializeField] private UIRadio _filterRune = null;
         [SerializeField] private UIRadio _filterNumber = null;
-        [SerializeField] private UIRadio _filterLine = null;
+        [SerializeField] private UIRadio _filterShape = null;
         [SerializeField] private UIRadio _filterSymbol = null;
         [SerializeField] private UIRadio _filterImported = null;
 
@@ -117,7 +117,7 @@ namespace Puzzled.Editor
             _filterNumber.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterRune.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterLetter.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
-            _filterLine.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
+            _filterShape.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterSymbol.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
             _filterImported.onValueChanged.AddListener((v) => { if (v) UpdateFilter(); });
 
@@ -193,8 +193,8 @@ namespace Puzzled.Editor
                 regex = RuneRegex;
             else if (_filterLetter.isOn)
                 regex = LetterRegex;
-            else if (_filterLine.isOn)
-                regex = LineRegex;
+            else if (_filterShape.isOn)
+                regex = ShapeRegex;
             else if (_filterSymbol.isOn)
                 regex = SymbolRegex;
 
@@ -225,7 +225,7 @@ namespace Puzzled.Editor
 
         public void FilterRunes() => _filterRune.isOn = true;
 
-        public void FilterLine() => _filterLine.isOn = true;
+        public void FilterShape() => _filterShape.isOn = true;
 
         public void FilterSymbol() => _filterSymbol.isOn = true;
 
