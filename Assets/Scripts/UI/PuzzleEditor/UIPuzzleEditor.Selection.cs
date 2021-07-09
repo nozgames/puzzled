@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Puzzled.Editor
@@ -8,44 +9,33 @@ namespace Puzzled.Editor
         [Header("Selection")]
         [SerializeField] private Color _selectionColor = Color.red;
 
-        private struct Selection
-        {
-            public Cell min;
-            public Cell max;
-            public Vector2Int size;
-            public Tile tile;
-            public Wire wire;
-        }
-
         public static Color selectionColor => instance._selectionColor;
 
-        private Selection _selection;
+        private List<Tile> _selectedTiles = new List<Tile>();
+        private Wire _selectedWire = null;
 
-        public static Tile selectedTile {
-            get => instance._selection.tile;
-            set => instance.SelectTile(value);
-        }
+        /// <summary>
+        /// True if there is at least one tile selected
+        /// </summary>
+        public bool hasSelection => _selectedTiles.Count > 0;
 
-        public static Wire selectedWire {
-            get => instance._selection.wire;
-            set => instance.SelectWire(value);
+        /// <summary>
+        /// Creates a copy of the selected tiles array and returns it
+        /// </summary>
+        public static Tile[] selectedTiles {
+            get => instance._selectedTiles.ToArray();
+            set => instance.SelectTiles(value);
         }
 
         /// <summary>
-        /// Returns the selected bounds.
+        /// Get/Set the selected wire.
         /// </summary>
-        public static CellBounds selectedBounds => new CellBounds(instance._selection.min, instance._selection.max);
-
-        public static Bounds selectedWorldBounds {
-            get {
-                var bounds = instance._puzzle.grid.CellToWorldBounds(instance._selection.min);
-                bounds.Encapsulate(instance._puzzle.grid.CellToWorldBounds(instance._selection.max));
-                return bounds;
-            }
+        public static Wire selectedWire {
+            get => instance._selectedWire;
+            set => instance.SelectWire(value);
         }
-            
-        public bool hasSelection => _selectionGizmo.gameObject.activeSelf;
 
+#if false
         /// <summary>
         /// Returns true if the given cell is part of the current selection
         /// </summary>
@@ -54,40 +44,18 @@ namespace Puzzled.Editor
         private bool IsSelected (Cell cell) => hasSelection && (_selection.min == _selection.max ? _selection.min == cell : selectedBounds.Contains(cell));
 
         private bool IsSelected(Vector3 position) => hasSelection && selectedWorldBounds.ContainsXZ(position);
-
-        /// <summary>
-        /// Return and array of all selected tiles
-        /// </summary>
-        private Tile[] GetSelectedTiles() =>
-            hasSelection ?
-                puzzle.grid.GetTiles(selectedBounds).Where(t => IsLayerVisible(t.layer)).ToArray() :
-                null;
+#endif
 
         public void ClearSelection()
         {
-            if (_selection.wire != null)
+            if(_selectedWire != null)
                 SelectWire(null);
 
-            if (_selection.tile != null)
-                SelectTile(null);
-
-            _selection.min = _selection.max = Cell.invalid;
-            _selection.size = Vector2Int.zero;
-            _selectionGizmo.gameObject.SetActive(false);
+            while (_selectedTiles.Count > 0)
+                RemoveSelection(_selectedTiles[0]);
         }
 
-        public void SelectRect(Cell min, Cell max) => SelectRect(new CellBounds(min, max));
-
-        public void SelectRect(CellBounds cellBounds)
-        {
-            _selection.min = cellBounds.min;
-            _selection.max = cellBounds.max;
-            _selection.size = _selection.max - _selection.min;
-
-            _selectionGizmo.gameObject.SetActive(true);
-            UpdateSelectionGizmo();
-        }
-
+#if false
         private void UpdateSelectionGizmo()
         {
             if (_selection.min == _selection.max)
@@ -101,11 +69,81 @@ namespace Puzzled.Editor
                 _selectionGizmo.max = _puzzle.grid.CellToWorld(_selection.max) + new Vector3(0.5f, 0, 0.5f);
             }
         }
+#endif
+
+        /// <summary>
+        /// Return true if a tile is selected
+        /// </summary>
+        /// <param name="tile">Tile</param>
+        /// <returns>True if selected, false if not</returns>
+        private bool IsSelected(Tile tile) => tile.GetComponent<Selected>() != null;
 
         private void SelectTile(Cell cell) => SelectTile(GetTopMostTile(cell));
 
+        /// <summary>
+        /// Select the givens tiles
+        /// </summary>
+        /// <param name="tiles">Tiles to select</param>
+        private void SelectTiles(Tile[] tiles)
+        {
+            ClearSelection();
+
+            if (null == tiles)
+                return;
+
+            foreach (var tile in tiles)
+                AddSelection(tile);
+
+            RefreshInspectorInternal();
+        }
+
+        /// <summary>
+        /// Add a tile to the current selection
+        /// </summary>
+        /// <param name="tile">Tile to select</param>
+        private void AddSelection (Tile tile)
+        {
+            if (_selectedTiles.Contains(tile))
+                return;
+
+            _selectedTiles.Add(tile);
+            tile.gameObject.AddComponent<Selected>();
+
+            CameraManager.showSelection = true;
+
+            tile.ShowGizmos(true);
+
+            SelectWire(null);
+        }
+
+        /// <summary>
+        /// Remove a tile from the current selection
+        /// </summary>
+        /// <param name="tile">Tile to remove</param>
+        private void RemoveSelection (Tile tile)
+        {
+            if (!_selectedTiles.Contains(tile))
+                return;
+
+            SetWiresDark(tile, false);
+
+            Destroy(tile.gameObject.GetComponent<Selected>());
+
+            _selectedTiles.Remove(tile);
+
+            tile.ShowGizmos(false);
+
+            CameraManager.showSelection = _selectedTiles.Count > 0;
+
+            SelectWire(null);
+        }
+
         private void SelectTile(Tile tile)
         {
+            // Clear the current selection
+            ClearSelection();
+
+#if false
             // Save the inspector state
             if (_selection.tile != null)
             {
@@ -121,20 +159,13 @@ namespace Puzzled.Editor
                 SetWiresDark(_selection.tile, false);
                 UpdateInspectorState(_selection.tile);
             }
+#endif
+            AddSelection(tile);            
 
-            _selection.tile = tile;
-
-            HideCameraEditor();
-
+#if false
             if (tile == null)
             {
-                CameraManager.showSelection = false;
-
                 ClearSelection();
-                _inspectorContent.transform.DetachAndDestroyChildren();
-                _inspectorContent.SetActive(false);
-                _inspectorHeader.SetActive(false);
-                _inspectorEmpty.SetActive(true);
 
                 // Show all wires when no tile is selected
                 if (mode == Mode.Logic)
@@ -144,43 +175,14 @@ namespace Puzzled.Editor
             } 
             else
             {
-                CameraManager.showSelection = true;
-
-                tile.gameObject.AddComponent<Selected>();
-
-                _inspectorEmpty.SetActive(false);
-                _inspectorContent.SetActive(true);
-                _inspectorHeader.SetActive(true);
-                inspectorTileName.SetTextWithoutNotify(tile.name);
-                _inspectorTileType.text = $"<{_selection.tile.info.displayName}>";
-
-                var rotation = _selection.tile.GetProperty("rotation");
-                _inspectorRotateButton.gameObject.SetActive(rotation != null);
-
-                _inspectorTilePreview.sprite = DatabaseManager.GetPreview(tile.guid);
-
-                // Update the selection
-                _selection.min = _selection.max = tile.cell;
-                _selection.size = Vector2Int.one;
-                //_selectionGizmo.gameObject.SetActive(false);
-                UpdateSelectionGizmo();
-
                 // Hide all wires in case they were all visible previously and show the selected tiles wires
                 _puzzle.HideWires();
                 _puzzle.ShowWires(tile);
                 RefreshInspectorInternal();
-
-                // If the tile is a camera then open the camera editor as well
-                var gameCamera = tile.GetComponent<GameCamera>();
-                if (gameCamera != null)
-                    ShowCameraEditor(gameCamera);
-
-                _selection.tile.ShowGizmos(true);
             }
+#endif
 
-            // Clear wire selection if the selected wire does not connect to the newly selected tile
-            if (selectedWire != null && selectedWire.from.tile != tile && selectedWire.to.tile != tile)
-                SelectWire(null);
+            RefreshInspectorInternal();
         }
 
         /// <summary>
@@ -190,18 +192,19 @@ namespace Puzzled.Editor
         private void SelectWire(Wire wire)
         {
             // Make sure one of the two tiles from the wire is selected, if not select the input
-            if (wire != null && _selection.tile != wire.from.tile && _selection.tile != wire.to.tile)
+            if (wire != null && !IsSelected(wire.from.tile) && !IsSelected(wire.to.tile))
                 SelectTile(wire.from.tile);
 
-            if (_selection.wire != null)
-                _selection.wire.visuals.selected = false;
+            // Unselect the current wire selection
+            if (_selectedWire != null)
+                _selectedWire.visuals.selected = false;
 
-            _selection.wire = wire;
+            _selectedWire = wire;
 
-            if (_selection.wire != null)
-                _selection.wire.visuals.selected = true;
+            if (_selectedWire != null)
+                _selectedWire.visuals.selected = true;
 
-            onSelectedWireChanged?.Invoke(_selection.wire);
+            onSelectedWireChanged?.Invoke(_selectedWire);
         }
 
         /// <summary>
@@ -212,11 +215,12 @@ namespace Puzzled.Editor
             if (!hasSelection)
                 return;
 
-            SelectTiles(GetSelectedTiles());
+            //SelectTiles(GetSelectedTiles());
         }
 
         private void SelectNextTileUnderCursor()
         {
+#if false
             if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
             {
                 SelectTile(_cursorCell);
@@ -229,37 +233,7 @@ namespace Puzzled.Editor
                 SelectTile(null);
             else
                 SelectTile(overlappingTiles[(overlappingTiles.IndexOf(selectedTile) + 1) % overlappingTiles.Count]);
-        }
-
-        /// <summary>
-        /// Select the givens tiles
-        /// </summary>
-        /// <param name="tiles">Tiles to select</param>
-        private void SelectTiles (Tile[] tiles)
-        {
-            if (null == tiles)
-                return;
-
-            ClearSelection();
-
-            if (tiles.Length == 0)
-                return;
-
-            if (tiles.Length == 1)
-            {
-                SelectTile(tiles[0]);
-                return;
-            }
-
-            var min = tiles[0].cell;
-            var max = min;
-            foreach (var tile in tiles)
-            {
-                min = Cell.Min(min, tile.cell);
-                max = Cell.Max(max, tile.cell);
-            }
-
-            SelectRect(min, max);
+#endif
         }
     }
 }

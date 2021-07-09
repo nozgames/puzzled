@@ -4,13 +4,13 @@ using UnityEngine;
 namespace Puzzled.Editor.Commands
 {
     public abstract class Command
-    {
+    {        
         public (string name,object value)[] undoState { get; set; }
         public (string name,object value)[] redoState { get; set; }
 
         public UIPuzzleEditor.Mode mode { get; private set; }
 
-        public Tile selectedTile { get; private set; }
+        public Tile[] selectedTiles { get; private set; }
 
         public Wire selectedWireUndo { get; set; }
         public Wire selectedWireRedo { get; set; }
@@ -24,7 +24,7 @@ namespace Puzzled.Editor.Commands
 
         public Command ()
         {
-            selectedTile = UIPuzzleEditor.selectedTile;
+            selectedTiles = UIPuzzleEditor.selectedTiles;
             selectedWireUndo = UIPuzzleEditor.selectedWire;
             mode = UIPuzzleEditor.instance.mode;
         }

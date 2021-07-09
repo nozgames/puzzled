@@ -10,34 +10,6 @@ namespace Puzzled.Editor
 {
     public partial class UIPuzzleEditor
     {
-        [Header("Inspector")]
-        [SerializeField] private GameObject _inspectorContent = null;
-        [SerializeField] private GameObject _inspectorEmpty = null;
-        [SerializeField] private GameObject _inspectorHeader = null;
-        [SerializeField] private TMPro.TMP_InputField inspectorTileName = null;
-        [SerializeField] private TMPro.TextMeshProUGUI _inspectorTileType = null;
-        [SerializeField] private Image _inspectorTilePreview = null;
-        [SerializeField] private UIPropertyEditor backgroundEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor boolEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor decalEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor decalArrayEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor soundArrayEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor numberEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor numberRangeEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor cellEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor numberArrayEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor portEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor portEmptyEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor stringEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor stringMultilineEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor stringArrayEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor multilineStringArrayEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor colorEditorPrefab = null;
-        [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
-        [SerializeField] private GameObject optionPropertiesPrefab = null;
-        [SerializeField] private Button _inspectorRotateButton = null;
-
         private WireVisuals dragWire = null;
         private bool logicCycleSelection = false;
         private bool _allowLogicDrag = false;
@@ -225,12 +197,6 @@ namespace Puzzled.Editor
             UpdateCursor();
         }
 
-
-        private void UpdateInspectorState(Tile tile)
-        {
-            tile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>(true).Select(p => (p.inspectorStateId, p.inspectorState)).ToArray();
-        }
-
         private void SetWiresDark (Tile tile, bool dark)
         {
             if (null == tile || null == tile.properties)
@@ -240,128 +206,6 @@ namespace Puzzled.Editor
                 if (property.type == TilePropertyType.Port)
                     foreach (var wire in property.GetValue<Port>(tile).wires)
                         wire.visuals.highlight = !dark;
-        }
-
-
-        public static void RefreshInspector() => instance.RefreshInspectorInternal();
-
-        private void RefreshInspectorInternal()
-        {
-            var tile = selectedTile;
-            _inspectorContent.transform.DetachAndDestroyChildren();
-
-            // Create the custom editos
-            if(tile.info.customEditors != null)
-                foreach (var customEditorPrefab in tile.info.customEditors)
-                    Instantiate(customEditorPrefab, _inspectorContent.transform).GetComponent<UIInspectorEditor>().tile = tile;
-
-            GameObject propertiesGroup = null;
-            Transform propertiesGroupContent = null;
-            foreach (var tileProperty in tile.properties)
-            {
-                // Skip hidden properties
-                if (tile.IsPropertyHidden(tileProperty))
-                    continue;
-
-                var optionEditor = InstantiatePropertyEditor(tile, tileProperty, _inspectorContent.transform);
-                if (null == optionEditor)
-                    continue;
-
-                if(!optionEditor.isGrouped)
-                {
-                    if (null == propertiesGroup)
-                    {
-                        propertiesGroup = Instantiate(optionPropertiesPrefab, _inspectorContent.transform);
-                        propertiesGroupContent = propertiesGroup.transform.Find("Content");
-                    }
-
-                    optionEditor.transform.SetParent(propertiesGroupContent);
-                }
-
-                optionEditor.target = new TilePropertyEditorTarget(tile, tileProperty);
-            }
-
-            if (propertiesGroup != null)
-                propertiesGroup.transform.SetAsFirstSibling();
-
-            // Apply the saved inspector state
-            if (selectedTile.inspectorState != null)
-            {
-                var providers = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>(true);
-                foreach (var state in selectedTile.inspectorState)
-                {
-                    var provider = providers.FirstOrDefault(p => p.inspectorStateId == state.id);
-                    if (provider != null)
-                        provider.inspectorState = state.value;
-                }
-            }
-
-            // Sort the priorities
-            var priorities = new List<UIPriority>(_inspectorContent.transform.childCount);
-            for(int i=0; i< _inspectorContent.transform.childCount; i++)
-            {
-                var priority = _inspectorContent.transform.GetChild(i).GetComponent<UIPriority>();
-                if(null == priority)
-                    priority = _inspectorContent.transform.GetChild(i).gameObject.AddComponent<UIPriority>();
-
-                priorities.Add(priority);
-            }
-
-            priorities = priorities.OrderByDescending(p => p.priority).ToList();
-            for(int i=0; i<priorities.Count; i++)
-                priorities[i].transform.SetSiblingIndex(i);
-        }
-
-        /// <summary>
-        /// Instantiate a property editor for the given property
-        /// </summary>
-        /// <param name="tile">Tile that owns the property</param>
-        /// <param name="property">Property</param>
-        /// <param name="parent">Parent transform to instantiate in to</param>
-        /// <returns>The instantiated editor</returns>
-        private UIPropertyEditor InstantiatePropertyEditor(Tile tile, TileProperty property, Transform parent)
-        {
-            var prefab = tile.info.GetCustomPropertyEditor(property)?.prefab ?? null;
-            if(null == prefab)
-                switch (property.type)
-                {
-                    case TilePropertyType.String:
-                        prefab = property.editable.multiline ? stringMultilineEditorPrefab : stringEditorPrefab;
-                        break;
-
-                    case TilePropertyType.StringArray:
-                        prefab = property.editable.multiline ? multilineStringArrayEditorPrefab : stringArrayEditorPrefab;
-                        break;
-
-                    case TilePropertyType.Int:
-                        if (property.editable.range.x != property.editable.range.y)
-                            prefab = numberRangeEditorPrefab;
-                        else
-                            prefab = numberEditorPrefab; 
-                        break;
-
-                    case TilePropertyType.Cell: prefab = cellEditorPrefab; break;
-                    case TilePropertyType.IntArray: prefab = numberArrayEditorPrefab; break;
-                    case TilePropertyType.Bool: prefab = boolEditorPrefab; break;
-                    case TilePropertyType.Background: prefab = backgroundEditorPrefab; break;
-                    case TilePropertyType.Guid: prefab = tileEditorPrefab; break;
-                    case TilePropertyType.Sound: prefab = soundEditorPrefab; break;
-                    case TilePropertyType.Color: prefab = colorEditorPrefab; break;
-                    case TilePropertyType.SoundArray: prefab = soundArrayEditorPrefab; break;
-                    case TilePropertyType.Decal: prefab = decalEditorPrefab; break;
-                    case TilePropertyType.DecalArray: prefab = decalArrayEditorPrefab; break;
-                    case TilePropertyType.Port:
-                        if (property.GetValue<Port>(tile).wires.Count == 0)
-                            prefab = portEmptyEditorPrefab; 
-                        else
-                            prefab = portEditorPrefab; 
-                        break;
-
-                    default:
-                        return null;
-                }
-
-            return Instantiate(prefab.gameObject, parent).GetComponent<UIPropertyEditor>();
         }
 
         private void OnLogicKey(KeyCode keyCode)
