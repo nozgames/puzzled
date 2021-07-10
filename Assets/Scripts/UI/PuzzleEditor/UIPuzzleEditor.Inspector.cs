@@ -10,6 +10,7 @@ namespace Puzzled.Editor
         [Header("Inspector")]
         [SerializeField] private GameObject _inspectorContent = null;
         [SerializeField] private GameObject _inspectorEmpty = null;
+        [SerializeField] private GameObject _inspectorMultiple = null;
         [SerializeField] private GameObject _inspectorHeader = null;
         [SerializeField] private TMPro.TMP_InputField _inspectorTileName = null;
         [SerializeField] private TMPro.TextMeshProUGUI _inspectorTileType = null;
@@ -68,6 +69,7 @@ namespace Puzzled.Editor
 
             _inspectorContent.transform.DetachAndDestroyChildren();
             _inspectorEmpty.SetActive(false);
+            _inspectorMultiple.SetActive(false);
             _inspectorContent.SetActive(false);
             _inspectorHeader.SetActive(false);
 
@@ -78,7 +80,8 @@ namespace Puzzled.Editor
             }
 
             if (_selectedTiles.Count > 1)
-            {                
+            {
+                _inspectorMultiple.SetActive(true);
                 return;
             }
 

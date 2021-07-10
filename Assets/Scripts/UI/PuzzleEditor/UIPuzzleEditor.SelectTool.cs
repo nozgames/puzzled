@@ -7,9 +7,13 @@ namespace Puzzled.Editor
 {
     public partial class UIPuzzleEditor
     {
+        [Header("SelectTool")]
+        [SerializeField] private RectTransform _selectionRect = null;
+
         private WireVisuals _dragWire = null;
         private List<Tile> _cursorTiles = null;
         private Tile _pendingSelection = null;
+        private Vector2 _selectionStart;
 
         public static Action<Wire> onSelectedWireChanged;
 
@@ -36,12 +40,22 @@ namespace Puzzled.Editor
 
         private List<Tile> RaycastTiles (Ray ray) => 
             Physics.RaycastAll(_cursorRay, 100.0f, CameraManager.camera.cullingMask)
+                .OrderByDescending(h => h.distance)
                 .Select(h => h.collider.GetComponentInParent<Tile>())
                 .Where(t => t != null)
                 .ToList();
 
         private void OnSelectLButtonDown (Vector2 position)
         {
+            _selectionStart = position;
+            _selectionRect.offsetMin = position;
+            _selectionRect.offsetMax = position;
+
+#if false
+
+            // TODO: did it hit a manipulator such as wire drag or move ?
+            // TODO: box selection
+
             var hit = _cursorTiles;
             if (hit.Count == 0)
                 return;
@@ -56,6 +70,8 @@ namespace Puzzled.Editor
                     RemoveSelection(hitTile);
                 else
                     AddSelection(hitTile);
+
+                RefreshInspectorInternal();
             }
             // If there is only one selected tile and that tile was hit then we need to cycle
             // selection to the next lowest tile.
@@ -74,6 +90,7 @@ namespace Puzzled.Editor
             { 
                 SelectTile(hitTile);
             }
+#endif
         }
 
         private void OnSelectLButtonUp (Vector2 position)
@@ -85,8 +102,108 @@ namespace Puzzled.Editor
             }
         }
 
+        private List<Tile> _boxSelectionTiles = new List<Tile>();
+        private Plane[] _boxSelectionPlanes = new Plane[4];
+        private Collider[] _boxSelectionColliders = new Collider[128];
+
+        /// <summary>
+        /// Returns a list of tiles that overlap or are contained within the given screen rectangle
+        /// </summary>
+        /// <param name="rect">Screen rectangle</param>
+        /// <param name="outTiles">Tiles that overlap the screen rectangle</param>
+        /// <returns>True if any tiles were found</returns>
+        private bool ScreenRectToTiles(Rect rect, List<Tile> outTiles)
+        {
+            outTiles.Clear();
+
+            // Calculate the rays at the four corners of the rect
+            var ray1 = CameraManager.camera.ScreenPointToRay(rect.min);
+            var ray2 = CameraManager.camera.ScreenPointToRay(new Vector2(rect.min.x, rect.max.y));
+            var ray3 = CameraManager.camera.ScreenPointToRay(rect.max);
+            var ray4 = CameraManager.camera.ScreenPointToRay(new Vector2(rect.max.x, rect.min.y));
+
+            // Find the intersection point of the rays with the ground plane
+            var ground = new Plane(Vector3.up, Vector3.zero);
+            if (!ground.Raycast(ray1, out float enter1)) return false;
+            if (!ground.Raycast(ray2, out float enter2)) return false;
+            if (!ground.Raycast(ray3, out float enter3)) return false;
+            if (!ground.Raycast(ray4, out float enter4)) return false;
+
+            // Find the world coordinates of the ray intersections
+            var world1 = ray1.origin + ray1.direction * enter1;
+            var world2 = ray2.origin + ray2.direction * enter2;
+            var world3 = ray3.origin + ray3.direction * enter3;
+            var world4 = ray4.origin + ray4.direction * enter4;
+
+            // Find all colliders within an AABB that wraps the box selection world coordinates
+            var bounds = new Bounds(world1, Vector3.zero);
+            bounds.Encapsulate(world2);
+            bounds.Encapsulate(world3);
+            bounds.Encapsulate(world4);
+            bounds.Encapsulate(world1 + Vector3.up * 10.0f);
+
+            var overlapCount = Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, _boxSelectionColliders, Quaternion.identity, CameraManager.camera.cullingMask);
+            while(overlapCount == _boxSelectionColliders.Length)
+            {
+                _boxSelectionColliders = new Collider[_boxSelectionColliders.Length * 2];
+                overlapCount = Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, _boxSelectionColliders, Quaternion.identity, CameraManager.camera.cullingMask);
+            }
+
+            // Create planes for each side of the box selection
+            _boxSelectionPlanes[0] = new Plane(-Vector3.Cross((world2 - world1).normalized, Vector3.up), world1);
+            _boxSelectionPlanes[1] = new Plane(-Vector3.Cross((world3 - world2).normalized, Vector3.up), world2);
+            _boxSelectionPlanes[2] = new Plane(-Vector3.Cross((world4 - world3).normalized, Vector3.up), world3);
+            _boxSelectionPlanes[3] = new Plane(-Vector3.Cross((world1 - world4).normalized, Vector3.up), world4);
+
+            // Test each collider that was overlapped and see if it is inside the calculate planes
+            for(int i=0; i<overlapCount; i++)
+            {
+                var tile = _boxSelectionColliders[i].GetComponentInParent<Tile>();
+                if (null == tile)
+                    continue;
+
+                if (outTiles.Contains(tile))
+                    continue;
+
+                if (GeometryUtility.TestPlanesAABB(_boxSelectionPlanes, _boxSelectionColliders[i].bounds))
+                    outTiles.Add(tile);
+            }
+
+            return outTiles.Count > 0;
+        }
+
+        private void UpdateBoxSelection(Vector2 position)
+        {
+            // Update the selection rect
+            _selectionRect.offsetMin = Vector3.Min(_selectionStart, position);
+            _selectionRect.offsetMax = Vector3.Max(_selectionStart, position);
+
+            // Ensure it is visible
+            _selectionRect.gameObject.SetActive(true);
+
+            var rect = _selectionRect.rect;
+            rect.position = _selectionRect.offsetMin;
+            
+            ClearSelection();
+            if (!ScreenRectToTiles(rect, _boxSelectionTiles))
+                return;
+
+            foreach (var tile in _boxSelectionTiles)
+                AddSelection(tile);
+        }
+
         private void OnSelectLButtonDragBegin(Vector2 position)
         {
+            // TODO: if dragged from on top of a selected tile then perform a move
+            // TODO: if dragged from the wire manipulator then start a wire drag
+
+            // Once a box selection starts we just clear the current selection
+            ClearSelection();
+
+            UpdateBoxSelection(position);
+            
+
+
             // Do not allow dragging wires if the selection has more than one tile
             if (_selectedTiles.Count != 1)
                 return;
@@ -112,6 +229,11 @@ namespace Puzzled.Editor
 
         private void OnSelectLButtonDrag(Vector2 position, Vector2 delta)
         {
+            UpdateBoxSelection(position);
+
+
+            // TODO: UPDATE the selected items in the selection rect
+
             if (null == _dragWire)
                 return;
 
@@ -120,6 +242,8 @@ namespace Puzzled.Editor
 
         private void OnSelectLButtonDragEnd(Vector2 position)
         {
+            _selectionRect.gameObject.SetActive(false);
+
             if (null == _dragWire)
                 return;
 

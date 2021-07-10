@@ -199,7 +199,7 @@ namespace Puzzled.Editor
             if (!inspector.gameObject.activeSelf)
             {
                 puzzle.HideWires();
-                SelectTile(null);
+                ClearSelection();
             }
 
             UpdateCursor();

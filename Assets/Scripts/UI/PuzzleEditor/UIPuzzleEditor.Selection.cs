@@ -109,6 +109,13 @@ namespace Puzzled.Editor
         /// <param name="tile">Tile to select</param>
         private void AddSelection (Tile tile)
         {
+            if (tile == null)
+            {
+                Debug.LogError("cannot add 'null' tile to selection");
+                return;
+            }
+                
+
             if (_selectedTiles.Contains(tile))
                 return;
 
