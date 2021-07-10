@@ -5,15 +5,16 @@ namespace Puzzled.Editor.Commands
 {
     public abstract class Command
     {        
-        public (string name,object value)[] undoState { get; set; }
-        public (string name,object value)[] redoState { get; set; }
+        public class EditorState
+        {
+            public Tile[] selectedTiles;
+            public Wire selectedWire;
+            public UIPuzzleEditor.Mode mode;
+            public (string name, object value)[][] inspectorState;
+        };
 
-        public UIPuzzleEditor.Mode mode { get; private set; }
-
-        public Tile[] selectedTiles { get; private set; }
-
-        public Wire selectedWireUndo { get; set; }
-        public Wire selectedWireRedo { get; set; }
+        public EditorState editorStateUndo;
+        public EditorState editorStateRedo;
 
         public bool isExecuted { get; private set; }
 
@@ -21,13 +22,6 @@ namespace Puzzled.Editor.Commands
         /// Puzzle being edited
         /// </summary>
         public Puzzle puzzle => UIPuzzleEditor.instance.puzzle;
-
-        public Command ()
-        {
-            selectedTiles = UIPuzzleEditor.selectedTiles;
-            selectedWireUndo = UIPuzzleEditor.selectedWire;
-            mode = UIPuzzleEditor.instance.mode;
-        }
 
         public void Execute (Action<Command> callback = null)
         {

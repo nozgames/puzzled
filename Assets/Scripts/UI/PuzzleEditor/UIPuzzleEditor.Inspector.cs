@@ -229,5 +229,26 @@ namespace Puzzled.Editor
 
             return Instantiate(prefab.gameObject, parent).GetComponent<UIPropertyEditor>();
         }
+
+        private void OnInspectorTileNameChanged(string name)
+        {
+            if (inspectorTile == null)
+                return;
+
+            name = name.Trim();
+
+            // Name hasnt changed?
+            if (name == inspectorTile.name)
+                return;
+
+            // Do not allow empty names, reset back to previous name
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                _inspectorTileName.SetTextWithoutNotify(inspectorTile.name);
+                return;
+            }
+
+            ExecuteCommand(new Commands.TileRenameCommand(inspectorTile, name));
+        }
     }
 }

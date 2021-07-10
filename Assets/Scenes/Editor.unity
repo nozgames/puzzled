@@ -3287,12 +3287,12 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2689036212727415548, guid: 94faa1bced678414982ed509594a2b37, type: 3}
       propertyPath: m_Name
-      value: Move
+      value: Select
       objectReference: {fileID: 0}
     - target: {fileID: 3202109759772315073, guid: 94faa1bced678414982ed509594a2b37, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 6bcdd9dcd58b80944b4c0f7a547ae2d7, type: 3}
+      objectReference: {fileID: 21300000, guid: 10a2c4c10abc7594b98d82847ccc76f3, type: 3}
     - target: {fileID: 4490231432449227306, guid: 94faa1bced678414982ed509594a2b37, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -10211,17 +10211,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2689036212727415548, guid: 94faa1bced678414982ed509594a2b37, type: 3}
   m_PrefabInstance: {fileID: 1868274004}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1868274007 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5155673019153429301, guid: 94faa1bced678414982ed509594a2b37, type: 3}
-  m_PrefabInstance: {fileID: 1868274004}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1868274006}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5993a3458ebad9c4181c0344353c3723, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1868274008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13745,10 +13734,9 @@ MonoBehaviour:
   _cursorGizmo: {fileID: 1390728434}
   _toolbar: {fileID: 4239777380601307249}
   _menuButton: {fileID: 888457079}
-  _moveTool: {fileID: 1684684455}
+  _selectTool: {fileID: 1684684455}
   _drawTool: {fileID: 790113065}
   _eraseTool: {fileID: 417682514}
-  _wireTool: {fileID: 1868274007}
   _decalTool: {fileID: 320271647}
   _undoButton: {fileID: 1719274589}
   _redoButton: {fileID: 1944340172}
@@ -13772,7 +13760,7 @@ MonoBehaviour:
   _inspectorContent: {fileID: 2378121415631486492}
   _inspectorEmpty: {fileID: 1970212840}
   _inspectorHeader: {fileID: 7074851191952858787}
-  inspectorTileName: {fileID: 207515092}
+  _inspectorTileName: {fileID: 207515092}
   _inspectorTileType: {fileID: 249539734}
   _inspectorTilePreview: {fileID: 8754590257301610612}
   backgroundEditorPrefab: {fileID: 8023340852146687442, guid: 09677ba4517c6054f975ff526f9bf051, type: 3}
@@ -18178,7 +18166,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4490231432449227306, guid: b2d13869461b66645aa33c38d3a5cc7a, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4490231432449227306, guid: b2d13869461b66645aa33c38d3a5cc7a, type: 3}
       propertyPath: m_AnchorMax.x

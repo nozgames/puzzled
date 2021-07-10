@@ -5,6 +5,7 @@ namespace Puzzled.Editor
 {
     public partial class UIPuzzleEditor 
     {
+#if false
         private enum MoveState
         {
             None,
@@ -380,5 +381,6 @@ namespace Puzzled.Editor
 
             return cloned;
         }
+#endif
     }
 }

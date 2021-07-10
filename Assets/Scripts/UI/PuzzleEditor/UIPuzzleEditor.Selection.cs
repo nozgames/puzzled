@@ -48,11 +48,13 @@ namespace Puzzled.Editor
 
         public void ClearSelection()
         {
-            if(_selectedWire != null)
+            if (_selectedWire != null)
                 SelectWire(null);
 
             while (_selectedTiles.Count > 0)
                 RemoveSelection(_selectedTiles[0]);
+
+            RefreshInspectorInternal();
         }
 
 #if false
@@ -78,7 +80,11 @@ namespace Puzzled.Editor
         /// <returns>True if selected, false if not</returns>
         private bool IsSelected(Tile tile) => tile.GetComponent<Selected>() != null;
 
-        private void SelectTile(Cell cell) => SelectTile(GetTopMostTile(cell));
+        /// <summary>
+        /// Select the top most tile in the given cell
+        /// </summary>
+        /// <param name="cell"></param>
+        public static void SelectTile(Cell cell) => SelectTile(instance.GetTopMostTile(cell));
 
         /// <summary>
         /// Select the givens tiles
@@ -88,7 +94,7 @@ namespace Puzzled.Editor
         {
             ClearSelection();
 
-            if (null == tiles)
+            if (null == tiles || tiles.Length == 0)
                 return;
 
             foreach (var tile in tiles)
@@ -138,7 +144,9 @@ namespace Puzzled.Editor
             SelectWire(null);
         }
 
-        private void SelectTile(Tile tile)
+        public static void SelectTile(Tile tile) => instance.SelectTileInternal(tile);
+
+        private void SelectTileInternal(Tile tile)
         {
             // Clear the current selection
             ClearSelection();

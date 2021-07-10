@@ -63,11 +63,8 @@ namespace Puzzled.Editor
                 _cursorWorld = _canvas.CanvasToWorld(position);
                 _cursorRay = _canvas.CanvasToRay(position);
 
-                // When moving a single tile around that is on an edge lock the edge to that edge
-                if (mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null && selectedTile.cell.edge != CellEdge.None)
-                    cell = new Cell(selectedTile.cell.system, cell.x, cell.y, selectedTile.cell.edge);
                 // When the cursor was an edge and will be an edge try to maintain some contiunity beween the edges
-                else if (cell.edge != CellEdge.None && _cursorCell.edge != CellEdge.None && _cursorCell.edge != cell.edge)
+                if (cell.edge != CellEdge.None && _cursorCell.edge != CellEdge.None && _cursorCell.edge != cell.edge)
                 {
                     // If the cursor is still within the previous cell then dont change.  This will
                     // help prevent oscillation between vertical and horizontal edges on the corners.
@@ -90,9 +87,10 @@ namespace Puzzled.Editor
                     }
                 }
 
+#if false
                 if (mode != Mode.Draw && 
                     !(mode == Mode.Erase && _eraseLayerOnly) &&
-                    !(mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null))
+                    !(mode == Mode.Move && _moveDragState == MoveState.Moving && hasSelection))
                 {
                     Debug.Assert(cell.edge != CellEdge.None);
 
@@ -105,6 +103,7 @@ namespace Puzzled.Editor
                             cell = sharedEdgeCell;
                     }
                 }
+#endif
 
                 _cursorCell = cell;
             }
