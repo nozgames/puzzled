@@ -72,6 +72,7 @@ namespace Puzzled.Editor
             _inspectorMultiple.SetActive(false);
             _inspectorContent.SetActive(false);
             _inspectorHeader.SetActive(false);
+            _wireGizmo.SetActive(false);
 
             if (_selectedTiles.Count == 0)
             {
@@ -94,6 +95,12 @@ namespace Puzzled.Editor
             _inspectorRotateButton.gameObject.SetActive(_inspectorTile.GetProperty("rotation") != null);
             _inspectorTilePreview.sprite = DatabaseManager.GetPreview(_inspectorTile.guid);
 
+            // If the tile can be wired then show the wire gizmo
+            if (_inspectorTile.hasOutputs)
+            {
+                _wireGizmo.SetActive(true);
+                _wireGizmo.transform.position = _inspectorTile.transform.position;
+            }
             // Create the custom editors
             if (_inspectorTile.info.customEditors != null)
                 foreach (var customEditorPrefab in _inspectorTile.info.customEditors)

@@ -13,6 +13,7 @@ namespace Puzzled.Editor
         private WireVisuals _dragWire = null;
         private List<Tile> _cursorTiles = null;
         private Vector2 _selectionStart;
+        private Vector3 _selectionStartWorld;
         private List<Tile> _savedSelection = new List<Tile>();
 
         public static Action<Wire> onSelectedWireChanged;
@@ -50,6 +51,7 @@ namespace Puzzled.Editor
         {
             // Initial box selection
             _selectionStart = position;
+            _selectionStartWorld = _cursorWorld;
             _selectionRect.offsetMin = position;
             _selectionRect.offsetMax = position;
         }
@@ -223,6 +225,21 @@ namespace Puzzled.Editor
 
         private void OnSelectLButtonDragBegin(Vector2 position)
         {
+            // Drag a wire from the wire gizmo
+            if(IsOverWireGizmo(_selectionStartWorld))
+            {
+                // Start dragging a wire
+                _dragWire = Instantiate(dragWirePrefab, puzzle.transform).GetComponent<WireVisuals>();
+                _dragWire.portTypeFrom = PortType.Power;
+                _dragWire.portTypeTo = PortType.Power;
+                _dragWire.selected = true;
+                _dragWire.target = _dragWire.transform.position = puzzle.grid.CellToWorldBounds(_inspectorTile.cell).center;
+
+                UpdateCursor();
+
+                return;
+            }
+
             // TODO: if dragged from on top of a selected tile then perform a move
             // TODO: if dragged from the wire manipulator then start a wire drag
 
@@ -248,29 +265,18 @@ namespace Puzzled.Editor
             if (!tile.hasOutputs)
                 return;
 
-            // Start dragging a wire
-            _dragWire = Instantiate(dragWirePrefab, puzzle.transform).GetComponent<WireVisuals>();
-            _dragWire.portTypeFrom = PortType.Power;
-            _dragWire.portTypeTo = PortType.Power;
-            _dragWire.selected = true;
-            _dragWire.transform.position = puzzle.grid.CellToWorldBounds(tile.cell).center;
-            _dragWire.target = puzzle.grid.CellToWorldBounds(tile.cell).center;
-
-            UpdateCursor();
 #endif
         }
 
         private void OnSelectLButtonDrag(Vector2 position, Vector2 delta)
         {
-            UpdateBoxSelection(position);
-
-
-            // TODO: UPDATE the selected items in the selection rect
-
-            if (null == _dragWire)
+            if (null != _dragWire)
+            {
+                _dragWire.target = _cursorWorld; 
                 return;
+            }
 
-            _dragWire.target = puzzle.grid.CellToWorldBounds(_cursorCell).center;
+            UpdateBoxSelection(position);
         }
 
         private void OnSelectLButtonDragEnd(Vector2 position)
@@ -287,67 +293,40 @@ namespace Puzzled.Editor
                 return;
             }
 
-            if (null == _dragWire)
+            if (null != _dragWire)
+            {
+                // Stop dragging
+                Destroy(_dragWire.gameObject);
+                _dragWire = null;
+
+                // Connect to the cursor tiles
+                Connect(_inspectorTile, _cursorTiles.Where(t => _inspectorTile.CanConnectTo(t, false)).ToArray());
+
+                UpdateCursor();
                 return;
-
-            // Stop dragging
-            Destroy(_dragWire.gameObject);
-            _dragWire = null;
-
-            // Connect to the cell
-            Connect(_selectedTiles[0], _cursorCell);
-
-            UpdateCursor();
+            }
         }
 
-        private void Connect(Tile tile, Cell cell)
+        private void Connect(Tile tile, Tile[] tiles)
         {
-            var group = new Commands.GroupCommand();
-
-            if (!tile.CanConnectTo(cell))
-                return;
-
-            // Get all in the given cell that we can connect to
-            var tiles = puzzle.grid.GetTiles(cell).Where(t => tile.CanConnectTo(t, false)).ToArray();
             if (tiles.Length == 0)
                 return;
 
-            if(tiles.Length == 1)
+            if (tiles.Length == 1)
             {
                 ChoosePort(tile, tiles[0], (from, to) => {
-                    ExecuteCommand(new Editor.Commands.WireAddCommand(from, to), false, (cmd) => {
-                        selectedWire = (cmd as Editor.Commands.WireAddCommand).addedWire;
+                    ExecuteCommand(new Commands.WireAddCommand(from, to), false, (cmd) => {
+                        selectedWire = (cmd as Commands.WireAddCommand).addedWire;
                     });
                 });
-            }
-            else
+            } else
             {
                 ChooseTileConnection(tiles, (target) => {
                     ChoosePort(tile, target, (from, to) => {
-                        ExecuteCommand(new Editor.Commands.WireAddCommand(from, to));
+                        ExecuteCommand(new Commands.WireAddCommand(from, to));
                     });
                 });
             }
-        }
-
-        private void Disconnect(Tile tile, Cell cell)
-        {
-            var group = new Editor.Commands.GroupCommand();
-            var outputs = tile.GetPorts(PortFlow.Output);
-            foreach(var output in outputs)
-                foreach(var wire in output.wires)
-                {
-                    var connection = wire.GetOppositeConnection(output);
-                    if(connection.cell != cell)
-                        continue;
-
-                    group.Add(new Editor.Commands.WireDestroyCommand(wire));
-                }
-
-            if(group.hasCommands)
-                ExecuteCommand(group);
-
-            UpdateCursor();
         }
 
         private void SetWiresDark (Tile tile, bool dark)
@@ -390,14 +369,33 @@ namespace Puzzled.Editor
                 UpdateBoxSelection(shift);
         }
 
+        /// <summary>
+        /// Returns true if the cursor is over the wire gizmo
+        /// </summary>
+        private bool IsOverWireGizmo(Vector3 position) => _wireGizmo.activeSelf && (position - _wireGizmo.transform.position).magnitude <= _wireGizmo.transform.localScale.x;
+
         private CursorType OnSelectToolGetCursor(Cell cell)
         {
+            // Show arrow for box selection
+            if(_selectionRect.gameObject.activeSelf)
+                return CursorType.Arrow;
+
+            // If the wire gizmo is active then hit test it
+            if (IsOverWireGizmo(_cursorWorld))
+                // TODO: wire crosshair?
+                return CursorType.ArrowWithPlus;
+
             _cursorTiles = RaycastTiles(_cursorRay);
 
             // If dragging a wire..
             if (_dragWire != null)
             {
-                // TODO: if over a tile that can be connected to then plus icon else not icon
+                // Can the inspector tile connect to any of the cursor tiles?
+                foreach (var cursorTile in _cursorTiles)
+                    if (_inspectorTile.CanConnectTo(cursorTile, false))
+                        return CursorType.ArrowWithPlus;
+
+                return CursorType.ArrowWithNot;
             }
 
             return CursorType.Arrow;

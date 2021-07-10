@@ -52,6 +52,7 @@ namespace Puzzled.Editor
         [SerializeField] private GameObject _playControls = null;
 
         [Header("Gizmos")]
+        [SerializeField] private GameObject _wireGizmo = null;
         [SerializeField] private SelectionGizmo _selectionGizmo = null;
         [SerializeField] private SelectionGizmo _cursorGizmo = null;
 
