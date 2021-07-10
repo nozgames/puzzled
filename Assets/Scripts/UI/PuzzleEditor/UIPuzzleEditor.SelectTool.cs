@@ -12,8 +12,8 @@ namespace Puzzled.Editor
 
         private WireVisuals _dragWire = null;
         private List<Tile> _cursorTiles = null;
-        private Tile _pendingSelection = null;
         private Vector2 _selectionStart;
+        private List<Tile> _savedSelection = new List<Tile>();
 
         public static Action<Wire> onSelectedWireChanged;
 
@@ -26,6 +26,7 @@ namespace Puzzled.Editor
             _canvas.onLButtonDragEnd = OnSelectLButtonDragEnd;
 
             _onKey = OnSelectToolKey;
+            _onKeyModifiers = OnSelectToolKeyModifiers;
             _getCursor = OnSelectToolGetCursor;
 
             inspector.SetActive(true);
@@ -47,18 +48,23 @@ namespace Puzzled.Editor
 
         private void OnSelectLButtonDown (Vector2 position)
         {
+            // Initial box selection
             _selectionStart = position;
             _selectionRect.offsetMin = position;
             _selectionRect.offsetMax = position;
+        }
 
-#if false
-
-            // TODO: did it hit a manipulator such as wire drag or move ?
-            // TODO: box selection
+        private void OnSelectLButtonUp (Vector2 position)
+        {
+            if (_dragWire != null || _selectionRect.gameObject.activeSelf)
+                return;
 
             var hit = _cursorTiles;
             if (hit.Count == 0)
+            {
+                ClearSelection();
                 return;
+            }
 
             var hitTile = hit.Last();
             var selectedIndex = _selectedTiles.Count > 0 ? hit.IndexOf(_selectedTiles[0]) : -1;
@@ -83,26 +89,17 @@ namespace Puzzled.Editor
 
                 // Set the pending selection to the tile under the current one selected.  This pending
                 // selection will be realized if no drag occurs and the mouse is released.
-                _pendingSelection = hit[(selectedIndex - 1 + hit.Count) % hit.Count];
+                SelectTile(hit[(selectedIndex - 1 + hit.Count) % hit.Count]);
             }
             // Single select logic
             else
-            { 
-                SelectTile(hitTile);
-            }
-#endif
-        }
-
-        private void OnSelectLButtonUp (Vector2 position)
-        {
-            if(_pendingSelection != null)
             {
-                SelectTile(_pendingSelection);
-                _pendingSelection = null;
+                SelectTile(hitTile);
             }
         }
 
         private List<Tile> _boxSelectionTiles = new List<Tile>();
+        private List<Tile> _boxSelectionTilesOutside = new List<Tile>();
         private Plane[] _boxSelectionPlanes = new Plane[4];
         private Collider[] _boxSelectionColliders = new Collider[128];
 
@@ -113,8 +110,8 @@ namespace Puzzled.Editor
         /// <param name="outTiles">Tiles that overlap the screen rectangle</param>
         /// <returns>True if any tiles were found</returns>
         private bool ScreenRectToTiles(Rect rect, List<Tile> outTiles)
-        {
-            outTiles.Clear();
+        {            
+            _boxSelectionTilesOutside.Clear();
 
             // Calculate the rays at the four corners of the rect
             var ray1 = CameraManager.camera.ScreenPointToRay(rect.min);
@@ -158,14 +155,34 @@ namespace Puzzled.Editor
             // Test each collider that was overlapped and see if it is inside the calculate planes
             for(int i=0; i<overlapCount; i++)
             {
-                var tile = _boxSelectionColliders[i].GetComponentInParent<Tile>();
+                var collider = _boxSelectionColliders[i];
+                _boxSelectionColliders[i] = null;
+                var tile = collider.GetComponentInParent<Tile>();
                 if (null == tile)
                     continue;
 
-                if (outTiles.Contains(tile))
-                    continue;
+                var outside = false;
+                for(int planeIndex = 0; !outside && planeIndex < _boxSelectionPlanes.Length; planeIndex++)
+                {
+                    var plane = _boxSelectionPlanes[planeIndex];
+                    var colliderBounds = collider.bounds;
+                    var min = colliderBounds.min;
+                    var max = colliderBounds.max;
 
-                if (GeometryUtility.TestPlanesAABB(_boxSelectionPlanes, _boxSelectionColliders[i].bounds))
+                    outside = !plane.GetSide(new Vector3(min.x, 0, min.z)) ||
+                              !plane.GetSide(new Vector3(min.x, 0, max.z)) ||
+                              !plane.GetSide(new Vector3(max.x, 0, min.z)) ||
+                              !plane.GetSide(new Vector3(max.x, 0, max.z));
+                }
+
+                if(outside)
+                {
+                    _boxSelectionTilesOutside.Add(tile);
+                    outTiles.Remove(tile);
+                    continue;
+                }
+
+                if(!outTiles.Contains(tile))
                     outTiles.Add(tile);
             }
 
@@ -178,16 +195,28 @@ namespace Puzzled.Editor
             _selectionRect.offsetMin = Vector3.Min(_selectionStart, position);
             _selectionRect.offsetMax = Vector3.Max(_selectionStart, position);
 
-            // Ensure it is visible
-            _selectionRect.gameObject.SetActive(true);
+            UpdateBoxSelection(KeyboardManager.isShiftPressed);
+        }
 
+        private void UpdateBoxSelection(bool additive=false)
+        { 
+            // Clear the current selection
+            ClearSelection();
+
+            _boxSelectionTiles.Clear();
+
+            // Find all tiles within the selection rectangle
             var rect = _selectionRect.rect;
             rect.position = _selectionRect.offsetMin;
-            
-            ClearSelection();
-            if (!ScreenRectToTiles(rect, _boxSelectionTiles))
-                return;
+            ScreenRectToTiles(rect, _boxSelectionTiles);
 
+            // If shift is held then we need to merge the saved selection with the new selection
+            if (additive)
+                foreach (var savedTile in _savedSelection)
+                    if (!_boxSelectionTiles.Contains(savedTile))
+                        _boxSelectionTiles.Add(savedTile);
+
+            // Select all of the tiles
             foreach (var tile in _boxSelectionTiles)
                 AddSelection(tile);
         }
@@ -197,12 +226,18 @@ namespace Puzzled.Editor
             // TODO: if dragged from on top of a selected tile then perform a move
             // TODO: if dragged from the wire manipulator then start a wire drag
 
-            // Once a box selection starts we just clear the current selection
-            ClearSelection();
+            // Save the selection for shift box drag operations
+            _savedSelection.Clear();
+            _savedSelection.AddRange(_selectedTiles);
 
+            // Show the box selection 
+            _selectionRect.gameObject.SetActive(true);
+
+            // Start with the new box selection
             UpdateBoxSelection(position);
-            
 
+
+#if false
 
             // Do not allow dragging wires if the selection has more than one tile
             if (_selectedTiles.Count != 1)
@@ -213,9 +248,6 @@ namespace Puzzled.Editor
             if (!tile.hasOutputs)
                 return;
 
-            // Since a drag is starting we cancel any pending tile selection
-            _pendingSelection = null;
-
             // Start dragging a wire
             _dragWire = Instantiate(dragWirePrefab, puzzle.transform).GetComponent<WireVisuals>();
             _dragWire.portTypeFrom = PortType.Power;
@@ -225,6 +257,7 @@ namespace Puzzled.Editor
             _dragWire.target = puzzle.grid.CellToWorldBounds(tile.cell).center;
 
             UpdateCursor();
+#endif
         }
 
         private void OnSelectLButtonDrag(Vector2 position, Vector2 delta)
@@ -242,7 +275,17 @@ namespace Puzzled.Editor
 
         private void OnSelectLButtonDragEnd(Vector2 position)
         {
-            _selectionRect.gameObject.SetActive(false);
+            // Box selection
+            if(_selectionRect.gameObject.activeSelf)
+            {
+                UpdateBoxSelection(position);
+                RefreshInspectorInternal();
+                _selectionRect.gameObject.SetActive(false);
+                _savedSelection.Clear();
+                _boxSelectionTiles.Clear();
+                _boxSelectionTilesOutside.Clear();
+                return;
+            }
 
             if (null == _dragWire)
                 return;
@@ -338,6 +381,13 @@ namespace Puzzled.Editor
                         Center(selectedTiles, _cameraZoom);
                     break;
             }
+        }
+
+        private void OnSelectToolKeyModifiers(bool shift, bool ctrl, bool alt)
+        {
+            // Update box selection whenever modifiers change if it is active
+            if (_selectionRect.gameObject.activeSelf)
+                UpdateBoxSelection(shift);
         }
 
         private CursorType OnSelectToolGetCursor(Cell cell)

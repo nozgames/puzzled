@@ -93,6 +93,7 @@ namespace Puzzled.Editor
         private Action<Sound> _chooseSoundCallback;
         private Mode savedMode;
         private Action<KeyCode> _onKey;
+        private Action<bool, bool, bool> _onKeyModifiers;
 
         private Vector3 _cameraTarget;
         private int _cameraZoom = DefaultZoom;
@@ -171,6 +172,7 @@ namespace Puzzled.Editor
 
             _getCursor = null;
             _onKey = null;
+            _onKeyModifiers = null;
 
             _canvas.UnregisterAll();
 
@@ -883,12 +885,7 @@ namespace Puzzled.Editor
 
         void KeyboardManager.IKeyboardHandler.OnModifiersChanged(bool shift, bool ctrl, bool alt)
         {
-            switch (mode)
-            {
-                case Mode.Erase:
-                    OnModifiersChangedErase(shift, ctrl, alt);
-                    break;
-            }
+            _onKeyModifiers?.Invoke(shift, ctrl, alt);
 
             UpdateCursor();
         }

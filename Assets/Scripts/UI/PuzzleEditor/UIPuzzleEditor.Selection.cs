@@ -78,7 +78,11 @@ namespace Puzzled.Editor
         /// </summary>
         /// <param name="tile">Tile</param>
         /// <returns>True if selected, false if not</returns>
-        private bool IsSelected(Tile tile) => tile.GetComponent<Selected>() != null;
+        private bool IsSelected(Tile tile)
+        {
+            var selected = tile.GetComponent<Selected>();
+            return null != selected && selected.enabled;
+        }
 
         /// <summary>
         /// Select the top most tile in the given cell
@@ -114,13 +118,17 @@ namespace Puzzled.Editor
                 Debug.LogError("cannot add 'null' tile to selection");
                 return;
             }
-                
 
             if (_selectedTiles.Contains(tile))
                 return;
 
             _selectedTiles.Add(tile);
-            tile.gameObject.AddComponent<Selected>();
+
+            var selected = tile.gameObject.GetComponent<Selected>();
+            if(null == selected)
+                selected = tile.gameObject.AddComponent<Selected>();
+            
+            selected.enabled = true;
 
             CameraManager.showSelection = true;
 
@@ -140,7 +148,9 @@ namespace Puzzled.Editor
 
             SetWiresDark(tile, false);
 
-            Destroy(tile.gameObject.GetComponent<Selected>());
+            var selected = tile.gameObject.GetComponent<Selected>();
+            if (selected != null)
+                selected.enabled = false;
 
             _selectedTiles.Remove(tile);
 

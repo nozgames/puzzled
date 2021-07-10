@@ -24,6 +24,7 @@ namespace Puzzled.Editor
             _canvas.onLButtonDrag = OnEraseToolDrag;
 
             _getCursor = OnEraseGetCursor;
+            _onKeyModifiers = OnModifiersChangedErase;
 
             _lastEraseCell = Cell.invalid;
         }
