@@ -143,8 +143,8 @@ Transform:
   m_Father: {fileID: 2819266254877709548}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!64 &4434252939530074426
-MeshCollider:
+--- !u!65 &1099198992211793835
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -153,10 +153,9 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4749707353668628313, guid: 44e172689c39466469ab9a9784c81a3e, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.1452571, y: 0.1, z: 0.27463514}
+  m_Center: {x: 0.053311665, y: -0.0000000037252903, z: 0.02586849}
 --- !u!1 &4489517949926743383
 GameObject:
   m_ObjectHideFlags: 0
@@ -254,7 +253,8 @@ VFXRenderer:
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
-  m_Materials: []
+  m_Materials:
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

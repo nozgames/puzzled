@@ -26,6 +26,7 @@ namespace Puzzled.Editor
             _canvas.onLButtonDragBegin = OnSelectLButtonDragBegin;
             _canvas.onLButtonDrag = OnSelectLButtonDrag;
             _canvas.onLButtonDragEnd = OnSelectLButtonDragEnd;
+            _canvas.onExit = OnSelectToolExitCanvas;
 
             _onKey = OnSelectToolKey;
             _onKeyModifiers = OnSelectToolKeyModifiers;
@@ -386,6 +387,7 @@ namespace Puzzled.Editor
                 _cursorHighlight.editor.isHighlighted = false;
 
             _cursorHighlight = highlight;
+
             if (_cursorHighlight != null)
                 _cursorHighlight.editor.isHighlighted = true;
         }
@@ -428,5 +430,11 @@ namespace Puzzled.Editor
 
             return CursorType.Arrow;
         }
+
+        private void OnSelectToolExitCanvas()
+        {            
+            HilightTile(null);
+        }
+
     }
 }

@@ -10,6 +10,10 @@ namespace Puzzled.Editor
         /// </summary>
         private static int _selectedLayer = -1;
 
+        private static int _selectedFloorLayer = -1;
+
+        private static int _tileFloorLayer = -1;
+
         /// <summary>
         /// Tag used to ignore selection on a renderer
         /// </summary>
@@ -73,6 +77,18 @@ namespace Puzzled.Editor
         /// </summary>
         public (string id, object value)[] inspectorState { get; set; }
 
+        private void Awake()
+        {
+            if (_selectedLayer == -1)
+                _selectedLayer = LayerMask.NameToLayer("Selected");
+
+            if (_selectedFloorLayer == -1)
+                _selectedFloorLayer = LayerMask.NameToLayer("TileFloorSelected");
+
+            if (_tileFloorLayer == -1)
+                _tileFloorLayer = LayerMask.NameToLayer("TileFloor");
+        }
+
         private void OnEnable()
         {
             UpdateSelection();
@@ -96,10 +112,6 @@ namespace Puzzled.Editor
             // Early out if already selected
             if (_renderers != null)
                 return;
-
-            // Cache off the selected layer index if needed
-            if (_selectedLayer == -1)
-                _selectedLayer = LayerMask.NameToLayer("Selected");
 
             // Get list of all renderers affected by the selection
             _renderers = GetComponentsInChildren<Renderer>()
@@ -129,7 +141,8 @@ namespace Puzzled.Editor
                 if (renderer.renderer is SpriteRenderer spriteRenderer)
                     spriteRenderer.color = UIPuzzleEditor.selectionColor;
                 else
-                    renderer.renderer.gameObject.layer = _selectedLayer;
+                    renderer.renderer.gameObject.layer = renderer.renderer.gameObject.layer == 
+                        _tileFloorLayer ? _selectedFloorLayer : _selectedLayer;
             }
         }
 
