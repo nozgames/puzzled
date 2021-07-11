@@ -54,13 +54,13 @@ namespace Puzzled.Editor
 
             if (updatePosition && _canvas.isMouseOver)
             {
-                var position = _pointerAction.action.ReadValue<Vector2>();
+                var position = _canvas.ScreenToCanvas(_pointerAction.action.ReadValue<Vector2>());
                 var cell = _canvas.CanvasToCell(position, coordinateSystem);
                 if (cell == Cell.invalid)
                     return;
 
                 _cursorWorld = _canvas.CanvasToWorld(position);
-                _cursorRay = _canvas.CanvasToRay(_canvas.ScreenToCanvas(position));
+                _cursorRay = _canvas.CanvasToRay(position);
 
                 // When the cursor was an edge and will be an edge try to maintain some contiunity beween the edges
                 if (cell.edge != CellEdge.None && _cursorCell.edge != CellEdge.None && _cursorCell.edge != cell.edge)
