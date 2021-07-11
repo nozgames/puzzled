@@ -346,14 +346,7 @@ namespace Puzzled.Editor
             switch (keyCode)
             {
                 case KeyCode.Delete:
-                    if (_selectedTiles.Count == 0)
-                        return;
-
-                    var command = new Commands.GroupCommand();
-                    foreach (var tile in _selectedTiles)
-                        Erase(tile, command);
-
-                    ExecuteCommand(command);
+                    ExecuteCommand(Erase(_selectedTiles.ToArray()));
                     break;
 
                 case KeyCode.F:

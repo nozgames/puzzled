@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Puzzled.Editor
 {
-    public class EditorTile : MonoBehaviour
+    public class EditorTile : TileComponent
     {
         /// <summary>
         /// Index of the "Selected" layer
@@ -73,6 +73,11 @@ namespace Puzzled.Editor
         }
 
         /// <summary>
+        /// Returns true if the tile is in the trash
+        /// </summary>
+        public bool isInTrash => transform.parent == tile.puzzle.trash;
+
+        /// <summary>
         /// Inspector state stored on the tile for the next time the tile is selected
         /// </summary>
         public (string id, object value)[] inspectorState { get; set; }
@@ -89,13 +94,17 @@ namespace Puzzled.Editor
                 _tileFloorLayer = LayerMask.NameToLayer("TileFloor");
         }
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             UpdateSelection();
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable();
+
             Deselect();
         }
 

@@ -13,7 +13,12 @@ namespace Puzzled.Editor.Commands
         {
         }
 
-        public void Add(Command command) => commands.Add(command);
+        public void Add(Command command)
+        {
+            if (command == null)
+                return;
+            commands.Add(command);
+        }
 
         protected override void OnExecute()
         {

@@ -175,15 +175,23 @@ namespace Puzzled.Editor
 
         public static void MoveToTrash (GameObject gameObject)
         {
+            if (instance._trash.ContainsKey(gameObject.GetInstanceID()))
+            {
+                Debug.LogError($"Object '{gameObject.name} is already in the trash");
+                return;
+            }
+
             instance._trash[gameObject.GetInstanceID()] = gameObject.transform.parent;
             gameObject.transform.SetParent(instance._puzzle.trash);
         }
 
         public static void RestoreFromTrash(GameObject gameObject)
         {
-            var parent = instance._trash[gameObject.GetInstanceID()];
-            if (parent == null)
+            if(!instance._trash.TryGetValue(gameObject.GetInstanceID(), out var parent))
+            {
+                Debug.LogError($"Could not restore object '{gameObject.name} from trash");
                 return;
+            }
 
             instance._trash.Remove(gameObject.GetInstanceID());
             gameObject.transform.SetParent(parent);
