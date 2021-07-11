@@ -15,7 +15,29 @@ namespace Puzzled.Editor
         private Tile _cursorHighlight = null;
         private Vector2 _selectionStart;
         private Vector3 _selectionStartWorld;
+        private Cell _selectionStartCell;
         private List<Tile> _savedSelection = new List<Tile>();
+
+        /// <summary>
+        /// Tiles being moved
+        /// </summary>
+        private Tile[] _moveTiles;
+
+        /// <summary>
+        /// Original cells of all tiles being moved
+        /// </summary>
+        private Cell[] _moveCells;
+
+        /// <summary>
+        /// Current offset from the selection start
+        /// </summary>
+        private Vector2Int _moveOffset;
+
+        /// <summary>
+        /// Last move command issued
+        /// </summary>
+        private Commands.Command _moveCommand;
+
 
         public static Action<Wire> onSelectedWireChanged;
 
@@ -55,12 +77,41 @@ namespace Puzzled.Editor
             // Initial box selection
             _selectionStart = position;
             _selectionStartWorld = _cursorWorld;
+            _selectionStartCell = _cursorCell;
             _selectionRect.offsetMin = position;
             _selectionRect.offsetMax = position;
         }
 
         private void OnSelectLButtonUp (Vector2 position)
         {
+            if (_moveTiles != null)
+            {
+                if (_moveCommand != null)
+                {
+                    _moveCommand.Undo();
+
+#if false
+                    var group = false;
+                    if (_copyCommand != null)
+                    {
+                        group = true;
+                        _copyCommand.Undo();
+                        ExecuteCommand(_copyCommand);
+                        _copyCommand = null;
+                    }
+                    ExecuteCommand(_moveCommand, true);
+#else
+                    ExecuteCommand(_moveCommand, false);
+#endif
+
+                    _moveCommand = null;
+
+                    //SelectTiles(_moveTiles);
+                }
+
+                return;
+            }
+
             if (_dragWire != null || _selectionRect.gameObject.activeSelf)
                 return;
 
@@ -103,130 +154,7 @@ namespace Puzzled.Editor
             }
 
             UpdateCursor();
-        }
-
-        private List<Tile> _boxSelectionTiles = new List<Tile>();
-        private List<Tile> _boxSelectionTilesOutside = new List<Tile>();
-        private Plane[] _boxSelectionPlanes = new Plane[4];
-        private Collider[] _boxSelectionColliders = new Collider[128];
-
-        /// <summary>
-        /// Returns a list of tiles that overlap or are contained within the given screen rectangle
-        /// </summary>
-        /// <param name="rect">Screen rectangle</param>
-        /// <param name="outTiles">Tiles that overlap the screen rectangle</param>
-        /// <returns>True if any tiles were found</returns>
-        private bool ScreenRectToTiles(Rect rect, List<Tile> outTiles)
-        {            
-            _boxSelectionTilesOutside.Clear();
-
-            // Calculate the rays at the four corners of the rect
-            var ray1 = CameraManager.camera.ScreenPointToRay(rect.min);
-            var ray2 = CameraManager.camera.ScreenPointToRay(new Vector2(rect.min.x, rect.max.y));
-            var ray3 = CameraManager.camera.ScreenPointToRay(rect.max);
-            var ray4 = CameraManager.camera.ScreenPointToRay(new Vector2(rect.max.x, rect.min.y));
-
-            // Find the intersection point of the rays with the ground plane
-            var ground = new Plane(Vector3.up, Vector3.zero);
-            if (!ground.Raycast(ray1, out float enter1)) return false;
-            if (!ground.Raycast(ray2, out float enter2)) return false;
-            if (!ground.Raycast(ray3, out float enter3)) return false;
-            if (!ground.Raycast(ray4, out float enter4)) return false;
-
-            // Find the world coordinates of the ray intersections
-            var world1 = ray1.origin + ray1.direction * enter1;
-            var world2 = ray2.origin + ray2.direction * enter2;
-            var world3 = ray3.origin + ray3.direction * enter3;
-            var world4 = ray4.origin + ray4.direction * enter4;
-
-            // Find all colliders within an AABB that wraps the box selection world coordinates
-            var bounds = new Bounds(world1, Vector3.zero);
-            bounds.Encapsulate(world2);
-            bounds.Encapsulate(world3);
-            bounds.Encapsulate(world4);
-            bounds.Encapsulate(world1 + Vector3.up * 10.0f);
-
-            var overlapCount = Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, _boxSelectionColliders, Quaternion.identity, CameraManager.camera.cullingMask);
-            while(overlapCount == _boxSelectionColliders.Length)
-            {
-                _boxSelectionColliders = new Collider[_boxSelectionColliders.Length * 2];
-                overlapCount = Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, _boxSelectionColliders, Quaternion.identity, CameraManager.camera.cullingMask);
-            }
-
-            // Create planes for each side of the box selection
-            _boxSelectionPlanes[0] = new Plane(-Vector3.Cross((world2 - world1).normalized, Vector3.up), world1);
-            _boxSelectionPlanes[1] = new Plane(-Vector3.Cross((world3 - world2).normalized, Vector3.up), world2);
-            _boxSelectionPlanes[2] = new Plane(-Vector3.Cross((world4 - world3).normalized, Vector3.up), world3);
-            _boxSelectionPlanes[3] = new Plane(-Vector3.Cross((world1 - world4).normalized, Vector3.up), world4);
-
-            // Test each collider that was overlapped and see if it is inside the calculate planes
-            for(int i=0; i<overlapCount; i++)
-            {
-                var collider = _boxSelectionColliders[i];
-                _boxSelectionColliders[i] = null;
-                var tile = collider.GetComponentInParent<Tile>();
-                if (null == tile)
-                    continue;
-
-                var outside = false;
-                for(int planeIndex = 0; !outside && planeIndex < _boxSelectionPlanes.Length; planeIndex++)
-                {
-                    var plane = _boxSelectionPlanes[planeIndex];
-                    var colliderBounds = collider.bounds;
-                    var min = colliderBounds.min;
-                    var max = colliderBounds.max;
-
-                    outside = !plane.GetSide(new Vector3(min.x, 0, min.z)) ||
-                              !plane.GetSide(new Vector3(min.x, 0, max.z)) ||
-                              !plane.GetSide(new Vector3(max.x, 0, min.z)) ||
-                              !plane.GetSide(new Vector3(max.x, 0, max.z));
-                }
-
-                if(outside)
-                {
-                    _boxSelectionTilesOutside.Add(tile);
-                    outTiles.Remove(tile);
-                    continue;
-                }
-
-                if(!outTiles.Contains(tile))
-                    outTiles.Add(tile);
-            }
-
-            return outTiles.Count > 0;
-        }
-
-        private void UpdateBoxSelection(Vector2 position)
-        {
-            // Update the selection rect
-            _selectionRect.offsetMin = Vector3.Min(_selectionStart, position);
-            _selectionRect.offsetMax = Vector3.Max(_selectionStart, position);
-
-            UpdateBoxSelection(KeyboardManager.isShiftPressed);
-        }
-
-        private void UpdateBoxSelection(bool additive=false)
-        { 
-            // Clear the current selection
-            ClearSelection();
-
-            _boxSelectionTiles.Clear();
-
-            // Find all tiles within the selection rectangle
-            var rect = _selectionRect.rect;
-            rect.position = _selectionRect.offsetMin;
-            ScreenRectToTiles(rect, _boxSelectionTiles);
-
-            // If shift is held then we need to merge the saved selection with the new selection
-            if (additive)
-                foreach (var savedTile in _savedSelection)
-                    if (!_boxSelectionTiles.Contains(savedTile))
-                        _boxSelectionTiles.Add(savedTile);
-
-            // Select all of the tiles
-            foreach (var tile in _boxSelectionTiles)
-                AddSelection(tile);
-        }
+        }        
 
         private void OnSelectLButtonDragBegin(Vector2 position)
         {
@@ -242,6 +170,14 @@ namespace Puzzled.Editor
 
                 UpdateCursor();
 
+                return;
+            }
+
+            // If over a selected tile then start moving
+            if (_cursorTiles.Any(t => t.isSelected))
+            {
+                _moveTiles = _selectedTiles.ToArray();
+                _moveCells = _moveTiles.Select(t => t.cell).ToArray();
                 return;
             }
 
@@ -275,6 +211,32 @@ namespace Puzzled.Editor
                 UpdateBoxSelection(position);
                 return;
             }
+
+            // Update Move
+            if(_moveTiles != null)
+            {
+                // Calculate the move offset and early out if there is no difference
+                var offset = (new Cell(_cursorCell, CellEdge.None) - _selectionStartCell);
+                if (offset == _moveOffset)
+                    return;
+
+                // If there was a previous move command undo it to revert back to the pre move state
+                if (_moveCommand != null)
+                {
+                    _moveCommand.Undo();
+                    _moveCommand = null;
+                }
+
+                // Move the tiles using the new offset
+                _moveOffset = offset;
+
+                _moveCommand = CreateMoveCommand(_moveTiles, _moveCells, _moveOffset);
+                _moveCommand.Execute();
+
+                LightmapManager.Render();
+
+                UpdateCursor();
+            }
         }
 
         private void OnSelectLButtonDragEnd(Vector2 position)
@@ -305,7 +267,11 @@ namespace Puzzled.Editor
                 return;
             }
 
-            // TODO: end move
+            // End move
+            if(null != _moveTiles)
+            {
+                _moveTiles = null;
+            }
         }
 
         private void Connect(Tile tile, Tile[] tiles)
@@ -387,6 +353,9 @@ namespace Puzzled.Editor
 
         private CursorType OnSelectToolGetCursor(Cell cell)
         {
+            if (_moveTiles != null)
+                return CursorType.Move;
+
             // Show arrow for box selection
             if (_selectionRect.gameObject.activeSelf)
             {
@@ -429,5 +398,35 @@ namespace Puzzled.Editor
             HilightTile(null);
         }
 
+        /// <summary>
+        /// Create a command to move tiles from the current cell to a new cell using an offset
+        /// </summary>
+        /// <param name="tiles">List of tiles to move</param>
+        /// <param name="offset">Offset to move tiles by</param>
+        /// <returns>Command used to move the tiles</returns>
+        private Commands.Command CreateMoveCommand(Tile[] tiles, Cell[] cells, Vector2Int offset)
+        {
+            var group = new Commands.GroupCommand();
+
+            // Unlink all tiles being moved
+            foreach (var tile in tiles)
+                group.Add(new Commands.TileMoveCommand(tile, Cell.invalid));
+
+            // Destroy any tiles in the target that overlap the tiles being moved
+            for (int i = 0; i < cells.Length; i++)
+            {
+                var existing = puzzle.grid.CellToTile(cells[i] + offset, tiles[i].layer);
+                if (null == existing || tiles.Contains(existing))
+                    continue;
+
+                Erase(existing, group);
+            }
+
+            // Link the new tiles in the moved position
+            for (int i = 0; i < cells.Length; i++)
+                group.Add(new Commands.TileMoveCommand(tiles[i], cells[i] + offset, Cell.invalid));
+
+            return group;
+        }
     }
 }

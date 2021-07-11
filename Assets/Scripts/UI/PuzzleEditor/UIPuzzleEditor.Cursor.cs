@@ -27,7 +27,6 @@ namespace Puzzled.Editor
 
         private void OnPointerExitCanvas()
         {
-            _cursorGizmo.gameObject.SetActive(false);
             UIManager.cursor = CursorType.Arrow;
             _cursorCell = Cell.invalid;
         }
@@ -61,7 +60,7 @@ namespace Puzzled.Editor
                     return;
 
                 _cursorWorld = _canvas.CanvasToWorld(position);
-                _cursorRay = _canvas.CanvasToRay(position);
+                _cursorRay = _canvas.CanvasToRay(_canvas.ScreenToCanvas(position));
 
                 // When the cursor was an edge and will be an edge try to maintain some contiunity beween the edges
                 if (cell.edge != CellEdge.None && _cursorCell.edge != CellEdge.None && _cursorCell.edge != cell.edge)
@@ -149,12 +148,6 @@ namespace Puzzled.Editor
 
             if(_canvas.isMouseOver)
                 UIManager.cursor = _getCursor?.Invoke(renderCell) ?? CursorType.Arrow;
-
-            _cursorGizmo.gameObject.SetActive(_canvas.isMouseOver && mode == Mode.Draw);
-
-            var cursorBounds = puzzle.grid.CellToWorldBounds(renderCell);
-            _cursorGizmo.min = cursorBounds.min;
-            _cursorGizmo.max = cursorBounds.max;
         }
     }
 }

@@ -53,8 +53,6 @@ namespace Puzzled.Editor
 
         [Header("Gizmos")]
         [SerializeField] private GameObject _wireGizmo = null;
-        [SerializeField] private SelectionGizmo _selectionGizmo = null;
-        [SerializeField] private SelectionGizmo _cursorGizmo = null;
 
         [Header("Toolbar")]
         [SerializeField] private GameObject _toolbar = null;
@@ -305,8 +303,6 @@ namespace Puzzled.Editor
             GameManager.busy++;
 
             inspector.SetActive(false);
-
-            _selectionGizmo.gameObject.SetActive(false);
 
             // Start off with an empty puzzle
             //NewPuzzle();

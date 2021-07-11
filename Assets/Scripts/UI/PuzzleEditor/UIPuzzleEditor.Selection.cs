@@ -13,7 +13,10 @@ namespace Puzzled.Editor
 
         private List<Tile> _selectedTiles = new List<Tile>();
         private Wire _selectedWire = null;
-
+        private List<Tile> _boxSelectionTiles = new List<Tile>();
+        private List<Tile> _boxSelectionTilesOutside = new List<Tile>();
+        private Plane[] _boxSelectionPlanes = new Plane[4];
+        private Collider[] _boxSelectionColliders = new Collider[128];
         /// <summary>
         /// True if there is at least one tile selected
         /// </summary>
@@ -45,22 +48,6 @@ namespace Puzzled.Editor
 
             RefreshInspectorInternal();
         }
-
-#if false
-        private void UpdateSelectionGizmo()
-        {
-            if (_selection.min == _selection.max)
-            {
-                var cellWorldBounds = puzzle.grid.CellToWorldBounds(_selection.min);
-                _selectionGizmo.min = cellWorldBounds.min;
-                _selectionGizmo.max = cellWorldBounds.max;
-            } else
-            {
-                _selectionGizmo.min = _puzzle.grid.CellToWorld(_selection.min) - new Vector3(0.5f, 0, 0.5f);
-                _selectionGizmo.max = _puzzle.grid.CellToWorld(_selection.max) + new Vector3(0.5f, 0, 0.5f);
-            }
-        }
-#endif
 
         /// <summary>
         /// Select the top most tile in the given cell
@@ -201,32 +188,125 @@ namespace Puzzled.Editor
         }
 
         /// <summary>
-        /// Fit the current selection rect to the visible tiles within it
+        /// Returns a list of tiles that overlap or are contained within the given screen rectangle
         /// </summary>
-        private void FitSelection()
+        /// <param name="rect">Screen rectangle</param>
+        /// <param name="outTiles">Tiles that overlap the screen rectangle</param>
+        /// <returns>True if any tiles were found</returns>
+        private bool CanvasRectToTiles (Rect rect, List<Tile> outTiles)
         {
-            if (!hasSelection)
-                return;
+            _boxSelectionTilesOutside.Clear();
 
-            //SelectTiles(GetSelectedTiles());
-        }
+            // Calculate the rays at the four corners of the rect
+            var ray1 = _canvas.CanvasToRay(rect.min);
+            var ray2 = _canvas.CanvasToRay(new Vector2(rect.min.x, rect.max.y));
+            var ray3 = _canvas.CanvasToRay(rect.max);
+            var ray4 = _canvas.CanvasToRay(new Vector2(rect.max.x, rect.min.y));
 
-        private void SelectNextTileUnderCursor()
-        {
-#if false
-            if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
+            // Find the intersection point of the rays with the ground plane
+            var ground = new Plane(Vector3.up, Vector3.zero);
+            if (!ground.Raycast(ray1, out float enter1))
+                return false;
+            if (!ground.Raycast(ray2, out float enter2))
+                return false;
+            if (!ground.Raycast(ray3, out float enter3))
+                return false;
+            if (!ground.Raycast(ray4, out float enter4))
+                return false;
+
+            // Find the world coordinates of the ray intersections
+            var world1 = ray1.origin + ray1.direction * enter1;
+            var world2 = ray2.origin + ray2.direction * enter2;
+            var world3 = ray3.origin + ray3.direction * enter3;
+            var world4 = ray4.origin + ray4.direction * enter4;
+
+            // Find all colliders within an AABB that wraps the box selection world coordinates
+            var bounds = new Bounds(world1, Vector3.zero);
+            bounds.Encapsulate(world2);
+            bounds.Encapsulate(world3);
+            bounds.Encapsulate(world4);
+            bounds.Encapsulate(world1 + Vector3.up * 10.0f);
+
+            var overlapCount = Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, _boxSelectionColliders, Quaternion.identity, CameraManager.camera.cullingMask);
+            while (overlapCount == _boxSelectionColliders.Length)
             {
-                SelectTile(_cursorCell);
-                return;
+                _boxSelectionColliders = new Collider[_boxSelectionColliders.Length * 2];
+                overlapCount = Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, _boxSelectionColliders, Quaternion.identity, CameraManager.camera.cullingMask);
             }
 
-            var cell = _puzzle.grid.WorldToCell(_cursorWorld + new Vector3(0.5f, 0, 0.5f), CellCoordinateSystem.Grid);
-            var overlappingTiles = _puzzle.grid.GetTiles(cell, cell).Where(t => _puzzle.grid.CellContainsWorldPoint(t.cell, _cursorWorld)).OrderByDescending(t => t.layer).ToList();
-            if (overlappingTiles.Count == 0)
-                SelectTile(null);
-            else
-                SelectTile(overlappingTiles[(overlappingTiles.IndexOf(selectedTile) + 1) % overlappingTiles.Count]);
-#endif
+            // Create planes for each side of the box selection
+            _boxSelectionPlanes[0] = new Plane(-Vector3.Cross((world2 - world1).normalized, Vector3.up), world1);
+            _boxSelectionPlanes[1] = new Plane(-Vector3.Cross((world3 - world2).normalized, Vector3.up), world2);
+            _boxSelectionPlanes[2] = new Plane(-Vector3.Cross((world4 - world3).normalized, Vector3.up), world3);
+            _boxSelectionPlanes[3] = new Plane(-Vector3.Cross((world1 - world4).normalized, Vector3.up), world4);
+
+            // Test each collider that was overlapped and see if it is inside the calculate planes
+            for (int i = 0; i < overlapCount; i++)
+            {
+                var collider = _boxSelectionColliders[i];
+                _boxSelectionColliders[i] = null;
+                var tile = collider.GetComponentInParent<Tile>();
+                if (null == tile)
+                    continue;
+
+                var outside = false;
+                for (int planeIndex = 0; !outside && planeIndex < _boxSelectionPlanes.Length; planeIndex++)
+                {
+                    var plane = _boxSelectionPlanes[planeIndex];
+                    var colliderBounds = collider.bounds;
+                    var min = colliderBounds.min;
+                    var max = colliderBounds.max;
+
+                    outside = !plane.GetSide(new Vector3(min.x, 0, min.z)) ||
+                              !plane.GetSide(new Vector3(min.x, 0, max.z)) ||
+                              !plane.GetSide(new Vector3(max.x, 0, min.z)) ||
+                              !plane.GetSide(new Vector3(max.x, 0, max.z));
+                }
+
+                if (outside)
+                {
+                    _boxSelectionTilesOutside.Add(tile);
+                    outTiles.Remove(tile);
+                    continue;
+                }
+
+                if (!outTiles.Contains(tile))
+                    outTiles.Add(tile);
+            }
+
+            return outTiles.Count > 0;
+        }
+
+        private void UpdateBoxSelection(Vector2 position)
+        {
+            // Update the selection rect
+            _selectionRect.offsetMin = Vector3.Min(_selectionStart, position);
+            _selectionRect.offsetMax = Vector3.Max(_selectionStart, position);
+
+            UpdateBoxSelection(KeyboardManager.isShiftPressed);
+        }
+
+        private void UpdateBoxSelection(bool additive = false)
+        {
+            // Clear the current selection
+            ClearSelection();
+
+            _boxSelectionTiles.Clear();
+
+            // Find all tiles within the selection rectangle
+            var rect = _selectionRect.rect;
+            rect.position = _selectionRect.offsetMin;
+            CanvasRectToTiles(rect, _boxSelectionTiles);
+
+            // If shift is held then we need to merge the saved selection with the new selection
+            if (additive)
+                foreach (var savedTile in _savedSelection)
+                    if (!_boxSelectionTiles.Contains(savedTile))
+                        _boxSelectionTiles.Add(savedTile);
+
+            // Select all of the tiles
+            foreach (var tile in _boxSelectionTiles)
+                AddSelection(tile);
         }
     }
 }
