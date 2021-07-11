@@ -10,7 +10,6 @@ namespace Puzzled.Editor
         [Header("Inspector")]
         [SerializeField] private GameObject _inspectorContent = null;
         [SerializeField] private GameObject _inspectorEmpty = null;
-        [SerializeField] private GameObject _inspectorMultiple = null;
         [SerializeField] private GameObject _inspectorHeader = null;
         [SerializeField] private TMPro.TMP_InputField _inspectorTileName = null;
         [SerializeField] private TMPro.TextMeshProUGUI _inspectorTileType = null;
@@ -33,6 +32,8 @@ namespace Puzzled.Editor
         [SerializeField] private UIPropertyEditor soundEditorPrefab = null;
         [SerializeField] private UIPropertyEditor colorEditorPrefab = null;
         [SerializeField] private UIPropertyEditor tileEditorPrefab = null;
+        [SerializeField] private GameObject _multiSelect = null;
+        [SerializeField] private UIMultiSelectItem _multiSelectItemPrefab = null;
         [SerializeField] private GameObject optionPropertiesPrefab = null;
         [SerializeField] private Button _inspectorRotateButton = null;
 
@@ -69,7 +70,6 @@ namespace Puzzled.Editor
 
             _inspectorContent.transform.DetachAndDestroyChildren();
             _inspectorEmpty.SetActive(false);
-            _inspectorMultiple.SetActive(false);
             _inspectorContent.SetActive(false);
             _inspectorHeader.SetActive(false);
             _wireGizmo.SetActive(false);
@@ -82,7 +82,14 @@ namespace Puzzled.Editor
 
             if (_selectedTiles.Count > 1)
             {
-                _inspectorMultiple.SetActive(true);
+                _inspectorContent.SetActive(true);
+
+                var multiselect = Instantiate(_multiSelect, _inspectorContent.transform);
+
+                // Add each selected item to the inspector
+                foreach (var tile in _selectedTiles.OrderBy(t => t.displayName))
+                    Instantiate(_multiSelectItemPrefab, multiselect.transform).GetComponent<UIMultiSelectItem>().tile = tile;
+
                 return;
             }
 

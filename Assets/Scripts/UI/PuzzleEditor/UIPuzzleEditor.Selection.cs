@@ -125,6 +125,12 @@ namespace Puzzled.Editor
             UpdateWireVisibility();
         }
 
+        public static void DeselectTile (Tile tile)
+        {
+            instance.RemoveSelection(tile);
+            instance.RefreshInspectorInternal();
+        }
+
         /// <summary>
         /// Select a single tile
         /// </summary>

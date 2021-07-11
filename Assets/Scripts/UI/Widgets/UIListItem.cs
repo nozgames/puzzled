@@ -61,6 +61,11 @@ namespace Puzzled.UI
 
                 _list.OnSelectionChanged();
                 onSelectionChanged?.Invoke(_selected);
+
+                if (value)
+                    OnSelected();
+                else
+                    OnDeselected();
             }
         }
 
@@ -189,6 +194,14 @@ namespace Puzzled.UI
                 selected = true;
             else
                 UpdateAnimatorState();
+        }
+
+        protected virtual void OnSelected()
+        { 
+        }
+
+        protected virtual void OnDeselected()
+        {
         }
     }
 }

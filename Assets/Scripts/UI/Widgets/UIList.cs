@@ -25,7 +25,8 @@ namespace Puzzled.UI
         {
             for(int i=0; i<transform.childCount; i++)
             {
-                if (transform.GetChild(i).GetComponent<UIListItem>().selected)
+                var listItem = transform.GetChild(i).GetComponent<UIListItem>();
+                if (listItem != null && listItem.selected)
                     return i;
             }
 

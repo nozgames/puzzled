@@ -64,7 +64,6 @@ namespace Puzzled.Editor
         [SerializeField] private Button _undoButton = null;
         [SerializeField] private Button _redoButton = null;
 
-
         [Header("Popups")]
         [SerializeField] private GameObject popups = null;
         [SerializeField] private Image _popupDarken = null;
@@ -82,7 +81,6 @@ namespace Puzzled.Editor
         [SerializeField] private UIColorPicker _colorPicker = null;
 
         private Mode _mode = Mode.Unknown;
-
         private Puzzle _puzzle = null;
         private World.IPuzzleEntry _puzzleEntry = null;
         private bool playing;
@@ -93,7 +91,6 @@ namespace Puzzled.Editor
         private Mode savedMode;
         private Action<KeyCode> _onKey;
         private Action<bool, bool, bool> _onKeyModifiers;
-
         private Vector3 _cameraTarget;
         private int _cameraZoom = DefaultZoom;
 
