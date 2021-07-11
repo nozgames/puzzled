@@ -12,6 +12,7 @@ namespace Puzzled.Editor
 
         private WireVisuals _dragWire = null;
         private List<Tile> _cursorTiles = null;
+        private Tile _cursorHighlight = null;
         private Vector2 _selectionStart;
         private Vector3 _selectionStartWorld;
         private List<Tile> _savedSelection = new List<Tile>();
@@ -37,6 +38,7 @@ namespace Puzzled.Editor
 
         private void DisableSelectTool()
         {
+            HilightTile(null);
             _cursorTiles = null;
         }
 
@@ -74,7 +76,7 @@ namespace Puzzled.Editor
             // When shift is held use multi-select logic
             if (KeyboardManager.isShiftPressed)
             {
-                if (IsSelected(hitTile))
+                if (hitTile.isSelected)
                     RemoveSelection(hitTile);
                 else
                     AddSelection(hitTile);
@@ -98,6 +100,8 @@ namespace Puzzled.Editor
             {
                 SelectTile(hitTile);
             }
+
+            UpdateCursor();
         }
 
         private List<Tile> _boxSelectionTiles = new List<Tile>();
@@ -240,6 +244,7 @@ namespace Puzzled.Editor
                 return;
             }
 
+            // TODO: if near outside edge of selection allow rotate (single tile only for now)
             // TODO: if dragged from on top of a selected tile then perform a move
             // TODO: if dragged from the wire manipulator then start a wire drag
 
@@ -252,36 +257,28 @@ namespace Puzzled.Editor
 
             // Start with the new box selection
             UpdateBoxSelection(position);
-
-
-#if false
-
-            // Do not allow dragging wires if the selection has more than one tile
-            if (_selectedTiles.Count != 1)
-                return;
-
-            // Do not allow dragging wires if there is no output on the selected tile
-            var tile = _selectedTiles[0];
-            if (!tile.hasOutputs)
-                return;
-
-#endif
         }
 
         private void OnSelectLButtonDrag(Vector2 position, Vector2 delta)
         {
+            // Update wire drag
             if (null != _dragWire)
             {
                 _dragWire.target = _cursorWorld; 
                 return;
             }
 
-            UpdateBoxSelection(position);
+            // Update box selection
+            if (_selectionRect.gameObject.activeSelf)
+            {
+                UpdateBoxSelection(position);
+                return;
+            }
         }
 
         private void OnSelectLButtonDragEnd(Vector2 position)
         {
-            // Box selection
+            // End Box selection
             if(_selectionRect.gameObject.activeSelf)
             {
                 UpdateBoxSelection(position);
@@ -293,6 +290,7 @@ namespace Puzzled.Editor
                 return;
             }
 
+            // End Wire drag
             if (null != _dragWire)
             {
                 // Stop dragging
@@ -305,6 +303,8 @@ namespace Puzzled.Editor
                 UpdateCursor();
                 return;
             }
+
+            // TODO: end move
         }
 
         private void Connect(Tile tile, Tile[] tiles)
@@ -372,20 +372,44 @@ namespace Puzzled.Editor
         /// <summary>
         /// Returns true if the cursor is over the wire gizmo
         /// </summary>
-        private bool IsOverWireGizmo(Vector3 position) => _wireGizmo.activeSelf && (position - _wireGizmo.transform.position).magnitude <= _wireGizmo.transform.localScale.x;
+        private bool IsOverWireGizmo(Vector3 position) => _wireGizmo.activeSelf && (position - _wireGizmo.transform.position).magnitude <= _wireGizmo.transform.localScale.x * 0.5f;
+
+        /// <summary>
+        /// Set the higlight tile
+        /// </summary>
+        private void HilightTile(Tile highlight)
+        {
+            if (highlight == _cursorHighlight)
+                return;
+
+            if (_cursorHighlight != null)
+                _cursorHighlight.editor.isHighlighted = false;
+
+            _cursorHighlight = highlight;
+            if (_cursorHighlight != null)
+                _cursorHighlight.editor.isHighlighted = true;
+        }
 
         private CursorType OnSelectToolGetCursor(Cell cell)
         {
             // Show arrow for box selection
-            if(_selectionRect.gameObject.activeSelf)
+            if (_selectionRect.gameObject.activeSelf)
+            {
+                HilightTile(null);
                 return CursorType.Arrow;
+            }
 
             // If the wire gizmo is active then hit test it
-            if (IsOverWireGizmo(_cursorWorld))
+            if (_dragWire == null && IsOverWireGizmo(_cursorWorld))
+            {
                 // TODO: wire crosshair?
+                HilightTile(null);
                 return CursorType.ArrowWithPlus;
+            }
 
             _cursorTiles = RaycastTiles(_cursorRay);
+
+            HilightTile(_cursorTiles.LastOrDefault());
 
             // If dragging a wire..
             if (_dragWire != null)
@@ -397,6 +421,10 @@ namespace Puzzled.Editor
 
                 return CursorType.ArrowWithNot;
             }
+
+            // Move cursor when over a tile that is already selected
+            if (_cursorTiles.Any(t => t.isSelected))
+                return CursorType.ArrowWithMove;
 
             return CursorType.Arrow;
         }

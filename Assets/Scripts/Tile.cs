@@ -31,6 +31,11 @@ namespace Puzzled
         /// </summary>
         private Port[][] _ports;
 
+        /// <summary>
+        /// Editor tile used by the puzzled editor
+        /// </summary>
+        private Editor.EditorTile _editor;
+
 
         public TileInfo info {
             get => _info;
@@ -83,9 +88,21 @@ namespace Puzzled
         private Cell _cell = Cell.invalid;
 
         /// <summary>
-        /// Inspector state stored on the tile for the next time the tile is selected
+        /// Return the associated editor tile and lazy create one if needed
         /// </summary>
-        public (string id, object value)[] inspectorState { get; set; }
+        public Editor.EditorTile editor {
+            get {
+                if(_editor == null)
+                    _editor = gameObject.AddComponent<Editor.EditorTile>();
+
+                return _editor;
+            }
+        }
+
+        /// <summary>
+        /// Get the editor selected state
+        /// </summary>
+        public bool isSelected => editor.isSelected;
 
         /// <summary>
         /// Get/Set the puzzle this tile belongs to

@@ -45,7 +45,7 @@ namespace Puzzled.Editor
 
         private void UpdateInspectorState(Tile tile)
         {
-            tile.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>(true).Select(p => (p.inspectorStateId, p.inspectorState)).ToArray();
+            tile.editor.inspectorState = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>(true).Select(p => (p.inspectorStateId, p.inspectorState)).ToArray();
         }
 
         public static void RefreshInspector() => instance.RefreshInspectorInternal();
@@ -136,10 +136,10 @@ namespace Puzzled.Editor
                 propertiesGroup.transform.SetAsFirstSibling();
 
             // Apply the saved inspector state
-            if (_inspectorTile.inspectorState != null)
+            if (_inspectorTile.editor.inspectorState != null)
             {
                 var providers = inspector.GetComponentsInChildren<Editor.IInspectorStateProvider>(true);
-                foreach (var state in _inspectorTile.inspectorState)
+                foreach (var state in _inspectorTile.editor.inspectorState)
                 {
                     var provider = providers.FirstOrDefault(p => p.inspectorStateId == state.id);
                     if (provider != null)

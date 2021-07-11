@@ -35,17 +35,6 @@ namespace Puzzled.Editor
             set => instance.SelectWire(value);
         }
 
-#if false
-        /// <summary>
-        /// Returns true if the given cell is part of the current selection
-        /// </summary>
-        /// <param name="cell">Cell to test</param>
-        /// <returns>True if the cell is part of the current selection+</returns>
-        private bool IsSelected (Cell cell) => hasSelection && (_selection.min == _selection.max ? _selection.min == cell : selectedBounds.Contains(cell));
-
-        private bool IsSelected(Vector3 position) => hasSelection && selectedWorldBounds.ContainsXZ(position);
-#endif
-
         public void ClearSelection()
         {
             if (_selectedWire != null)
@@ -72,17 +61,6 @@ namespace Puzzled.Editor
             }
         }
 #endif
-
-        /// <summary>
-        /// Return true if a tile is selected
-        /// </summary>
-        /// <param name="tile">Tile</param>
-        /// <returns>True if selected, false if not</returns>
-        private bool IsSelected(Tile tile)
-        {
-            var selected = tile.GetComponent<Selected>();
-            return null != selected && selected.enabled;
-        }
 
         /// <summary>
         /// Select the top most tile in the given cell
@@ -124,13 +102,7 @@ namespace Puzzled.Editor
 
             _selectedTiles.Add(tile);
 
-            var selected = tile.gameObject.GetComponent<Selected>();
-            if(null == selected)
-                selected = tile.gameObject.AddComponent<Selected>();
-            
-            selected.enabled = true;
-
-            CameraManager.showSelection = true;
+            tile.editor.isSelected = true;
 
             tile.ShowGizmos(true);
 
@@ -148,15 +120,11 @@ namespace Puzzled.Editor
 
             SetWiresDark(tile, false);
 
-            var selected = tile.gameObject.GetComponent<Selected>();
-            if (selected != null)
-                selected.enabled = false;
+            tile.editor.isSelected = false;
 
             _selectedTiles.Remove(tile);
 
             tile.ShowGizmos(false);
-
-            CameraManager.showSelection = _selectedTiles.Count > 0;
 
             SelectWire(null);
         }
@@ -217,7 +185,7 @@ namespace Puzzled.Editor
         private void SelectWire(Wire wire)
         {
             // Make sure one of the two tiles from the wire is selected, if not select the input
-            if (wire != null && !IsSelected(wire.from.tile) && !IsSelected(wire.to.tile))
+            if (wire != null && !wire.from.tile.isSelected && !wire.to.tile.isSelected)
                 SelectTile(wire.from.tile);
 
             // Unselect the current wire selection

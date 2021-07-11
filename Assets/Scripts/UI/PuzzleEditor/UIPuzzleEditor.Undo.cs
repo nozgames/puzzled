@@ -19,7 +19,7 @@ namespace Puzzled.Editor
             selectedTiles = selectedTiles,
             selectedWire = selectedWire,
             mode = mode,
-            inspectorState = _selectedTiles.Select(t => { UpdateInspectorState(t); return t.inspectorState; }).ToArray()
+            inspectorState = _selectedTiles.Select(t => { UpdateInspectorState(t); return t.editor.inspectorState; }).ToArray()
         };
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Puzzled.Editor
             if(editorState.selectedTiles != null && editorState.selectedTiles.Length > 0)
             {
                 for(int i=0; i < editorState.selectedTiles.Length; i++)
-                    editorState.selectedTiles[i].inspectorState = editorState.inspectorState[i];
+                    editorState.selectedTiles[i].editor.inspectorState = editorState.inspectorState[i];
 
                 SelectTiles(editorState.selectedTiles);
                 SelectWire(editorState.selectedWire);
