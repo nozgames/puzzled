@@ -32,6 +32,13 @@ namespace Puzzled.Editor
         public Action onEnter;
         public Action onExit;
 
+        private RectTransform _rect;
+
+        private void Awake()
+        {
+            _rect = GetComponentInParent<RectTransform>();
+        }
+
         public void UnregisterAll ()
         {
             onLButtonClick = null;
@@ -42,26 +49,52 @@ namespace Puzzled.Editor
             onLButtonDragEnd = null;
         }
 
-        public Ray CanvasToRay (Vector2 position) => CameraManager.camera.ScreenPointToRay(position);
+        /// <summary>
+        /// Convert a screen coordinate to a canvas coordinate
+        /// </summary>
+        public Vector2 ScreenToCanvas(Vector2 screen) =>
+            _rect.InverseTransformPoint(screen);
 
-        public Vector3 CanvasToWorld(Vector2 position)
+        /// <summary>
+        /// Convert a canvas coordinate to a screen coordinate
+        /// </summary>
+        public Vector2 CanvasToScreen(Vector2 canvas) =>
+            _rect.TransformPoint(canvas);
+
+        /// <summary>
+        /// Convert a canvas position to a world ray
+        /// </summary>
+        public Ray CanvasToRay(Vector2 canvasPosition) =>
+            CameraManager.camera.ScreenPointToRay(CanvasToScreen(canvasPosition));
+
+        /// <summary>
+        /// Convert a canvas position to a world position on the gound plane
+        /// </summary>
+        public Vector3 CanvasToWorld(Vector2 canvasPosition)
         {
-            var ray = CanvasToRay(position);
+            var ray = CanvasToRay(canvasPosition);
             if ((new Plane(Vector3.up, Vector3.zero)).Raycast(ray, out float enter))
                 return ray.origin + ray.direction * enter;
 
             return Vector3.zero;
         }
 
-        public Cell CanvasToCell(Vector2 position) => CanvasToCell(position, CellCoordinateSystem.Grid);
+        /// <summary>
+        /// Convert a canvas position to a cell
+        /// </summary>
+        public Cell CanvasToCell(Vector2 canvasPosition) => CanvasToCell(canvasPosition, CellCoordinateSystem.Grid);
 
-        public Cell CanvasToCell(Vector2 position, CellCoordinateSystem system) => 
-            UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(position) + new Vector3(0.5f, 0, 0.5f), system);
+        /// <summary>
+        /// Convert a canvas position to a cell in a specific coordinate system
+        /// </summary>
+        public Cell CanvasToCell(Vector2 canvasPosition, CellCoordinateSystem system) => 
+            UIPuzzleEditor.instance.puzzle.grid.WorldToCell(CanvasToWorld(canvasPosition) + new Vector3(0.5f, 0, 0.5f), system);
+
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
-                onLButtonClick?.Invoke(eventData.position);
+                onLButtonClick?.Invoke(ScreenToCanvas(eventData.position));
         }
 
         void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
@@ -79,18 +112,18 @@ namespace Puzzled.Editor
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
-                onLButtonDown?.Invoke(eventData.position);
+                onLButtonDown?.Invoke(ScreenToCanvas(eventData.position));
         }
 
         void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
-                onLButtonUp?.Invoke(eventData.position);
+                onLButtonUp?.Invoke(ScreenToCanvas(eventData.position));
         }
 
         void IScrollHandler.OnScroll(PointerEventData eventData)
         {
-            onScroll?.Invoke(eventData.position, eventData.scrollDelta);
+            onScroll?.Invoke(ScreenToCanvas(eventData.position), eventData.scrollDelta);
         }
 
         void IDragHandler.OnDrag(PointerEventData eventData)
@@ -98,11 +131,11 @@ namespace Puzzled.Editor
             switch (eventData.button)
             {
                 case PointerEventData.InputButton.Left:
-                    onLButtonDrag?.Invoke(eventData.position, eventData.delta);
+                    onLButtonDrag?.Invoke(ScreenToCanvas(eventData.position), eventData.delta);
                     break;
 
                 case PointerEventData.InputButton.Right:
-                    onRButtonDrag?.Invoke(eventData.position, eventData.delta);
+                    onRButtonDrag?.Invoke(ScreenToCanvas(eventData.position), eventData.delta);
                     break;
             }
         }
@@ -112,7 +145,7 @@ namespace Puzzled.Editor
             switch (eventData.button)
             {
                 case PointerEventData.InputButton.Left:
-                    onLButtonDragBegin?.Invoke(eventData.position);
+                    onLButtonDragBegin?.Invoke(ScreenToCanvas(eventData.position));
                     break;
             }
         }
@@ -122,7 +155,7 @@ namespace Puzzled.Editor
             switch (eventData.button)
             {
                 case PointerEventData.InputButton.Left:
-                    onLButtonDragEnd?.Invoke(eventData.position);
+                    onLButtonDragEnd?.Invoke(ScreenToCanvas(eventData.position));
                     break;
             }
         }

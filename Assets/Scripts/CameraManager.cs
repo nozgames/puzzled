@@ -49,6 +49,7 @@ namespace Puzzled
         [Header("General")]
         [SerializeField] private Camera _camera = null;
         [SerializeField] private Camera _selectionCamera = null;
+        [SerializeField] private Camera _wireCamera = null;
         [SerializeField] private GameObject _letterbox = null;
 
         [Header("Layers")]
@@ -58,7 +59,6 @@ namespace Puzzled
         [SerializeField] [Layer] private int dynamicLayer = 0;
         [SerializeField] [Layer] private int logicLayer = 0;
         [SerializeField] [Layer] private int gizmoLayer = 0;
-        [SerializeField] [Layer] private int wireLayer = 0;
         [SerializeField] [Layer] private int fogLayer = 0;
         [SerializeField] [Layer] private int wallLayer = 0;
 
@@ -220,10 +220,7 @@ namespace Puzzled
         /// </summary>
         public static void ShowWires (bool show = true)
         {
-            if (show)
-                camera.cullingMask |= (1 << _instance.wireLayer);
-            else
-                camera.cullingMask &= ~(1 << _instance.wireLayer);
+            _instance._wireCamera.enabled = show;
         }
 
         /// <summary>

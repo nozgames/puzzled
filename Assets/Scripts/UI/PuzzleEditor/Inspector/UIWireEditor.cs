@@ -40,7 +40,7 @@ namespace Puzzled.Editor
         {
             wiresEditor = GetComponentInParent<UIPortEditor>();
             _item.onDoubleClick.AddListener(() => {
-                UIPuzzleEditor.selectedTile = _wire.GetOppositeConnection(wiresEditor.port).tile;
+                UIPuzzleEditor.SelectTile(_wire.GetOppositeConnection(wiresEditor.port).tile);
             });
 
             _deleteButton.onClick.AddListener(() => {

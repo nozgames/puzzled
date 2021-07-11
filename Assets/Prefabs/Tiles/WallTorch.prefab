@@ -140,11 +140,12 @@ Transform:
   - {fileID: 2340136432085890950}
   - {fileID: 4943933777729088414}
   - {fileID: 7235634233944045208}
+  - {fileID: 7948136801148066313}
   m_Father: {fileID: 2819266254877709548}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!64 &4434252939530074426
-MeshCollider:
+--- !u!65 &1099198992211793835
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -153,10 +154,39 @@ MeshCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4749707353668628313, guid: 44e172689c39466469ab9a9784c81a3e, type: 3}
+  serializedVersion: 2
+  m_Size: {x: 0.1452571, y: 0.1, z: 0.27463514}
+  m_Center: {x: 0.053311665, y: -0.0000000037252903, z: 0.02586849}
+--- !u!1 &3393821570862725846
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7948136801148066313}
+  m_Layer: 0
+  m_Name: WireAttach
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7948136801148066313
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3393821570862725846}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.155, z: 0.0255}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 3686624325138080281}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4489517949926743383
 GameObject:
   m_ObjectHideFlags: 0
@@ -217,6 +247,9 @@ VisualEffect:
         m_Overridden: 1
       - m_Value: {x: 0.16700001, y: 0.0023034497, z: 0.0023034497, w: 3.27}
         m_Name: EndColor
+        m_Overridden: 1
+      - m_Value: {x: 1, y: 0.27485868, z: 0, w: 1}
+        m_Name: Color
         m_Overridden: 1
     m_Uint:
       m_Array: []
@@ -326,6 +359,7 @@ MonoBehaviour:
   _info: {fileID: 11400000, guid: e3556300074291c49b94764c31ea7118, type: 2}
   _icon: {fileID: 0}
   _displayName: 
+  _wireAttach: {fileID: 7948136801148066313}
 --- !u!114 &6047282338572007918
 MonoBehaviour:
   m_ObjectHideFlags: 0

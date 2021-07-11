@@ -192,8 +192,9 @@ namespace Puzzled
 
         public void UpdatePositions()
         {
-            transform.position = from.tile.puzzle.grid.CellToWorldBounds(from.tile.cell).center;
-            _visuals.target = to.tile.puzzle.grid.CellToWorldBounds(to.tile.cell).center;
+            transform.position = from.tile.wireAttach.position;
+            _visuals.target = to.tile.wireAttach.position;
+
             _visuals.portTypeFrom = from.port.type;
             _visuals.portTypeTo = to.port.type;
         }

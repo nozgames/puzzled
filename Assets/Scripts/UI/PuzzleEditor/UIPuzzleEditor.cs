@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using Puzzled.UI;
+using System.Collections.Generic;
 
 namespace Puzzled.Editor
 {
@@ -17,10 +18,9 @@ namespace Puzzled.Editor
         public enum Mode
         {
             Unknown,
+            Select,
             Draw,
-            Move,
             Erase,
-            Logic,
             Decal
         }
 
@@ -52,16 +52,14 @@ namespace Puzzled.Editor
         [SerializeField] private GameObject _playControls = null;
 
         [Header("Gizmos")]
-        [SerializeField] private SelectionGizmo _selectionGizmo = null;
-        [SerializeField] private SelectionGizmo _cursorGizmo = null;
+        [SerializeField] private GameObject _wireGizmo = null;
 
         [Header("Toolbar")]
         [SerializeField] private GameObject _toolbar = null;
         [SerializeField] private Button _menuButton = null;
-        [SerializeField] private UIRadio _moveTool = null;
+        [SerializeField] private UIRadio _selectTool = null;
         [SerializeField] private UIRadio _drawTool = null;
         [SerializeField] private UIRadio _eraseTool = null;
-        [SerializeField] private UIRadio _wireTool = null;
         [SerializeField] private UIRadio _decalTool = null;
         [SerializeField] private Button _undoButton = null;
         [SerializeField] private Button _redoButton = null;
@@ -94,6 +92,7 @@ namespace Puzzled.Editor
         private Action<Sound> _chooseSoundCallback;
         private Mode savedMode;
         private Action<KeyCode> _onKey;
+        private Action<bool, bool, bool> _onKeyModifiers;
 
         private Vector3 _cameraTarget;
         private int _cameraZoom = DefaultZoom;
@@ -119,14 +118,11 @@ namespace Puzzled.Editor
                     case Mode.Draw:
                         _drawTool.isOn = true;
                         break;
-                    case Mode.Move:
-                        _moveTool.isOn = true;
+                    case Mode.Select:
+                        _selectTool.isOn = true;
                         break;
                     case Mode.Erase:
                         _eraseTool.isOn = true;
-                        break;
-                    case Mode.Logic:
-                        _wireTool.isOn = true;
                         break;
                     case Mode.Decal:
                         _decalTool.isOn = true;
@@ -175,19 +171,19 @@ namespace Puzzled.Editor
 
             _getCursor = null;
             _onKey = null;
+            _onKeyModifiers = null;
 
             _canvas.UnregisterAll();
 
-            DisableMoveTool();
+            DisableSelectTool();
             DisableDrawTool();
             DisableEraseTool();
-            DisableLogicTool();
             DisableDecalTool();
 
             switch (_mode)
             {
-                case Mode.Move:
-                    EnableMoveTool();
+                case Mode.Select:
+                    EnableSelectTool();
                     break;
                 case Mode.Draw:
                     EnableDrawTool();
@@ -195,19 +191,18 @@ namespace Puzzled.Editor
                 case Mode.Erase:
                     EnableEraseTool();
                     break;
-                case Mode.Logic:
-                    EnableLogicTool();
-                    break;
                 case Mode.Decal:
                     EnableDecalTool();
                     break;
             }
 
+            UpdateWireVisibility();
+
             // Clear selection if the inspector is not enabled
             if (!inspector.gameObject.activeSelf)
             {
                 puzzle.HideWires();
-                SelectTile(null);
+                ClearSelection();
             }
 
             UpdateCursor();
@@ -217,7 +212,7 @@ namespace Puzzled.Editor
         {
             instance = this;
 
-            inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
+            _inspectorTileName.onEndEdit.AddListener(OnInspectorTileNameChanged);
 
             _saveButton.onClick.AddListener(() => {
                 Save();
@@ -254,9 +249,9 @@ namespace Puzzled.Editor
             _postProcToggle.onValueChanged.AddListener((v) => PostProcManager.disableAll = !v); 
 
             _inspectorRotateButton.onClick.AddListener(() => {
-                var rotation = selectedTile.GetProperty("rotation");
+                var rotation = inspectorTile.GetProperty("rotation");
                 if (null != rotation)
-                    ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(selectedTile, "rotation", rotation.GetValue<int>(selectedTile) + 1));
+                    ExecuteCommand(new Editor.Commands.TileSetPropertyCommand(inspectorTile, "rotation", rotation.GetValue<int>(inspectorTile) + 1));
             });            
 
             _chooseSoundPalette.onDoubleClickSound += (background) => {
@@ -291,10 +286,9 @@ namespace Puzzled.Editor
             _layerToggleStatic.onValueChanged.AddListener((v) => UpdateCameraFlags());
             _layerToggleFloor.onValueChanged.AddListener((v) => UpdateCameraFlags());
 
-            _moveTool.onValueChanged.AddListener((v) => OnToolChanged());
+            _selectTool.onValueChanged.AddListener((v) => OnToolChanged());
             _decalTool.onValueChanged.AddListener((v) => OnToolChanged());
             _drawTool.onValueChanged.AddListener((v) => OnToolChanged());
-            _wireTool.onValueChanged.AddListener((v) => OnToolChanged());
             _eraseTool.onValueChanged.AddListener((v) => OnToolChanged());
         }
 
@@ -311,8 +305,6 @@ namespace Puzzled.Editor
             GameManager.busy++;
 
             inspector.SetActive(false);
-
-            _selectionGizmo.gameObject.SetActive(false);
 
             // Start off with an empty puzzle
             //NewPuzzle();
@@ -343,7 +335,6 @@ namespace Puzzled.Editor
             _cameraZoom = Mathf.Clamp(zoom, CameraManager.MinZoom, MaxZoom);
 
             UpdateCamera();
-            UpdateSelectionGizmo();
 
             _zoomSlider.SetValueWithoutNotify(_cameraZoom);
 
@@ -374,12 +365,10 @@ namespace Puzzled.Editor
 
             if (_drawTool.isOn)
                 mode = Mode.Draw;
-            else if (_moveTool.isOn)
-                mode = Mode.Move;
+            else if (_selectTool.isOn)
+                mode = Mode.Select;
             else if (_eraseTool.isOn)
                 mode = Mode.Erase;
-            else if (_wireTool.isOn)
-                mode = Mode.Logic;
             else if (_decalTool.isOn)
                 mode = Mode.Decal;
         }
@@ -393,7 +382,6 @@ namespace Puzzled.Editor
             _cameraTarget += -(_canvas.CanvasToWorld(position + delta) - _canvas.CanvasToWorld(position));
 
             UpdateCamera();
-            UpdateSelectionGizmo();
             UpdateCursor();
         }
 
@@ -491,7 +479,9 @@ namespace Puzzled.Editor
 
             _toolbar.SetActive(true);
             _playControls.SetActive(false);
-            inspector.SetActive(mode == Mode.Logic);
+
+            // Always return to the select tool when exiting play mode
+            inspector.SetActive(mode == Mode.Select);
 
             playing = false;
             _playButton.gameObject.SetActive(true);
@@ -524,6 +514,22 @@ namespace Puzzled.Editor
                 yawIndex = 0,
                 zoomLevel = _cameraZoom
             };
+
+            CameraManager.ForceUpdate();
+        }
+
+        private void Center(Tile[] tiles, int zoom = -1)
+        {
+            if (tiles == null || tiles.Length == 0)
+                return;
+
+            var bounds = puzzle.grid.CellToWorldBounds(tiles[0].cell);
+            foreach(var tile in tiles)
+                bounds.Encapsulate(puzzle.grid.CellToWorldBounds(tile.cell));
+
+            _cameraTarget = bounds.center;
+            _cameraZoom = zoom == -1 ? _cameraZoom : zoom;
+            UpdateCamera();
         }
 
         private void Center(Cell cell, int zoom = -1)
@@ -532,25 +538,6 @@ namespace Puzzled.Editor
             _cameraZoom = zoom == -1 ? _cameraZoom : zoom;
 
             UpdateCamera();
-#if false
-            // Center around the tile first
-            CameraManager.Transition(
-                puzzle.grid.CellToWorld(cell), 
-                CameraManager.DefaultPitch,
-                zoom == -1 ? state.zoom : zoom,
-                null,
-                0);
-
-            // Now center around the actual center of the canvas
-            state = CameraManager.state;
-            CameraManager.Transition(
-                state.target - (canvas.CanvasToWorld(_canvasCenter.TransformPoint(Vector3.zero)) - state.target),
-                CameraManager.DefaultPitch,
-                state.zoom,
-                null,
-                0);
-#endif //false
-
         }
 
         public void Load(World.IPuzzleEntry puzzleEntry)
@@ -567,7 +554,8 @@ namespace Puzzled.Editor
                 _puzzle.name = puzzleEntry.name;
                 Puzzle.current = _puzzle;
 
-                mode = Mode.Logic;
+                // Always start in the select tool
+                mode = Mode.Select;
 
                 ClearSelection();
 
@@ -828,6 +816,13 @@ namespace Puzzled.Editor
             switch (keyCode)
             {
                 case KeyCode.Escape:
+                    // If the select tool is performing a drag operation then cancel it
+                    if (isSelectToolDragging)
+                    {
+                        CancelDrag();
+                        return;
+                    }
+
                     if (playing)
                         OnStopButton();
                     else
@@ -844,8 +839,8 @@ namespace Puzzled.Editor
                     BeginPlay();
                     break;
 
-                case KeyCode.W:
-                    mode = Mode.Logic;
+                case KeyCode.V:
+                    mode = Mode.Select;
                     break;
 
                 case KeyCode.B:
@@ -854,10 +849,6 @@ namespace Puzzled.Editor
 
                 case KeyCode.E:
                     mode = Mode.Erase;
-                    break;
-
-                case KeyCode.V:
-                    mode = Mode.Move;
                     break;
 
                 case KeyCode.D:
@@ -902,12 +893,7 @@ namespace Puzzled.Editor
 
         void KeyboardManager.IKeyboardHandler.OnModifiersChanged(bool shift, bool ctrl, bool alt)
         {
-            switch (mode)
-            {
-                case Mode.Erase:
-                    OnModifiersChangedErase(shift, ctrl, alt);
-                    break;
-            }
+            _onKeyModifiers?.Invoke(shift, ctrl, alt);
 
             UpdateCursor();
         }

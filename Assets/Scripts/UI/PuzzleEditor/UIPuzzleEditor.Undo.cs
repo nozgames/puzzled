@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,37 @@ namespace Puzzled.Editor
         private List<Command> _undo = new List<Command>();
         private List<Command> _redo = new List<Command>();
         private Dictionary<int, Transform> _trash = new Dictionary<int, Transform>();
+
+        private Command.EditorState editorState => new Command.EditorState {
+            selectedTiles = selectedTiles,
+            selectedWire = selectedWire,
+            mode = mode,
+            inspectorState = _selectedTiles.Select(t => { UpdateInspectorState(t); return t.editor.inspectorState; }).ToArray()
+        };
+
+        /// <summary>
+        /// Set the editor state 
+        /// </summary>
+        /// <param name="editorState">New editor state</param>
+        private void SetEditorState(Command.EditorState editorState)
+        {
+            mode = editorState.mode;
+
+            // Clear selection so we can overwrite inspector states
+            ClearSelection();
+
+            // If there are selected tiles then first update the inspector state to the saved value
+            if(editorState.selectedTiles != null && editorState.selectedTiles.Length > 0)
+            {
+                for(int i=0; i < editorState.selectedTiles.Length; i++)
+                    editorState.selectedTiles[i].editor.inspectorState = editorState.inspectorState[i];
+
+                SelectTiles(editorState.selectedTiles);
+                SelectWire(editorState.selectedWire);
+            }
+
+            UpdateCursor(true);
+        }
 
         /// <summary>
         /// Execute a new command
@@ -49,34 +81,24 @@ namespace Puzzled.Editor
                 instance.UpdateUndoButtons();
             }
 
-            if (selectedTile != null)
-            {
-                instance.UpdateInspectorState(selectedTile);
-                command.undoState = selectedTile.inspectorState;
-            }
+            // Save editor undo state prior to executing the command
+            command.editorStateUndo = instance.editorState;
 
             command.Execute();
 
             callback?.Invoke(command);
 
-            if (selectedTile != null)
-            {
-                instance.UpdateInspectorState(selectedTile);
-                command.redoState = selectedTile.inspectorState;
-            }
+            // Save editor redo state after executing the command
+            command.editorStateRedo = instance.editorState;
 
-            command.selectedWireRedo = selectedWire;
-
-            instance.mode = command.mode;
-            selectedTile = command.selectedTile;
-
+            // Mark the puzzle as modified
             instance.puzzle.isModified = true;
 
+            instance.RefreshInspectorInternal();
+            
             // Add a star to the end of the puzzle name
             if (!instance.puzzleName.text.EndsWith("*"))
                 instance.puzzleName.text = instance.puzzleName.text + "*";
-
-            instance.UpdateCursor(true);
 
             LightmapManager.Render();
         }
@@ -94,19 +116,9 @@ namespace Puzzled.Editor
             _redo.Add(command);
             command.Undo();
 
-            instance.mode = command.mode;
-
-            var tile = selectedTile;
-            selectedTile = null;
-            if (tile != null)
-                tile.inspectorState = command.undoState;
-            selectedTile = command.selectedTile;
-
-            selectedWire = command.selectedWireUndo;
+            SetEditorState(command.editorStateUndo);
 
             UpdateUndoButtons();
-
-            instance.UpdateCursor(true);
 
             _puzzle.isModified = true;
 
@@ -126,19 +138,10 @@ namespace Puzzled.Editor
             _undo.Add(command);
             command.Redo();
 
-            instance.mode = command.mode;
-
-            var tile = selectedTile;
-            selectedTile = null;
-            if (tile != null)
-                tile.inspectorState = command.redoState;
-            selectedTile = command.selectedTile;
-
-            selectedWire = command.selectedWireRedo;
+            SetEditorState(command.editorStateRedo);
 
             UpdateUndoButtons();
 
-            instance.UpdateCursor(true);
 
             _puzzle.isModified = true;
 
@@ -174,15 +177,28 @@ namespace Puzzled.Editor
 
         public static void MoveToTrash (GameObject gameObject)
         {
+            if (instance._trash.ContainsKey(gameObject.GetInstanceID()))
+            {
+                Debug.LogError($"Object '{gameObject.name} is already in the trash");
+                return;
+            }
+
+            // Automatically de-select any tiles going to the trash
+            var tile = gameObject.GetComponent<Tile>();
+            if (tile != null && tile.editor.isSelected)
+                instance.RemoveSelection(tile);
+
             instance._trash[gameObject.GetInstanceID()] = gameObject.transform.parent;
             gameObject.transform.SetParent(instance._puzzle.trash);
         }
 
         public static void RestoreFromTrash(GameObject gameObject)
         {
-            var parent = instance._trash[gameObject.GetInstanceID()];
-            if (parent == null)
+            if(!instance._trash.TryGetValue(gameObject.GetInstanceID(), out var parent))
+            {
+                Debug.LogError($"Could not restore object '{gameObject.name} from trash");
                 return;
+            }
 
             instance._trash.Remove(gameObject.GetInstanceID());
             gameObject.transform.SetParent(parent);

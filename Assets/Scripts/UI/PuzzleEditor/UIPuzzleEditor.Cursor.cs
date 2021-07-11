@@ -27,7 +27,6 @@ namespace Puzzled.Editor
 
         private void OnPointerExitCanvas()
         {
-            _cursorGizmo.gameObject.SetActive(false);
             UIManager.cursor = CursorType.Arrow;
             _cursorCell = Cell.invalid;
         }
@@ -55,7 +54,7 @@ namespace Puzzled.Editor
 
             if (updatePosition && _canvas.isMouseOver)
             {
-                var position = _pointerAction.action.ReadValue<Vector2>();
+                var position = _canvas.ScreenToCanvas(_pointerAction.action.ReadValue<Vector2>());
                 var cell = _canvas.CanvasToCell(position, coordinateSystem);
                 if (cell == Cell.invalid)
                     return;
@@ -63,11 +62,8 @@ namespace Puzzled.Editor
                 _cursorWorld = _canvas.CanvasToWorld(position);
                 _cursorRay = _canvas.CanvasToRay(position);
 
-                // When moving a single tile around that is on an edge lock the edge to that edge
-                if (mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null && selectedTile.cell.edge != CellEdge.None)
-                    cell = new Cell(selectedTile.cell.system, cell.x, cell.y, selectedTile.cell.edge);
                 // When the cursor was an edge and will be an edge try to maintain some contiunity beween the edges
-                else if (cell.edge != CellEdge.None && _cursorCell.edge != CellEdge.None && _cursorCell.edge != cell.edge)
+                if (cell.edge != CellEdge.None && _cursorCell.edge != CellEdge.None && _cursorCell.edge != cell.edge)
                 {
                     // If the cursor is still within the previous cell then dont change.  This will
                     // help prevent oscillation between vertical and horizontal edges on the corners.
@@ -90,9 +86,10 @@ namespace Puzzled.Editor
                     }
                 }
 
+#if false
                 if (mode != Mode.Draw && 
                     !(mode == Mode.Erase && _eraseLayerOnly) &&
-                    !(mode == Mode.Move && _moveDragState == MoveState.Moving && selectedTile != null))
+                    !(mode == Mode.Move && _moveDragState == MoveState.Moving && hasSelection))
                 {
                     Debug.Assert(cell.edge != CellEdge.None);
 
@@ -105,6 +102,7 @@ namespace Puzzled.Editor
                             cell = sharedEdgeCell;
                     }
                 }
+#endif
 
                 _cursorCell = cell;
             }
@@ -148,13 +146,10 @@ namespace Puzzled.Editor
 #endif
             _cursorCell = renderCell;
 
-            UIManager.cursor = _getCursor?.Invoke(renderCell) ?? CursorType.Arrow;
-
-            _cursorGizmo.gameObject.SetActive(_canvas.isMouseOver && mode == Mode.Draw);
-
-            var cursorBounds = puzzle.grid.CellToWorldBounds(renderCell);
-            _cursorGizmo.min = cursorBounds.min;
-            _cursorGizmo.max = cursorBounds.max;
+            if (!_canvas.isMouseOver)
+                UIManager.cursor = CursorType.Arrow;
+            else 
+                UIManager.cursor = _getCursor?.Invoke(renderCell) ?? CursorType.Arrow;
         }
     }
 }

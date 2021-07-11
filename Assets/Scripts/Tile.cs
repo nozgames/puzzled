@@ -16,6 +16,9 @@ namespace Puzzled
         [Tooltip("Optional tile display name")]
         [SerializeField] private string _displayName = null;
 
+        [Tooltip("Transform used to attach wires")]
+        [SerializeField] private Transform _wireAttach = null;
+
         private static List<Tile> _tick = new List<Tile>();
         private static TickEvent _tickEvent = new TickEvent();
         private static bool _isTickFrame = false;
@@ -30,6 +33,11 @@ namespace Puzzled
         /// Cached port list
         /// </summary>
         private Port[][] _ports;
+
+        /// <summary>
+        /// Editor tile used by the puzzled editor
+        /// </summary>
+        private Editor.EditorTile _editor;
 
 
         public TileInfo info {
@@ -83,9 +91,26 @@ namespace Puzzled
         private Cell _cell = Cell.invalid;
 
         /// <summary>
-        /// Inspector state stored on the tile for the next time the tile is selected
+        /// Return the associated editor tile and lazy create one if needed
         /// </summary>
-        public (string id, object value)[] inspectorState { get; set; }
+        public Editor.EditorTile editor {
+            get {
+                if(_editor == null)
+                    _editor = gameObject.AddComponent<Editor.EditorTile>();
+
+                return _editor;
+            }
+        }
+
+        /// <summary>
+        /// Return the wire attachment transform
+        /// </summary>
+        public Transform wireAttach => _wireAttach != null ? _wireAttach : transform;
+
+        /// <summary>
+        /// Get the editor selected state
+        /// </summary>
+        public bool isSelected => editor.isSelected;
 
         /// <summary>
         /// Get/Set the puzzle this tile belongs to

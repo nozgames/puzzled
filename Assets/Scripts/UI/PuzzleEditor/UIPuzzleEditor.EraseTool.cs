@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Puzzled.Editor
@@ -24,6 +26,7 @@ namespace Puzzled.Editor
             _canvas.onLButtonDrag = OnEraseToolDrag;
 
             _getCursor = OnEraseGetCursor;
+            _onKeyModifiers = OnModifiersChangedErase;
 
             _lastEraseCell = Cell.invalid;
         }
@@ -71,10 +74,43 @@ namespace Puzzled.Editor
             _eraseStarted = true;
         }
 
-        private Editor.Commands.GroupCommand Erase (Tile tile, Editor.Commands.GroupCommand group = null, EraseFlags flags = EraseFlags.None)
+        private Commands.GroupCommand Erase(Tile[] tiles, Commands.GroupCommand group = null)
+        {
+            if (null == tiles || tiles.Length == 0)
+                return null;
+
+            if (null == group)
+                group = new Commands.GroupCommand();
+
+            // Ensure there are no duplicates
+            var eraseTiles = tiles.Distinct().ToList();
+
+            // Search through the tiles being erased and see if there are additional tiles that need to be erased as well
+            foreach (var tile in eraseTiles)
+            {
+                // Add any wall mounts to walls being erased.
+                if (tile.layer == TileLayer.Wall)
+                {
+                    var wall = tile.GetComponent<Wall>();
+                    if (null != wall)
+                        foreach (var mountedTile in wall.GetMountedTiles())
+                        {
+                            if (!eraseTiles.Contains(mountedTile))
+                                eraseTiles.Add(mountedTile);
+                        }
+                }
+            }
+
+            foreach (var eraseTile in eraseTiles)
+                Erase(eraseTile, group, EraseFlags.KeepWallMount);
+
+            return group;
+        }
+
+        private Commands.GroupCommand Erase (Tile tile, Commands.GroupCommand group = null, EraseFlags flags = EraseFlags.None)
         {
             if (null == group)
-                group = new Editor.Commands.GroupCommand();
+                group = new Commands.GroupCommand();
 
             // If a wall layer is being erased and we were not told to keep the wall mounts then remove all wall mounts
             if(tile.layer == TileLayer.Wall && (flags & EraseFlags.KeepWallMount) != EraseFlags.KeepWallMount)

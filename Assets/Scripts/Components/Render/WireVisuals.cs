@@ -7,8 +7,7 @@ namespace Puzzled
         [SerializeField] private Renderer _fromPortRenderer = null;
         [SerializeField] private Renderer _toPortRenderer = null;
         [SerializeField] private Renderer _wireRenderer = null;
-        [SerializeField] private WireMesh _wireMesh = null;
-        
+
         private PortType _portTypeFrom = PortType.Number;
         private PortType _portTypeTo = PortType.Number;        
         private Vector3 _target;
@@ -52,9 +51,9 @@ namespace Puzzled
             if (highlight)
                 z += 12;
 
-            _wireRenderer.sortingOrder = z;
-            _fromPortRenderer.sortingOrder = z + 3;
-            _toPortRenderer.sortingOrder = z + 6;
+            _wireRenderer.material.renderQueue = 2000 + z;
+            _fromPortRenderer.material.renderQueue = 2000 + z + 3;
+            _toPortRenderer.material.renderQueue = 2000 + z + 6;
         }
 
         public PortType portTypeFrom {
@@ -114,17 +113,17 @@ namespace Puzzled
 
         public Vector3 target {
             get => _target;
-            set {
+            set {                
+                var length = (value - transform.position).magnitude;
+                length -= _toPortRenderer.transform.localScale.z;
+                _wireRenderer.transform.localScale = new Vector3(_wireRenderer.transform.localScale.x, _wireRenderer.transform.localScale.y, length);
+                _wireRenderer.material.SetFloat("_tiling", length * 4.0f);
+                _toPortRenderer.transform.localPosition = new Vector3(0, 0, length);
+
+                if(length > 0)
+                    transform.rotation = Quaternion.LookRotation((value - transform.position).normalized);
+
                 _target = value;
-
-                _wireMesh.target = target;
-                _toPortRenderer.transform.parent.position = target;
-
-                var dir = target - transform.position;
-                if (dir.magnitude < 0.1f)
-                    _toPortRenderer.transform.parent.rotation = Quaternion.LookRotation(-Vector3.right, Vector3.up);
-                else
-                    _toPortRenderer.transform.parent.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
             }
         }
     }

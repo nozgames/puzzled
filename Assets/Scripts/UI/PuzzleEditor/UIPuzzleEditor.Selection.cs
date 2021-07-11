@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Puzzled.Editor
@@ -8,179 +9,130 @@ namespace Puzzled.Editor
         [Header("Selection")]
         [SerializeField] private Color _selectionColor = Color.red;
 
-        private struct Selection
-        {
-            public Cell min;
-            public Cell max;
-            public Vector2Int size;
-            public Tile tile;
-            public Wire wire;
-        }
-
         public static Color selectionColor => instance._selectionColor;
 
-        private Selection _selection;
+        private List<Tile> _selectedTiles = new List<Tile>();
+        private Wire _selectedWire = null;
+        private List<Tile> _boxSelectionTiles = new List<Tile>();
+        private List<Tile> _boxSelectionTilesOutside = new List<Tile>();
+        private Plane[] _boxSelectionPlanes = new Plane[4];
+        private Collider[] _boxSelectionColliders = new Collider[128];
 
-        public static Tile selectedTile {
-            get => instance._selection.tile;
-            set => instance.SelectTile(value);
+        /// <summary>
+        /// True if there is at least one tile selected
+        /// </summary>
+        public bool hasSelection => _selectedTiles.Count > 0;
+
+        /// <summary>
+        /// Creates a copy of the selected tiles array and returns it
+        /// </summary>
+        public static Tile[] selectedTiles {
+            get => instance._selectedTiles.ToArray();
+            set => instance.SelectTiles(value);
         }
 
+        /// <summary>
+        /// Get/Set the selected wire.
+        /// </summary>
         public static Wire selectedWire {
-            get => instance._selection.wire;
+            get => instance._selectedWire;
             set => instance.SelectWire(value);
         }
 
-        /// <summary>
-        /// Returns the selected bounds.
-        /// </summary>
-        public static CellBounds selectedBounds => new CellBounds(instance._selection.min, instance._selection.max);
-
-        public static Bounds selectedWorldBounds {
-            get {
-                var bounds = instance._puzzle.grid.CellToWorldBounds(instance._selection.min);
-                bounds.Encapsulate(instance._puzzle.grid.CellToWorldBounds(instance._selection.max));
-                return bounds;
-            }
-        }
-            
-        public bool hasSelection => _selectionGizmo.gameObject.activeSelf;
-
-        /// <summary>
-        /// Returns true if the given cell is part of the current selection
-        /// </summary>
-        /// <param name="cell">Cell to test</param>
-        /// <returns>True if the cell is part of the current selection+</returns>
-        private bool IsSelected (Cell cell) => hasSelection && (_selection.min == _selection.max ? _selection.min == cell : selectedBounds.Contains(cell));
-
-        private bool IsSelected(Vector3 position) => hasSelection && selectedWorldBounds.ContainsXZ(position);
-
-        /// <summary>
-        /// Return and array of all selected tiles
-        /// </summary>
-        private Tile[] GetSelectedTiles() =>
-            hasSelection ?
-                puzzle.grid.GetTiles(selectedBounds).Where(t => IsLayerVisible(t.layer)).ToArray() :
-                null;
-
         public void ClearSelection()
         {
-            if (_selection.wire != null)
+            if (_selectedWire != null)
                 SelectWire(null);
 
-            if (_selection.tile != null)
-                SelectTile(null);
+            while (_selectedTiles.Count > 0)
+                RemoveSelection(_selectedTiles[0]);
 
-            _selection.min = _selection.max = Cell.invalid;
-            _selection.size = Vector2Int.zero;
-            _selectionGizmo.gameObject.SetActive(false);
+            UpdateWireVisibility();
+
+            RefreshInspectorInternal();
+
+            UpdateCursor();
         }
 
-        public void SelectRect(Cell min, Cell max) => SelectRect(new CellBounds(min, max));
+        /// <summary>
+        /// Select the top most tile in the given cell
+        /// </summary>
+        /// <param name="cell"></param>
+        public static void SelectTile(Cell cell) => SelectTile(instance.GetTopMostTile(cell));
 
-        public void SelectRect(CellBounds cellBounds)
+        /// <summary>
+        /// Select the givens tiles
+        /// </summary>
+        /// <param name="tiles">Tiles to select</param>
+        private void SelectTiles(Tile[] tiles)
         {
-            _selection.min = cellBounds.min;
-            _selection.max = cellBounds.max;
-            _selection.size = _selection.max - _selection.min;
+            ClearSelection();
 
-            _selectionGizmo.gameObject.SetActive(true);
-            UpdateSelectionGizmo();
+            if (null == tiles || tiles.Length == 0)
+                return;
+
+            foreach (var tile in tiles)
+                AddSelection(tile);
+
+            RefreshInspectorInternal();
         }
 
-        private void UpdateSelectionGizmo()
+        /// <summary>
+        /// Add a tile to the current selection
+        /// </summary>
+        /// <param name="tile">Tile to select</param>
+        private void AddSelection (Tile tile)
         {
-            if (_selection.min == _selection.max)
-            {
-                var cellWorldBounds = puzzle.grid.CellToWorldBounds(_selection.min);
-                _selectionGizmo.min = cellWorldBounds.min;
-                _selectionGizmo.max = cellWorldBounds.max;
-            } else
-            {
-                _selectionGizmo.min = _puzzle.grid.CellToWorld(_selection.min) - new Vector3(0.5f, 0, 0.5f);
-                _selectionGizmo.max = _puzzle.grid.CellToWorld(_selection.max) + new Vector3(0.5f, 0, 0.5f);
-            }
-        }
-
-        private void SelectTile(Cell cell) => SelectTile(GetTopMostTile(cell));
-
-        private void SelectTile(Tile tile)
-        {
-            // Save the inspector state
-            if (_selection.tile != null)
-            {
-                var selected = _selection.tile.GetComponent<Selected>();
-                if (null != selected)
-                    Destroy(selected);
-
-                _selection.tile.ShowGizmos(false);
-
-                // Make sure the current edit box finishes before we clear the selected tile
-                if (UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == inspectorTileName)
-                    UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-                SetWiresDark(_selection.tile, false);
-                UpdateInspectorState(_selection.tile);
-            }
-
-            _selection.tile = tile;
-
-            HideCameraEditor();
-
             if (tile == null)
             {
-                CameraManager.showSelection = false;
-
-                ClearSelection();
-                _inspectorContent.transform.DetachAndDestroyChildren();
-                _inspectorContent.SetActive(false);
-                _inspectorHeader.SetActive(false);
-                _inspectorEmpty.SetActive(true);
-
-                // Show all wires when no tile is selected
-                if (mode == Mode.Logic)
-                    _puzzle.ShowWires();
-                else
-                    _puzzle.HideWires();
-            } 
-            else
-            {
-                CameraManager.showSelection = true;
-
-                tile.gameObject.AddComponent<Selected>();
-
-                _inspectorEmpty.SetActive(false);
-                _inspectorContent.SetActive(true);
-                _inspectorHeader.SetActive(true);
-                inspectorTileName.SetTextWithoutNotify(tile.name);
-                _inspectorTileType.text = $"<{_selection.tile.info.displayName}>";
-
-                var rotation = _selection.tile.GetProperty("rotation");
-                _inspectorRotateButton.gameObject.SetActive(rotation != null);
-
-                _inspectorTilePreview.sprite = DatabaseManager.GetPreview(tile.guid);
-
-                // Update the selection
-                _selection.min = _selection.max = tile.cell;
-                _selection.size = Vector2Int.one;
-                //_selectionGizmo.gameObject.SetActive(false);
-                UpdateSelectionGizmo();
-
-                // Hide all wires in case they were all visible previously and show the selected tiles wires
-                _puzzle.HideWires();
-                _puzzle.ShowWires(tile);
-                RefreshInspectorInternal();
-
-                // If the tile is a camera then open the camera editor as well
-                var gameCamera = tile.GetComponent<GameCamera>();
-                if (gameCamera != null)
-                    ShowCameraEditor(gameCamera);
-
-                _selection.tile.ShowGizmos(true);
+                Debug.LogError("cannot add 'null' tile to selection");
+                return;
             }
 
-            // Clear wire selection if the selected wire does not connect to the newly selected tile
-            if (selectedWire != null && selectedWire.from.tile != tile && selectedWire.to.tile != tile)
-                SelectWire(null);
+            if (_selectedTiles.Contains(tile))
+                return;
+
+            _selectedTiles.Add(tile);
+
+            tile.editor.isSelected = true;
+
+            tile.ShowGizmos(true);
+
+            UpdateWireVisibility();
+
+            SelectWire(null);
+        }
+
+        /// <summary>
+        /// Remove a tile from the current selection
+        /// </summary>
+        /// <param name="tile">Tile to remove</param>
+        private void RemoveSelection (Tile tile)
+        {
+            if (!_selectedTiles.Contains(tile))
+                return;
+
+            SetWiresDark(tile, false);
+
+            tile.editor.isSelected = false;
+
+            _selectedTiles.Remove(tile);
+
+            tile.ShowGizmos(false);
+
+            SelectWire(null);
+
+            UpdateWireVisibility();
+        }
+
+        /// <summary>
+        /// Select a single tile
+        /// </summary>
+        public static void SelectTile(Tile tile)
+        {
+            instance.ClearSelection();
+            instance.AddSelection(tile);            
+            instance.RefreshInspectorInternal();
         }
 
         /// <summary>
@@ -190,76 +142,163 @@ namespace Puzzled.Editor
         private void SelectWire(Wire wire)
         {
             // Make sure one of the two tiles from the wire is selected, if not select the input
-            if (wire != null && _selection.tile != wire.from.tile && _selection.tile != wire.to.tile)
+            if (wire != null && !wire.from.tile.isSelected && !wire.to.tile.isSelected)
                 SelectTile(wire.from.tile);
 
-            if (_selection.wire != null)
-                _selection.wire.visuals.selected = false;
+            // Unselect the current wire selection
+            if (_selectedWire != null)
+                _selectedWire.visuals.selected = false;
 
-            _selection.wire = wire;
+            _selectedWire = wire;
 
-            if (_selection.wire != null)
-                _selection.wire.visuals.selected = true;
+            if (_selectedWire != null)
+                _selectedWire.visuals.selected = true;
 
-            onSelectedWireChanged?.Invoke(_selection.wire);
+            onSelectedWireChanged?.Invoke(_selectedWire);
         }
 
         /// <summary>
-        /// Fit the current selection rect to the visible tiles within it
+        /// Returns a list of tiles that overlap or are contained within the given screen rectangle
         /// </summary>
-        private void FitSelection()
+        /// <param name="rect">Screen rectangle</param>
+        /// <param name="outTiles">Tiles that overlap the screen rectangle</param>
+        /// <returns>True if any tiles were found</returns>
+        private bool CanvasRectToTiles (Rect rect, List<Tile> outTiles)
         {
-            if (!hasSelection)
-                return;
+            _boxSelectionTilesOutside.Clear();
 
-            SelectTiles(GetSelectedTiles());
-        }
+            // Calculate the rays at the four corners of the rect
+            var ray1 = _canvas.CanvasToRay(rect.min);
+            var ray2 = _canvas.CanvasToRay(new Vector2(rect.min.x, rect.max.y));
+            var ray3 = _canvas.CanvasToRay(rect.max);
+            var ray4 = _canvas.CanvasToRay(new Vector2(rect.max.x, rect.min.y));
 
-        private void SelectNextTileUnderCursor()
-        {
-            if (selectedTile == null || !_puzzle.grid.CellContainsWorldPoint(selectedTile.cell, _cursorWorld))
+            // Find the intersection point of the rays with the ground plane
+            var ground = new Plane(Vector3.up, Vector3.zero);
+            if (!ground.Raycast(ray1, out float enter1))
+                return false;
+            if (!ground.Raycast(ray2, out float enter2))
+                return false;
+            if (!ground.Raycast(ray3, out float enter3))
+                return false;
+            if (!ground.Raycast(ray4, out float enter4))
+                return false;
+
+            // Find the world coordinates of the ray intersections
+            var world1 = ray1.origin + ray1.direction * enter1;
+            var world2 = ray2.origin + ray2.direction * enter2;
+            var world3 = ray3.origin + ray3.direction * enter3;
+            var world4 = ray4.origin + ray4.direction * enter4;
+
+            // Find all colliders within an AABB that wraps the box selection world coordinates
+            var bounds = new Bounds(world1, Vector3.zero);
+            bounds.Encapsulate(world2);
+            bounds.Encapsulate(world3);
+            bounds.Encapsulate(world4);
+            bounds.Encapsulate(world1 + Vector3.up * 10.0f);
+
+            var overlapCount = Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, _boxSelectionColliders, Quaternion.identity, CameraManager.camera.cullingMask);
+            while (overlapCount == _boxSelectionColliders.Length)
             {
-                SelectTile(_cursorCell);
-                return;
+                _boxSelectionColliders = new Collider[_boxSelectionColliders.Length * 2];
+                overlapCount = Physics.OverlapBoxNonAlloc(bounds.center, bounds.extents, _boxSelectionColliders, Quaternion.identity, CameraManager.camera.cullingMask);
             }
 
-            var cell = _puzzle.grid.WorldToCell(_cursorWorld + new Vector3(0.5f, 0, 0.5f), CellCoordinateSystem.Grid);
-            var overlappingTiles = _puzzle.grid.GetTiles(cell, cell).Where(t => _puzzle.grid.CellContainsWorldPoint(t.cell, _cursorWorld)).OrderByDescending(t => t.layer).ToList();
-            if (overlappingTiles.Count == 0)
-                SelectTile(null);
-            else
-                SelectTile(overlappingTiles[(overlappingTiles.IndexOf(selectedTile) + 1) % overlappingTiles.Count]);
+            // Create planes for each side of the box selection
+            _boxSelectionPlanes[0] = new Plane(-Vector3.Cross((world2 - world1).normalized, Vector3.up), world1);
+            _boxSelectionPlanes[1] = new Plane(-Vector3.Cross((world3 - world2).normalized, Vector3.up), world2);
+            _boxSelectionPlanes[2] = new Plane(-Vector3.Cross((world4 - world3).normalized, Vector3.up), world3);
+            _boxSelectionPlanes[3] = new Plane(-Vector3.Cross((world1 - world4).normalized, Vector3.up), world4);
+
+            // Test each collider that was overlapped and see if it is inside the calculate planes
+            for (int i = 0; i < overlapCount; i++)
+            {
+                var collider = _boxSelectionColliders[i];
+                _boxSelectionColliders[i] = null;
+                var tile = collider.GetComponentInParent<Tile>();
+                if (null == tile)
+                    continue;
+
+                var outside = false;
+                for (int planeIndex = 0; !outside && planeIndex < _boxSelectionPlanes.Length; planeIndex++)
+                {
+                    var plane = _boxSelectionPlanes[planeIndex];
+                    var colliderBounds = collider.bounds;
+                    var min = colliderBounds.min;
+                    var max = colliderBounds.max;
+
+                    outside = !plane.GetSide(new Vector3(min.x, 0, min.z)) ||
+                              !plane.GetSide(new Vector3(min.x, 0, max.z)) ||
+                              !plane.GetSide(new Vector3(max.x, 0, min.z)) ||
+                              !plane.GetSide(new Vector3(max.x, 0, max.z));
+                }
+
+                if (outside)
+                {
+                    _boxSelectionTilesOutside.Add(tile);
+                    outTiles.Remove(tile);
+                    continue;
+                }
+
+                if (!outTiles.Contains(tile))
+                    outTiles.Add(tile);
+            }
+
+            return outTiles.Count > 0;
         }
 
-        /// <summary>
-        /// Select the givens tiles
-        /// </summary>
-        /// <param name="tiles">Tiles to select</param>
-        private void SelectTiles (Tile[] tiles)
+        private void UpdateBoxSelection(Vector2 position)
         {
-            if (null == tiles)
-                return;
+            // Update the selection rect
+            _selectionRect.offsetMin = Vector3.Min(_selectionStart, position);
+            _selectionRect.offsetMax = Vector3.Max(_selectionStart, position);
 
+            UpdateBoxSelection(KeyboardManager.isShiftPressed);
+        }
+
+        private void UpdateBoxSelection(bool additive = false)
+        {
+            // Clear the current selection
             ClearSelection();
 
-            if (tiles.Length == 0)
-                return;
+            _boxSelectionTiles.Clear();
 
-            if (tiles.Length == 1)
+            // Find all tiles within the selection rectangle
+            var rect = _selectionRect.rect;
+            rect.position = _selectionRect.offsetMin;
+            CanvasRectToTiles(rect, _boxSelectionTiles);
+
+            // If shift is held then we need to merge the saved selection with the new selection
+            if (additive)
+                foreach (var savedTile in _savedSelection)
+                    if (!_boxSelectionTiles.Contains(savedTile))
+                        _boxSelectionTiles.Add(savedTile);
+
+            // Select all of the tiles
+            foreach (var tile in _boxSelectionTiles)
+                AddSelection(tile);
+        }
+
+        /// <summary>
+        ///  Update the visibility of all wires based on the current selection
+        /// </summary>
+        private void UpdateWireVisibility ()
+        {
+            if(_mode != Mode.Select)
             {
-                SelectTile(tiles[0]);
+                _puzzle.ShowWires(false);
                 return;
             }
 
-            var min = tiles[0].cell;
-            var max = min;
-            foreach (var tile in tiles)
+            if(!hasSelection)
             {
-                min = Cell.Min(min, tile.cell);
-                max = Cell.Max(max, tile.cell);
+                _puzzle.ShowWires(true);
+                return;
             }
 
-            SelectRect(min, max);
+            _puzzle.ShowWires(false);
+            foreach(var tile in _selectedTiles)
+                _puzzle.ShowWires(tile, true);
         }
     }
 }

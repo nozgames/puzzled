@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: WireCapFrom
+  m_Name: WireCap
   m_Shader: {fileID: -6465566751694194690, guid: 9b498ff0dfa6819488766885448880b6, type: 3}
   m_ShaderKeywords: ETC1_EXTERNAL_ALPHA FLOW_TYPE_ROTATE
   m_LightmapFlags: 4
@@ -68,7 +68,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _texture:
-        m_Texture: {fileID: 2800000, guid: da1e4d83b55e6b545beb84b377af8f48, type: 3}
+        m_Texture: {fileID: 2800000, guid: 138beb5f7a88f334886d4a19e5d8d15b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -83,6 +83,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - Boolean_ac7c7e9096114d9cbd10c95f615c3a48: 0
     - FLOW_TYPE: 0
@@ -118,9 +119,9 @@ Material:
     - _ZWrite: 1
     - _flowing: 1
     - _highlight: 1
-    - _portType: 0
+    - _portType: 2
     - _selected: 0
-    - _wireType: 0
+    - _wireType: 1
     m_Colors:
     - Color_149297ba924849d1bf26d8904e6d7114: {r: 1, g: 0.9892867, b: 0.76037735, a: 1}
     - Color_6ed259ca2bd9498fb91fbc30dc3928eb: {r: 0.754717, g: 0.754717, b: 0.754717, a: 1}
