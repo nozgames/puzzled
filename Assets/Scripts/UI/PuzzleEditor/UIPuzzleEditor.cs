@@ -80,6 +80,9 @@ namespace Puzzled.Editor
         [SerializeField] private UITileSelector _chooseTileConnectionPopup = null;
         [SerializeField] private UIColorPicker _colorPicker = null;
 
+        [Header("Sprites")]
+        public Sprite spriteDecalPower = null;
+
         private Mode _mode = Mode.Unknown;
         private Puzzle _puzzle = null;
         private World.IPuzzleEntry _puzzleEntry = null;

@@ -9,8 +9,13 @@ namespace Puzzled
         private DecalSurface[] _surfaces;
 
         [Editable(hiddenIfFalse = "hasDecal")]
-        [Port(PortFlow.Input, PortType.Power, PortFlags.AllowSelfWire)]
+        [Port(PortFlow.Input, PortType.Power, PortFlags.AllowSelfWire, customIcon = "decalPowerPortIcon")]
         public Port decalPowerPort { get; private set; }
+
+        /// <summary>
+        /// Custom icon for decal power
+        /// </summary>
+        public Sprite decalPowerPortIcon => Editor.UIPuzzleEditor.instance.spriteDecalPower;
 
         [Editable(hidden = true, serialized = false)]
         private bool hasDecal => _surfaces.Any(s => s.decal != Decal.none);

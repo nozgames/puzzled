@@ -30,6 +30,7 @@ namespace Puzzled
         public PortFlow flow { get; private set; }
         public PortFlags flags { get; private set; }
         public Type signalEvent { get; set; }
+        public string customIcon { get; set; }
         
         /// <summary>
         /// The legacy port is the port that V1 files will connect their inputs to
@@ -77,6 +78,11 @@ namespace Puzzled
         public PortFlags flags => _property.port.flags;
 
         /// <summary>
+        /// Property name for custom icon
+        /// </summary>
+        public string customIcon => _property.port.customIcon;
+
+        /// <summary>
         /// Returns the port signal event type
         /// </summary>
         public Type signalEventType => _property.port.signalEvent;
@@ -107,6 +113,11 @@ namespace Puzzled
         public int wireCount => wires.Count;
 
         /// <summary>
+        /// Return the component this port is attached to
+        /// </summary>
+        public TileComponent component => _property.GetComponent(tile);
+
+        /// <summary>
         /// True if one or more wires are powered
         /// </summary>
         public bool hasPower {
@@ -129,7 +140,7 @@ namespace Puzzled
         public Port(Tile tile, TileProperty tileProperty)
         {
             this.tile = tile;
-            _property = tileProperty;
+            _property = tileProperty;            
         }
 
         /// <summary>
