@@ -311,6 +311,11 @@ namespace Puzzled.Editor
         {
             switch (keyCode)
             {
+                case KeyCode.F:
+                    if (selectedTile != null)
+                        Center(selectedTile.cell, _cameraZoom);
+                    break;
+
                 case KeyCode.Delete:
                     var tiles = GetSelectedTiles();
                     if (null == tiles || tiles.Length == 0)
