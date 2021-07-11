@@ -94,13 +94,9 @@ namespace Puzzled.Editor
             _inspectorTileType.text = $"<{_inspectorTile.info.displayName}>";
             _inspectorRotateButton.gameObject.SetActive(_inspectorTile.GetProperty("rotation") != null);
             _inspectorTilePreview.sprite = DatabaseManager.GetPreview(_inspectorTile.guid);
+            
+            UpdateWireGizmo();
 
-            // If the tile can be wired then show the wire gizmo
-            if (_inspectorTile.hasOutputs)
-            {
-                _wireGizmo.SetActive(true);
-                _wireGizmo.transform.position = _inspectorTile.wireAttach.position;
-            }
             // Create the custom editors
             if (_inspectorTile.info.customEditors != null)
                 foreach (var customEditorPrefab in _inspectorTile.info.customEditors)
@@ -259,6 +255,18 @@ namespace Puzzled.Editor
             }
 
             ExecuteCommand(new Commands.TileRenameCommand(inspectorTile, name));
+        }
+
+        private void UpdateWireGizmo()
+        {
+            if(_inspectorTile == null || !_inspectorTile.hasOutputs)
+            {
+                _wireGizmo.gameObject.SetActive(false);
+                return;
+            }
+
+            _wireGizmo.gameObject.SetActive(true);
+            _wireGizmo.transform.position = _inspectorTile.wireAttach.position;
         }
     }
 }

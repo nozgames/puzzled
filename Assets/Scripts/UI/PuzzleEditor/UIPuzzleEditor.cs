@@ -196,6 +196,8 @@ namespace Puzzled.Editor
                     break;
             }
 
+            UpdateWireVisibility();
+
             // Clear selection if the inspector is not enabled
             if (!inspector.gameObject.activeSelf)
             {
@@ -512,6 +514,8 @@ namespace Puzzled.Editor
                 yawIndex = 0,
                 zoomLevel = _cameraZoom
             };
+
+            CameraManager.ForceUpdate();
         }
 
         private void Center(Tile[] tiles, int zoom = -1)
@@ -812,6 +816,13 @@ namespace Puzzled.Editor
             switch (keyCode)
             {
                 case KeyCode.Escape:
+                    // If the select tool is performing a drag operation then cancel it
+                    if (isSelectToolDragging)
+                    {
+                        CancelDrag();
+                        return;
+                    }
+
                     if (playing)
                         OnStopButton();
                     else

@@ -10,6 +10,7 @@ namespace Puzzled.Editor
         [Header("SelectTool")]
         [SerializeField] private RectTransform _selectionRect = null;
 
+        private bool _dragCancelled = false;
         private WireVisuals _dragWire = null;
         private List<Tile> _cursorTiles = null;
         private Tile _cursorHighlight = null;
@@ -18,6 +19,7 @@ namespace Puzzled.Editor
         private Cell _selectionStartCell;
         private List<Tile> _savedSelection = new List<Tile>();
         private bool _cursorOverWireGizmo = false;
+        private bool _cursorOverWireGizmoAtStart = false;
 
         /// <summary>
         /// Tiles being moved
@@ -42,6 +44,11 @@ namespace Puzzled.Editor
 
         public static Action<Wire> onSelectedWireChanged;
 
+        /// <summary>
+        /// Returns true if the select tool is performing a drag operation
+        /// </summary>
+        public bool isSelectToolDragging => _mode == Mode.Select && (_moveTiles != null || _dragWire != null || _selectionRect.gameObject.activeSelf);
+
         private void EnableSelectTool()
         {
             _canvas.onLButtonDown = OnSelectLButtonDown;
@@ -58,13 +65,15 @@ namespace Puzzled.Editor
 
             inspector.SetActive(true);
 
-            _puzzle.ShowWires(!hasSelection);
+            ClearSelection();
         }
 
         private void DisableSelectTool()
         {
             HilightTile(null);
             _cursorTiles = null;
+
+            ClearSelection();
         }
 
         private List<Tile> RaycastTiles (Ray ray) => 
@@ -82,10 +91,19 @@ namespace Puzzled.Editor
             _selectionStartCell = _cursorCell;
             _selectionRect.offsetMin = position;
             _selectionRect.offsetMax = position;
+            _cursorOverWireGizmoAtStart = _cursorOverWireGizmo;
+            _dragCancelled = false;
         }
 
         private void OnSelectLButtonUp (Vector2 position)
         {
+            if(_dragCancelled)
+            {
+                _dragCancelled = false;
+                UpdateCursor();
+                return;
+            }
+
             if (_moveTiles != null)
             {
                 if (_moveCommand != null)
@@ -108,14 +126,17 @@ namespace Puzzled.Editor
 
                     _moveCommand = null;
 
-                    //SelectTiles(_moveTiles);
+                    UpdateWireGizmo();
                 }
 
                 return;
             }
 
             if (_dragWire != null || _selectionRect.gameObject.activeSelf)
+            {
+                UpdateCursor();
                 return;
+            }
 
             var hit = _cursorTiles;
             if (hit.Count == 0)
@@ -161,7 +182,7 @@ namespace Puzzled.Editor
         private void OnSelectLButtonDragBegin(Vector2 position)
         {
             // Drag a wire from the wire gizmo
-            if(_cursorOverWireGizmo)
+            if (_cursorOverWireGizmoAtStart)
             {
                 // Start dragging a wire
                 _dragWire = Instantiate(dragWirePrefab, puzzle.transform).GetComponent<WireVisuals>();
@@ -180,26 +201,20 @@ namespace Puzzled.Editor
             {
                 _moveTiles = _selectedTiles.ToArray();
                 _moveCells = _moveTiles.Select(t => t.cell).ToArray();
+
+                // Hide the wire gizmo while moving tiles
+                _wireGizmo.gameObject.SetActive(false);
                 return;
             }
 
-            // TODO: if near outside edge of selection allow rotate (single tile only for now)
-            // TODO: if dragged from on top of a selected tile then perform a move
-            // TODO: if dragged from the wire manipulator then start a wire drag
-
-            // Save the selection for shift box drag operations
-            _savedSelection.Clear();
-            _savedSelection.AddRange(_selectedTiles);
-
-            // Show the box selection 
-            _selectionRect.gameObject.SetActive(true);
-
-            // Start with the new box selection
-            UpdateBoxSelection(position);
+            BeginBoxSelect(position);
         }
 
         private void OnSelectLButtonDrag(Vector2 position, Vector2 delta)
         {
+            if (_dragCancelled)
+                return;
+
             // Update wire drag
             if (null != _dragWire)
             {
@@ -246,14 +261,9 @@ namespace Puzzled.Editor
             // End Box selection
             if(_selectionRect.gameObject.activeSelf)
             {
-                UpdateBoxSelection(position);
-                RefreshInspectorInternal();
-                _selectionRect.gameObject.SetActive(false);
-                _savedSelection.Clear();
-                _boxSelectionTiles.Clear();
-                _boxSelectionTilesOutside.Clear();
+                EndBoxSelection(position);
                 return;
-            }
+            }            
 
             // End Wire drag
             if (null != _dragWire)
@@ -273,6 +283,7 @@ namespace Puzzled.Editor
             if(null != _moveTiles)
             {
                 _moveTiles = null;
+                _moveCells = null;
             }
         }
 
@@ -352,6 +363,9 @@ namespace Puzzled.Editor
         {
             _cursorOverWireGizmo = false;
 
+            if (_dragCancelled)
+                return CursorType.Arrow;
+
             if (_moveTiles != null)
                 return CursorType.Move;
 
@@ -429,6 +443,69 @@ namespace Puzzled.Editor
                 group.Add(new Commands.TileMoveCommand(tiles[i], cells[i] + offset, Cell.invalid));
 
             return group;
+        }
+
+        private void BeginBoxSelect(Vector3 position)
+        {
+            _savedSelection.Clear();
+            _savedSelection.AddRange(_selectedTiles);
+
+            // Show the box selection 
+            _selectionRect.gameObject.SetActive(true);
+
+            // Start with the new box selection
+            UpdateBoxSelection(position);
+        }
+
+        private void EndBoxSelection(Vector3 position, bool cancel=false)
+        {
+            if (!cancel)
+            {
+                UpdateBoxSelection(position);
+                RefreshInspectorInternal();
+            } else
+            {
+                SelectTiles(_savedSelection.ToArray());
+            }
+
+            _selectionRect.gameObject.SetActive(false);
+            _savedSelection.Clear();
+            _boxSelectionTiles.Clear();
+            _boxSelectionTilesOutside.Clear();
+        }
+
+        private void CancelDrag ()
+        {
+            _dragCancelled = true;
+
+            // Cancel drag wire
+            if (_dragWire != null)
+            {
+                Destroy(_dragWire.gameObject);
+                _dragWire = null;
+            }
+
+            // Cancel box select
+            if (_selectionRect.gameObject.activeSelf)
+            {
+                EndBoxSelection(Vector3.zero, true);
+            }
+
+            // Cancel Move
+            if (_moveTiles != null)
+            {
+                if (_moveCommand != null)
+                {
+                    _moveCommand.Undo();
+                    LightmapManager.Render();
+                }
+
+                _moveTiles = null;
+                _moveCells = null;
+                _moveCommand = null;
+            }
+
+            UpdateCursor();
         }
     }
 }

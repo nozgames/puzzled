@@ -17,6 +17,7 @@ namespace Puzzled.Editor
         private List<Tile> _boxSelectionTilesOutside = new List<Tile>();
         private Plane[] _boxSelectionPlanes = new Plane[4];
         private Collider[] _boxSelectionColliders = new Collider[128];
+
         /// <summary>
         /// True if there is at least one tile selected
         /// </summary>
@@ -46,7 +47,11 @@ namespace Puzzled.Editor
             while (_selectedTiles.Count > 0)
                 RemoveSelection(_selectedTiles[0]);
 
+            UpdateWireVisibility();
+
             RefreshInspectorInternal();
+
+            UpdateCursor();
         }
 
         /// <summary>
@@ -93,6 +98,8 @@ namespace Puzzled.Editor
 
             tile.ShowGizmos(true);
 
+            UpdateWireVisibility();
+
             SelectWire(null);
         }
 
@@ -114,55 +121,18 @@ namespace Puzzled.Editor
             tile.ShowGizmos(false);
 
             SelectWire(null);
+
+            UpdateWireVisibility();
         }
 
-        public static void SelectTile(Tile tile) => instance.SelectTileInternal(tile);
-
-        private void SelectTileInternal(Tile tile)
+        /// <summary>
+        /// Select a single tile
+        /// </summary>
+        public static void SelectTile(Tile tile)
         {
-            // Clear the current selection
-            ClearSelection();
-
-#if false
-            // Save the inspector state
-            if (_selection.tile != null)
-            {
-                var selected = _selection.tile.GetComponent<Selected>();
-                if (null != selected)
-                    Destroy(selected);
-
-                _selection.tile.ShowGizmos(false);
-
-                // Make sure the current edit box finishes before we clear the selected tile
-                if (UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == inspectorTileName)
-                    UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(null);
-                SetWiresDark(_selection.tile, false);
-                UpdateInspectorState(_selection.tile);
-            }
-#endif
-            AddSelection(tile);            
-
-#if false
-            if (tile == null)
-            {
-                ClearSelection();
-
-                // Show all wires when no tile is selected
-                if (mode == Mode.Logic)
-                    _puzzle.ShowWires();
-                else
-                    _puzzle.HideWires();
-            } 
-            else
-            {
-                // Hide all wires in case they were all visible previously and show the selected tiles wires
-                _puzzle.HideWires();
-                _puzzle.ShowWires(tile);
-                RefreshInspectorInternal();
-            }
-#endif
-
-            RefreshInspectorInternal();
+            instance.ClearSelection();
+            instance.AddSelection(tile);            
+            instance.RefreshInspectorInternal();
         }
 
         /// <summary>
@@ -307,6 +277,28 @@ namespace Puzzled.Editor
             // Select all of the tiles
             foreach (var tile in _boxSelectionTiles)
                 AddSelection(tile);
+        }
+
+        /// <summary>
+        ///  Update the visibility of all wires based on the current selection
+        /// </summary>
+        private void UpdateWireVisibility ()
+        {
+            if(_mode != Mode.Select)
+            {
+                _puzzle.ShowWires(false);
+                return;
+            }
+
+            if(!hasSelection)
+            {
+                _puzzle.ShowWires(true);
+                return;
+            }
+
+            _puzzle.ShowWires(false);
+            foreach(var tile in _selectedTiles)
+                _puzzle.ShowWires(tile, true);
         }
     }
 }
