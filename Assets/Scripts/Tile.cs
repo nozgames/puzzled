@@ -464,6 +464,18 @@ namespace Puzzled
         }
 
         /// <summary>
+        /// Returns true if the tile is connected to the given tile
+        /// </summary>
+        public bool IsConnectedTo(Tile tile)
+        {
+            foreach (var port in GetPorts())
+                if (port.IsConnectedTo(tile))
+                    return true;
+
+            return false;
+        }
+
+        /// <summary>
         /// Returns true if the tile can connect to the given tile via at least one port.  This
         /// method takes into account existing connections as well.
         /// </summary>

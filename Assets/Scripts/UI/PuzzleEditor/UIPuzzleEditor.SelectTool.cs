@@ -119,13 +119,25 @@ namespace Puzzled.Editor
             }
 
             var hit = _cursorTiles;
-            if (hit.Count == 0)
+            var hitTile = hit.LastOrDefault();
+
+            // Quick connect / disconnect
+            if(KeyboardManager.isCtrlPressed && _inspectorTile != null && hitTile != null)
+            {
+                if (UI.UIManager.cursor == CursorType.ArrowWithPlus)
+                    Connect(_inspectorTile, new Tile[] { hitTile });
+                else
+                    Disconnect(_inspectorTile, hitTile);
+
+                return;
+            }
+
+            if (hitTile == null)
             {
                 ClearSelection();
                 return;
             }
 
-            var hitTile = hit.Last();
             var selectedIndex = _selectedTiles.Count > 0 ? hit.IndexOf(_selectedTiles[0]) : -1;
 
             // When shift is held use multi-select logic
@@ -381,6 +393,21 @@ namespace Puzzled.Editor
                 return CursorType.ArrowWithNot;
             }
 
+            // Quick connect / disconnect
+            if(KeyboardManager.isCtrlPressed && _inspectorTile != null)
+            {
+                if (_cursorTiles.Count == 0)
+                    return CursorType.ArrowWithNot;
+
+                if (_inspectorTile.IsConnectedTo(_cursorTiles.LastOrDefault()))
+                    return CursorType.ArrowWithMinus;
+                
+                if(_inspectorTile.CanConnectTo(_cursorTiles.LastOrDefault(), false))
+                    return CursorType.ArrowWithPlus;
+
+                return CursorType.ArrowWithNot;
+            }
+
             // Move cursor when over a tile that is already selected
             if (_cursorTiles.Any(t => t.isSelected))
                 return CursorType.ArrowWithMove;
@@ -592,5 +619,29 @@ namespace Puzzled.Editor
 
             UpdateCursor();
         }
+
+        /// <summary>
+        /// Disconnect one tile from another, this will disconnect all connections that match the two tiles
+        /// </summary>
+        private void Disconnect(Tile from, Tile to)
+        {
+            var group = new Commands.GroupCommand();
+            var outputs = from.GetPorts(PortFlow.Output);
+            foreach (var output in outputs)
+                foreach (var wire in output.wires)
+                {
+                    var connection = wire.GetOppositeConnection(output);
+                    if (connection.tile != to)
+                        continue;
+
+                    group.Add(new Commands.WireDestroyCommand(wire));
+                }
+
+            if (group.hasCommands)
+                ExecuteCommand(group);
+
+            UpdateCursor();
+        }
+
     }
 }
