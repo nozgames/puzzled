@@ -99,7 +99,7 @@ namespace Puzzled.Editor
             if (_inspectorTile.hasOutputs)
             {
                 _wireGizmo.SetActive(true);
-                _wireGizmo.transform.position = _inspectorTile.transform.position;
+                _wireGizmo.transform.position = _inspectorTile.wireAttach.position;
             }
             // Create the custom editors
             if (_inspectorTile.info.customEditors != null)

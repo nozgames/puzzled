@@ -89,11 +89,13 @@ namespace Puzzled.Editor
             callback?.Invoke(command);
 
             // Save editor redo state after executing the command
-            command.editorStateUndo = instance.editorState;
+            command.editorStateRedo = instance.editorState;
 
             // Mark the puzzle as modified
             instance.puzzle.isModified = true;
 
+            instance.RefreshInspectorInternal();
+            
             // Add a star to the end of the puzzle name
             if (!instance.puzzleName.text.EndsWith("*"))
                 instance.puzzleName.text = instance.puzzleName.text + "*";
@@ -180,6 +182,11 @@ namespace Puzzled.Editor
                 Debug.LogError($"Object '{gameObject.name} is already in the trash");
                 return;
             }
+
+            // Automatically de-select any tiles going to the trash
+            var tile = gameObject.GetComponent<Tile>();
+            if (tile != null && tile.editor.isSelected)
+                instance.RemoveSelection(tile);
 
             instance._trash[gameObject.GetInstanceID()] = gameObject.transform.parent;
             gameObject.transform.SetParent(instance._puzzle.trash);

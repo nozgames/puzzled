@@ -12842,7 +12842,7 @@ Transform:
   m_GameObject: {fileID: 3325511640797165868}
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 0.15, y: 0.15, z: 0.15}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -13219,28 +13219,27 @@ GameObject:
   - component: {fileID: 2002872264564760986}
   - component: {fileID: 8575322494389028269}
   - component: {fileID: 4656762298682300923}
-  - component: {fileID: 3325511640797165869}
+  - component: {fileID: 3325511640797165870}
   m_Layer: 9
   m_Name: WireGizmo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &3325511640797165869
-MonoBehaviour:
+  m_IsActive: 1
+--- !u!135 &3325511640797165870
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3325511640797165868}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5edb35d6fbd0e4d4085e29c92a26f77a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sortingOrder: 101
-  sortingLayerName: Wire
+  serializedVersion: 2
+  m_Radius: 0.5000001
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!224 &3331881685556337285
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19850,7 +19849,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3325511640797165868}
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4504296033867486479, guid: e659504739e07b34a9e1838badf5deda, type: 3}
 --- !u!114 &8580739832128848981
 MonoBehaviour:
   m_ObjectHideFlags: 0

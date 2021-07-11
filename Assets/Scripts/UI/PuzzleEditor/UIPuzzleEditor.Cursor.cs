@@ -146,7 +146,9 @@ namespace Puzzled.Editor
 #endif
             _cursorCell = renderCell;
 
-            if(_canvas.isMouseOver)
+            if (!_canvas.isMouseOver)
+                UIManager.cursor = CursorType.Arrow;
+            else 
                 UIManager.cursor = _getCursor?.Invoke(renderCell) ?? CursorType.Arrow;
         }
     }

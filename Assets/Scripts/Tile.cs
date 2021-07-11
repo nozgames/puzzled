@@ -16,6 +16,9 @@ namespace Puzzled
         [Tooltip("Optional tile display name")]
         [SerializeField] private string _displayName = null;
 
+        [Tooltip("Transform used to attach wires")]
+        [SerializeField] private Transform _wireAttach = null;
+
         private static List<Tile> _tick = new List<Tile>();
         private static TickEvent _tickEvent = new TickEvent();
         private static bool _isTickFrame = false;
@@ -98,6 +101,11 @@ namespace Puzzled
                 return _editor;
             }
         }
+
+        /// <summary>
+        /// Return the wire attachment transform
+        /// </summary>
+        public Transform wireAttach => _wireAttach != null ? _wireAttach : transform;
 
         /// <summary>
         /// Get the editor selected state

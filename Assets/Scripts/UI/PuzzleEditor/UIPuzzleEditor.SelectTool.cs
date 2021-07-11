@@ -17,6 +17,7 @@ namespace Puzzled.Editor
         private Vector3 _selectionStartWorld;
         private Cell _selectionStartCell;
         private List<Tile> _savedSelection = new List<Tile>();
+        private bool _cursorOverWireGizmo = false;
 
         /// <summary>
         /// Tiles being moved
@@ -53,6 +54,7 @@ namespace Puzzled.Editor
             _onKey = OnSelectToolKey;
             _onKeyModifiers = OnSelectToolKeyModifiers;
             _getCursor = OnSelectToolGetCursor;
+            _cursorOverWireGizmo = false;
 
             inspector.SetActive(true);
 
@@ -159,14 +161,14 @@ namespace Puzzled.Editor
         private void OnSelectLButtonDragBegin(Vector2 position)
         {
             // Drag a wire from the wire gizmo
-            if(IsOverWireGizmo(_selectionStartWorld))
+            if(_cursorOverWireGizmo)
             {
                 // Start dragging a wire
                 _dragWire = Instantiate(dragWirePrefab, puzzle.transform).GetComponent<WireVisuals>();
                 _dragWire.portTypeFrom = PortType.Power;
                 _dragWire.portTypeTo = PortType.Power;
                 _dragWire.selected = true;
-                _dragWire.target = _dragWire.transform.position = puzzle.grid.CellToWorldBounds(_inspectorTile.cell).center;
+                _dragWire.target = _dragWire.transform.position = _inspectorTile.wireAttach.position;
 
                 UpdateCursor();
 
@@ -330,11 +332,6 @@ namespace Puzzled.Editor
         }
 
         /// <summary>
-        /// Returns true if the cursor is over the wire gizmo
-        /// </summary>
-        private bool IsOverWireGizmo(Vector3 position) => _wireGizmo.activeSelf && (position - _wireGizmo.transform.position).magnitude <= _wireGizmo.transform.localScale.x * 0.5f;
-
-        /// <summary>
         /// Set the higlight tile
         /// </summary>
         private void HilightTile(Tile highlight)
@@ -353,6 +350,8 @@ namespace Puzzled.Editor
 
         private CursorType OnSelectToolGetCursor(Cell cell)
         {
+            _cursorOverWireGizmo = false;
+
             if (_moveTiles != null)
                 return CursorType.Move;
 
@@ -363,8 +362,11 @@ namespace Puzzled.Editor
                 return CursorType.Arrow;
             }
 
+            // Is the cursor of the wire gizmo?
+            _cursorOverWireGizmo = Physics.Raycast(_cursorRay, 100.0f, 1 << _wireGizmo.gameObject.layer);
+
             // If the wire gizmo is active then hit test it
-            if (_dragWire == null && IsOverWireGizmo(_cursorWorld))
+            if (_dragWire == null && _cursorOverWireGizmo)
             {
                 // TODO: wire crosshair?
                 HilightTile(null);
