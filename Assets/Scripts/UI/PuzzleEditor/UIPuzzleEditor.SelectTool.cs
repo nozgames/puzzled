@@ -41,6 +41,7 @@ namespace Puzzled.Editor
         /// </summary>
         private Commands.Command _moveCommand;
 
+        private Commands.GroupCommand _copyCommand;
 
         public static Action<Wire> onSelectedWireChanged;
 
@@ -106,28 +107,7 @@ namespace Puzzled.Editor
 
             if (_moveTiles != null)
             {
-                if (_moveCommand != null)
-                {
-                    _moveCommand.Undo();
-
-#if false
-                    var group = false;
-                    if (_copyCommand != null)
-                    {
-                        group = true;
-                        _copyCommand.Undo();
-                        ExecuteCommand(_copyCommand);
-                        _copyCommand = null;
-                    }
-                    ExecuteCommand(_moveCommand, true);
-#else
-                    ExecuteCommand(_moveCommand, false);
-#endif
-
-                    _moveCommand = null;
-
-                    UpdateWireGizmo();
-                }
+                EndMove(false);
 
                 return;
             }
@@ -199,11 +179,7 @@ namespace Puzzled.Editor
             // If over a selected tile then start moving
             if (_cursorTiles.Any(t => t.isSelected))
             {
-                _moveTiles = _selectedTiles.ToArray();
-                _moveCells = _moveTiles.Select(t => t.cell).ToArray();
-
-                // Hide the wire gizmo while moving tiles
-                _wireGizmo.gameObject.SetActive(false);
+                BeginMove();
                 return;
             }
 
@@ -282,8 +258,8 @@ namespace Puzzled.Editor
             // End move
             if(null != _moveTiles)
             {
-                _moveTiles = null;
-                _moveCells = null;
+                EndMove(false);
+                return;
             }
         }
 
@@ -367,7 +343,10 @@ namespace Puzzled.Editor
                 return CursorType.Arrow;
 
             if (_moveTiles != null)
+            {
+                HilightTile(null);
                 return CursorType.Move;
+            }
 
             // Show arrow for box selection
             if (_selectionRect.gameObject.activeSelf)
@@ -474,6 +453,122 @@ namespace Puzzled.Editor
             _boxSelectionTilesOutside.Clear();
         }
 
+
+        private Tile[] CloneTiles(Tile[] tiles)
+        {
+            var cloned = new Tile[tiles.Length];
+            for (int i = 0; i < tiles.Length; i++)
+            {
+                cloned[i] = puzzle.InstantiateTile(DatabaseManager.GetTile(tiles[i].guid), Cell.invalid);
+            }
+
+            for (int i = 0; i < tiles.Length; i++)
+            {
+                var sourcePorts = tiles[i].GetPorts();
+                for (int j = 0; j < sourcePorts.Length; j++)
+                {
+                    var sourcePort = sourcePorts[j];
+                    if (sourcePort.flow != PortFlow.Output)
+                        continue;
+
+                    foreach (var sourceWire in sourcePort.wires)
+                    {
+                        var fromPortTileIndex = 0;
+                        for (; fromPortTileIndex < tiles.Length && tiles[fromPortTileIndex] != sourceWire.from.tile; fromPortTileIndex++)
+                            ;
+                        if (fromPortTileIndex >= tiles.Length)
+                            continue;
+
+                        var toPortTileIndex = 0;
+                        for (; toPortTileIndex < tiles.Length && tiles[toPortTileIndex] != sourceWire.to.tile; toPortTileIndex++)
+                            ;
+                        if (toPortTileIndex >= tiles.Length)
+                            continue;
+
+                        var fromPort = cloned[fromPortTileIndex].GetPropertyValue<Port>(sourceWire.from.port.name);
+                        if (null == fromPort)
+                            continue;
+
+                        var toPort = cloned[toPortTileIndex].GetPropertyValue<Port>(sourceWire.to.port.name);
+                        if (null == toPort)
+                            continue;
+
+                        // Copy wire options
+                        var wire = puzzle.InstantiateWire(fromPort, toPort);
+                        if (sourceWire.from.hasOptions)
+                            for (int optionIndex = 0; optionIndex < sourceWire.from.options.Length; optionIndex++)
+                                wire.from.SetOption(optionIndex, sourceWire.from.GetOption(optionIndex));
+
+                        if (sourceWire.to.hasOptions)
+                            for (int optionIndex = 0; optionIndex < sourceWire.to.options.Length; optionIndex++)
+                                wire.to.SetOption(optionIndex, sourceWire.to.GetOption(optionIndex));
+                    }
+                }
+
+                foreach (var property in tiles[i].properties)
+                    if (property.type != TilePropertyType.Port && property.editable.serialized)
+                        property.SetValue(cloned[i], property.GetValue(tiles[i]));
+            }
+
+            return cloned;
+        }
+
+        private void BeginMove ()
+        {
+            _moveTiles = _selectedTiles.ToArray();
+            _moveCells = _moveTiles.Select(t => t.cell).ToArray();
+
+            // Hide the wire gizmo while moving tiles
+            _wireGizmo.gameObject.SetActive(false);
+
+            if (KeyboardManager.isAltPressed)
+            {
+                _moveTiles = CloneTiles(_moveTiles);
+
+                _copyCommand = new Commands.GroupCommand();
+                foreach (var tile in _moveTiles)
+                    _copyCommand.Add(new Commands.TileAddCommand(DatabaseManager.GetTile(tile.guid), Cell.invalid, tile));
+
+                _moveCommand = CreateMoveCommand(_moveTiles, _moveCells, _moveOffset);
+                _moveCommand.Execute();
+
+                SelectTiles(_moveTiles);
+            }
+
+            UpdateCursor();
+        }
+
+        private void EndMove(bool cancel=false)
+        {
+            if (_moveCommand != null)
+            {
+                _moveCommand.Undo();
+
+                var group = false;
+                if (_copyCommand != null)
+                {
+                    group = true;
+                    _copyCommand.Undo();
+
+                    if(!cancel)
+                        ExecuteCommand(_copyCommand);
+                    _copyCommand = null;
+                }
+
+                if(!cancel)
+                    ExecuteCommand(_moveCommand, group);
+
+                _moveCommand = null;
+
+                UpdateWireGizmo();
+            }
+
+            _moveTiles = null;
+            _moveCells = null;
+
+            LightmapManager.Render();
+        }
+
         private void CancelDrag ()
         {
             _dragCancelled = true;
@@ -493,17 +588,7 @@ namespace Puzzled.Editor
 
             // Cancel Move
             if (_moveTiles != null)
-            {
-                if (_moveCommand != null)
-                {
-                    _moveCommand.Undo();
-                    LightmapManager.Render();
-                }
-
-                _moveTiles = null;
-                _moveCells = null;
-                _moveCommand = null;
-            }
+                EndMove(true);
 
             UpdateCursor();
         }
