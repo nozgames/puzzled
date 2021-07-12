@@ -52,6 +52,9 @@ namespace Puzzled.Editor
         /// <param name="command">Command to execute</param>
         public static void ExecuteCommand (Command command, bool combine=false, Action<Command> callback = null)
         {
+            if (command == null)
+                return;
+
             if (combine && instance._undo.Count > 0)
             {
                 // Is there already a group command in the undo queue?

@@ -14,6 +14,8 @@ namespace Puzzled.Editor
 
         private static int _tileFloorLayer = -1;
 
+        private static int _markId = 1;
+
         /// <summary>
         /// Tag used to ignore selection on a renderer
         /// </summary>
@@ -44,6 +46,16 @@ namespace Puzzled.Editor
         private bool _highlighted;
 
         /// <summary>
+        /// MarkId the last time this tile was marked
+        /// </summary>
+        private int _lastMarkIdA = 0;
+
+        /// <summary>
+        /// MarkId the last time this tile was marked
+        /// </summary>
+        private int _lastMarkIdB = 0;
+
+        /// <summary>
         /// Get/Set the selected state of the tile within the editor
         /// </summary>
         public bool isSelected {
@@ -69,6 +81,26 @@ namespace Puzzled.Editor
 
                 _highlighted = value;
                 UpdateSelection();
+            }
+        }
+
+        public bool isMarkedA {
+            get => _markId == _lastMarkIdA;
+            set {
+                if (value)
+                    _lastMarkIdA = _markId;
+                else
+                    _lastMarkIdA = -1;
+            }
+        }
+
+        public bool isMarkedB {
+            get => _markId == _lastMarkIdB;
+            set {
+                if (value)
+                    _lastMarkIdB = _markId;
+                else
+                    _lastMarkIdB = -1;
             }
         }
 
@@ -180,5 +212,7 @@ namespace Puzzled.Editor
 
             _renderers = null;
         }
+
+        public static void BeginMark() => _markId++;
     }
 }

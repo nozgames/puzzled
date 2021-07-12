@@ -97,6 +97,16 @@ namespace Puzzled
             UIManager.HideTooltip();
         }
 
+        [ActorEventHandler]
+        private void OnCellChanged(CellChangedEvent evt)
+        {
+            if (isEditing)
+            {
+                SendToCell(new LeaveCellEvent(tile, tile.cell), evt.old);
+                SendToCell(new EnterCellEvent(tile, evt.old), tile.cell);
+            }
+        }
+
         public bool Teleport (Cell cell)
         {
             if (cell == tile.cell)

@@ -827,10 +827,13 @@ namespace Puzzled
         /// <param name="show">True to show wires and flase to hide wires</param>
         public void ShowWires(Tile tile, bool show = true)
         {
-            foreach (var property in tile.properties)
-                if (property.type == TilePropertyType.Port)
-                    foreach (var wire in property.GetValue<Port>(tile).wires)
-                        wire.visible = show;
+            var ports = tile.GetPorts();
+            for(int portIndex=ports.Length -1; portIndex >= 0; portIndex--)
+            {
+                var wires = ports[portIndex].wires;
+                for(int wireIndex=wires.Count - 1; wireIndex >= 0; wireIndex--)
+                    wires[wireIndex].visible = show;
+            }
         }
 
         /// <summary>

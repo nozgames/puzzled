@@ -12,5 +12,14 @@ namespace Puzzled
             for (int i = gameObject.transform.childCount - 1; i >= 0; i--)
                 gameObject.transform.GetChild(i).gameObject.SetChildLayers(layer, mask);
         }
+
+        public static void DestroyPooled (this GameObject gameObject)
+        {
+            var poolref = gameObject.GetComponent<GameObjectPoolRef>();
+            if (poolref != null && poolref.pool != null)
+                poolref.pool.Put(gameObject);
+            else
+                GameObject.Destroy(gameObject);
+        }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Linq;
 using Puzzled.UI;
+using Puzzled.Editor.Commands;
+using System;
 
 namespace Puzzled.Editor
 {
@@ -9,36 +11,41 @@ namespace Puzzled.Editor
         [Header("DrawTool")]
         [SerializeField] private UITilePalette _tilePalette = null;
 
+        private Cell _drawCommandCell = Cell.invalid;
+        private Command _drawCommand = null;
+        private Tile _drawTile = null;
+
         private void EnableDrawTool()
         {
             _canvas.onLButtonDown = OnDrawToolLButtonDown;
+            _canvas.onLButtonUp = OnDrawToolLButtonUp;
             _canvas.onLButtonDrag = OnDrawToolDrag;
+            _canvas.onLButtonDragBegin = OnDrawToolDragBegin;
+            _canvas.onExit = OnDrawToolPointerExit;
 
             _getCursor = OnDrawGetCursor;
 
             _tilePalette.gameObject.SetActive(true);
+
+            _drawCommandCell = Cell.invalid;
         }
 
         private void DisableDrawTool()
         {
             _tilePalette.gameObject.SetActive(false);
+
+            CancelDrawCommand();
         }
 
         private CursorType OnDrawGetCursor(Cell cell)
         {
-            if (!_canvas.isMouseOver)
-                return CursorType.Arrow;
-
-            if (KeyboardManager.isAltPressed)
-                return CursorType.EyeDropper;
-
             var tile = _tilePalette.selected;
 
             // Dont allow drawing with a tile that is on a hidden layer
             if (!IsLayerVisible(tile.layer))
                 return CursorType.Not;
 
-            // Static objects cannot be placed on floor objects.
+            // Dynamic objects can only be placed on top of a static if the static allows it (aka pressure plate)
             if (tile.layer == TileLayer.Dynamic)
             {
                 var staticTile = _puzzle.grid.CellToTile(cell, TileLayer.Static);
@@ -60,57 +67,87 @@ namespace Puzzled.Editor
                     return CursorType.Not;
             }
 
+            // If the cell change then update the draw command
+            if(!_canvas.isDragging && _drawCommandCell != _cursorCell)
+            {
+                CancelDrawCommand();
+
+                _drawCommandCell = _cursorCell;
+
+                _drawCommand = CreateDrawCommand(_cursorCell, tile);
+                if (_drawCommand != null)
+                {
+                    _drawCommand.Execute();
+                    LightmapManager.Render();
+                }
+            }
+
             return CursorType.Crosshair;
         }
-            
-        private void OnDrawToolLButtonDown(Vector2 position) => Draw(false);
+
+        private void OnDrawToolLButtonDown(Vector2 position)
+        {
+            CancelDrawCommand();
+            Draw(false);
+        }
+
+        private void OnDrawToolLButtonUp(Vector2 position)
+        {
+            if(_drawTile != null && !_drawTile.info.allowMultiple)
+            {
+                mode = Mode.Select;
+                SelectTile(_drawTile);
+            }
+            _drawTile = null;
+        }
+
+        private void OnDrawToolDragBegin (Vector2 position)
+        {
+            var group = _drawCommand != null;
+            Debug.Log(group);
+            CancelDrawCommand();
+            Draw(group);
+        }
 
         private void OnDrawToolDrag(Vector2 position, Vector2 delta) => Draw(true);
 
-        private void Draw (bool group)
+        private void OnDrawToolPointerExit() => CancelDrawCommand();
+
+        private void CancelDrawCommand()
         {
-            if (null == _tilePalette.selected)
+            if (_drawCommand == null)
                 return;
 
-            // Dont allow drawing with a tile that is hidden
-            if (!IsLayerVisible(_tilePalette.selected.layer))
-                return;
+            _drawCommand.Undo();
+            _drawCommand.Destroy();
+            _drawCommand = null;
 
-            if (KeyboardManager.isAltPressed)
-            {
-                EyeDropper(_cursorCell, !group);
-                return;
-            }
-
-            if (UIManager.cursor != CursorType.Crosshair)
-                return;
-  
-            Draw(_cursorCell, _tilePalette.selected, group);
+            _drawCommandCell = Cell.invalid;
         }
 
-        private void Draw (Cell cell, Tile prefab, bool group = false)
+        private Command CreateDrawCommand (Cell cell, Tile prefab)
         {
             if (!puzzle.grid.IsValid(cell))
-                return;
-
-            var command = new Editor.Commands.GroupCommand();
+                return null;
 
             // Dont draw if the same exact tile is already there.  This prevents accidental removal 
             // of connections and properties
             var existing = puzzle.grid.CellToTile(cell, prefab.layer);
             if (existing != null && existing.guid == prefab.guid)
-                return;
+                return null;
+
+            var command = new GroupCommand();
 
             // If this prefab does not allow multiples then destroy all other instances within the puzzle 
             if (!prefab.info.allowMultiple)
             {
-                var multipleInstance = puzzle.grid.GetTiles().FirstOrDefault(t => t.info == prefab.info);
+                var multipleInstance = puzzle.grid.GetTile(prefab.info);
                 if (null != multipleInstance)
                     Erase(multipleInstance, command);
 
                 if (multipleInstance == existing)
                     existing = null;
-            } 
+            }
 
             if (existing != null)
             {
@@ -128,7 +165,8 @@ namespace Puzzled.Editor
             }
 
             var tile = puzzle.InstantiateTile(prefab.guid, Cell.invalid);
-            command.Add(new Editor.Commands.TileAddCommand(prefab, cell, tile));
+            command.Add(new TileAddCommand(prefab, cell, tile));
+            _drawTile = tile;
 
             // Copy properties and wires?
             if (existing)
@@ -164,31 +202,24 @@ namespace Puzzled.Editor
                 }
             }
 
-            command.Add(new Editor.Commands.TileMoveCommand(tile, cell));
+            command.Add(new TileMoveCommand(tile, cell));
 
-            ExecuteCommand(command, group);
+            return command;
         }
 
-        private void EyeDropper(Cell cell, bool cycle)
+        private void Draw(bool group)
         {
-            var selected = _tilePalette.selected;
-            var existing = GetTopMostTile(cell, (selected == null || !cycle) ? TileLayer.InvisibleStatic : selected.layer);
-            if (cycle && existing != null && selected != null && existing.guid == selected.guid)
-            {
-                if (existing.layer != TileLayer.Floor)
-                    existing = GetTopMostTile(cell, (TileLayer)(existing.layer - 1));
-                else
-                    existing = null;
-            }
+            if (null == _tilePalette.selected)
+                return;
 
-            if (null == existing)
-            {
-                existing = GetTopMostTile(cell, TileLayer.InvisibleStatic);
-                if (null == existing)
-                    return;
-            }
+            // Dont allow drawing with a tile that is hidden
+            if (!IsLayerVisible(_tilePalette.selected.layer))
+                return;
 
-            _tilePalette.selected = DatabaseManager.GetTile(existing.guid);
+            if (UIManager.cursor != CursorType.Crosshair)
+                return;
+
+            ExecuteCommand(CreateDrawCommand(_cursorCell, _tilePalette.selected), group);
         }
     }
 }

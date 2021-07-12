@@ -10,6 +10,12 @@ namespace Puzzled
                 UnityEngine.Object.Destroy(transform.GetChild(i).gameObject);
         }
 
+        public static void DestroyChildrenPooled(this Transform transform)
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+                transform.GetChild(i).gameObject.DestroyPooled();
+        }
+
         public static void DetachAndDestroyChildren(this Transform transform)
         {
             for (int i = transform.childCount - 1; i >= 0; i--)
@@ -18,6 +24,12 @@ namespace Puzzled
                 go.transform.SetParent(null);
                 UnityEngine.Object.Destroy(go);
             }
+        }
+
+        public static void DetachAndDestroyChildrenPooled(this Transform transform)
+        {
+            for (int i = transform.childCount - 1; i >= 0; i--)
+                transform.GetChild(i).gameObject.DestroyPooled();
         }
 
         public static void DisableChildren(this Transform transform)

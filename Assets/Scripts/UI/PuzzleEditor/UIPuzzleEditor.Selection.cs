@@ -14,7 +14,6 @@ namespace Puzzled.Editor
         private List<Tile> _selectedTiles = new List<Tile>();
         private Wire _selectedWire = null;
         private List<Tile> _boxSelectionTiles = new List<Tile>();
-        private List<Tile> _boxSelectionTilesOutside = new List<Tile>();
         private Plane[] _boxSelectionPlanes = new Plane[4];
         private Collider[] _boxSelectionColliders = new Collider[128];
 
@@ -89,18 +88,29 @@ namespace Puzzled.Editor
                 return;
             }
 
-            if (_selectedTiles.Contains(tile))
+            if (!AddTileToSelectedTiles(tile))
                 return;
-
-            _selectedTiles.Add(tile);
-
-            tile.editor.isSelected = true;
-
-            tile.ShowGizmos(true);
 
             UpdateWireVisibility();
 
             SelectWire(null);
+        }
+
+        /// <summary>
+        /// Adds the given tile to the selected tiles. 
+        /// </summary>
+        private bool AddTileToSelectedTiles (Tile tile)
+        {
+            if (tile.editor.isSelected)
+                return false;
+
+            _selectedTiles.Add(tile);
+
+            tile.ShowGizmos(true);
+
+            tile.editor.isSelected = true;
+
+            return true;
         }
 
         /// <summary>
@@ -109,7 +119,7 @@ namespace Puzzled.Editor
         /// <param name="tile">Tile to remove</param>
         private void RemoveSelection (Tile tile)
         {
-            if (!_selectedTiles.Contains(tile))
+            if (!tile.editor.isSelected)
                 return;
 
             SetWiresDark(tile, false);
@@ -171,7 +181,7 @@ namespace Puzzled.Editor
         /// <returns>True if any tiles were found</returns>
         private bool CanvasRectToTiles (Rect rect, List<Tile> outTiles)
         {
-            _boxSelectionTilesOutside.Clear();
+            EditorTile.BeginMark();
 
             // Calculate the rays at the four corners of the rect
             var ray1 = _canvas.CanvasToRay(rect.min);
@@ -225,6 +235,10 @@ namespace Puzzled.Editor
                 if (null == tile)
                     continue;
 
+                // If the tiles is Marked B then one of its colliders is outside so skip it
+                if (tile.editor.isMarkedB)
+                    continue;
+
                 var outside = false;
                 for (int planeIndex = 0; !outside && planeIndex < _boxSelectionPlanes.Length; planeIndex++)
                 {
@@ -241,13 +255,25 @@ namespace Puzzled.Editor
 
                 if (outside)
                 {
-                    _boxSelectionTilesOutside.Add(tile);
-                    outTiles.Remove(tile);
+                    // If the tile is marked A then it is in the out list so we need to remove it
+                    if (tile.editor.isMarkedA)
+                    {
+                        tile.editor.isMarkedA = false;
+                        outTiles.Remove(tile);
+                    }
+
+                    // Mark outside
+                    tile.editor.isMarkedB = true;
+
                     continue;
                 }
 
-                if (!outTiles.Contains(tile))
+                // If the tile is not marked as A then it is not in the out list so add it now
+                if (!tile.editor.isMarkedA)
+                {
                     outTiles.Add(tile);
+                    tile.editor.isMarkedA = true;
+                }
             }
 
             return outTiles.Count > 0;
@@ -264,12 +290,12 @@ namespace Puzzled.Editor
 
         private void UpdateBoxSelection(bool additive = false)
         {
-            // Clear the current selection
-            ClearSelection();
-
-            _boxSelectionTiles.Clear();
+            // Remove highlight from all previous box selection tiles
+            for (int i = _boxSelectionTiles.Count - 1; i >= 0; i--)
+                _boxSelectionTiles[i].editor.isHighlighted = false;
 
             // Find all tiles within the selection rectangle
+            _boxSelectionTiles.Clear();
             var rect = _selectionRect.rect;
             rect.position = _selectionRect.offsetMin;
             CanvasRectToTiles(rect, _boxSelectionTiles);
@@ -280,9 +306,9 @@ namespace Puzzled.Editor
                     if (!_boxSelectionTiles.Contains(savedTile))
                         _boxSelectionTiles.Add(savedTile);
 
-            // Select all of the tiles
-            foreach (var tile in _boxSelectionTiles)
-                AddSelection(tile);
+            // Set highlight on all tiles in box selection
+            for (int i = _boxSelectionTiles.Count - 1; i >= 0; i--)
+                _boxSelectionTiles[i].editor.isHighlighted = true;
         }
 
         /// <summary>

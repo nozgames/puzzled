@@ -34,6 +34,8 @@ namespace Puzzled.Editor
 
         private RectTransform _rect;
 
+        public bool isDragging { get; private set; }
+
         private void Awake()
         {
             _rect = GetComponentInParent<RectTransform>();
@@ -112,13 +114,19 @@ namespace Puzzled.Editor
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
+            {
+                isDragging = false;
                 onLButtonDown?.Invoke(ScreenToCanvas(eventData.position));
+            }
         }
 
         void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
         {
             if (eventData.button == PointerEventData.InputButton.Left)
+            {
+                isDragging = false;
                 onLButtonUp?.Invoke(ScreenToCanvas(eventData.position));
+            }
         }
 
         void IScrollHandler.OnScroll(PointerEventData eventData)
@@ -145,6 +153,7 @@ namespace Puzzled.Editor
             switch (eventData.button)
             {
                 case PointerEventData.InputButton.Left:
+                    isDragging = true;
                     onLButtonDragBegin?.Invoke(ScreenToCanvas(eventData.position));
                     break;
             }
@@ -156,6 +165,7 @@ namespace Puzzled.Editor
             {
                 case PointerEventData.InputButton.Left:
                     onLButtonDragEnd?.Invoke(ScreenToCanvas(eventData.position));
+                    isDragging = false;
                     break;
             }
         }

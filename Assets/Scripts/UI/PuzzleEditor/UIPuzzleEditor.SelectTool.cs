@@ -468,16 +468,27 @@ namespace Puzzled.Editor
             if (!cancel)
             {
                 UpdateBoxSelection(position);
+
+                // Apply the box selection
+                ClearSelection();
+                foreach(var tile in _boxSelectionTiles)
+                    AddTileToSelectedTiles(tile);
+
+                UpdateWireVisibility();
+
                 RefreshInspectorInternal();
             } else
             {
                 SelectTiles(_savedSelection.ToArray());
             }
 
+            // Clear the highlight on box selection tiles
+            foreach (var tile in _boxSelectionTiles)
+                tile.editor.isHighlighted = false;
+
             _selectionRect.gameObject.SetActive(false);
             _savedSelection.Clear();
             _boxSelectionTiles.Clear();
-            _boxSelectionTilesOutside.Clear();
         }
 
 

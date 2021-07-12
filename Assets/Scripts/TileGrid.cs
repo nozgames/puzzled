@@ -172,6 +172,26 @@ namespace Puzzled
         /// <returns>Cell coorindate</returns>
         public Cell WorldToCell(Vector3 position) => WorldToCell(position, CellCoordinateSystem.Grid);
 
+
+        /// <summary>
+        /// Find the first tile that matches the given tile info
+        /// </summary>
+        /// <param name="tileInfo"></param>
+        /// <returns></returns>
+        public Tile GetTile (TileInfo tileInfo)
+        {
+            var layer = _layers[(int)tileInfo.layer];
+            var tiles = layer.tiles;
+            for(int tileIndex=tiles.Length - 1; tileIndex>=0; tileIndex--)
+            {
+                var tile = tiles[tileIndex];
+                if (tile != null && tile.info == tileInfo)
+                    return tile;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Convert a world coordinate to a cell coordinate
         /// </summary>

@@ -17,10 +17,6 @@ namespace Puzzled
 
         private void Awake()
         {
-            _wireRenderer.sortingLayerName = "Wire";
-            _fromPortRenderer.sortingLayerName = "Wire";
-            _toPortRenderer.sortingLayerName = "Wire";
-
             highlight = _highlight;
             selected = _selected;
             flowing = _flowing;

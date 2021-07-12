@@ -117,8 +117,13 @@ namespace Puzzled
         public bool visible {
             get => _visuals.gameObject.activeSelf;
             set {
-               UpdatePositions();
+                if (visible == _visuals.gameObject.activeSelf)
+                    return;
+                
                 _visuals.gameObject.SetActive(value);
+
+                if(value)
+                    UpdatePositions();
             }
         }
 
